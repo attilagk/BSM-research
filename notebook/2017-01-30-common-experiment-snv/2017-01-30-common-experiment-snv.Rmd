@@ -1,0 +1,59 @@
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+## Definitions
+
+**(all) kept variants**
+* these were kept by the quality filter (see `PASS` in the `FILTER` field of the vcf file)
+* they include specific and non-specific variants
+
+**sample-specific variants**
+* these are specific to either of the three samples
+* thus they represent a certain type of somatic mozaicism (see *Discussion* below)
+
+## Analysis
+
+Extract the number of kept variants:
+
+```{r engine='bash'}
+# after running "runme.sh"
+cd ../../results/common-experiment/snv/2017-01-24-alison
+BN="snv-2017-01-24"
+grep '^After filtering.*Sites' ${BN}.log | sed 's/.*kept \([[:digit:]]\+\) out of.*/\1/' > kept.vars
+cat ${BN}.log
+```
+
+Read number of kept variants and also read the sites of singletons:
+
+```{r}
+kept.vars <- scan(file = "../../results/common-experiment/snv/2017-01-24-alison/kept.vars")
+singletons <- read.delim("../../results/common-experiment/snv/2017-01-24-alison/snv-2017-01-24.singletons")
+head(singletons)
+```
+
+Print first the number sample-specific variants:
+
+```{r}
+(singleton.freq <- with(singletons, table(INDV)))
+```
+
+Now print their fraction in all `r kept.vars` kept variants:
+
+```{r}
+singleton.freq / kept.vars
+```
+
+The same information as a barchart:
+
+```{r}
+barchart(singleton.freq, main = "Sample-specific variants")
+```
+
+## Discussion

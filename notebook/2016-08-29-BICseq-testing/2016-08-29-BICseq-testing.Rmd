@@ -1,0 +1,19 @@
+Load package (warnings, messages suppressed)
+
+```{r results=FALSE}
+library(BICseq)
+```
+
+Using the test data supplied with BICseq create a BICseq object
+
+```{r}
+bs <- BICseq(sample = "../../data/BICseq/tumor_sorted.bam",
+             reference = "../../data/BICseq/normal_sorted.bam", seqNames = "chr22")
+str(bs)
+```
+
+The BICseq object appears to be OK.  Segmentation, however, fails
+
+```{r}
+segs <- getBICseg(object = bs)
+```
