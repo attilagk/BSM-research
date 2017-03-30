@@ -18,10 +18,10 @@
 
 % beamer styles
 \mode<presentation>{
-%\usetheme{Pittsburgh}
-\usetheme{Copenhagen}
-\usecolortheme{beaver}
-%\usecolortheme{seahorse}
+\usetheme{Boadilla}
+%\usetheme{Copenhagen}
+%\usecolortheme{beaver}
+\usecolortheme{default}
 %\usefonttheme{structureitalicserif}
 \setbeamercovered{transparent}
 }
@@ -34,9 +34,9 @@
 }
 %\useoutertheme[]{tree}
 
-\title{Work in the Chess lab at MSSM}
+\title{Accurate variant calling with FDR control}
 \author{Attila Guly\'{a}s-Kov\'{a}cs}
-\date{Mount Sinai School of Medicine}
+\date{Chess Lab at Mount Sinai}
 
 \newcommand{\platefigscale}[0]{0.7}
 \newcommand{\ownfigscale}[0]{0.4}
@@ -47,350 +47,84 @@
 \maketitle
 \end{frame}
 
-\section{Imprinted genes in the brain}
+\section{The problem}
 
-%\subsection{Imprinting and allelic bias}
+\begin{frame}
+posterior evidence for the role of gene \(g\) in a phenotype
 
-\begin{frame}[label=chess-lab]{The Chess lab}
-\begin{tabular}{r|l}
-Andy Chess & BSM, replication, imprinting, drop-seq \\
-Chaggai Rosenbluh & BSM, replication \\
-Attila Guly\'{a}s-Kov\'{a}cs & BSM, imprinting \\
-Mehaa Bajaj & BSM, replication, imprinting, drop-seq \\
-Eva Xia & drop-seq, imprinting \\
-\end{tabular}
+prior evidence
+
++ \(\int_{v\in g}\) evidence
 \end{frame}
 
-\begin{frame}{Imprinting and allelic bias}
-\begin{enumerate}
-\item epigenetic mechanism
-\item variation across age and tissue
-\item biological function 
-\end{enumerate}
-\includegraphics[width=0.6\textwidth]{figures/from-others/renfree-2012-fig2.jpg}
+\begin{frame}{}
 
-{\tiny Renfree et al 2012 Philos Trans R Soc Lond B}
+We have:
 
-\end{frame}
-
-%\begin{frame}{Increasing evolutionary prevalence}{}
-%{\tiny Smits et al 2008 Nat Genet}
-%
-%\includegraphics[width=0.7\textwidth]{figures/from-others/smits-et-al-2008-fig5.jpg}
-%
-%\begin{flushright}
-%How many imprinted genes?
-%
-%\(\approx 100 \; \leftrightarrow \; \approx 1300\) \footnote{Gregg et al 2010}
-%\end{flushright}
-%\end{frame}
-
-%% shift away from normal allelic bias in two possible directions => sister disorders
-%% general: growth disorders, mental defects
-%% Igf2/H19: Beckwith–Wiedeman syn, Silver-Russell syn
-%% Ube3a cluster 15q13: Angelman (mental retardation); Prader-Willi (obesity, mental defects)
-%% CNV in 15q13 increases risk of SCZ, a highly polygenic disorder with many common variants with mild risk
-%\begin{frame}[t, label=sister-disorders]{Dysfunction: development and growth}
-%\includegraphics[width=0.85\textwidth]{figures/from-others/peters-2014-imprinting-fig1b.jpg}
-%{\tiny Peters 2014}
-%\begin{columns}[t]
-%\begin{column}{0.5\textwidth}
-%{\tiny Angelman syndrome. Boy with a puppet}
-%
-%\includegraphics<1>[width=0.60\columnwidth]{figures/from-others/boy-with-a-puppet-Giovanni-Francesco-Caroto.jpg}
-%
-%%{\tiny Boy with a Puppet}
-%\end{column}
-%\begin{column}{0.5\textwidth}
-%{\tiny Prader-Willi syndr.  Eugenia ``La Monstrua''}
-%
-%\includegraphics<1>[width=0.70\columnwidth]{figures/from-others/Eugenia-Martínez-Vallejo-clothed-cropped.jpg}
-%
-%%{\tiny Eugenia Mart\'{i}nez Vallejo}
-%\end{column}
-%\end{columns}
-%
-%\end{frame}
-%
-%\begin{frame}{Dysfunction: psychology}{Angelman/Prader-Willi region implicated
-%in schizophrenia}
-%\includegraphics[width=1.0\textwidth]{figures/from-others/sullivan-natrevgenet-2012-fig1b.jpg}
-%
-%{\tiny Sullivan 2012 Nat Rev Genet.}
-%\end{frame}
-
-%% uses kinship theory to explain psychiatric conditions
-%% PEGs self-oriented cognition, - inc. fitness, autistic; MEGs mentalistic cognition, + incl. fitness, psychotic
-%% this hypothesis guides the study the role of imprinting in psychiatric disorders e.g. SCZ
-%\begin{frame}[label=imprinted-brain]{The imprinted brain theory}
-%\begin{center}
-%\includegraphics[width=0.7\textwidth]{figures/from-others/crespi-2008-fig3.png}
-%\vfill
-%{\tiny \raggedright{Crespi \& Badcock 2008 Behav Brain Sci.}}
-%\end{center}
-%\end{frame}
-
-%% clarifying the functional roles of imprinted genes requires characterization of their variation
-%% variation across devel. time, tissue type, gender,...
-%% variation in postnatal age, aging unclear especially in humans
-%% theoretical and experimental mouse studies
-%\begin{frame}[label=previous-age-studies]{Variation with age}
-%\begin{columns}[t]
-%\begin{column}{0.5\textwidth}
-%
-%\includegraphics[height=0.5\textheight]{figures/from-others/ubeda-2012-fig3a.jpg}
-%
-%{\tiny Ubeda 2012 Evolution}
-%\end{column}
-%
-%\begin{column}{0.5\textwidth}
-%
-%\includegraphics[height=0.3\textheight]{figures/from-others/perez-2015-elife-fig4b.png}
-%
-%{\tiny Perez et al 2015 eLife}
-%\end{column}
-%\end{columns}
-%\end{frame}
-
-\begin{frame}<1>[label=questions]{\textit{Questions} \only<2->{and \textbf{Answers}}}
-\begin{enumerate}
-\item Imprinted genes in the DLPFC\footnote{dorsolateral prefrontal
-cortex}
-\begin{itemize}
-\item \textit{How many?} \only<2->{\textbf{30 genes in \(\approx\frac{1}{3}\) genome}}
-\item \textit{Novelty?} \only<2->{\textbf{8 new imprinted genes}}
-\end{itemize}
-\item Dependence of allelic bias on:\\
-Age, Dx, Gender, Ancestry.\(x\) (genotype)
-\begin{itemize}
-\item \textit{How to describe dependency structure?} \only<3>{\textbf{Linear
-mixed models}}
-\item \textit{Genes affected uniformly?} \only<3>{\textbf{No!}}
-\item \textit{Most prominent effects?} \only<3>{\textbf{Gene, Age.Gene, Ances1.Gene}}
-\end{itemize}
-\end{enumerate}
-\end{frame}
-
-%\subsection{Imprinted genes in the brain}
-
-\begin{frame}{The read count ratio approach}
-
-\includegraphics[width=1.0\textwidth]{figures/from-others/castel-2015-fig1.png}
-
-{\tiny Castel et al 2015 GenomeBiology}
-\end{frame}
-
-% our study aims to characterize that variation in humans using CMC data
-\begin{frame}[label=our-study]{Our research study}
-\begin{description}
-\item[data/project] Common Mind Consortium
-\item[participants] \alert{Ifat Keydar}, Eva Xia, Menachem Fromer, Doug Ruderfer, Ravi Sachinanandam, Andrew Chess
-\end{description}
-\end{frame}
-
-% observational study: explain the observed variation in allelic bias with variation in age, gender, psych. condition
-% e.g. gene g1 has stronger maternal bias in individual i1 than in i2
-% allelic bias not directly observed; RNA-seq read count ration S statistic; technical noise
-\begin{frame}[label=cmc]{Study setup}
-% CommonMind: within cohort variation of age, gender, genotype, Dx; correlate
-% with RNA-seq-based measure of allelic bias
-\includegraphics[height=0.75\textheight]{figures/by-me/commonmind-rna-seq/commonmind-rna-seq.pdf}
-\end{frame}
-
-\begin{frame}[t]{\only<1>{Distribution across individuals and genes}\only<2-3>{Called imprinted genes}}
-\begin{columns}[t]
-\begin{column}{0.65\textwidth}
-
-\includegraphics<1-2>[height=0.8\textheight]{figures/2016-07-19-genome-wide-S/complex-plot-b-1.png}
-\includegraphics<3>[height=0.8\textheight]{figures/2016-08-01-ifats-filters/venn-total-finalf-called-1.pdf}
-\end{column}
-
-\begin{column}{0.35\textwidth}
-
-\includegraphics<2-3>[height=0.80\textheight]{figures/2016-08-01-ifats-filters/top-ranking-genes-1.pdf}
-\end{column}
-\end{columns}
-\end{frame}
-
-\againframe<2>{questions}
-
-%\subsection{Dependence of allelic bias}
-
-\begin{frame}{Explaining inter-individual variation}
-\begin{columns}[t]
-\begin{column}{0.4\textwidth}
-
-\includegraphics[width=1.1\columnwidth]{figures/2016-07-19-genome-wide-S/complex-plot-1.png}
-\end{column}
-
-\begin{column}{0.6\textwidth}
-
-\includegraphics[width=1.1\columnwidth]{figures/2016-06-26-trellis-display-of-data/S-age-gender-2}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Multiple interdependent predictors}
-\includegraphics[width=0.9\textheight]{figures/2016-06-26-trellis-display-of-data/evar-scatterplot-matrix-1.png}
-\end{frame}
-
-%\begin{frame}[t]{Inferring dependence using regression models}
-%\begin{columns}[t]
-%\begin{column}{0.4\textwidth}
-%
-%generalized linear models
-%
-%\begin{eqnarray*}
-%\mathrm{E}[y_g] &=& \mu_g = h^{-1}(X\beta_g) \\
-%y &=& \mu_g + \varepsilon_{\mu_g}
-%\end{eqnarray*}
-%\end{column}
-%
-%\begin{column}{0.6\textwidth}
-%
-%\visible<2->{inference for gene \(g\) (PEG3)}
-%
-%%\includegraphics<2>[width=1.1\columnwidth]{figures/2016-08-21-likelihood-surface/explain-rll-wireframe-1.png}
-%\includegraphics<2>[width=\columnwidth]{figures/2016-08-21-likelihood-surface/explain-rll-levelplot-B-1.png}
-%\end{column}
-%\end{columns}
-%
-%\end{frame}
-
-\begin{frame}[t]{Model selection and inference}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-\begin{center}
-
-model selection
-
-%\tiny{(simple regression, for demonstration only)}
-
-\includegraphics[width=1.1\columnwidth]{figures/2016-08-23-glm-sampling-distributions/PEG3-1.png}
-\end{center}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-\begin{center}
-
-\only<2>{maximum likelihood inference}
-
-%\tiny{(multiple regression)}
-
-
-\includegraphics<2>[width=\columnwidth]{figures/2016-08-21-likelihood-surface/explain-rll-levelplot-B-1.png}
-\end{center}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Explained variation of read count ratio}
-
-\includegraphics[width=0.9\textwidth]{figures/2017-02-14-beta-from-mixed-model/tval-varpart-fixed-present-1.pdf}
-\end{frame}
-
-\begin{frame}[label=signif-genes]{Genes \(g\) affected by one or more predictors \(p\)
-(\(\beta_{pg}\neq 0\))}
-%{Test: parametric + non-parametric (permutations)}
-\tiny
-\input{signif-gene-effects-either-manual-annot.tex}
-\end{frame}
-
-%\begin{frame}{Different results under similarly well-fitting models}
-%
-%\includegraphics[height=0.85\textheight]{figures/2016-06-22-extending-anova/unlm-Q-wnlm-Q-compare-1.pdf}
-%\end{frame}
-
-%% two predictors interact when the effect of one predictor (X1) depends on the value (a or b) of another (X2) 
-%% this is distinct from correlation/non-orthogonality of predictors
-%% e.g. if X2=a then X1 has no dependence on Y (beta1=0) but if X2=b then it does % (beta1>0)
-%% we found that effect of Age on S depended on both Institution and Gender at various degrees for different genes
-%% we didn't model interactions to avoid extra parameters and decrease in power => our conclusions on beta are too simplistic
-%\begin{frame}[label=interaction]{Effects appear interdependent}
-%%{The effect of one predictor depends on another}
-%
-%\includegraphics[width=0.9\textwidth]{figures/2016-07-08-conditional-inference/beta-age-cond-wnlm-Q-2-present-1.pdf}
-%\end{frame}
-
-\begin{frame}{Multiple levels of variation}
-\begin{center}
-\includegraphics[height=0.75\textheight]{figures/by-me/commonmind-rna-seq/commonmind-rna-seq.pdf}
-\end{center}
-\end{frame}
-
-\begin{frame}{Linear Mixed Models: joint models for nested variation}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-\begin{center}
-gene-wise marginal approach\\
-%a separate model for each gene
-
-\includegraphics[scale=\platefigscale]{figures/by-me/monoall-dependencies-2/obs-simple-general/obs-simple-general.pdf}
-\end{center}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-\begin{center}
-joint approach (mixed model)\\
-%a single model for all genes
-
-\bigskip\bigskip
-
-\tikz{\node[draw, align=left]{TODO:\\plate diagram for a mixed model}}
-%\includegraphics[scale=\platefigscale]{figures/by-me/monoall-dependencies-2/obs-bayesian/obs-bayesian.pdf}
-\end{center}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Preliminary results from mixed models}
-\begin{tabular}{ccc}
-term        &   Delta.AIC &        p.Chi \\
-\hline
-\hline
-Age         &   1.7975291 &  6.527338e-01 \\
-\hline
-\textbf{Age.Gene}    & \textbf{-23.4036}    &  \textbf{2.532556e-06} \\
-\hline
-Ances1      &  -0.2462851 &  1.339356e-01 \\
-\textbf{Ances1.Gene} & \textbf{-56.7626802} &  \textbf{4.826726e-13} \\
-\hline
-Gender.fix  &   1.0152936 &  0.321039630 \\
-Gender.ran  &   2.0000000 &  0.999978157 \\
-\textbf{Gender.Gene} &  \textbf{-5.7961247} &  \textbf{0.005235841} \\
-Dx.fix      &   3.8933639 &  0.948078426 \\
-Dx.ran      &   2.0000000 &  0.999972480 \\
-Dx.Gene     &   0.4529866 &  0.213576883 \\
-\hline
+\begin{tabular}{cl}
+%\(\mathcal{T}\) & true variants \\
+%\(v\) & a called variant \\
+%\(\mathcal{C}\) & called variants \\
+\(\mathcal{V}\) & true (but unknown) variants \\
+\(\{E_v : v \in \mathcal{V} \} \) & prior evidence that true variant \(v\) is causal \\
+\(D\) & sequence data \\
 \end{tabular}
 
+\bigskip
+
+Suppose \(i\) was called a variant.
+\begin{itemize}
+\item Is \(i\) a true variant?
+\item Is \(i\) also causal?
+\end{itemize}
+
+\bigskip
+
+\begin{eqnarray*}
+P(i \text{ is true and causal } | D, E_i, i \text{ called})
+&=&
+\overbrace{P(i \text{ is true } | D, i \text{ called})}^{\pi_i} \\
+&\times&
+P(i \text{ is causal } | i \text{ is true}, E_i)
+\end{eqnarray*}
 \end{frame}
 
-\againframe<3>{questions}
+\begin{frame}{FDR and precision}
+\begin{eqnarray*}
+\text{FDR} &=& \text{E} \left[ \frac{\text{\# false calls}}{\# calls} \right] \\
+&=& 1 - \underbrace{\text{E} \left[ \frac{\text{\# true calls}}{\# calls}
+\right]}_{\text{precision or PPV}}
+\end{eqnarray*}
+\end{frame}
 
-%\subsection{Future work}
+\begin{frame}{How FDR control works}
 
-%\begin{frame}{Reanalyze dependence?}
-%Is it worth? If yes...
-%\begin{enumerate}
-%\item add more data
-%\begin{itemize}
-%\visible<2>{\item no solution for biased stats.~approach}
-%\end{itemize}
-%\item more accurate read counts
-%\begin{itemize}
-%\visible<2>{\item improve QC: RNA-seq + genotyping}
-%\end{itemize}
-%\item find a better model
-%\begin{itemize}
-%\visible<2>{\item implement inference, validate}
-%\end{itemize}
-%\end{enumerate}
-%\end{frame}
+\begin{enumerate}
+\item set FDR to some desired level \(\alpha\)
+\item rank candidate variants by \(\pi_i\) 
+\item for each rank \(j\) calculate
+\begin{equation*}
+\overbrace{\text{FDR}_{(j)}}^{q_{(j)} \text{-value}} = 1 - \text{precision}_{(j)} = 1 -
+%\frac{1}{j} \sum_{k=1}^j \pi_{(k)}
+\frac{\pi_{(1)} + ... + \pi_{(j)}}{j}
+\end{equation*}
+\item call the \(j'\) highest ranking candidates if \(\text{FDR}_{(j')} <
+\alpha < \text{FDR}_{(j'+1)}\)
 
-\section{Calling somatic variants with precision}
+\end{enumerate}
 
-\begin{frame}{The well-known problem: calls depend on calles}
+\bigskip
+{\footnotesize
+\begin{tabular}{cl}
+\hline
+%\(j\) & the rank of candidate variant \(i\) \\
+\(\text{FDR}_{(j)}\) & the minimum FDR calling the \(j\) highest ranking candidates \\
+\(\pi_i\) & the probability that \(i\) is a true call \\
+\end{tabular}
+}
+\end{frame}
+
+\begin{frame}{The well-known problem: calls depend on callers}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 
@@ -402,6 +136,8 @@ Dx.Gene     &   0.4529866 &  0.213576883 \\
 \end{column}
 \end{columns}
 \end{frame}
+
+\section{A solution: VariantMetaCaller (VMC)}
 
 \begin{frame}{Combining variants with BAYSIC}
 {BMC Bioinformatics. 2014; 15: 104.}
