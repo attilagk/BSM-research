@@ -49,30 +49,55 @@
 
 \section{The problem}
 
-\begin{frame}
-posterior evidence for the role of gene \(g\) in a phenotype
+\begin{frame}{Challenges of variant calling}
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
 
-prior evidence
+\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1a.png}
 
-+ \(\int_{v\in g}\) evidence
+\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1b.png}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\item accuracy
+\begin{itemize}
+\item no perfect caller
+\item not even best caller
+\end{itemize}
+\item filtering
+\begin{itemize}
+\item quality annotations in VCF
+\item sensitivity vs.~specificity
+\end{itemize}
+\item combination: \alert{meta}callers
+\end{enumerate}
+%\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1b.png}
+\end{column}
+\end{columns}
 \end{frame}
+
+
+%\begin{frame}{The probability that \(i\) is a true call}
+%\begin{center}
+%
+%\[P(i \text{ is true } | D, i \text{ called by } k) \equiv \pi_i\]
+%
+%\bigskip
+%
+%{\small
+%\begin{tabular}{cl}
+%\hline
+%\(i\) & candidate variant \\
+%\(D\) & sequence data \\
+%\(k\) & caller \\
+%\end{tabular}
+%}
+%\end{center}
+%\end{frame}
 
 \begin{frame}{}
 
-We have:
-
-\begin{tabular}{cl}
-%\(\mathcal{T}\) & true variants \\
-%\(v\) & a called variant \\
-%\(\mathcal{C}\) & called variants \\
-\(\mathcal{V}\) & true (but unknown) variants \\
-\(\{E_v : v \in \mathcal{V} \} \) & prior evidence that true variant \(v\) is causal \\
-\(D\) & sequence data \\
-\end{tabular}
-
-\bigskip
-
-Suppose \(i\) was called a variant.
+Candidate variant \(i\) was called by (meta)caller \(k\) based on data \(D\).
 \begin{itemize}
 \item Is \(i\) a true variant?
 \item Is \(i\) also causal?
@@ -80,31 +105,57 @@ Suppose \(i\) was called a variant.
 
 \bigskip
 
+\onslide<2>{
 \begin{eqnarray*}
-P(i \text{ is true and causal } | D, E_i, i \text{ called})
+P(i \text{ is true and causal } | D, E_i, i \text{ cal'd by } k)
 &=&
-\overbrace{P(i \text{ is true } | D, i \text{ called})}^{\pi_i} \\
+\overbrace{P(i \text{ is true } | D, i \text{ cal'd by } k)}^{\pi_i} \\
 &\times&
 P(i \text{ is causal } | i \text{ is true}, E_i)
 \end{eqnarray*}
+
+\bigskip
+
+{\small
+\begin{tabular}{cl}
+\hline
+%\(\mathcal{T}\) & true variants \\
+%\(v\) & a called variant \\
+%\(\mathcal{C}\) & called variants \\
+%\(\mathcal{V}\) & true (but unknown) variants \\
+%\(i\) & candidate variant \\
+\(E_v\) & prior evidence that a true variant \(v\) is causal \\
+\end{tabular}
+}
+}
 \end{frame}
 
-\begin{frame}{FDR and precision}
+\begin{frame}{Performance and precision-based filtering}
+\begin{columns}[t]
+\small
+\begin{column}{0.45\textwidth}
 \begin{eqnarray*}
-\text{FDR} &=& \text{E} \left[ \frac{\text{\# false calls}}{\# calls} \right] \\
-&=& 1 - \underbrace{\text{E} \left[ \frac{\text{\# true calls}}{\# calls}
-\right]}_{\text{precision or PPV}}
+\text{precision} &=& \text{E} \left[ \frac{\text{\# true calls}}{\text{\# calls}} \right] \\
+&=& 1 - \underbrace{\text{E} \left[ \frac{\text{\# false calls}}{\text{\# calls}} \right]}_{\text{FDR}} \\
+\text{recall} &=& \text{E} \left[ \frac{\text{\# true calls}}{\text{\# variants}} \right]
 \end{eqnarray*}
+\end{column}
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/from-others/PRROC-R-package-fig2.png}
+\end{column}
+\end{columns}
+
 \end{frame}
 
-\begin{frame}{How FDR control works}
+\begin{frame}{Algorithm for precision-based filtering (FDR control)}
 
 \begin{enumerate}
 \item set FDR to some desired level \(\alpha\)
 \item rank candidate variants by \(\pi_i\) 
 \item for each rank \(j\) calculate
 \begin{equation*}
-\overbrace{\text{FDR}_{(j)}}^{q_{(j)} \text{-value}} = 1 - \text{precision}_{(j)} = 1 -
+\overbrace{\text{FDR}_{(j)}}^{q\text{-value}} = 1 - \text{precision}_{(j)} = 1 -
 %\frac{1}{j} \sum_{k=1}^j \pi_{(k)}
 \frac{\pi_{(1)} + ... + \pi_{(j)}}{j}
 \end{equation*}
@@ -118,37 +169,89 @@ P(i \text{ is causal } | i \text{ is true}, E_i)
 \begin{tabular}{cl}
 \hline
 %\(j\) & the rank of candidate variant \(i\) \\
-\(\text{FDR}_{(j)}\) & the minimum FDR calling the \(j\) highest ranking candidates \\
-\(\pi_i\) & the probability that \(i\) is a true call \\
+\(\text{FDR}_{(j)}\) & FDR when we filter just below rank \(j\) \\
+%\(\pi_i\) & the probability that \(i\) is a true call \\
 \end{tabular}
 }
 \end{frame}
 
-\begin{frame}{The well-known problem: calls depend on callers}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
 
-\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1a.png}
-\end{column}
-\begin{column}{0.5\textwidth}
+\begin{frame}{Optimal soft filtering}
+we have
+\begin{itemize}
+\item a VCF file by a typical caller \(k\)
+\item quality annotations \(\mathbf{x}_{ik} = (x_{ik1},...,x_{ikA})\)
+\end{itemize}
+\bigskip
+\begin{description}
+\item[Problem:] \(\{\pi_{ik}\}\) is unknown and depends on \(\mathbf{x}_{ik}\)
+\item[Task:]
+\begin{enumerate}
+\item find a good estimator \(\hat{\pi}_{i}\) for \(\pi_{i}\) \\
+\item maximize \(\hat{\pi}_{ik}\) given \(\mathbf{x}_{ik}\)
+\end{enumerate}
 
-\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1b.png}
-\end{column}
-\end{columns}
+\end{description}
 \end{frame}
 
-\section{A solution: VariantMetaCaller (VMC)}
 
-\begin{frame}{Combining variants with BAYSIC}
-{BMC Bioinformatics. 2014; 15: 104.}
+\begin{frame}{Optimal metacaller}
+\begin{columns}[t]
+\begin{column}{0.45\textwidth}
+we have
+\begin{itemize}
+\item \(K\) VCFs by \(K\) callers
+\item maximized \(\hat{\pi}_{ik}\)
+\end{itemize}
+\bigskip
 
+optimal metacaller:
+\[\underbrace{\hat{\pi}_{i}}_{\text{metacaller}} = \frac{\hat{\pi}_{i1} + ... + \hat{\pi}_{iK}}{K}\]
+\end{column}
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/from-others/PRROC-R-package-fig7.png}
+\end{column}
+\end{columns}
+
+\end{frame}
+
+\section{Solutions}
+
+\begin{frame}{Callers and metacallers}
+\includegraphics[width=0.9\textwidth]{figures/from-others/vmc-fig1.png}
+\bigskip
+
+{\footnotesize G\'{e}zsi,..., Antal, BMC Genomics. 2015; 16: 875.}
+\end{frame}
+
+\begin{frame}{BAYSIC}
 \includegraphics[height=0.7\textheight]{figures/from-others/baysic-fig6.png}
+\bigskip
+
+{\footnotesize BMC Bioinformatics. 2014; 15: 104.}
 \end{frame}
 
 \begin{frame}{VariantMetaCaller (VMC)}
-{G\'{e}zsi,..., Antal, BMC Genomics. 2015; 16: 875.}
+recall that
 
-\includegraphics[width=0.9\textwidth]{figures/from-others/vmc-fig1.png}
+\(\pi_{ik} = P(i \text{ is true } | \mathbf{x}_{ik}, D, i \text{ called by
+caller } k)\)
+\bigskip
+
+estimator
+
+\(\hat{\pi}_{ik} = \hat{P}_{\text{svm}}(i \text{ is true } | \mathbf{x}_{ik},
+D, i \text{ called by \emph{any caller}} )\)
+\begin{itemize}
+\item optimal soft filtering
+\item good estimator 
+\item svm: support vector machine
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Support vector machines}
+
 \end{frame}
 
 \begin{frame}{Performance and precision}
@@ -166,6 +269,15 @@ error of precision
 \end{column}
 \end{columns}
 \end{frame}
+
+\end{document}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\end{column}
+\begin{column}{0.5\textwidth}
+\end{column}
+\end{columns}
 
 %\begin{frame}{Brain Somatic Mosaicism}
 %\begin{columns}[t]
@@ -187,5 +299,3 @@ error of precision
 %\end{column}
 %\end{columns}
 %\end{frame}
-
-\end{document}
