@@ -77,27 +77,12 @@
 \end{frame}
 
 
-%\begin{frame}{The probability that \(i\) is a true call}
-%\begin{center}
-%
-%\[P(i \text{ is true } | D, i \text{ called by } k) \equiv \pi_i\]
-%
-%\bigskip
-%
-%{\small
-%\begin{tabular}{cl}
-%\hline
-%\(i\) & candidate variant \\
-%\(D\) & sequence data \\
-%\(k\) & caller \\
-%\end{tabular}
-%}
-%\end{center}
-%\end{frame}
-
 \begin{frame}{}
 
-Candidate variant \(i\) was called by (meta)caller \(k\) based on data \(D\).
+A set \(\mathcal{K}\) of \(K\) callers was applied to data \(D\).\\
+Candidate variant \(i\) was called by a subset \(\mathcal{C}\subseteq\mathcal{K}\)
+of callers.
+
 \begin{itemize}
 \item Is \(i\) a true variant?
 \item Is \(i\) also causal?
@@ -107,9 +92,11 @@ Candidate variant \(i\) was called by (meta)caller \(k\) based on data \(D\).
 
 \onslide<2>{
 \begin{eqnarray*}
-P(i \text{ is true and causal } | D, E_i, i \text{ cal'd by } k)
+P(i \text{ is true and causal } | D, E_i, i \text{ by
+}\mathcal{C}\subseteq\mathcal{K})
 &=&
-\overbrace{P(i \text{ is true } | D, i \text{ cal'd by } k)}^{\pi_i} \\
+\overbrace{P(i \text{ is true } | D, i \text{ by }
+\mathcal{C}\subseteq\mathcal{K})}^{\pi_{i|\mathcal{K}}} \\
 &\times&
 P(i \text{ is causal } | i \text{ is true}, E_i)
 \end{eqnarray*}
@@ -136,7 +123,8 @@ P(i \text{ is causal } | i \text{ is true}, E_i)
 \begin{column}{0.45\textwidth}
 \begin{eqnarray*}
 \text{precision} &=& \text{E} \left[ \frac{\text{\# true calls}}{\text{\# calls}} \right] \\
-&=& 1 - \underbrace{\text{E} \left[ \frac{\text{\# false calls}}{\text{\# calls}} \right]}_{\text{FDR}} \\
+&=& 1 - \text{FDR} \\
+%&=& 1 - \underbrace{\text{E} \left[ \frac{\text{\# false calls}}{\text{\# calls}} \right]}_{\text{FDR}} \\
 \text{recall} &=& \text{E} \left[ \frac{\text{\# true calls}}{\text{\# variants}} \right]
 \end{eqnarray*}
 \end{column}
@@ -177,36 +165,37 @@ P(i \text{ is causal } | i \text{ is true}, E_i)
 
 
 \begin{frame}{Optimal soft filtering}
-we have
+Using a single caller \(k\) we have
 \begin{itemize}
-\item a VCF file by a typical caller \(k\)
-\item quality annotations \(\mathbf{x}_{ik} = (x_{ik1},...,x_{ikA})\)
+\item \(\mathcal{K}=\{k\}\)
+\item a VCF file with quality annotations \(\mathbf{x}_{ik}\)
 \end{itemize}
 \bigskip
 \begin{description}
-\item[Problem:] \(\{\pi_{ik}\}\) is unknown and depends on \(\mathbf{x}_{ik}\)
+\item[Problem:] \(\pi_{i | \{k\}}\) is unknown and depends on \(\mathbf{x}_{ik}\)
 \item[Task:]
 \begin{enumerate}
-\item find a good estimator \(\hat{\pi}_{i}\) for \(\pi_{i}\) \\
-\item maximize \(\hat{\pi}_{ik}\) given \(\mathbf{x}_{ik}\)
+\item find a good estimator \(\hat{\pi}_{i | \{k\}}\) for \(\pi_{i | \{k\}}\) \\
+\item maximize \(\hat{\pi}_{i | \{k\}}\) given \(\mathbf{x}_{ik}\)
 \end{enumerate}
 
 \end{description}
 \end{frame}
 
 
-\begin{frame}{Optimal metacaller}
+\begin{frame}{Optimal combination: metacaller}
 \begin{columns}[t]
 \begin{column}{0.45\textwidth}
+Using a set \(\mathcal{K}\) of \(K\) callers \\
 we have
 \begin{itemize}
-\item \(K\) VCFs by \(K\) callers
-\item maximized \(\hat{\pi}_{ik}\)
+\item \(K\) VCFs with annot.~\(\mathbf{x}_{i\mathcal{K}}\)
+\item \(\hat{\pi}_{ik | \mathcal{K}}\) analogous to \(\hat{\pi}_{i | \{k\}}\)
 \end{itemize}
 \bigskip
 
-optimal metacaller:
-\[\underbrace{\hat{\pi}_{i}}_{\text{metacaller}} = \frac{\hat{\pi}_{i1} + ... + \hat{\pi}_{iK}}{K}\]
+%optimal combination:
+\[\underbrace{\hat{\pi}_{i | \mathcal{K}}}_{\text{metacaller}} = \frac{\hat{\pi}_{i1 | \mathcal{K}} + ... + \hat{\pi}_{iK | \mathcal{K}}}{K}\]
 \end{column}
 \begin{column}{0.6\textwidth}
 
@@ -216,16 +205,16 @@ optimal metacaller:
 
 \end{frame}
 
-\section{Solutions}
+\section{VariantMetaCaller}
 
-\begin{frame}{Callers and metacallers}
+\begin{frame}{Approaches}
 \includegraphics[width=0.9\textwidth]{figures/from-others/vmc-fig1.png}
 \bigskip
 
 {\footnotesize G\'{e}zsi,..., Antal, BMC Genomics. 2015; 16: 875.}
 \end{frame}
 
-\begin{frame}{BAYSIC}
+\begin{frame}{BAYSIC applied to somatic variants}
 \includegraphics[height=0.7\textheight]{figures/from-others/baysic-fig6.png}
 \bigskip
 
@@ -233,41 +222,93 @@ optimal metacaller:
 \end{frame}
 
 \begin{frame}{VariantMetaCaller (VMC)}
-recall that
-
-\(\pi_{ik} = P(i \text{ is true } | \mathbf{x}_{ik}, D, i \text{ called by
-caller } k)\)
+Estimate
+\(\pi_{i|\mathcal{K}} = P(i \text{ is true } | D, i \text{ by }
+\mathcal{C}\subseteq\mathcal{K})\)
 \bigskip
 
-estimator
+with
 
-\(\hat{\pi}_{ik} = \hat{P}_{\text{svm}}(i \text{ is true } | \mathbf{x}_{ik},
-D, i \text{ called by \emph{any caller}} )\)
+\[\hat{\pi}_{i | \mathcal{K}} = \frac{\hat{\pi}_{i1 | \mathcal{K}} + ... +
+\hat{\pi}_{iK | \mathcal{K}}}{K}\]
+
+where
+
+\[\hat{\pi}_{ik | \mathcal{K}} = \hat{P}_{\text{svm}}(i \text{ is true } |
+\mathbf{x}_{ik}, \text{ training sets based on } \mathcal{K})\]
 \begin{itemize}
+\item \(\mathbf{x}_{ik} = (x_{ik1},...,x_{ikA})\) using \(A\) annotations \\
+{\small read depth, variant quality, mapping quality,...}
 \item optimal soft filtering
 \item good estimator 
-\item svm: support vector machine
+%\item svm: support vector machine
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Support vector machines}
+\begin{center}
+\includegraphics[height=0.7\textheight]{figures/from-others/ben-hur-2008-ploscompbio-fig6middle.png}
 
+\end{center}
+{\footnotesize Ben-Hur et al 2008}
 \end{frame}
 
-\begin{frame}{Performance and precision}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-performance
 
-\includegraphics[height=0.8\textheight]{figures/from-others/vmc-fig4b-bwa.png}
+\begin{frame}{Training sets based on set \(\mathcal{K}\) of \(K\) callers}
+\begin{center}
+\begin{eqnarray*}
+\text{positive training set} &=& \{i \text{ called by all callers}\} \\
+\text{negative training set} &=& \{i \text{ called by any single caller}\}
+\end{eqnarray*}
+\bigskip
+
+\includegraphics[height=0.5\textheight]{figures/from-others/kim-2013-bmcbioinf-fig1a.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Accuracy and goodness of precision estimation}
+\begin{columns}[t]
+\begin{column}{0.7\textwidth}
+precision-recall curve
+\bigskip
+
+\includegraphics[width=1.0\columnwidth]{figures/from-others/vmc-fig4a-bwa-indel.png}
+%\includegraphics[height=0.8\textheight]{figures/from-others/vmc-fig4b-bwa.png}
 \end{column}
 
-\begin{column}{0.5\textwidth}
-error of precision
+\begin{column}{0.3\textwidth}
+m.a.~error of \(\widehat{\text{precision}}\)
+\bigskip
 
-\includegraphics[height=0.8\textheight]{figures/from-others/vmc-fig4c-bwa.png}
+\includegraphics[width=1.0\columnwidth]{figures/from-others/vmc-fig4c-bwa-indel.png}
 \end{column}
 \end{columns}
+\bigskip
+
+\hline
+\small indels, bwa
+\end{frame}
+
+\begin{frame}{Summary}
+\begin{enumerate}
+\item useful information in
+\begin{itemize}
+\item calling pattern of mulitple callers
+\item quality annotations 
+\end{itemize}
+\item traditional approach
+\begin{itemize}
+\item heuristics: hard filter + combination
+\item Inaccurate. No FDR control. 
+\end{itemize} 
+\item VariantMetaCaller
+\begin{itemize}
+\item machine learning (SVM)
+\item best precision-recall
+\item well-estimated precision \(\Rightarrow\) FDR control
+\end{itemize}
+\end{enumerate}
+
 \end{frame}
 
 \end{document}
