@@ -47,43 +47,52 @@
 \maketitle
 \end{frame}
 
-\begin{frame}{Challenges of variant calling}
+\begin{frame}{Variant calling}{Concepts, challenges, approaches}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 
 \includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1a.png}
+\medskip
 
+{\tiny BMC Bioinformatics. 2013;14:189}
 %\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1b.png}
 \end{column}
 \begin{column}{0.5\textwidth}
-{\large accuracy}
-\begin{itemize}
-\item no perfect caller
-\item depends on quality annotations
-\end{itemize}
-\bigskip
-{\large approaches}
 \begin{enumerate}
-\item heuristic (conventional)
-\begin{itemize}
-\item hard filters
-\item combine call sets
-\end{itemize}
-\item machine learning-based
-\begin{itemize}
-\item optimally weighted combination
-\item soft filters 
-\item FDR control
-\item probability that a call is true
-\end{itemize}
+\item data + caller\(_k\) \(\rightarrow\) VCF\(_k\)
+\item 
++ hard filter\(_k\) \(\rightarrow\) call set\(_k\)
+\item<2-> call set\(_1\) + ... + call set\(_K\) \(\rightarrow\) combined call set
 \end{enumerate}
+
+\bigskip
+{\onslide<3->
+\begin{itemize}
+\item optimal filtering \& combination?
+\item sensitivity--specificity: FDR = ?
+\end{itemize}
+}
+
+\bigskip
+{\onslide<4>
+\large
+probabilistic approaches
+}
 %\includegraphics[width=1.0\columnwidth]{figures/from-others/kim-2013-bmcbioinf-fig1b.png}
 \end{column}
 \end{columns}
 \end{frame}
 
 
-\begin{frame}{Probability that a called variant is true}
+\begin{frame}[label=approaches]{Approaches}
+\includegraphics[width=0.9\textwidth]{figures/from-others/vmc-fig1.png}
+\bigskip
+
+{\footnotesize G\'{e}zsi,..., Antal, BMC Genomics. 2015; 16: 875.}
+\end{frame}
+
+
+\begin{frame}{Probability that a candidate variant is true}
 
 A set \(\mathcal{K}\) of \(K\) callers was applied to data \(D\).\\
 Candidate variant \(i\) was called by a subset \(\mathcal{C}\subseteq\mathcal{K}\)
@@ -96,7 +105,7 @@ P(i \text{ is true } | D, i \text{ by }
 \]
 \begin{itemize}
 \item would be useful for FDR control and downstream analysis
-\item but it is unknown
+\item<2> but \(\pi_i\) is unknown
 \end{itemize}
 
 \bigskip
@@ -113,22 +122,22 @@ P(i \text{ is true } | D, i \text{ by }
 \begin{column}{0.45\textwidth}
 \begin{center}
 {let \(j = \text{\# called positives}\) }
-\smallskip
+\medskip
 \end{center}
-\begin{eqnarray*}
-\text{precision}_j &=& \text{E} \left[ \frac{\text{\# true positives}}{j} \right] \\
-&=& \frac{\pi_{(1)} + ... + \pi_{(j)}}{j} \\
-&=& 1 - \text{FDR}_j
-\end{eqnarray*}
-\smallskip
 \[
 \overbrace{\text{recall}_j}^{\text{sensitivity}} = \text{E} \left[
 \frac{\text{\# true positives}}{\text{\# actual positives}} \right]
 \]
+\medskip
+\begin{eqnarray*}
+\text{precision}_j &=& \text{E} \left[ \frac{\text{\# true positives}}{j} \right] \\
+&=& 1 - \text{FDR}_j \\
+&=& \frac{\pi_{(1)} + ... + \pi_{(j)}}{j}
+\end{eqnarray*}
 \end{column}
-\begin{column}{0.6\textwidth}
+\begin{column}{0.55\textwidth}
 
-\includegraphics[width=1.0\columnwidth]{figures/from-others/PRROC-R-package-fig2.png}
+\includegraphics[width=1.0\columnwidth]{figures/from-others/PRROC-R-package-fig2-no-colorbar.png}
 \end{column}
 \end{columns}
 \end{frame}
@@ -187,14 +196,16 @@ P(i \text{ is true } | D, i \text{ by }
 \begin{eqnarray*}
 \hat{\pi}_{i} &=& \frac{\hat{\pi}_{i1} + ... + \hat{\pi}_{iK}}{K} \\
 \hat{\pi}_{ik} &=& \hat{P}_{\text{svm}}(i \text{ is true } |
-\mathbf{x}_{ik}, \text{ training sets based on } \mathcal{K})
+\text{input }\mathbf{x}_{ik}, \text{ training sets
+}\textcolor{blue}{S^+}, \textcolor{red}{S^-})
 \end{eqnarray*}
 \bigskip
 
-input \(\mathbf{x}_{ik}\) to SVM
+support vector machine (SVM)
 \begin{itemize}
-\item \(\mathbf{x}_{ik} = (x_{ik1},...,x_{ikA})\) using \(A\) quality annotations \\
-\item \emph{caller's score}, read depth, variant quality, mapping quality,...
+\item \(\mathbf{x}_{ik} = (x_{ik1},...,x_{ikA})\) vector of \(A\) annotations \\
+\item \textcolor{blue}{\(S^+\)}, \textcolor{red}{\(S^-\)}: based on callers' concordance
+%\item \emph{caller's score}, read depth, variant quality, mapping quality,...
 \end{itemize}
 \end{frame}
 
@@ -227,7 +238,10 @@ input \(\mathbf{x}_{ik}\) to SVM
 %\end{center}
 %\end{frame}
 
-\begin{frame}{Accuracy and goodness of precision estimation}
+\againframe{approaches}
+
+\begin{frame}{Germline variants: accuracy and estimated FDR}
+{WES, indels, bwa}
 \begin{columns}[t]
 \begin{column}{0.7\textwidth}
 precision-recall curve
@@ -244,42 +258,43 @@ mean abs.~error of \(\widehat{\text{FDR}}\)
 \includegraphics[height=0.5\textheight]{figures/from-others/vmc-fig4c-bwa-indel.png}
 \end{column}
 \end{columns}
+
+\bigskip
+\begin{center}
+{\footnotesize G\'{e}zsi,..., Antal, BMC Genomics. 2015; 16: 875.}
+\end{center}
 \end{frame}
 
-\begin{frame}{Somatic variants from normal--tumor samples}
+\begin{frame}{Somatic variants}{normal--tumor samples}
+\begin{center}
 \includegraphics[height=0.7\textheight]{figures/from-others/baysic-fig6.png}
+\end{center}
 \bigskip
 
 {\footnotesize BMC Bioinformatics. 2014; 15: 104.}
 \end{frame}
 
 \begin{frame}{Summary}
-\includegraphics[width=0.9\textwidth]{figures/from-others/vmc-fig1.png}
+\begin{itemize}
+\item useful information in
+\begin{enumerate}
+\item concordance of multiple callers
+\item annotations 
+\end{enumerate}
+\item probabilistic approaches
+\begin{itemize}
+\item use those info
+\item optimally weighted combination of callers
+\item optimal selection (FDR control)
+\end{itemize} 
+\end{itemize}
 \bigskip
 
-{\footnotesize G\'{e}zsi,..., Antal, BMC Genomics. 2015; 16: 875.}
+\begin{center}
+\Large Thanks for attention
+\end{center}
 \end{frame}
 
-%\begin{frame}{Summary}
-%\begin{enumerate}
-%\item useful information in
-%\begin{itemize}
-%\item calling pattern of mulitple callers
-%\item quality annotations 
-%\end{itemize}
-%\item traditional approach
-%\begin{itemize}
-%\item heuristics: hard filter + combination
-%\item Inaccurate. No FDR control. 
-%\end{itemize} 
-%\item VariantMetaCaller
-%\begin{itemize}
-%\item machine learning (SVM)
-%\item best precision-recall
-%\item well-estimated precision \(\Rightarrow\) FDR control
-%\end{itemize}
-%\end{enumerate}
-%\end{frame}
 
 \end{document}
 
