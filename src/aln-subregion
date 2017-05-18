@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+
+# Extracts a subregion from a sorted bam alignment.  The subregion is defined by the
+# first x megabases (default x = 1) of the first n-th chromosomes (default n =
+# 3, up to 22). To select full chromosomes set x = "full". 
+
+usage="usage: `basename $0` inbam [lastchrom [lengthmegabase]]"
+if test $# -eq 0 -o $# -gt 3; then
+    echo $usage >&2
+    exit 1
+fi
+
+inputbam=$1
+tissue=`basename $1 .bam`
+lastchrom=${2:-3}
+lengthmegabase=${3:-1}
+
+# initialize loop variables
+chr=1
+region='' # region argument to samtools view
+while test $chr -le $lastchrom; do
+    if test $lengthmegabase = "full"; then
+        region="$region $chr:"
+        unit=""
+    else
+        length=`expr $lengthmegabase \* 1000000`
+        region="$region $chr:1-$length"
+        unit="MB"
+    fi
+    chr=`expr $chr + 1`
+done
+
+#generate output name
+outbam="$tissue-${lastchrom}_x_$lengthmegabase$unit.bam"
+
+# filter for subregion and save alignment as $outbam
+samtools view -bh $inputbam $region > $outbam
+samtools index $outbam
