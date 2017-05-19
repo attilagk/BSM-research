@@ -1,38 +1,48 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-# Extracts a subregion from a sorted bam alignment.  The subregion is defined by the
-# first x megabases (default x = 1) of the first n-th chromosomes (default n =
-# 3, up to 22). To select full chromosomes set x = "full". 
+# Extracts n megabase (MB)-long region(s) from a sorted bam alignment 'inbam'.  Given
+# the regions' lenght in MB each region is implicitly defined by
+# chrom_i:start_i such that the explicit definition is chrom_i:start_i-end_i,
+# where end_i = start_i + 10^6 * n.  The indexed bam is written in a
+# subdirectory named as 'nMB'.
 
-usage="usage: `basename $0` inbam [lastchrom [lengthmegabase]]"
-if test $# -eq 0 -o $# -gt 3; then
+usage="usage: `basename $0` -@ nthreads inbam lengthmegabase [chromA:startA [chromB:startB ...]] "
+if test $# -lt 2; then
     echo $usage >&2
     exit 1
 fi
 
-inputbam=$1
-tissue=`basename $1 .bam`
-lastchrom=${2:-3}
-lengthmegabase=${3:-1}
+# number of threads to samtools
+if getopts ":@:" myopts; then
+    nthreads=$OPTARG
+fi
+shift $(($OPTIND - 1))
+nthreads=${nthreads:-6} # 6 threads by default
 
-# initialize loop variables
-chr=1
-region='' # region argument to samtools view
-while test $chr -le $lastchrom; do
-    if test $lengthmegabase = "full"; then
-        region="$region $chr:"
-        unit=""
-    else
-        length=`expr $lengthmegabase \* 1000000`
-        region="$region $chr:1-$length"
-        unit="MB"
-    fi
-    chr=`expr $chr + 1`
+inbam=$1
+seglen=${2:-1} # 1 MB by default
+shift 2 # remaining positional arguments will be used in a loop
+
+# define output dir and files
+tissue=`basename $inbam .bam`
+segMB="${seglen}MB"
+outbam="$segMB/$tissue-$segMB.bam"
+readme="$segMB/README"
+if ! test -d $segMB; then
+    mkdir $segMB
+    echo -e "bam file\tgenomic region(s)" > $readme
+fi
+
+# complete regions with calculated endpositions
+for r; do
+    # get start position without chromosome and possibly separating commas
+    rstart=$(<<< $r sed 's/^[^:]*:\(\S\+\)/\1/' | tr -d ',')
+    rend=$(( $rstart + $seglen * 1000000 ))
+    region="$region $r-$rend"
 done
 
-#generate output name
-outbam="$tissue-${lastchrom}_x_$lengthmegabase$unit.bam"
-
+# store region(s)
+echo -e "$outbam\t$region" >> $readme
 # filter for subregion and save alignment as $outbam
-samtools view -bh $inputbam $region > $outbam
-samtools index $outbam
+samtools view -bh@$nthreads $inbam $region > $outbam
+samtools index -@$nthreads $outbam
