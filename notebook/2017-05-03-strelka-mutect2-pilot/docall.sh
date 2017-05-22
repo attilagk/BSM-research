@@ -9,6 +9,7 @@ esac
 normal=${2:-muscle}
 tumor=${3:-NeuN_pl}
 
+#for seglen in 32MB; do
 for seglen in *MB; do
     cd $seglen
     normalbam=MSSM179_$normal-$seglen.bam
