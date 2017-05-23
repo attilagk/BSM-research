@@ -1,9 +1,21 @@
 
+```
+## Loading required package: Matrix
+```
 
 ## Scaling with segment length
 
 
 ```r
+rdepth <- lapply(tissues <- c("NeuN_pl", "NeuN_mn", "muscle"),
+                 function(x) {
+                     df <- read.delim(paste0("results/16MB/MSSM179_", x , "-16MB.bam.depth.1000"),
+                                      header = FALSE, col.names = c("ones", "pos", "depth"))[-1]
+                     df$tissue <- factor(x, levels = tissues, ordered = TRUE)
+                     return(df)
+                 })
+#names(rdepth) <- tissues
+rdepth <- do.call(rbind, rdepth)
 runt <- read.csv("results/runtimes.csv")
 ```
 
@@ -12,6 +24,8 @@ runt <- read.csv("results/runtimes.csv")
 1. the caller (strelka or mutect2)
 1. length of genomic segment
 1. read depth
+
+<img src="figure/read-depth-1.png" title="plot of chunk read-depth" alt="plot of chunk read-depth" width="700px" />
 
 <img src="figure/scaling-length-1.png" title="plot of chunk scaling-length" alt="plot of chunk scaling-length" width="700px" />
 
