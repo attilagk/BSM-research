@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# perform variant calling on a .bam pair and record elapsed time
+
 case $1 in
     strelka) caller=strelka;;
     mutect2) caller=mutect2;;
@@ -9,7 +11,7 @@ esac
 normal=${2:-muscle}
 tumor=${3:-NeuN_pl}
 
-#for seglen in 32MB; do
+#for seglen in {1,32}MB; do
 for seglen in *MB; do
     cd $seglen
     normalbam=MSSM179_$normal-$seglen.bam

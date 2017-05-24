@@ -1,0 +1,40 @@
+```{r echo=FALSE, warning=FALSE}
+library(lme4)
+library(lattice)
+#library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+```{r cache=TRUE}
+fai <- read.delim("Homo_sapiens.GRCh37.dna.fa.fai", header = FALSE, stringsAsFactors = FALSE)[1:2]
+names(fai) <- c("contig", "length")
+rdepth <- lapply(tissues <- c("NeuN_pl", "NeuN_mn", "muscle"),
+                 function(x) {
+                     read.delim("../../data/MSSM_179/aln-stats/MSSM179_muscle.bam.depth.1000", header = FALSE)
+                     df <- read.delim(paste0("../../data/MSSM_179/aln-stats/MSSM179_", x , ".bam.depth.1000"),
+                                      header = FALSE, col.names = c("contig", "pos", "depth"))
+                     df$tissue <- factor(x, levels = tissues, ordered = TRUE)
+                     return(df)
+                 })
+rdepth <- do.call(rbind, rdepth)
+rdepth$contig <- factor(rdepth$contig, level = fai$contig, ordered = TRUE)
+```
+
+Read depth
+
+```{r}
+rdepth.100 <- rdepth[seq(1, nrow(rdepth), by = 100), ] # for test purposes
+chromosomes <- grep("^GL", fai$contig, value = TRUE, invert = TRUE)
+```
+
+```{r read-depth-muscle, echo=FALSE, fig.asp=2}
+xyplot(depth ~ pos | contig, data = rdepth, subset = contig %in% chromosomes & tissue == "NeuN_pl", layout = c(1, length(chromosomes)), strip = FALSE, strip.left = TRUE, type = "l", xlab = "position (MB)")
+```
+
+```{r read-depth, echo=FALSE, fig.asp=2}
+xyplot(depth ~ pos / 1e6 | contig, groups = tissue, data = rdepth, subset = contig %in% chromosomes, layout = c(1, length(chromosomes)), strip = FALSE, strip.left = TRUE, type = "p", pch = ".", ylim = c(-0, 250), auto.key = list(column = 3), grid = TRUE, xlab = "position (MB)")
+```
