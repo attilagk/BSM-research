@@ -7,34 +7,58 @@ opts_chunk$set(out.width = "700px")
 opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
+source("2017-05-24-alignment-stats.R")
 ```
 
 ```{r cache=TRUE}
-fai <- read.delim("Homo_sapiens.GRCh37.dna.fa.fai", header = FALSE, stringsAsFactors = FALSE)[1:2]
-names(fai) <- c("contig", "length")
-rdepth <- lapply(tissues <- c("NeuN_pl", "NeuN_mn", "muscle"),
-                 function(x) {
-                     read.delim("../../data/MSSM_179/aln-stats/MSSM179_muscle.bam.depth.1000", header = FALSE)
-                     df <- read.delim(paste0("../../data/MSSM_179/aln-stats/MSSM179_", x , ".bam.depth.1000"),
-                                      header = FALSE, col.names = c("contig", "pos", "depth"))
-                     df$tissue <- factor(x, levels = tissues, ordered = TRUE)
-                     return(df)
-                 })
-rdepth <- do.call(rbind, rdepth)
-rdepth$contig <- factor(rdepth$contig, level = fai$contig, ordered = TRUE)
-```
-
-Read depth
-
-```{r}
-rdepth.100 <- rdepth[seq(1, nrow(rdepth), by = 100), ] # for test purposes
+tissues <- c("NeuN_pl", "NeuN_mn", "muscle")
+fai <- get.fai()
 chromosomes <- grep("^GL", fai$contig, value = TRUE, invert = TRUE)
+rd.genome <- get.read.depths(fai, tissues)
+rd.repres <- get.read.depths(fai, tissues, suffices = "chr1_119,500,001-121,500,000")
 ```
 
-```{r read-depth-muscle, echo=FALSE, fig.asp=2}
-xyplot(depth ~ pos | contig, data = rdepth, subset = contig %in% chromosomes & tissue == "NeuN_pl", layout = c(1, length(chromosomes)), strip = FALSE, strip.left = TRUE, type = "l", xlab = "position (MB)")
+```{r cache=TRUE}
+rd.repres <-
+    do.call(rbind,
+            lapply(regions <- c("2Mb", "10kB baseline", "10kB spike"),
+                   function(x) {
+                       r <- rd.repres
+                       r$region <- factor(x, levels = regions, ordered = TRUE)
+                       r
+                   }))
+rd.repres.100 <- rd.repres[seq(1, nrow(rd.repres), by = 100), ] # for test purposes
+rd.genome.100 <- rd.genome[seq(1, nrow(rd.genome), by = 100), ] # for test purposes
+fastaix <- "~/data/GRCh37/dna/Homo_sapiens.GRCh37.dna.fa.fai"
 ```
 
-```{r read-depth, echo=FALSE, fig.asp=2}
-xyplot(depth ~ pos / 1e6 | contig, groups = tissue, data = rdepth, subset = contig %in% chromosomes, layout = c(1, length(chromosomes)), strip = FALSE, strip.left = TRUE, type = "p", pch = ".", ylim = c(-0, 250), auto.key = list(column = 3), grid = TRUE, xlab = "position (MB)")
+```{r depth-hist}
+depth.hist <-
+    lapply(tissues,
+           function(x) {
+               df <- get.samstats(paste0("../../results/2017-05-24-alignment-stats/MSSM179_", x, ".bam.stats"))
+               df <- df[3:4]
+               names(df) <- c("depth", "frequency")
+               df$tissue <- factor(x, levels = tissues, ordered = TRUE)
+               return(df)
+           })
+depth.hist <- do.call(rbind, depth.hist)
+xyplot(frequency ~ depth | tissue, groups = tissue, data = depth.hist, type = "s", xlim = c(-10, 300), layout = c(1, 3), grid = TRUE)
+```
+
+```{r read-depth-genome-log, echo=FALSE, fig.asp=1.5}
+scalingf <- 1e6
+smalldata <- FALSE
+rd.g <- if(smalldata) rd.genome.100 else rd.genome
+depth.plot(rd.g, chromosomes, scales = list(y = list(log = TRUE)))
+```
+
+```{r read-depth-genome, echo=FALSE, fig.asp=1.5}
+depth.plot(rd.g, chromosomes, ylim = c(0, 250))
+```
+
+```{r read-depth-repres, echo=FALSE, fig.asp=0.5}
+rd.r <- if(smalldata) rd.repres.100 else rd.repres
+(tp.regions <- xyplot(depth ~ pos / scalingf | region, data = rd.r, subset = tissue == "NeuN_pl" & suffix == "chr1_119,500,001-121,500,000", scales = list(x = list(rot = 90, relation = "free")), xlim = xlim.region <- list(1e6 / scalingf * c(119.5, 121.5), 1e6 / scalingf * c(120, 120.01), 1e6 / scalingf * c(121.476, 121.486)), type = "s", layout = c(3, 1), xlab = "position (Mb)", grid = TRUE))
+update(tp.regions, xlim = xlim.region, ylim = c(0, 400))
 ```
