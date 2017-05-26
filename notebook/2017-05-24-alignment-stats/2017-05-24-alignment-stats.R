@@ -27,11 +27,17 @@ get.read.depths <- function(fai, tissues = c("NeuN_pl", "NeuN_mn", "muscle"), su
 }
 
 
-depth.plot <- function(x, chromosomes, ...)
-    xyplot(depth ~ pos / 1e6 | contig, groups = tissue, data = x,
-           subset = x$contig %in% chromosomes & x$tissue != "muscle",
-           layout = c(1, length(chromosomes)), strip = FALSE, strip.left = TRUE,
-           type = "p", pch = ".", auto.key = list(column = 3),
-           key = simpleKey(text = tissues[-3], lines = TRUE, points = FALSE, columns = 2),
-           xlab = "position (Mb)", grid = TRUE, par.settings = list(superpose.symbol = list(alpha = 0.5)),
-           ...)
+depth.plot <- function(x, sel.contigs, chromosomal = TRUE, ...) {
+    tp <- xyplot(depth ~ pos / ifelse(chromosomal, 1e6, 1e3) | contig, groups = tissue, data = x,
+                 subset = x$contig %in% sel.contigs & x$tissue != "muscle",
+                 type = "p", pch = ".", auto.key = list(column = 3),
+                 key = simpleKey(text = tissues[-3], lines = TRUE, points = FALSE, columns = 2),
+                 xlab = "position (kb)", grid = TRUE,
+                 ...)
+    if(chromosomal)
+        update(tp, par.settings = list(superpose.symbol = list(alpha = 0.5)),
+               strip = FALSE, strip.left = TRUE,
+               layout = c(1, length(sel.contigs)), xlab = "position (Mb)")
+    else
+        update(tp, par.strip.text = list(cex = 0.7))
+}

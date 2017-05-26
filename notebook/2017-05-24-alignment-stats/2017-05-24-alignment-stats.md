@@ -9,13 +9,11 @@ rd.genome <- get.read.depths(fai, tissues)
 rd.repres <- get.read.depths(fai, tissues, suffices = "chr1_119,500,001-121,500,000")
 ```
 
-Read depth
-
 
 ```r
 rd.repres <-
     do.call(rbind,
-            lapply(regions <- c("2Mb", "10kB baseline", "10kB spike"),
+            lapply(regions <- c("2Mb", "10kb baseline", "10kb spike"),
                    function(x) {
                        r <- rd.repres
                        r$region <- factor(x, levels = regions, ordered = TRUE)
@@ -48,3 +46,7 @@ xyplot(frequency ~ depth | tissue, groups = tissue, data = depth.hist, type = "s
 <img src="figure/read-depth-genome-1.png" title="plot of chunk read-depth-genome" alt="plot of chunk read-depth-genome" width="700px" />
 
 <img src="figure/read-depth-repres-1.png" title="plot of chunk read-depth-repres" alt="plot of chunk read-depth-repres" width="700px" /><img src="figure/read-depth-repres-2.png" title="plot of chunk read-depth-repres" alt="plot of chunk read-depth-repres" width="700px" />
+
+<img src="figure/read-depth-nonchromosomal-log-1.png" title="plot of chunk read-depth-nonchromosomal-log" alt="plot of chunk read-depth-nonchromosomal-log" width="700px" />
+
+<img src="figure/read-depth-nonchromosomal-1.png" title="plot of chunk read-depth-nonchromosomal" alt="plot of chunk read-depth-nonchromosomal" width="700px" />

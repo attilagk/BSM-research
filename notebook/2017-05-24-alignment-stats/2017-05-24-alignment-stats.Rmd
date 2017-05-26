@@ -21,7 +21,7 @@ rd.repres <- get.read.depths(fai, tissues, suffices = "chr1_119,500,001-121,500,
 ```{r cache=TRUE}
 rd.repres <-
     do.call(rbind,
-            lapply(regions <- c("2Mb", "10kB baseline", "10kB spike"),
+            lapply(regions <- c("2Mb", "10kb baseline", "10kb spike"),
                    function(x) {
                        r <- rd.repres
                        r$region <- factor(x, levels = regions, ordered = TRUE)
@@ -50,15 +50,24 @@ xyplot(frequency ~ depth | tissue, groups = tissue, data = depth.hist, type = "s
 scalingf <- 1e6
 smalldata <- FALSE
 rd.g <- if(smalldata) rd.genome.100 else rd.genome
-depth.plot(rd.g, chromosomes, scales = list(y = list(log = TRUE)))
+depth.plot(rd.g, chromosomes, chromosomal = TRUE, scales = list(y = list(log = TRUE)))
 ```
 
 ```{r read-depth-genome, echo=FALSE, fig.asp=1.5}
-depth.plot(rd.g, chromosomes, ylim = c(0, 250))
+depth.plot(rd.g, chromosomes, chromosomal = TRUE, ylim = c(0, 250))
 ```
 
 ```{r read-depth-repres, echo=FALSE, fig.asp=0.5}
 rd.r <- if(smalldata) rd.repres.100 else rd.repres
 (tp.regions <- xyplot(depth ~ pos / scalingf | region, data = rd.r, subset = tissue == "NeuN_pl" & suffix == "chr1_119,500,001-121,500,000", scales = list(x = list(rot = 90, relation = "free")), xlim = xlim.region <- list(1e6 / scalingf * c(119.5, 121.5), 1e6 / scalingf * c(120, 120.01), 1e6 / scalingf * c(121.476, 121.486)), type = "s", layout = c(3, 1), xlab = "position (Mb)", grid = TRUE))
 update(tp.regions, xlim = xlim.region, ylim = c(0, 400))
+```
+
+```{r read-depth-nonchromosomal-log, echo=FALSE}
+nonchromosomes <- grep("^GL", fai$contig, value = TRUE)
+depth.plot(rd.genome, nonchromosomes, chromosomal = FALSE, scales = list(x = list(rot = 90), y = list(log = TRUE)))
+```
+
+```{r read-depth-nonchromosomal, echo=FALSE}
+depth.plot(rd.genome, nonchromosomes, chromosomal = FALSE, ylim = c(0, 1000), scales = list(x = list(rot = 90)))
 ```
