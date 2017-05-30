@@ -14,6 +14,7 @@ test
 *.png
 *.pdf
 *.html
+*.swp
 
 # ignore knitr's cache
 **/cache/
