@@ -4,13 +4,16 @@ library(lattice)
 library(VennDiagram)
 #library(latticeExtra)
 opts_chunk$set(dpi = 144)
-opts_chunk$set(out.width = "700px")
+opts_chunk$set(out.width = "500px")
+opts_chunk$set(fig.width = 5)
+opts_chunk$set(fig.asp = 1)
 opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
+source("2017-05-29-vcf-comparisons.R")
 ```
 
-## Goal
+## Goals
 
 Assess concordance of call sets
 
@@ -24,11 +27,75 @@ The first
 
 ## Results
 
+### Computation and summary
+
 ```{r engine="bash"}
 ./myisec.sh &&
     find results/ -name callset-sizes.tsv | xargs head
 ```
 
 ```{r}
-#grid.draw(draw.pairwise.venn(100, 70, 30, c("First", "Second"), scaled = FALSE))
+indirs <- c(paste0("results/1_isec-callers/", c("NeuN_mn-NeuN_pl", "muscle-NeuN_pl")),
+       "results/2_cmp-reftissues")
+indirs <- paste0(rep(indirs, each = 2), c("/indels/", "/snvs/"))
+names(indirs) <- LETTERS[seq_along(indirs)]
+clsets <-
+    lapply(indirs, function(x) {
+           df <- read.delim(paste0(x, "callset-sizes.tsv"), header = FALSE,
+                            col.names = c("set.size", "file.vcf", "set.operator", "set.operand"))
+           df$directory <- factor(x)
+           return(df)
+       })
+clsets <- do.call(rbind, clsets)
+```
+
+### Comparing callers
+
+#### NeuN_mn reference tissue, SNVs
+
+```{r venn-caller-neun_mn-snvs}
+my.grid.draw(dir = "results/1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets,
+             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
+             cat.pos = 165 * c(-1, 1))
+```
+
+#### NeuN_mn reference tissue, indels
+
+```{r venn-caller-neun_mn-indels, echo=FALSE}
+my.grid.draw(dir = "results/1_isec-callers/NeuN_mn-NeuN_pl/indels/", cls = clsets,
+             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
+             cat.pos = 165 * c(-1, 1))
+```
+
+
+#### muscle reference tissue, SNVs
+
+```{r venn-caller-muscle-snvs, echo=FALSE}
+my.grid.draw(dir = "results/1_isec-callers/muscle-NeuN_pl/snvs/", cls = clsets,
+             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
+             cat.pos = 165 * c(-1, 1))
+```
+
+#### muscle reference tissue, indels
+
+```{r venn-caller-muscle-indels, echo=FALSE}
+my.grid.draw(dir = "results/1_isec-callers/muscle-NeuN_pl/indels/", cls = clsets,
+             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
+             cat.pos = 165 * c(-1, 1))
+```
+
+### Comparing reference tissues: SNVs
+
+```{r venn-ref-tissue-snvs, echo=FALSE}
+my.grid.draw(dir = "results/2_cmp-reftissues/snvs/", cls = clsets,
+             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols,
+             cat.pos = 165 * c(-1, 1))
+```
+
+### Comparing reference tissues: indels
+
+```{r venn-ref-tissue-indels, echo=FALSE}
+my.grid.draw(dir = "results/2_cmp-reftissues/indels/", cls = clsets,
+             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols,
+             cat.pos = 165 * c(-1, 1))
 ```

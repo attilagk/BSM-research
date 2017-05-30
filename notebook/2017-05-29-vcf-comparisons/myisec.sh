@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-usage="usage: ./`basename $0`"
+# concordance of call sets under indir from the strelka-mutect2 pilot analysis
+
+usage="usage: ./`basename $0` indir"
 
 # step 1: set operations on call sets
 
+indir=${1:-$HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB}
 outmaindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
 subdircaller=1_isec-callers
 subdirreftis=2_cmp-reftissues
@@ -24,7 +27,7 @@ mu2_str_isec () {
     tissuepair=$1 # NeuN_mn-NeuN_pl or muscle-NeuN_pl
     vartype=$2 # snvs or indels
     # input
-    indir=$HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB
+    #indir=$HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB
     inmu2="$indir/$tissuepair-mutect2/out.vcf"
     instr="$indir/$tissuepair-strelka/results/all.somatic.$vartype.vcf"
     # output
@@ -63,9 +66,12 @@ dosummary () {
     tmp1=`mktemp`
     tmp2=`mktemp`
     for v in 000{0..2}.vcf; do
-        grep -v '^##' $indir/$v | wc -l
-        readme=$indir/README.txt
+        # line numbers with header = set size + 1
+        linenowheader=$(grep -v '^##' $indir/$v | wc -l)
+        setsize=$(( $linenowheader - 1 ))
+        echo $setsize
     done > $tmp1
+    readme=$indir/README.txt
     sed -e \
     "1,/^Using/ d;
     s|$indir||g;
