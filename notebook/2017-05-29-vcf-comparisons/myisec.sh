@@ -2,24 +2,35 @@
 
 # concordance of call sets under indir from the strelka-mutect2 pilot analysis
 
-usage="usage: ./`basename $0` indir"
+usage="usage: ./`basename $0` indir [mutect2_filter]"
 
 # step 1: set operations on call sets
 
 indir=${1:-$HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB}
+mutect2_filter=${2}
+
 outmaindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
-subdircaller=1_isec-callers
-subdirreftis=2_cmp-reftissues
+if test -z $mutect2_filter; then
+    filtdir=mutect2-unfilt
+else
+    filtdir=mutect2-$mutect2_filter
+fi
+subdircaller=$filtdir/1_isec-callers
+subdirreftis=$filtdir/2_cmp-reftissues
 
 vcf2indexedbcf () {
+    inputf=$1 outputf=$2 vartype=$3 filter=$4
     # note that bcftools uses type 'snps' also for 'snvs'
-    vartype=$3
     if test $vartype == snvs; then
         vartype=snps
     fi
     # filter for vartype, save as .bcf, and index
-    bcftools view -o $2 -O b --types $vartype $1
-    bcftools index $2
+    if test -z $filter; then
+        bcftools view -o $outputf -O b --types $vartype $inputf
+    else
+        bcftools view -o $outputf -O b --types $vartype -f $filter $inputf
+    fi
+    bcftools index $outputf
 }
 
 mu2_str_isec () {
@@ -37,7 +48,7 @@ mu2_str_isec () {
     # make outdir
     test -d $outdir && rm -r $outdir
     mkdir -p $outdir
-    vcf2indexedbcf $inmu2 $outmu2 $vartype
+    vcf2indexedbcf $inmu2 $outmu2 $vartype $mutect2_filter
     vcf2indexedbcf $instr $outstr $vartype
     # perform comparison
     bcftools isec -p $outdir $outmu2 $outstr
@@ -82,8 +93,8 @@ dosummary () {
 
 maindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
 for t in snvs indels; do
-    dosummary $maindir/2_cmp-reftissues/$t/
+    dosummary $maindir/$filtdir/2_cmp-reftissues/$t/
     for ref in NeuN_mn muscle; do
-        dosummary $maindir/1_isec-callers/$ref-NeuN_pl/$t/
+        dosummary $maindir/$filtdir/1_isec-callers/$ref-NeuN_pl/$t/
     done
 done

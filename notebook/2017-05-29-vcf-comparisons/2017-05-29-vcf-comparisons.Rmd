@@ -4,8 +4,8 @@ library(lattice)
 library(VennDiagram)
 #library(latticeExtra)
 opts_chunk$set(dpi = 144)
-opts_chunk$set(out.width = "500px")
-opts_chunk$set(fig.width = 5)
+opts_chunk$set(out.width = "400px")
+opts_chunk$set(fig.width = 4)
 opts_chunk$set(fig.asp = 1)
 opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
@@ -30,13 +30,14 @@ The first
 ### Computation and summary
 
 ```{r engine="bash"}
-./myisec.sh &&
-    find results/ -name callset-sizes.tsv | xargs head
+./myisec.sh $HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB
+./myisec.sh $HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB PASS
+find results/ -name callset-sizes.tsv | xargs head
 ```
 
 ```{r}
-indirs <- c(paste0("results/1_isec-callers/", c("NeuN_mn-NeuN_pl", "muscle-NeuN_pl")),
-       "results/2_cmp-reftissues")
+indirs <- paste0("results/mutect2-", c("unfilt", "PASS"), "/")
+indirs <- paste0(rep(indirs, each = 3), c(paste0("1_isec-callers/", c("NeuN_mn-NeuN_pl", "muscle-NeuN_pl")), "2_cmp-reftissues"))
 indirs <- paste0(rep(indirs, each = 2), c("/indels/", "/snvs/"))
 names(indirs) <- LETTERS[seq_along(indirs)]
 clsets <-
@@ -54,48 +55,58 @@ clsets <- do.call(rbind, clsets)
 #### NeuN_mn reference tissue, SNVs
 
 ```{r venn-caller-neun_mn-snvs}
-my.grid.draw(dir = "results/1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets,
-             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
-             cat.pos = 165 * c(-1, 1))
+my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets)
 ```
 
 #### NeuN_mn reference tissue, indels
 
 ```{r venn-caller-neun_mn-indels, echo=FALSE}
-my.grid.draw(dir = "results/1_isec-callers/NeuN_mn-NeuN_pl/indels/", cls = clsets,
-             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
-             cat.pos = 165 * c(-1, 1))
+my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/indels/", cls = clsets)
 ```
 
 
 #### muscle reference tissue, SNVs
 
 ```{r venn-caller-muscle-snvs, echo=FALSE}
-my.grid.draw(dir = "results/1_isec-callers/muscle-NeuN_pl/snvs/", cls = clsets,
-             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
-             cat.pos = 165 * c(-1, 1))
+my.venn3(dir = "1_isec-callers/muscle-NeuN_pl/snvs/", cls = clsets)
 ```
 
 #### muscle reference tissue, indels
 
 ```{r venn-caller-muscle-indels, echo=FALSE}
-my.grid.draw(dir = "results/1_isec-callers/muscle-NeuN_pl/indels/", cls = clsets,
-             category = c("mutect2", "strelka"), col = my.cols <- c("cyan", "magenta"), fill = my.cols,
-             cat.pos = 165 * c(-1, 1))
+my.venn3(dir = "1_isec-callers/muscle-NeuN_pl/indels/", cls = clsets)
 ```
 
-### Comparing reference tissues: SNVs
+### Comparing reference tissues: unfiltered
+
+### SNVs
 
 ```{r venn-ref-tissue-snvs, echo=FALSE}
-my.grid.draw(dir = "results/2_cmp-reftissues/snvs/", cls = clsets,
-             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols,
-             cat.pos = 165 * c(-1, 1))
+my.venn2(dir = "results/mutect2-unfilt/2_cmp-reftissues/snvs/", cls = clsets,
+             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
 ```
 
-### Comparing reference tissues: indels
+#### indels
 
 ```{r venn-ref-tissue-indels, echo=FALSE}
-my.grid.draw(dir = "results/2_cmp-reftissues/indels/", cls = clsets,
-             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols,
-             cat.pos = 165 * c(-1, 1))
+my.venn2(dir = "results/mutect2-unfilt/2_cmp-reftissues/indels/", cls = clsets,
+             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
+```
+
+### Comparing reference tissues: filtered
+
+mutect2 PASS only
+
+### SNVs
+
+```{r venn-ref-tissue-snvs-PASS, echo=FALSE}
+my.venn2(dir = "results/mutect2-PASS/2_cmp-reftissues/snvs/", cls = clsets,
+             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
+```
+
+#### indels
+
+```{r venn-ref-tissue-indels-PASS, echo=FALSE}
+my.venn2(dir = "results/mutect2-PASS/2_cmp-reftissues/indels/", cls = clsets,
+             category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
 ```
