@@ -13,11 +13,13 @@ dosummary () {
     s|$indir||g;
     s/for records.*\(private to.*$\|shared by.*$\)/\1/;
     /0003\.vcf/ d" $readme > $tmp2
-    paste $tmp1 $tmp2 > $indir/summary.tsv && rm $tmp1 $tmp2
+    paste $tmp1 $tmp2 > $indir/callset-sizes.tsv && rm $tmp1 $tmp2
 }
 
 maindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
-dosummary $maindir/cmp-reftissues/indels/
-dosummary $maindir/caller-isec/muscle-NeuN_pl/indels/
-dosummary $maindir/cmp-reftissues/snps/
-dosummary $maindir/caller-isec/muscle-NeuN_pl/snps/
+for t in snvs indels; do
+    dosummary $maindir/2_cmp-reftissues/$t/
+    for ref in NeuN_mn muscle; do
+        dosummary $maindir/1_isec-callers/$ref-NeuN_pl/$t/
+    done
+done

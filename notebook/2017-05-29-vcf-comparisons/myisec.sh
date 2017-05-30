@@ -1,30 +1,34 @@
 #!/usr/bin/env bash
 
-# get intersection from a mutect2-strelka pair of vcf files
+usage="usage: ./`basename $0`"
+
+# step 1: set operations on call sets
 
 outmaindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
+subdircaller=1_isec-callers
+subdirreftis=2_cmp-reftissues
 
 vcf2indexedbcf () {
+    # note that bcftools uses type 'snps' also for 'snvs'
+    vartype=$3
+    if test $vartype == snvs; then
+        vartype=snps
+    fi
     # filter for vartype, save as .bcf, and index
-    bcftools view -o $2 -O b --types $3 $1
+    bcftools view -o $2 -O b --types $vartype $1
     bcftools index $2
 }
 
 mu2_str_isec () {
     # args
     tissuepair=$1 # NeuN_mn-NeuN_pl or muscle-NeuN_pl
-    vartype=$2 # snps or indels
-    # note that the strelka generated vcf file name contains 'snvs' instead of 'snps'
-    case $vartype in
-        snps) strelkatype=snvs;;
-        indels) strelkatype=indels;;
-    esac
+    vartype=$2 # snvs or indels
     # input
     indir=$HOME/projects/bsm/results/2017-05-03-strelka-mutect2-pilot/32MB
     inmu2="$indir/$tissuepair-mutect2/out.vcf"
-    instr="$indir/$tissuepair-strelka/results/all.somatic.$strelkatype.vcf"
+    instr="$indir/$tissuepair-strelka/results/all.somatic.$vartype.vcf"
     # output
-    outdir=$outmaindir/caller-isec/$tissuepair/$vartype
+    outdir=$outmaindir/$subdircaller/$tissuepair/$vartype
     outmu2=$outdir/mutect2.bcf
     outstr=$outdir/strelka.bcf
     # make outdir
@@ -36,13 +40,13 @@ mu2_str_isec () {
     bcftools isec -p $outdir $outmu2 $outstr
 }
 
-for v in snps indels; do
+for v in snvs indels; do
     for t in {NeuN_mn,muscle}-NeuN_pl; do
         mu2_str_isec $t $v
     done
-    reft1vcf=$outmaindir/caller-isec/NeuN_mn-NeuN_pl/$v/0003.vcf
-    reft2vcf=$outmaindir/caller-isec/muscle-NeuN_pl/$v/0003.vcf
-    reftoutdir=$outmaindir/cmp-reftissues/$v
+    reft1vcf=$outmaindir/$subdircaller/NeuN_mn-NeuN_pl/$v/0003.vcf
+    reft2vcf=$outmaindir/$subdircaller/muscle-NeuN_pl/$v/0003.vcf
+    reftoutdir=$outmaindir/$subdirreftis/$v
     test -d $reftoutdir && rm -r $reftoutdir
     mkdir -p $reftoutdir
     reft1bcf=$reftoutdir/NeuN_mn-NeuN_pl.bcf
@@ -50,4 +54,30 @@ for v in snps indels; do
     vcf2indexedbcf $reft1vcf $reft1bcf $v
     vcf2indexedbcf $reft2vcf $reft2bcf $v
     bcftools isec -p $reftoutdir $reft1bcf $reft2bcf
+done
+
+# step 2: summarize results with call set sizes
+
+dosummary () {
+    indir=$1
+    tmp1=`mktemp`
+    tmp2=`mktemp`
+    for v in 000{0..2}.vcf; do
+        grep -v '^##' $indir/$v | wc -l
+        readme=$indir/README.txt
+    done > $tmp1
+    sed -e \
+    "1,/^Using/ d;
+    s|$indir||g;
+    s/for records.*\(private to.*$\|shared by.*$\)/\1/;
+    /0003\.vcf/ d" $readme > $tmp2
+    paste $tmp1 $tmp2 > $indir/callset-sizes.tsv && rm $tmp1 $tmp2
+}
+
+maindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
+for t in snvs indels; do
+    dosummary $maindir/2_cmp-reftissues/$t/
+    for ref in NeuN_mn muscle; do
+        dosummary $maindir/1_isec-callers/$ref-NeuN_pl/$t/
+    done
 done

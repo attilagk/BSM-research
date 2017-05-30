@@ -1,0 +1,34 @@
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(VennDiagram)
+#library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+## Goal
+
+Assess concordance of call sets
+
+1. between callers
+   * compare call set by mutect2 and that by strelka for a given tissue-pair and variant type (snvs or indels)
+1. between reference tissues
+   * compare call set with muscle reference to that with NeuN_mn reference given a variant type
+   * use call sets obtained by mutect2 $\cap$ strelka given a tissue pair and variant type
+
+The first
+
+## Results
+
+```{r engine="bash"}
+./myisec.sh &&
+    find results/ -name callset-sizes.tsv | xargs head
+```
+
+```{r}
+#grid.draw(draw.pairwise.venn(100, 70, 30, c("First", "Second"), scaled = FALSE))
+```
