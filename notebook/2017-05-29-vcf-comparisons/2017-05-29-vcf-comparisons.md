@@ -5,16 +5,16 @@
 Assess concordance of call sets
 
 1. between callers
-   * compare call set by mutect2 and that by strelka for a given tissue-pair and variant type (snvs or indels)
+   * compare call set by mutect2 and that by strelka for a given tissue-pair, variant type (snvs or indels), and filter setting
 1. between reference tissues
    * compare call set with muscle reference to that with NeuN_mn reference given a variant type
-   * use call sets obtained by mutect2 $\cap$ strelka given a tissue pair and variant type
-
-The first
+   * use call sets obtained by mutect2 $\cap$ strelka given a tissue pair and variant type and filter setting
 
 ## Results
 
 ### Computation and summary
+
+The `myisec.sh` script does all the job: various filtering, conversion, indexing and comparison using `bcftools`, as well as summarizing the results by calculating the size of call sets in files named `callset-sizes.tsv`, which are printed below.  The only filter setting tested was the *PASS* value of mutect2; otherwise unfiltered sets are reported.  Note that none of the strelka records have *PASS* filter value.
 
 
 ```bash
@@ -85,6 +85,8 @@ find results/ -name callset-sizes.tsv | xargs head
 ## 225	0002.vcf	shared by both	NeuN_mn-NeuN_pl.bcf muscle-NeuN_pl.bcf
 ```
 
+Import sizes of various callsets to R:
+
 
 ```r
 indirs <- paste0("results/mutect2-", c("unfilt", "PASS"), "/")
@@ -105,6 +107,8 @@ clsets <- do.call(rbind, clsets)
 
 #### NeuN_mn reference tissue, SNVs
 
+Without filtering mutect2 calls many more variants than strelka.  With filtering (PASS) mutect2 still calls slightly more variants than stelka without filtering.  The overlap between the two callers is substantial and filtering makes mutect2 calls even more concordant with strelka calls.
+
 
 ```r
 my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets)
@@ -114,10 +118,14 @@ my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets)
 
 #### NeuN_mn reference tissue, indels
 
+Callsets of indels share some but not all of the above properties with SNV callsets.  Importantly, the concordance seems lower for indels than for NSPs, but the much lower number of indel records leaves a greater room for certain patterns emerging by chance.
+
 <img src="figure/venn-caller-neun_mn-indels-1.png" title="plot of chunk venn-caller-neun_mn-indels" alt="plot of chunk venn-caller-neun_mn-indels" width="400px" />
 
 
 #### muscle reference tissue, SNVs
+
+These results are very similar to the previous ones; the muscle reference gives very slightly more candidate variants than NeuN_mn reference, which aligns with the expectation that muscle cell lineage is further away from the NeuN_pl lineage compared to NeuN_mn.  But the differences are very subtle.
 
 <img src="figure/venn-caller-muscle-snvs-1.png" title="plot of chunk venn-caller-muscle-snvs" alt="plot of chunk venn-caller-muscle-snvs" width="400px" />
 
@@ -126,6 +134,8 @@ my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets)
 <img src="figure/venn-caller-muscle-indels-1.png" title="plot of chunk venn-caller-muscle-indels" alt="plot of chunk venn-caller-muscle-indels" width="400px" />
 
 ### Comparing reference tissues: unfiltered
+
+The next Venn-Euler diagrams feature two sets corresponding to muscle and NeuN_mn reference tissue.  Both sets are **intersections** of mutect2 and strelka call sets.  This first set of diagrams was obtained **without** filtering mutect2 calls.  The overlap is relatively larger than either set difference---records that are private to either muscle or NeuN_mn reference.  This suggests that the choice of reference tissue is not critical.  Fewer records are private to NeuN_mn than to muscle.  This is again consistent with the muscle lineage being more distant to the NeuN_pl lineage.
 
 ### SNVs
 
@@ -137,7 +147,7 @@ my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets)
 
 ### Comparing reference tissues: filtered
 
-mutect2 PASS only
+The next set of diagrams was obtained **with** filtered mutect2 calls.  These results show the same qualitative picture as the ones without filtering.
 
 ### SNVs
 
