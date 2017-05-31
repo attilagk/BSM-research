@@ -78,6 +78,7 @@ dosummary () {
     tmp2=`mktemp`
     for v in 000{0..2}.vcf; do
         # line numbers with header = set size + 1
+        # 'bcftools stats' would be an alternative
         linenowheader=$(grep -v '^##' $indir/$v | wc -l)
         setsize=$(( $linenowheader - 1 ))
         echo $setsize
