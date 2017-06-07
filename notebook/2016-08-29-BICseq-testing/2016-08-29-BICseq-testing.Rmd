@@ -1,6 +1,11 @@
+---
+layout: default
+title: Testing the BICseq tool
+---
+
 Load package (warnings, messages suppressed)
 
-```{r results=FALSE}
+```{r results=FALSE, warning=FALSE, message=FALSE}
 library(BICseq)
 ```
 

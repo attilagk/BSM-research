@@ -1,3 +1,8 @@
+---
+layout: default
+tags: [bam, alignment, genome]
+---
+
 ```{r echo=FALSE, warning=FALSE}
 library(lme4)
 library(lattice)
@@ -46,18 +51,18 @@ depth.hist <- do.call(rbind, depth.hist)
 xyplot(frequency ~ depth | tissue, groups = tissue, data = depth.hist, type = "s", xlim = c(-10, 300), layout = c(1, 3), grid = TRUE)
 ```
 
-```{r read-depth-genome-log, echo=FALSE, fig.asp=1.5}
+```{r read-depth-genome-log, echo=FALSE, fig.asp=1.5, dev="png"}
 scalingf <- 1e6
 smalldata <- FALSE
 rd.g <- if(smalldata) rd.genome.100 else rd.genome
 depth.plot(rd.g, chromosomes, chromosomal = TRUE, scales = list(y = list(log = TRUE)))
 ```
 
-```{r read-depth-genome, echo=FALSE, fig.asp=1.5}
+```{r read-depth-genome, echo=FALSE, fig.asp=1.5, dev="png"}
 depth.plot(rd.g, chromosomes, chromosomal = TRUE, ylim = c(0, 250))
 ```
 
-```{r read-depth-repres, echo=FALSE, fig.asp=0.5}
+```{r read-depth-repres, echo=FALSE, fig.asp=0.5, dev="png"}
 rd.r <- if(smalldata) rd.repres.100 else rd.repres
 (tp.regions <- xyplot(depth ~ pos / scalingf | region, data = rd.r, subset = tissue == "NeuN_pl" & suffix == "chr1_119,500,001-121,500,000", scales = list(x = list(rot = 90, relation = "free")), xlim = xlim.region <- list(1e6 / scalingf * c(119.5, 121.5), 1e6 / scalingf * c(120, 120.01), 1e6 / scalingf * c(121.476, 121.486)), type = "s", layout = c(3, 1), xlab = "position (Mb)", grid = TRUE))
 update(tp.regions, xlim = xlim.region, ylim = c(0, 400))

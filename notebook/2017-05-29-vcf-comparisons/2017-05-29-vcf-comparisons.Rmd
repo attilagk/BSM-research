@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Comparing Callsets: Callers and Referenfe Tissues"
+---
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(lme4)
 library(lattice)
@@ -21,7 +26,7 @@ Assess concordance of call sets
    * compare call set by mutect2 and that by strelka for a given tissue-pair, variant type (snvs or indels), and filter setting
 1. between reference tissues
    * compare call set with muscle reference to that with NeuN_mn reference given a variant type
-   * use call sets obtained by mutect2 $\cap$ strelka given a tissue pair and variant type and filter setting
+   * use call sets obtained by mutect2 $$\cap$$ strelka given a tissue pair and variant type and filter setting
 
 ## Results
 
