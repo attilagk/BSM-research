@@ -1,0 +1,70 @@
+---
+layout: default
+---
+
+## Motivation
+
+Validation of somatic variants called from next generation sequencing data is possible with ddPCR.  But ddPCR requires substantial DNA.  Here our DNA libraries are analyzed in terms of their measured total DNA content (in nanograms).  The result is a ranking of study individuals according to DNA content based on all combinations of brain samples and nucleus types (either NeuN+ and NeuN-) and all replicates of DNA libraries.
+
+## Total DNA / library
+
+```{r echo=FALSE, warning=FALSE}
+library(lattice)
+opts_chunk$set(dpi = 144)
+#opts_chunk$set(out.width = "700px")
+#opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+#lattice.options(default.theme = "standard.theme")
+source("2017-06-08-planning-validation.R")
+```
+
+Load table of DNA libraries and summarize the distribution of total DNA (in ng) across libraries for a given tissue sample type (muscle, NeuN+, NeuN-).  Libraries from muscle tend to contain a lot more DNA than those from NeuN+ and NeuN- nuclei:
+
+```{r}
+dnalib <- read.csv("~/projects/bsm/data/dnalib/BSM_Project_Chess.csv")
+l <- lapply(list(muscle = "mu", neunpos = "np", neunneg = "nn"),
+            function(x)
+                with(dnalib, subset(dnalib, subset = Sample == x,
+                                    select = c("Library.name", "Individual.ID", "Sample", "Dx", "Total.DNA..ng."))))
+lapply(l, function(x) summary(x$Total.DNA..ng.))
+```
+
+```{r tot-dna-histogram}
+histogram(~ Total.DNA..ng. | Sample, data = dnalib, subset = Sample  %in% c("np", "nn"))
+```
+
+Get best library replicate within an individual
+
+```{r}
+lb <- lapply(l, best.replicate)
+indiv <- intersect(as.character(lb$neunp$Individual.ID), as.character(lb$neunn$Individual.ID))
+lbest <- cbind(lb$neunneg[indiv, c(1, 4, 5) ], lb$neunpos[indiv, c(1, 4, 5)])
+names(lbest) <- paste0(rep(c("neunneg.", "neunpos."), each = 3), rep(c("Library.name", "Dx", "Total.DNA..ng."), 2))
+lbest$neunneg.Library.name <- sub("^[^.]+\\.", "", lbest$neunneg.Library.name)
+lbest$neunpos.Library.name <- sub("^[^.]+\\.", "", lbest$neunpos.Library.name)
+```
+
+Look at the correlation between NeuN+ and NeuN- DNA content:
+
+```{r neu-neg-pos-dna-correlation}
+xyplot(neunneg.Total.DNA..ng. ~ neunpos.Total.DNA..ng., data = lbest)
+```
+
+Sort individuals according to the minimum DNA within the NeuN- and NeuN+ sample (using the best library replicate given each tissue type) and look at the best individuals:
+
+```{r}
+lbest$min.dna <- apply(as.matrix(lbest[c(3, 6)]), 1, min)
+lbest.ordered <- lbest[order(lbest$min.dna, decreasing = TRUE), sel.col <- c("neunneg.Dx", "neunneg.Library.name", "neunpos.Library.name", "min.dna")]
+head(lbest.ordered, n = 10L)
+```
+
+The "worst individuals":
+
+```{r}
+tail(lbest.ordered)
+```
+
+MSSM_179 (the first individual analyzed in the pilot phase) is in the middle:
+```{r}
+lbest.ordered["CMC_MSSM_179", ]
+```
