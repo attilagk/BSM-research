@@ -1,7 +1,10 @@
 ---
 title: Somatic SNVs and Indels by HaplotypeCaller
 layout: default
+featimg: "barchart-1.png"
 ---
+
+TODO
 
 ## Introduction
 
@@ -73,7 +76,7 @@ singleton.freq / kept.vars
 
 The same information as a barchart:
 
-```{r}
+```{r barchart}
 barchart(singleton.freq, main = "Sample-specific variants")
 ```
 

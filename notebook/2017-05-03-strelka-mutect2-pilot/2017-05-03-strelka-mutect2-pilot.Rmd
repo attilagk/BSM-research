@@ -2,6 +2,7 @@
 layout: default
 title: 'strelka and mutect2: Determinants of Runtime'
 tags: [ strelka, mutect2 ]
+featimg: "scaling-length-log-1.png"
 ---
 
 ```{r echo=FALSE, warning=FALSE}

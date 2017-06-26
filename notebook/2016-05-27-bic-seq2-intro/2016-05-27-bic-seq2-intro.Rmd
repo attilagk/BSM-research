@@ -4,6 +4,8 @@ title: Introduction to BIC-seq and BIC-seq2
 tags: [ CNV, regression, classification, modeling, discussion ]
 ---
 
+TODO
+
 ## Motivation
 
 Understand the strengths and weaknesses of BIC-seq ([Xi et al 2011]) and BIC-seq2 (Xi et al, unpublished).

@@ -1,7 +1,10 @@
 ---
 layout: default
 tags: [bam, alignment, genome]
+featimg: "read-depth-repres-1.png"
 ---
+
+TODO
 
 ```{r echo=FALSE, warning=FALSE}
 library(lme4)
