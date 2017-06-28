@@ -3,7 +3,7 @@ layout: default
 title: Testing the BICseq tool
 ---
 
-TODO
+The BICseq R package was installed both locally, on my laptop and on Minerva.  The critical segmentation step of the BICseq workflow fails, however.
 
 Load package (warnings, messages suppressed)
 

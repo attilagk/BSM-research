@@ -3,10 +3,6 @@ layout: default
 featimg: "tot-dna-histogram-1.png"
 ---
 
-TODO
-
-## Motivation
-
 Validation of somatic variants called from next generation sequencing data is possible with ddPCR.  But ddPCR requires substantial DNA.  Here our DNA libraries are analyzed in terms of their measured total DNA content (in nanograms).  The result is a ranking of study individuals according to DNA content based on all combinations of brain samples and nucleus types (either NeuN+ and NeuN-) and all replicates of DNA libraries.
 
 ## Total DNA / library

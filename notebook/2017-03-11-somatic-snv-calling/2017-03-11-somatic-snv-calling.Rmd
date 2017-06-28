@@ -4,7 +4,7 @@ tags: [literature, SNV, somatic-variant, bioinformatics, classification]
 title: Approaches to Somatic SNV Calling
 ---
 
-TODO
+Some aspects of somatic SNV callers are listed here with references to methodological and benchmark studies.
 
 ## Somatic SNV callers
 

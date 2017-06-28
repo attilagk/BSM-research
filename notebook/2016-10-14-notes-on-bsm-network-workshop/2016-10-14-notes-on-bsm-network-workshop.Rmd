@@ -4,10 +4,6 @@ tags: [ meeting ]
 title: Notes on a BSM Network Workshop
 ---
 
-TODO
-
-## Introduction
-
 A BSM Network workshop took place on September 16, 2016 at the Lieber Institute for Brain Development at Johns Hopkins University in Baltimore.  Andy and I participated from Mount Sinai.  See [the program brossure]({{ site.baseurl}}/assets/projects/bsm/bsm-network-workshop-2016-sep-program.pdf) for all presentations and sessions.
 
 ## Notes on presentations

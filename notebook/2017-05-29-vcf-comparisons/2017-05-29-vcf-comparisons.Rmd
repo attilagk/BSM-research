@@ -1,10 +1,10 @@
 ---
 layout: default
-title: "Comparing Callsets: Callers and Referenfe Tissues"
+title: "Comparing Callsets: Callers and Reference Tissues"
 featimg: "venn-caller-neun_mn-snvs-1.png"
 ---
 
-TODO
+The MuTect2 and Strelka somatic variant callers are used to produced unfiltered and heuristically filtered call sets.  Two pairwise tissue comparisons are used: (1) NeuN+ vs NeuN- reference or (2) NeuN+ vs muscle reference.  These result in substantially concordant call sets.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(lme4)

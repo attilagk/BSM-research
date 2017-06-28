@@ -2,9 +2,9 @@
 layout: default
 ---
 
-TODO
+The main questions at this point concern how descriptive or hypothesis driven the analysis should be, the priority of mutation types, and the priority of certain functional DNA elements and coding regions.
 
-abbreviations
+Abbreviations
 
 * CNV: copy number variation
 * SNV: single nucleotide variant

@@ -4,7 +4,7 @@ tags: [bam, alignment, genome]
 featimg: "read-depth-repres-1.png"
 ---
 
-TODO
+All reads were mapped for three samples from a single control individual: NeuN+, NeuN-, muscle.  The coverage was even (except around centromeres) and at least as high as the nominal coverage ordered from the sequencing biotech company.
 
 ```{r echo=FALSE, warning=FALSE}
 library(lme4)

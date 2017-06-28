@@ -5,6 +5,8 @@ tags: [ strelka, mutect2 ]
 featimg: "scaling-length-log-1.png"
 ---
 
+Rationale: (1) understand determinants of the runtime of variant calling programs mutect2 and stelka; (2) obtain hints for speed-up by parallelization
+
 ```{r echo=FALSE, warning=FALSE}
 library(lme4)
 library(lattice)
@@ -15,11 +17,6 @@ opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
 ```
-
-## Rationale
-
-* understand determinants of the runtime of variant calling programs mutect2 and stelka
-* hints for speed-up by parallelization
 
 ## Experimental setup
 
