@@ -18,6 +18,7 @@ fi
 subdircaller=$filtdir/1_isec-callers
 subdirreftis=$filtdir/2_cmp-reftissues
 
+# convert VCF into indexed BCF
 vcf2indexedbcf () {
     inputf=$1 outputf=$2 vartype=$3 filter=$4
     # note that bcftools uses type 'snps' also for 'snvs'
@@ -33,6 +34,7 @@ vcf2indexedbcf () {
     bcftools index $outputf
 }
 
+# intersection of mutect2 and strelka sets
 mu2_str_isec () {
     # args
     tissuepair=$1 # NeuN_mn-NeuN_pl or muscle-NeuN_pl
@@ -54,20 +56,21 @@ mu2_str_isec () {
     bcftools isec -p $outdir $outmu2 $outstr
 }
 
-for v in snvs indels; do
-    for t in {NeuN_mn,muscle}-NeuN_pl; do
-        mu2_str_isec $t $v
-    done
-    reft1vcf=$outmaindir/$subdircaller/NeuN_mn-NeuN_pl/$v/0003.vcf
-    reft2vcf=$outmaindir/$subdircaller/muscle-NeuN_pl/$v/0003.vcf
-    reftoutdir=$outmaindir/$subdirreftis/$v
+for mut in snvs indels; do
+    reftoutdir=$outmaindir/$subdirreftis/$mut
     test -d $reftoutdir && rm -r $reftoutdir
     mkdir -p $reftoutdir
-    reft1bcf=$reftoutdir/NeuN_mn-NeuN_pl.bcf
-    reft2bcf=$reftoutdir/muscle-NeuN_pl.bcf
-    vcf2indexedbcf $reft1vcf $reft1bcf $v
-    vcf2indexedbcf $reft2vcf $reft2bcf $v
-    bcftools isec -p $reftoutdir $reft1bcf $reft2bcf
+    for t in NeuN_mn-NeuN_pl muscle-NeuN_pl muscle-NeuN_mn; do
+        mu2_str_isec $t $mut
+        tispairvcf=$outmaindir/$subdircaller/$t/$mut/0003.vcf
+        tispairbcf=$reftoutdir/$t.bcf
+        vcf2indexedbcf $tispairvcf $tispairbcf $mut
+    done
+    bcftools isec -p $reftoutdir $reftoutdir/*NeuN_pl*.bcf
+    for bitmap in 100 010 001 110 101 011 111; do
+        bcftools isec -n~$bitmap -w 1 -o $reftoutdir/$bitmap.vcf \
+            $reftoutdir/{muscle-NeuN_pl.bcf,NeuN_mn-NeuN_pl.bcf,muscle-NeuN_mn.bcf}
+    done
 done
 
 # step 2: summarize results with call set sizes
@@ -92,10 +95,11 @@ dosummary () {
     paste $tmp1 $tmp2 > $indir/callset-sizes.tsv && rm $tmp1 $tmp2
 }
 
-maindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
-for t in snvs indels; do
-    dosummary $maindir/$filtdir/2_cmp-reftissues/$t/
-    for ref in NeuN_mn muscle; do
-        dosummary $maindir/$filtdir/1_isec-callers/$ref-NeuN_pl/$t/
-    done
-done
+#maindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
+#for mut in snvs indels; do
+#    dosummary $maindir/$filtdir/2_cmp-reftissues/$mut/NeuN_mn-NeuN_pl
+#    for tis in NeuN_mn-NeuN_pl muscle-NeuN_pl muscle-NeuN_mn; do
+#        mu2_str_isec $mut $v
+#        dosummary $maindir/$filtdir/1_isec-callers/$tis/$mut/
+#    done
+#done
