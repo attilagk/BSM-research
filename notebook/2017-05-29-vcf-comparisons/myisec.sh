@@ -56,50 +56,61 @@ mu2_str_isec () {
     bcftools isec -p $outdir $outmu2 $outstr
 }
 
+# get number of records in various subsets (intersection, setdifferences)
+dosummary1 () {
+    inputd=$1
+    tmp1=`mktemp`
+    tmp2=`mktemp`
+    for v in $inputd/000{0..2}.vcf; do
+        # line numbers with header = set size + 1
+        # 'bcftools stats' would be an alternative
+        linenowheader=$(grep -v '^##' $v | wc -l)
+        setsize=$(( $linenowheader - 1 ))
+        echo $setsize
+    done > $tmp1
+    readme=$inputd/README.txt
+    sed -e \
+    "1,/^Using/ d;
+    s|$inputd||g;
+    s/for records.*\(private to.*$\|shared by.*$\)/\1/;
+    /0003\.vcf/ d" $readme > $tmp2 # 0003 has the same no records as 0002 and can be deleted
+    paste $tmp1 $tmp2 > $inputd/callset-sizes.tsv && rm $tmp1 $tmp2
+}
+
+# outer loop: type of mutation mut
 for mut in snvs indels; do
+    # clean up subdirectories
     reftoutdir=$outmaindir/$subdirreftis/$mut
     test -d $reftoutdir && rm -r $reftoutdir
     mkdir -p $reftoutdir
+    # inner loop: tissue pair t
     for t in NeuN_mn-NeuN_pl muscle-NeuN_pl muscle-NeuN_mn; do
+        # pairwise comparison between mutect2 and strelka
         mu2_str_isec $t $mut
+        dosummary1 $outmaindir/$subdircaller/$t/$mut
+        # prepare intersection of mutect2 and strelka for later comparisons
         tispairvcf=$outmaindir/$subdircaller/$t/$mut/0003.vcf
         tispairbcf=$reftoutdir/$t.bcf
         vcf2indexedbcf $tispairvcf $tispairbcf $mut
     done
-    bcftools isec -p $reftoutdir $reftoutdir/*NeuN_pl*.bcf
+    # three-way comparison using the three tissue pairs
+    tsv2=$reftoutdir/callset-sizes.tsv # save results in this .tsv file
+    tispairlist="muscle-NeuN_pl\tNeuN_mn-NeuN_pl\tmuscle-NeuN_mn"
+    echo -e "nrec\tABC\ttissue_pair_A\ttissue_pair_B\ttissue_pair_C" > $tsv2
+    # inner loop: subsets defined by bitmap
+    # A: muscle-NeuN_pl, B: NeuN_mn-NeuN_pl, C: muscle-NeuN_mn
+    # 100: A \ (B ∪ C)
+    # 010: B \ (A ∪ C)
+    # 001: C \ (A ∪ B)
+    # 110: (A ∩ B) \ C
+    # 101: (A ∩ C) \ B
+    # 011: (B ∩ C) \ A
+    # 111: A ∩ B ∩ C
     for bitmap in 100 010 001 110 101 011 111; do
         bcftools isec -n~$bitmap -w 1 -o $reftoutdir/$bitmap.vcf \
             $reftoutdir/{muscle-NeuN_pl.bcf,NeuN_mn-NeuN_pl.bcf,muscle-NeuN_mn.bcf}
-    done
+        numrecords=$(bcftools stats $reftoutdir/$bitmap.vcf | \
+            sed -n '/^.*number of records:\s*\([[:digit:]]\+\)$/ { s//\1/; p }')
+        echo -e "$numrecords\t$bitmap\t$tispairlist"
+    done >> $tsv2
 done
-
-# step 2: summarize results with call set sizes
-
-dosummary () {
-    indir=$1
-    tmp1=`mktemp`
-    tmp2=`mktemp`
-    for v in 000{0..2}.vcf; do
-        # line numbers with header = set size + 1
-        # 'bcftools stats' would be an alternative
-        linenowheader=$(grep -v '^##' $indir/$v | wc -l)
-        setsize=$(( $linenowheader - 1 ))
-        echo $setsize
-    done > $tmp1
-    readme=$indir/README.txt
-    sed -e \
-    "1,/^Using/ d;
-    s|$indir||g;
-    s/for records.*\(private to.*$\|shared by.*$\)/\1/;
-    /0003\.vcf/ d" $readme > $tmp2
-    paste $tmp1 $tmp2 > $indir/callset-sizes.tsv && rm $tmp1 $tmp2
-}
-
-#maindir=$HOME/projects/bsm/results/2017-05-29-vcf-comparisons
-#for mut in snvs indels; do
-#    dosummary $maindir/$filtdir/2_cmp-reftissues/$mut/NeuN_mn-NeuN_pl
-#    for tis in NeuN_mn-NeuN_pl muscle-NeuN_pl muscle-NeuN_mn; do
-#        mu2_str_isec $mut $v
-#        dosummary $maindir/$filtdir/1_isec-callers/$tis/$mut/
-#    done
-#done

@@ -7,7 +7,7 @@ my.venn2 <- function(dir = "results/2_cmp-reftissues/snvs/", cls = clsets, ...) 
 }
 
 
-my.venn3 <- function(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets, ...) {
+my.venn3 <- function(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets1, ...) {
     dir <- paste0("results/mutect2-", c("unfilt", "PASS"), "/", dir)
     ss <- with(cls, subset(cls, subset = directory %in% dir, select = set.size))$set.size
     area1 <- ss[1] + ss[3] # unfiltered mutect2

@@ -47,50 +47,62 @@ Import sizes of various callsets to R:
 
 ```{r}
 indirs <- paste0("results/mutect2-", c("unfilt", "PASS"), "/")
-indirs <- paste0(rep(indirs, each = 3), c(paste0("1_isec-callers/", c("NeuN_mn-NeuN_pl", "muscle-NeuN_pl")), "2_cmp-reftissues"))
+indirs <- paste0(rep(indirs, each = 3), c(paste0("1_isec-callers/", c("muscle-NeuN_pl", "NeuN_mn-NeuN_pl", "muscle-NeuN_mn"))))
 indirs <- paste0(rep(indirs, each = 2), c("/indels/", "/snvs/"))
 names(indirs) <- LETTERS[seq_along(indirs)]
-clsets <-
+clsets1 <-
     lapply(indirs, function(x) {
            df <- read.delim(paste0(x, "callset-sizes.tsv"), header = FALSE,
                             col.names = c("set.size", "file.vcf", "set.operator", "set.operand"))
            df$directory <- factor(x)
            return(df)
        })
-clsets <- do.call(rbind, clsets)
+clsets1 <- do.call(rbind, clsets1)
 ```
 
 ### Comparing callers
 
-#### NeuN_mn reference tissue, SNVs
+#### NeuN_mn--NeuN_pl, SNVs
 
 Without filtering mutect2 calls many more variants than strelka.  With filtering (PASS) mutect2 still calls slightly more variants than stelka without filtering.  The overlap between the two callers is substantial and filtering makes mutect2 calls even more concordant with strelka calls.
 
-```{r venn-caller-neun_mn-snvs}
-my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets)
+```{r venn-caller-neun_mn-neun_pl-snvs}
+my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/snvs/", cls = clsets1)
 ```
 
-#### NeuN_mn reference tissue, indels
+#### NeuN_mn--NeuN_pl, indels
 
 Callsets of indels share some but not all of the above properties with SNV callsets.  Importantly, the concordance seems lower for indels than for NSPs, but the much lower number of indel records leaves a greater room for certain patterns emerging by chance.
 
-```{r venn-caller-neun_mn-indels, echo=FALSE}
-my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/indels/", cls = clsets)
+```{r venn-caller-neun_mn-neun_pl-indels, echo=FALSE}
+my.venn3(dir = "1_isec-callers/NeuN_mn-NeuN_pl/indels/", cls = clsets1)
 ```
 
 
-#### muscle reference tissue, SNVs
+#### muscle--NeuN_pl, SNVs
 
 These results are very similar to the previous ones; the muscle reference gives very slightly more candidate variants than NeuN_mn reference, which aligns with the expectation that muscle cell lineage is further away from the NeuN_pl lineage compared to NeuN_mn.  But the differences are very subtle.
 
-```{r venn-caller-muscle-snvs, echo=FALSE}
-my.venn3(dir = "1_isec-callers/muscle-NeuN_pl/snvs/", cls = clsets)
+```{r venn-caller-muscle-neun_pl-snvs, echo=FALSE}
+my.venn3(dir = "1_isec-callers/muscle-NeuN_pl/snvs/", cls = clsets1)
 ```
 
-#### muscle reference tissue, indels
+#### muscle--NeuN_pl, indels
 
-```{r venn-caller-muscle-indels, echo=FALSE}
-my.venn3(dir = "1_isec-callers/muscle-NeuN_pl/indels/", cls = clsets)
+```{r venn-caller-muscle-neun_pl-indels, echo=FALSE}
+my.venn3(dir = "1_isec-callers/muscle-NeuN_pl/indels/", cls = clsets1)
+```
+
+#### muscle--NeuN_mn, SNVs
+
+```{r venn-caller-muscle-neun-mn-snvs, echo=FALSE}
+my.venn3(dir = "1_isec-callers/muscle-NeuN_mn/snvs/", cls = clsets1)
+```
+
+#### muscle--NeuN_mn, indels
+
+```{r venn-caller-muscle-neun-mn-indels, echo=FALSE}
+my.venn3(dir = "1_isec-callers/muscle-NeuN_mn/indels/", cls = clsets1)
 ```
 
 ### Comparing reference tissues: unfiltered
@@ -100,14 +112,14 @@ The next Venn-Euler diagrams feature two sets corresponding to muscle and NeuN_m
 ### SNVs
 
 ```{r venn-ref-tissue-snvs, echo=FALSE}
-my.venn2(dir = "results/mutect2-unfilt/2_cmp-reftissues/snvs/", cls = clsets,
+my.venn2(dir = "results/mutect2-unfilt/2_cmp-reftissues/snvs/", cls = clsets1,
              category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
 ```
 
 #### indels
 
 ```{r venn-ref-tissue-indels, echo=FALSE}
-my.venn2(dir = "results/mutect2-unfilt/2_cmp-reftissues/indels/", cls = clsets,
+my.venn2(dir = "results/mutect2-unfilt/2_cmp-reftissues/indels/", cls = clsets1,
              category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
 ```
 
@@ -118,13 +130,13 @@ The next set of diagrams was obtained **with** filtered mutect2 calls.  These re
 ### SNVs
 
 ```{r venn-ref-tissue-snvs-PASS, echo=FALSE}
-my.venn2(dir = "results/mutect2-PASS/2_cmp-reftissues/snvs/", cls = clsets,
+my.venn2(dir = "results/mutect2-PASS/2_cmp-reftissues/snvs/", cls = clsets1,
              category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
 ```
 
 #### indels
 
 ```{r venn-ref-tissue-indels-PASS, echo=FALSE}
-my.venn2(dir = "results/mutect2-PASS/2_cmp-reftissues/indels/", cls = clsets,
+my.venn2(dir = "results/mutect2-PASS/2_cmp-reftissues/indels/", cls = clsets1,
              category = c("NeuN_mn", "muscle"), col = my.cols <- c("gray", "rosybrown"), fill = my.cols)
 ```
