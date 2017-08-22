@@ -1,6 +1,6 @@
 ---
 layout: default
-tags: [bam, alignment, genome]
+tags: [BAM, alignment, genome]
 featimg: "read-depth-repres-1.png"
 ---
 

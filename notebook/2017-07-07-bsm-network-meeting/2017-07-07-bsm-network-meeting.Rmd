@@ -1,0 +1,7 @@
+---
+layout: default
+---
+
+My second BSM network workshop, where I am presenting preliminary results on somatic variants from individual MSSM_179.
+
+The presentation can be downloaded [here](https://www.dropbox.com/s/giusjmteylnbhr9/bsm-2017-jul-attila.pdf?dl=0).

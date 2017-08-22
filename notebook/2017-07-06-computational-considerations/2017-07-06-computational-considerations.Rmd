@@ -1,0 +1,46 @@
+---
+layout: default
+---
+
+Some considerations on computational aspects of the BSM project in the present state.
+
+## General
+
+- select callers beyond mutect2 and strelka
+- set up new PC
+    - install and configure linux and software on new PC
+
+## Minerva
+
+- install strelka and other callers to be selected
+- CRAM or BAM alignment?  Store FASTQ after alignment?
+- scatter/gather I/O parallelization: bash scripts
+
+## k2
+
+Some system information on k2 suggests the computational resources might be adequate for the BSM project but the storage is low.
+
+```{r eval=FALSE, engine='bash'}
+32 processors, 126 GB memory
+Filesystem              Size  Used Avail Use% Mounted on
+udev                     63G  8.0K   63G   1% /dev
+tmpfs                    13G  1.2M   13G   1% /run
+/dev/sda5               5.2G  4.7G  245M  96% /
+none                    4.0K     0  4.0K   0% /sys/fs/cgroup
+none                    5.0M     0  5.0M   0% /run/lock
+none                     63G  144K   63G   1% /run/shm
+none                    100M   40K  100M   1% /run/user
+/dev/mapper/vg-webtemp  296G  250G   31G  89% /web_temp
+/dev/sda7                14G   36M   13G   1% /home
+/dev/sda1               223M  2.0K  211M   1% /boot_old
+/dev/sda2               227G   87G  129G  41% /old
+/dev/mapper/vg-home     7.6T  5.2T  2.0T  73% /home_old
+10.91.65.25:/bio2        21T   21T  434G  98% /mbio2
+10.91.65.25:/bio1        21T   19T  2.1T  91% /mbio1
+10.81.74.43:/bio2        31T   17T   14T  55% /ybio2
+```
+
+- Policy of disk usage?
+- What would be the policy of running jobs?
+    - How much resources (proc, memory, duration) could I use?
+- How to coordinate to avoid clashes with Ravi and other users?

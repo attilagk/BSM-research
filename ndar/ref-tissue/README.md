@@ -1,0 +1,1 @@
+The validation tool does not work with `javaws` provided by OpenJDK.  Therefore Oracle Java 8 had to be installed using the `oracle-java8-installer` Debian package.  More info [here](http://www.webupd8.org/2014/03/how-to-install-oracle-java-8-in-debian.html).  The symlink `javaws-oracle` was created to point to `javaws` of Oracle Java 8.

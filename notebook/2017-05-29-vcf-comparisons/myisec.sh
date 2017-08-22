@@ -109,7 +109,7 @@ for mut in snvs indels; do
     for bitmap in 100 010 001 110 101 011 111; do
         bcftools isec -n~$bitmap -w 1 -o $reftoutdir/$bitmap.vcf \
             $reftoutdir/{muscle-NeuN_pl.bcf,NeuN_mn-NeuN_pl.bcf,muscle-NeuN_mn.bcf}
-        numrecords=$(bcftools stats $reftoutdir/$bitmap.vcf | \
+        numrecords=$(bcftools stats $reftoutdir/${bitmap}.vcf | \
             sed -n '/^.*number of records:\s*\([[:digit:]]\+\)$/ { s//\1/; p }')
         echo -e "$numrecords\t$bitmap\t$tispairlist"
     done >> $tsv2

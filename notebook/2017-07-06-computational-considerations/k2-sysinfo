@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+outfile="$0.txt"
+
+mem=$(free -tg | sed -n '/Total:\s*\([[:digit:]]\+\)\s*.*$/ {s//\1/; p}')
+echo "`nproc` processors, $mem GB memory" > $outfile
+
+df -h >> $outfile
