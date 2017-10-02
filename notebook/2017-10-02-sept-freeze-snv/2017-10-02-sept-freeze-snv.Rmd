@@ -1,0 +1,48 @@
+---
+layout: default
+title: SNVs from Sept Data Freeze
+tags: [ mutect2 ]
+---
+
+Hello, World!
+
+```
+sed -n '/^#CHROM/,$ p' alon-mutect.vcf | sed -n '2,$ p' | tr '\t;=' ',' >alon-mutect.csv
+```
+
+```{r echo=FALSE, warning=FALSE}
+library(lme4)
+library(lattice)
+#library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Read VCF
+
+```{r}
+f <- "/home/attila/projects/bsm/results/2017-10-02-sept-freeze-snv/alon-mutect.csv"
+vcf <- read.csv(f, header = FALSE)
+l <- list(
+          nlod = subset(vcf, vcf$V16 == "NLOD", select = c(16:17)),
+          tlod = subset(vcf, vcf$V18 == "TLOD", select = c(18:19)))
+names(l$nlod) <- c("type", "LOD")
+names(l$tlod) <- c("type", "LOD")
+df <- rbind(l$nlod, l$tlod)
+levels(df$type) <- c("normal", "RPA", "tumor")
+```
+
+```{r lod}
+histogram(~ LOD | type, data = df, type = "count")
+```
+
+```{r lod-zoom}
+histogram(~ LOD | type, data = df, type = "count", ylim = c(0, 50))
+```
+
+```{r lod-zoom-density}
+densityplot(~ LOD | type, data = df, ylim = c(-1e-4, 5e-3), plot.points = "rug")
+```

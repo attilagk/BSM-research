@@ -7,14 +7,16 @@ f3=$d/genomics_sample03_template.csv
 
 # Oracle 8
 # /usr/lib/jvm/java-8-oracle/bin/java \
-# OpenJDK
+    # OpenJDK
 # java \
-/usr/lib/jvm/java-8-oracle/bin/java \
+    /usr/lib/jvm/java-8-oracle/bin/java \
     -jar /opt/validationtool/current/validationtool-console-client-1.10.2.jar \
     --validationAPI https://ndar.nih.gov/api/validationtool/v2 \
-    --collectionId C2458 \
+    --collectionId 2458 \
     --title mssm-reftissue \
     --description "FASTQ data files for Reference Tissue Project" \
-    --username andrewchess \
-    --password Bern1e2017 \
+    --username attilagk \
+    --password Chesslab13 \
+    --buildPackage \ 
+    --submitPackage \
     $f1 $f2 $f3
