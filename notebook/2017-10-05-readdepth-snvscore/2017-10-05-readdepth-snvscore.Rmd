@@ -1,0 +1,57 @@
+---
+layout: default
+title: Dependence of Mutect2 LOD Score on Read Depth
+tags: [ mutect2 ]
+featimg: "lod-frac-1.png"
+---
+
+Given some candidate somatic SNV the NLOD (normal log odds) score quantifies evidence for somatic mosaicism in fibroblasts (the "Normal" tissue) while the TLOD for that in NeuN+ nuclei ("Tumor" tissue).  Thus, the NLOD and TLOD score quantify two different subhypotheses: *mosaic fibroblast* and *mosaic NeuN+*.  How do these two LOD scores depend on the depth sequencing of the NeuN+ ("tumor") tissue when the depth for fibroblasts ("normal") is fixed?
+
+## Preparation
+
+Subsample BAM, run Mutect2 and parse NLOD and TLOD scores
+
+```{r eval=TRUE, engine='bash'}
+indir="$HOME/projects/bsm/results/2017-10-05-readdepth-snvscore"
+```
+
+```{r echo=FALSE, warning=FALSE}
+library(lme4)
+library(lattice)
+#library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Read NLOD and TLOD scores for all levels of subsampling
+
+```{r}
+frac <- rev(c("1.00", "0.50", "0.25", "0.12", "0.06", "0.03"))
+f <- paste0("~/projects/bsm/results/2017-10-05-readdepth-snvscore/MSSM179_NeuN_pl-1MB-", frac, "/mutect2/lod.csv")
+names(f) <- frac
+l <- lapply(f, read.csv)
+df <- do.call(rbind, lapply(names(l), function(x) cbind(data.frame(frac = x), l[[x]])))
+df <- cbind(data.frame(ID = factor(paste(df$CHROM, df$POS, sep = ":"))), df)
+df.long <- reshape(df, varying = c("NLOD", "TLOD"), v.names = "LOD", idvar = c("ID", "frac"), timevar = "tissue", times = paste("mosaic", c("fibroblast","NeuN+")), direction = "long")
+```
+
+## Result
+
+Recall ([see alignment stats]({{ site.baseurl }}{% post_url /projects/bsm/2017-05-24-alignment-stats %})) that NeuN+ nuclei were sequenced at $$\approx 140 \times$$ depth while fibroblasts at $$\approx 35 \times$$ depth, which is $$\approx 0.25\times 140 \times$$ depth.  Thus subsampling the $$\approx 140 \times$$ BAM for NeuN+ at a sampling fraction of $$0.25$$ brings the depth for NeuN+ to the value of that for fibroblasts.  Apart from 0.25 a number of smaller or larger fractions were also used to subsample the NeuN+ BAM.
+
+The plot below shows how the LOD, separately for the *mosaic fibroblast* and *mosaic NeuN+* subhypothesis, depends on the fraction at which the NeuN+ BAM was subsampled.  It is clear that
+
+1. higher depth for NeuN+ leads to more candidate SNVs
+1. the candidate SNVs that are specific to higher NeuN+ depth tend to have larger TLOD score (LOD for *mosaic NeuN+*) than NLOD score (LOD for *mosaic fibroblast*)
+
+
+```{r lod-frac}
+xyplot(LOD ~ as.numeric(as.character(frac)) | tissue, data = df.long, type = "b", groups = ID, xlab = "fraction of reads in ~140x NeuN+ at constant ~35x fibroblast", ylim = c(0, 35))
+```
+
+## Conclusion
+
+The result suggests that the right-shifted TLOD distribution relative to the NLOD distribution ([see the previous analysis]({{ site.baseurl }}{% post_url /projects/bsm/2017-10-02-sept-freeze-snv %})) is an artefact related to sequencing depth, rather than to a different frequency of true mosaic SNVs in the two tissues.

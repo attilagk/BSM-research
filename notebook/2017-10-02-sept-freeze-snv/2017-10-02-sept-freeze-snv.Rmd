@@ -45,7 +45,7 @@ levels(df$type) <- c("fibroblast", "RPA", "NeuN+")
 
 ## Distribution of LOD scores
 
-The figures below show the distribution of the NLOD and TLOD score providing evidence for somatic mosaicism in fibroblasts or NeuN+ nuclei.  The TLOD distribution is wider and shifted to the right relative to the NLOD distribution suggesting that mosaicism is more common in NeuN+ cells than in fibroblasts.
+The figures below show the distribution of the NLOD and TLOD score providing evidence for somatic mosaicism in fibroblasts or NeuN+ nuclei.  The TLOD distribution is wider and shifted to the right relative to the NLOD distribution suggesting that mosaicism is more common in NeuN+ cells than in fibroblasts.  Alternatively, differing read depth for NeuN+ nuclei and for fibroblasts (or other technical difference) may underlie the different LOD score distribution.
 
 ```{r lod}
 histogram(~ LOD | type, data = df, type = "count")
