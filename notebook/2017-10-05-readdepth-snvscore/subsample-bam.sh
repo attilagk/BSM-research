@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # subsample tumor.bam and run mutect2
-usage="usage:$(basename $0) .20 tumor.bam [normal.bam]"
+usage="usage:$(basename $0) .20 tumor.bam normal.bam"
 
 frac=$1
 tumorbam=$2
-normalbam=${3:-MSSM179_muscle-1MB.bam}
+normalbam=$3
 seed=1313
 refseq="$HOME/data/GRCh37/karyotypic-order/Homo_sapiens.GRCh37.dna.fa"
 # output directory and path to subsampled tumor.bam
@@ -45,6 +45,9 @@ if [ ! -e $vcf ]; then
     mymutect2 $normalbam $subsamplebam $mutect2dir $refseq
 fi
 
-echo "CHROM,POS,NLOD,TLOD" > $csv
-sed -n '/^#CHROM/,$ {/^[^#].*/ p}' $vcf |
-sed 's/^\([^\t]*\)\t\([^\t]*\)\t.*NLOD=\([.[:digit:]]\+\).*TLOD=\([.[:digit:]]\+\).*$/\1,\2,\3,\4/' >> $csv
+if [ ! -e $csv ]; then
+    echo "CHROM,POS,FILTER,NLOD,TLOD" > $csv
+    sed -n '/^#CHROM/,$ {/^[^#].*/ p}' $vcf |
+    sed 's/^\([^\t]*\)\t\([^\t]*\)\t\(\([^\t]*\t\)\{4\}\)\([^\t]*\)\t.*NLOD=\([.[:digit:]]\+\).*TLOD=\([.[:digit:]]\+\).*$/\1,\2,\5,\6,\7/' >> $csv
+    #sed 's/^\([^\t]*\)\t\([^\t]*\)\t.*NLOD=\([.[:digit:]]\+\).*TLOD=\([.[:digit:]]\+\).*$/\1,\2,\3,\4/' >> $csv
+fi
