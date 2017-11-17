@@ -1,0 +1,36 @@
+---
+layout: default
+---
+
+The reference tissue project showed that the various sequencing and variant calling strategies employed by different investigators of the BSM Network are all highly erroneous (in terms of amplicon-seq validation) and highly discordant with each other.  While Jeff Kidd's group showed that some discordance is attributable to NGS data generation, the majority of discordance and error is likely due to suboptimal variant calling. The BSM Network plans to optimize its variant calling workflows.  Here I propose an approach to optimization based on simulations.
+
+## Approaches to optimization
+
+Systematic adjustment of variant calling and filtering parameters:
+
+* data inspection by eye
+* machine learning
+
+Validation:
+
+* targeted resequencing (amplicon-seq)
+* ground truth from simulations
+
+## How simulations would help optimize variant calling
+
+### NeuN+ and reference sequencing depth
+
+Our budget puts constrains on WGS data generation, in particular on sequencing depth.  But the relative sequencing depth of NeuN+ and reference sample is still a free parameter under that constraint.  Hofmann et al 2017 showed in their [Fig 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig3/) that for most variant callers low coverage of normal tissue is leads to a large number of false calls that is comparable to the number of falls calls due to low coverage of tumor tissue.  Thus the relative depth of NeuN+ and reference sample is an important parameter, which could be optimized using simulations.
+
+### Filtering and combination of callers
+
+How callers are combined can make a huge difference.  Hofmann et al 2017 showed in their [Fig 4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig4/) that combination via intersection lead to much worse performance than rank-combination and that rank-combination of only a smaller subset of callers outperformed rank-combinaton of all callers suggesting the optimal weighting of callers is crucial.  Simulations would enable us to compare the performance of different combination approaches: [VariantMetaCaller][VMC] and the various intersection schemes employed by BSMN investigators.
+
+### FDR control
+
+Hofmann et all showed in their [Fig 2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig2/) that the relative performance of variant callers depends on both allele fraction (variant frequency) and FDR cutoff.  [VariantMetaCaller][VMC] is designed to allow easy, automatic adjustment of variant caller filtering and combination to a desired FDR cutoff.  This would enable us to adjust the size of the call set to different practical goals such as lower and higher throughput validation methods, and downstream analyses concerning gene pathways and networks.
+
+
+[Hofmann]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852
+[Azevedo]: http://onlinelibrary.wiley.com/doi/10.1002/cne.21974/abstract;jsessionid=C2AAC679DDBDF32D1F372A740061268E.f04t04
+[VMC]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4625715/
