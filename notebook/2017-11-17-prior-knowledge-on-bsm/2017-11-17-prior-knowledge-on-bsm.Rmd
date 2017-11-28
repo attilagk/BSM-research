@@ -4,31 +4,62 @@ layout: default
 
 The reference tissue project showed that the various sequencing and variant calling strategies employed by different investigators of the BSM Network are all highly erroneous (in terms of amplicon-seq validation) and highly discordant with each other.  While Jeff Kidd's group showed that some discordance is attributable to NGS data generation, the majority of discordance and error is likely due to suboptimal variant calling. The BSM Network plans to optimize its variant calling workflows.  Here I propose an approach to optimization based on simulations.
 
-## Approaches to optimization
+## Questions
 
-Systematic adjustment of variant calling and filtering parameters:
+1. optimal experimental design
+    * cost vs sequencing depths of NeuN+ and fibroblast samples
+1. optimal variant calling
+    * combination, filtering, FDR control
+1. germline variants
+    * do we need them?
+    * dissection of somatic and germline variants
 
-* data inspection by eye
-* machine learning
+## Background
 
-Validation:
+Comparative benchmark studies (e.g. [Hofmann et al][Hofmann], [Gezsi et al][VMC], [Azevedo et al][Azevedo]) provided many details but here I list only a few
 
-* targeted resequencing (amplicon-seq)
-* ground truth from simulations
+* benchmarking and tuning variant callers should first use synthetic data sets and only then labor intensive experimental validation
+* the relative performance of callers is specific to each data set, biological phenomenon, and the desired FDR (Hofmann et [Fig 2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig2/))
+* low coverage of reference tissue is leads to a large number of false calls that is comparable to the number of falls calls due to low coverage of "tumor" tissue (Hofmann et al 2017 [Fig 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig3/))
+* optimal filtering is inseparable from variant calling and FDR control
+* filtering is based on too many features (quality scores, depth,...) and two many potential variants to be explored visually and manually
+* some weighted combination of callers is beneficial, while others can be even disadvantageous (Hofmann et al 2017 [Fig 4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig4/))
+* germline variant callers do provide useful info on somatic variants because the signals of somatic and germline variants overlap
 
-## How simulations would help optimize variant calling
+## Plan
 
-### NeuN+ and reference sequencing depth
+Overview:
 
-Our budget puts constrains on WGS data generation, in particular on sequencing depth.  But the relative sequencing depth of NeuN+ and reference sample is still a free parameter under that constraint.  Hofmann et al 2017 showed in their [Fig 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig3/) that for most variant callers low coverage of normal tissue is leads to a large number of false calls that is comparable to the number of falls calls due to low coverage of tumor tissue.  Thus the relative depth of NeuN+ and reference sample is an important parameter, which could be optimized using simulations.
+1. generate synthetic data under various conditions: hypothetical BSM models and sequencing technologies/depths
+1. optimize variant calling on synthetic data
+1. study how performance (i.e. sensitivity-specificity) depends on conditions
+1. validate using targeted resequencing
 
-### Filtering and combination of callers
+### Sequencing data with known variants
 
-How callers are combined can make a huge difference.  Hofmann et al 2017 showed in their [Fig 4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig4/) that combination via intersection lead to much worse performance than rank-combination and that rank-combination of only a smaller subset of callers outperformed rank-combinaton of all callers suggesting the optimal weighting of callers is crucial.  Simulations would enable us to compare the performance of different combination approaches: [VariantMetaCaller][VMC] and the various intersection schemes employed by BSMN investigators.
+We need sequencing data with the following properties:
 
-### FDR control
+* realistic reads: length and base qualities and various depths for NeuN+ and reference
+* realistic variation in the data (two components that need to be dissected)
+    1. known biological variation (true variants) under various BSM models
+    1. stochastic technical variation (noise)
 
-Hofmann et all showed in their [Fig 2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852/figure/Fig2/) that the relative performance of variant callers depends on both allele fraction (variant frequency) and FDR cutoff.  [VariantMetaCaller][VMC] is designed to allow easy, automatic adjustment of variant caller filtering and combination to a desired FDR cutoff.  This would enable us to adjust the size of the call set to different practical goals such as lower and higher throughput validation methods, and downstream analyses concerning gene pathways and networks.
+There are two approaches of achieving such data based on how the nature of technical variation
+
+1. *fully synthetic*: embedding true variants into simulated data
+1. *semi-synthetic*: embedding true variants into real data
+
+It might be worth exploring both approaches because each has a different limitation.  The problem with fully synthetic data is that the read lengths, base qualities and technical variation may not be very realistic.  The problem with semi-synthetic data is that besides the embedded synthetic true variants there are already unknown (hidden) natural true variants mixed with technical noise.
+
+Both approaches require the embedding of known true variants into the background of technical variation.  Currently there exist genome wide sets of validated natural germline variants (REF?), which can be embedded directly in the reference genome.  Many validated natural somatic cancer variants also exist but there are too few validated natural BSM variants (see BSM network amplicon-seq validation) for benchmarking.  Therefore true somatic variants will need to be synthesised under some realistic assumptions on BSM.  What assumptions are realistic is uncertain; this uncertainty can be addressed by using different hypothetical BSM models.  Such BSM models would differ in the joint distribution of the number and allele frequency of BSM variants.
+
+### Optimizing variant calling
+
+[VariantMetaCaller][VMC], a support vector machine (SVN) based approach, finds optimal combination and filtering and allows FDR control.  It will be a primary goal to assess on synthetic data to what extent VariantMetaCaller improves performance relative to initial approaches used by the BSM network.  It would be useful to investigate how the improvement depends on sequencing depths and BSM model.
+
+### Validation
+
+This step could use true BSM variants validated by the BSM network using amplicon-seq.  Because the small number of validated variants such validation would be limited in accuracy.
 
 
 [Hofmann]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5209852

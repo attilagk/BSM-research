@@ -1,0 +1,11 @@
+name,version,install.date,install.method,installed.OK,install.error,testrun,path,URL,DOI
+LoFreq,v2.1.2,2017-11-22 16:00:00,binary,TRUE,,,/opt/lofreq_star/2.1.2,http://csb5.github.io/lofreq/,10.1093/nar/gks918
+GATK,v3.8.0,2017-07-28 17:29:00,,TRUE,,,/opt/gatk/3.8.0,,
+strelka2,V2.8.4,2017-11-21 16:59:00,build,TRUE,,,/usr/local,https://github.com/Illumina/strelka,10.1101/192872 
+JointSNVMix2,v0.8,2017-11-21 14:55:00,build,TRUE,,,/usr/local/bin/jsm.py,https://github.com/aroth85/JointSNVMix,10.1093/bioinformatics/bts053
+EBCall,NaN,,build,TRUE,,,,https://github.com/friend1ws/EBCall,10.1093/nar/gkt126
+deepSNV,NaN,,build,FALSE,"Error: package or namespace load failed for ‘GenomicRanges’ in loadNamespace(package, lib.loc): in ‘GenomicRanges’ methods for export not found: ngap",,,https://github.com/gerstung-lab/deepSNV,10.1038/ncomms1814
+TNseq,201711,2017-11-17 19:10:52,binary,TRUE,,,/opt/sentieon-genomics/current/bin/sentieon,https://www.sentieon.com/products/,10.1101/115717
+SiNVICT,NaN,2017-11-22 17:34:14,build,TRUE,,,/usr/local/bin/sinvict,https://github.com/sfu-compbio/sinvict,10.1093/bioinformatics/btw536
+SomaticSniper,v1.0.5.0,2017-11-27 12:58:16,build,TRUE,,,/usr/local/bin/bam-somaticsniper,http://gmt.genome.wustl.edu/packages/somatic-sniper/index.html,10.1093/bioinformatics/btr665
+VarDict,NaN,2017-11-27 14:07:49,NaN,TRUE,,,/home/attila/tools/VarDict,https://github.com/AstraZeneca-NGS/VarDict,10.1093/nar/gkw227
