@@ -49,8 +49,6 @@ We need several sets of sequencing data.  Each set needs have the following prop
 
 There are several approaches of achieving such benchmark data (see Introduction in [Li 2014][Li]).
 
-(Both approaches require the embedding of known true variants into the background of technical variation.  Currently there exist genome wide sets of validated natural germline variants (REF?), which can be embedded directly in the reference genome.  Many validated natural somatic cancer variants also exist but there are too few validated natural BSM variants (see BSM network amplicon-seq validation) for benchmarking.  Therefore true somatic variants will need to be synthesised under some realistic assumptions on BSM.  What assumptions are realistic is uncertain; this uncertainty can be addressed by using different hypothetical BSM models.  Such BSM models would differ in the joint distribution of the number and allele frequency of BSM variants.)
-
 ### Optimizing variant calling and comparison to previous approaches
 
 [VariantMetaCaller][VMC], a support vector machine (SVN) based approach, finds optimal combination and filtering and allows FDR control. It will be a primary goal to assess for each benchmark data set to what extent VariantMetaCaller improves performance relative to initial approaches used by the BSM network.

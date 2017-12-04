@@ -1,0 +1,132 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, hyperref, color, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Boadilla}
+%\usetheme{Antibes}
+%\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Proposed Benchmark Study}
+\subtitle{Biological and technical limitations of somatic variant calling}
+\author{Brain Somatic Mosaicism project}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+\begin{frame}{Terms}
+\small
+\begin{tabular}{c|l}
+variant & a SNV or small indel, germline or somatic \\
+allele frequency & of a somatic variant in a tissue sample \\
+paired sample & NeuN+ DLPFC nuclei and reference tissue \\
+data set & NGS data from a paired sample \\
+caller & a classifier yielding candidate variants \\
+filter & a tunable classifier yielding likely true variants \\
+compound caller & a combination of a \emph{single} caller and multiple filters \\
+combined caller & a combination of \emph{multiple} callers and filters \\
+\end{tabular}
+
+\vfill
+
+\begin{tabular}{c|c|c}
+ & caller & filter \\
+\hline
+local info across reads & base (including gap) & caller/quality score, depth,... \\
+designed for & sensitivity & specificity \\
+\end{tabular}
+\end{frame}
+
+\begin{frame}{The ``Reference tissue project''}
+\begin{itemize}
+\item a paired sample shared by labs
+\item NGS technology and compound or combined caller specific to each lab
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Example: the combined caller of U.~Michigan}
+\begin{center}
+\includegraphics[height=0.8\textheight]{../../bsm-network/presentations/UM-Pipeline-3.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Amplicon-seq validation}
+{validation attempted for 7 of 11 candidate variants}
+\begin{center}
+\includegraphics[height=0.9\textheight]{../../bsm-network/presentations/BSMN_data_call_101617-summary.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Concordance of call sets}
+\begin{center}
+\includegraphics[height=0.7\textheight]{../../bsm-network/presentations/tbae-call-set-comparison.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Questions}
+\begin{enumerate}
+\item experimental design
+\begin{itemize}
+\item cost vs sequencing depths of NeuN+ and fibroblast samples
+\end{itemize}
+\item sensitivity and specificity; their dependence on
+\begin{itemize}
+\item technical variables (quality scores, depth, ...)
+\item allelic fraction in neurons and in reference tissue
+\end{itemize}
+\item optimization of variant calling
+\begin{itemize}
+\item the most sensitive caller combination and filtering
+\item at given specificity (FDR control)
+\end{itemize}
+\item germline variants
+\begin{itemize}
+\item dissection of somatic and germline variants
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\section{Proposal}
+
+\end{document}
+
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
+
