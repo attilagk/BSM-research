@@ -1,0 +1,6 @@
+dataset,URL,publication
+strelka2 somatic,http://strelka-public.s3.amazonaws.com,https://www.biorxiv.org/content/early/2017/09/25/192872
+FDA,https://precision.fda.gov/,https://www.biorxiv.org/content/early/2017/09/25/192872
+Genome-in-a-bottle,https://github.com/genome-in-a-bottle,https://www.biorxiv.org/content/early/2017/09/25/192872
+FDA,https://precision.fda.gov/,10.1101/092890
+Genome-in-a-bottle,https://github.com/genome-in-a-bottle,10.1101/092890
