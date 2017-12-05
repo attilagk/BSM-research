@@ -50,10 +50,10 @@ variant & a SNV or small indel, germline or somatic \\
 allele frequency & of a somatic variant in a tissue sample \\
 paired sample & NeuN+ DLPFC nuclei and reference tissue \\
 data set & NGS data from a paired sample \\
-caller & a classifier yielding candidate variants \\
-filter & a tunable classifier yielding likely true variants \\
-compound caller & a combination of a \emph{single} caller and multiple filters \\
-combined caller & a combination of \emph{multiple} callers and filters \\
+caller & a classifier and scoring method \\
+filter & a tunable classifier \\
+%compound caller & a combination of a \emph{single} caller and multiple filters \\
+var.~calling workflow & data set(s) + caller(s) + filters \\
 \end{tabular}
 
 \vfill
@@ -61,7 +61,9 @@ combined caller & a combination of \emph{multiple} callers and filters \\
 \begin{tabular}{c|c|c}
  & caller & filter \\
 \hline
-local info across reads & base (including gap) & caller/quality score, depth,... \\
+local info & base (including gap) & caller/quality score, depth,... \\
+stat.~model & yes & no \\
+yields & unfiltered call set\footnote{VCF record} & final call set \\
 designed for & sensitivity & specificity \\
 \end{tabular}
 \end{frame}
@@ -75,47 +77,86 @@ designed for & sensitivity & specificity \\
 
 \begin{frame}{Example: the combined caller of U.~Michigan}
 \begin{center}
-\includegraphics[height=0.8\textheight]{../../bsm-network/presentations/UM-Pipeline-3.pdf}
+\includegraphics[height=0.8\textheight]{figures/UM-Pipeline-3.pdf}
 \end{center}
 \end{frame}
 
 \begin{frame}{Amplicon-seq validation}
 {validation attempted for 7 of 11 candidate variants}
 \begin{center}
-\includegraphics[height=0.9\textheight]{../../bsm-network/presentations/BSMN_data_call_101617-summary.pdf}
+\includegraphics[height=0.9\textheight]{figures/BSMN_data_call_101617-summary.pdf}
 \end{center}
 \end{frame}
 
 \begin{frame}{Concordance of call sets}
 \begin{center}
-\includegraphics[height=0.7\textheight]{../../bsm-network/presentations/tbae-call-set-comparison.png}
+\includegraphics[height=0.7\textheight]{figures/tbae-call-set-comparison.png}
 \end{center}
 \end{frame}
 
-\begin{frame}{Questions}
-\begin{enumerate}
-\item experimental design
+\begin{frame}{Conclusion: low accuracy workflows \(\Rightarrow\) need
+optimization}
+\begin{center}
+{\Large Two approaches to optimization}
+\vfill
+\begin{tabular}{r|c|c}
+ & 1. & 2. \\
+\hline
+known true variants & benchmark data & targeted re-seq. \\
+\# of true variants & high & low \\
+allows machine learning? & yes & no \\
+bias & prior knowledge & ascertainment \\
+ideal for & initial optim. & final validation \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}{Optimization without machine learning}
+{Example: U.~Michigan workflow}
 \begin{itemize}
-\item cost vs sequencing depths of NeuN+ and fibroblast samples
-\end{itemize}
-\item sensitivity and specificity; their dependence on
+\item 
+exhaustive search
 \begin{itemize}
-\item technical variables (quality scores, depth, ...)
-\item allelic fraction in neurons and in reference tissue
+\item \(\ge 9\) tuning parameters
+\item if only 2 settings for each \(\Rightarrow 2^9 = 512\) call sets
+\item \(512 \gg\) what targeted re-sequencing allows
 \end{itemize}
-\item optimization of variant calling
+\item<2-> inspection
 \begin{itemize}
-\item the most sensitive caller combination and filtering
-\item at given specificity (FDR control)
+\item 5 out of 9 are annotation/quality based filters
+\item 5 additional dimensions when inspecting paired alignments
 \end{itemize}
-\item germline variants
-\begin{itemize}
-\item dissection of somatic and germline variants
 \end{itemize}
-\end{enumerate}
 \end{frame}
 
 \section{Proposal}
+
+\begin{frame}{Plan}
+\begin{enumerate}
+\item<1> obtain benchmark data: several data sets
+\begin{itemize}
+\item no gold standard for BSM \(\Rightarrow\) must be generated
+\item little prior knowledge \(\Rightarrow\) various BSM models
+\item various sequencing technology and depth 
+\end{itemize}
+\item<2> optimize workflow parameters
+\begin{itemize}
+\item for each data set
+\item machine learning: VariantMetaCaller 
+\end{itemize}
+\item<3> estimate sensitivity-specificity 
+\begin{itemize}
+\item demonstrate improvement by VariantMetaCaller
+\item FDR (specificity) control
+\item dependence on BSM model
+\item dependence on seq.~technology and depth
+\end{itemize}
+\item validation of VariantMetaCaller call set with re-sequencing
+\begin{itemize}
+\item<4> collaboration within BSM network?
+\end{itemize}
+\end{enumerate}
+\end{frame}
 
 \end{document}
 
