@@ -4,6 +4,8 @@ layout: default
 
 The reference tissue project showed that the various sequencing and variant calling strategies employed by different investigators of the BSM Network are all highly erroneous (in terms of amplicon-seq validation) and highly discordant with each other.  While Jeff Kidd's group showed that some discordance is attributable to NGS data generation, the majority of discordance and error is likely due to suboptimal variant calling in terms of accuracy (sensitivity and specificity). The BSM Network plans to optimize its variant calling workflows.  Here I propose an approach to method benchmarking, optimization, sensitivity-specificity analysis and the effects of various BSM models (somatic mutation scenarios) based on benchmark data, i.e. data with known somatic and germline variants.
 
+A modified version of this article was turned into [this presentation]({{ site.baseurl }}/assets/projects/bsm/2017-11-17-proposed-benchmark-study.pdf) to facilitate discussion (Dec 6, 2017) with Andy and Chaggai.
+
 ## Questions
 
 1. experimental design
@@ -47,7 +49,7 @@ We need several sets of sequencing data.  Each set needs have the following prop
 * a given (distribution of) read depth for NeuN+ and reference
 * known true variants consistent with a given BSM model
 
-There are several approaches of achieving such benchmark data (see Introduction in [Li 2014][Li]).
+There are several approaches of achieving such benchmark data (see Introduction in [Li 2014][Li]).  We decided to take parent-child genomes that have been Sanger-sequenced and mix them in a number of proportions to mimic somatic variants.  The parent-child relationship is cost-effective because it multiplies the number of mixing proportions due to the various outcomes of Mendelian inheritance.
 
 ### Optimizing variant calling and comparison to previous approaches
 
