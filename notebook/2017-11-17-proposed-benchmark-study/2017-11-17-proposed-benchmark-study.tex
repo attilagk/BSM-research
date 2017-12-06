@@ -111,7 +111,7 @@ ideal for & initial optim. & final validation \\
 \end{center}
 \end{frame}
 
-\begin{frame}{Optimization without machine learning}
+\begin{frame}[label=umworkflow]{Optimization without machine learning}
 {Example: U.~Michigan workflow}
 \begin{itemize}
 \item 
@@ -131,13 +131,13 @@ exhaustive search
 
 \section{Proposal}
 
-\begin{frame}{Plan}
+\begin{frame}[label=plan]{Plan}
 \begin{enumerate}
 \item<1> obtain benchmark data: several data sets
 \begin{itemize}
+\item various sequencing technology and depth 
 \item no gold standard for BSM \(\Rightarrow\) must be generated
 \item little prior knowledge \(\Rightarrow\) various BSM models
-\item various sequencing technology and depth 
 \end{itemize}
 \item<2> optimize workflow parameters
 \begin{itemize}
@@ -151,11 +151,74 @@ exhaustive search
 \item dependence on BSM model
 \item dependence on seq.~technology and depth
 \end{itemize}
-\item validation of VariantMetaCaller call set with re-sequencing
+\item<4> validation of VariantMetaCaller call set with re-sequencing
 \begin{itemize}
-\item<4> collaboration within BSM network?
+\item collaboration within BSM network?
 \end{itemize}
 \end{enumerate}
+\end{frame}
+
+\againframe<1>{plan}
+
+\begin{frame}{Relative depth of NeuN+ and reference}
+\includegraphics[width=0.2\textwidth]{/home/attila/figures/from-others/Hofmann-2017-Fig3legend.png}
+\includegraphics[width=0.4\textwidth]{/home/attila/figures/from-others/Hofmann-2017-Fig3a.png}
+\includegraphics[width=0.4\textwidth]{/home/attila/figures/from-others/Hofmann-2017-Fig3c.png}
+\vfill
+\footnotesize{Hofmann et al 2017 BMC Bioinformatics}
+\end{frame}
+
+\againframe<1>{plan}
+
+\begin{frame}{How many mitoses before and after neurulation?}
+\begin{itemize}
+\item \(86.1 \pm 8.1\) billion NeuN+ cells\footnote{Azevedo et al 2009 J Comp
+Neur}
+\item taking \(\log_2 \Rightarrow\) avg: 36.33 mitoses (error: 36.17, 36.46)
+\item not accounted for:
+\begin{itemize}
+\item cell death
+\item mitoses before and after neurulation  
+\end{itemize}
+\item mutation rate \(=\)?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mutation rate: latest estimate}
+\includegraphics[width=1.0\textwidth]{/home/attila/figures/from-others/milholland-2017-fig1b.png}
+\vfill
+\footnotesize{Milholland et al 2017 Nat Commun}
+\end{frame}
+
+\begin{frame}{Human embryogenesis}
+\includegraphics[height=0.8\textheight]{/home/attila/figures/from-others/human-embryogenesis-wikipedia.png}
+\end{frame}
+
+\begin{frame}{Movies on human embryonic development}
+\begin{description}
+\item[2nd week]
+https://www.youtube.com/watch?v=bIdJOiXpp9g
+\item[gastrulation]
+https://www.youtube.com/watch?v=3AOoikTEfeo
+\item[neurulation] 
+https://www.youtube.com/watch?v=lGLexQR9xGs
+\end{description}
+\end{frame}
+
+\againframe<1>{plan}
+
+\againframe{umworkflow}
+
+\begin{frame}{Combination benefits from weighting}
+\includegraphics[width=0.8\textwidth]{/home/attila/figures/from-others/Hofmann-2017-Fig4cd.png}
+\vfill
+\footnotesize{Hofmann et al 2017 BMC Bioinformatics}
+\end{frame}
+
+\begin{frame}{VariantMetaCaller}
+\includegraphics[height=0.7\textheight]{/home/attila/figures/from-others/vmc-fig1.png}
+\vfill
+\footnotesize{Gezsi et al 2015 BMC Genomics}
 \end{frame}
 
 \end{document}
