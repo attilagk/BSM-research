@@ -9,13 +9,19 @@ Our goal is to generate a paired sample NGS data set in order to benchmark and o
 
 ### Platinum Genomes
 
-See [Illumina's Platinum website][platinum] and the corresponding [article by Eberle et al 2017][Eberle].
+[Illumina's Platinum website][platinum] lists resources for the 17 member CEPH/Utah pedigree 1463, in which the father and mother are NA12877 and NA12878.  See the [CEPH 1463 pedigree][coriell-ceph] and pricing (\$56.00) for genomic DNA at the Coriell Institute.  See the [platinum on GitHub][platinum-github] for truth sets (VCF files) and raw data.  Read the [article by Eberle et al 2017][Eberle] for more.
 
 ### Genome in a Bottle
 
-| The Genome in a Bottle Consortium is a public-private-academic consortium hosted by NIST to develop the technical infrastructure (reference standards, reference methods, and reference data) to enable translation of whole human genome sequencing to clinical practice. The priority of GIAB is authoritative characterization of human genomes for use in analytical validation and technology development, optimization, and demonstration. In 2015, NIST released the pilot genome Reference Material 8398, which is genomic DNA (NA12878) derived from a large batch of the Coriell cell line GM12878, characterized for high-confidence SNPs, indel, and homozygous reference regions ([Zook, et al., Nature Biotechnology 2014][Zook]).
+| The Genome in a Bottle Consortium is a public-private-academic consortium hosted by NIST to develop the technical infrastructure (reference standards, reference methods, and reference data) to enable translation of whole human genome sequencing to clinical practice. The priority of GIAB is authoritative characterization of human genomes for use in analytical validation and technology development, optimization, and demonstration. In 2015, NIST released the pilot genome Reference Material 8398, which is genomic DNA (NA12878) derived from a large batch of the Coriell cell line GM12878, characterized for high-confidence SNPs, indel, and homozygous reference regions ([Zook, et al., Nature Biotechnology 2014][Zook2014]).
 
-For general description see [http://jimb.stanford.edu/giab][GIAB]; for available NGS data sets see [genome-in-a-bottle/giab_data_indexes](https://github.com/genome-in-a-bottle/giab_data_indexes).
+The following 7 genomes have been sequenced by more than ten different technologies ([Zook et al 2016 Sci Data][Zook2016])
+
+* NA12878
+* Ashkenasim trio
+* Chinese trio
+
+Note that the DNA sample for the Ashkenasim or Chinese son is \$451.00. For general description see [http://jimb.stanford.edu/giab][GIAB]; for available NGS data sets see [genome-in-a-bottle/giab_data_indexes](https://github.com/genome-in-a-bottle/giab_data_indexes).
 
 ## Previous approaches to benchmark data
 
@@ -26,6 +32,9 @@ A list of previous approaches and related publications and resources---far from 
 * ...
 
 [platinum]: https://www.illumina.com/platinumgenomes.html
+[platinum-github]: https://github.com/Illumina/PlatinumGenomes
 [GIAB]: http://jimb.stanford.edu/giab
-[Zook]: https://www.nature.com/articles/nbt.2835
+[Zook2014]: https://www.nature.com/articles/nbt.2835
+[Zook2016]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4896128/
 [Eberle]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5204340/
+[coriell-ceph]: https://www.coriell.org/0/Sections/Collections/NIGMS/CEPHFamiliesDetail.aspx?PgId=441&fam=1463&
