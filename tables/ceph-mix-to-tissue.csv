@@ -1,0 +1,10 @@
+target.tissue,reference.tissue,allele.freq.target,allele.freq.reference
+mix1,mix1,high,high
+mix1,mix2,high,low
+mix2,mix1,low,high
+mix1,mix3,high,zero
+mix3,mix1,zero,high
+mix2,mix2,low,low
+mix2,mix3,low,zero
+mix3,mix2,zero,low
+mix3,mix3,zero,zero

@@ -1,0 +1,39 @@
+---
+layout: default
+#title:
+---
+
+The DNA of the four grandparents of the CEPH 1463 pedigree will be mixed in various proportions.  Depending on the proportions three mixes have been planned.  This will allow us to model various cases of somatic mosaicism in a NeuN+/reference sample pair.
+
+The table below (download CSV [here]({{ site.baseurl }}/assets/projects/bsm/ceph-dna-mix.csv)) shows mixing proportions in % for the three mixes.
+
+| genome | mix1 | mix2 | mix3 |
+|:---:|:---:|:---:|:---:|
+| NA12889 | 4 | 2 | 0 |
+| NA12890 | 8 | 4 | 0 |
+| NA12891 | 16 | 8 | 0 |
+| NA12892 | 72 | 86 | 100 |
+
+Target-reference tissue pairs can be defined based on these mixes.  The term "target-reference" is the generalization of "tumor-normal" terminology that is widely used for paired-tissue callers because these were predominantly developed for calling cancer-associated somatic variants present in the target tissue.  In the context of our brain somatic mosaicism study the target tissue is NeuN+ and the reference is muscle.
+
+The next table (download CSV [here]({{ site.baseurl }}/assets/projects/bsm/ceph-mix-to-tissue.csv)) lists all possible cases for defining target-reference tissue pairs based on three mixes:
+
+| target.tissue | reference.tissue | allele.freq.target | allele.freq.reference |
+|:---:|:---:|:---:|:---:|
+| mix1 | mix1 | high | high |
+| mix1 | mix2 | high | low |
+| mix2 | mix1 | low | high |
+| mix1 | mix3 | high | zero |
+| mix3 | mix1 | zero | high |
+| mix2 | mix2 | low | low |
+| mix2 | mix3 | low | zero |
+| mix3 | mix2 | zero | low |
+| mix3 | mix3 | zero | zero |
+
+Note that there are $$n = 3$$ mixes and $$k = 2$$ tissues, therefore the number of cases is the sum reflecting asymmetric (e.g. mix1, mix2) and symmetric (e.g. mix2, mix2) cases is
+
+$$
+\begin{equation}
+\frac{n!}{(n-k)!} + n = 6 + 3 = 9.
+\end{equation}
+$$
