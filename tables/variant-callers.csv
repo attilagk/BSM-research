@@ -11,4 +11,4 @@ SomaticSniper,v1.0.5.0,2017-11-27 12:58:16,build,TRUE,,,/usr/local/bin/bam-somat
 VarDict,NaN,2017-11-27 14:07:49,NaN,TRUE,,,/home/attila/tools/VarDict,https://github.com/AstraZeneca-NGS/VarDict,10.1093/nar/gkw227
 FreeBayes,,,,,,,,,
 Samtools,,,,,,,,,
-DeepVariant,,,,FALSE,not released yet,,,https://cloud.google.com/genomics/v1alpha2/deepvariant,10.1101/092890 
+DeepVariant,,,,FALSE,,,,https://github.com/google/deepvariant,10.1101/092890 

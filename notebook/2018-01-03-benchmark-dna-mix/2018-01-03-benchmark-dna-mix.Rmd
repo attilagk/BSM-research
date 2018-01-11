@@ -1,18 +1,27 @@
 ---
 layout: default
-#title:
+title: CEPH/Utah DNA mixes
+tags: {design; chaggai}
 ---
 
 The DNA of the four grandparents of the CEPH 1463 pedigree will be mixed in various proportions.  Depending on the proportions three mixes have been planned.  This will allow us to model various cases of somatic mosaicism in a NeuN+/reference sample pair.
+
+## Designing the mixes
 
 The table below (download CSV [here]({{ site.baseurl }}/assets/projects/bsm/ceph-dna-mix.csv)) shows mixing proportions in % for the three mixes.
 
 | genome | mix1 | mix2 | mix3 |
 |:---:|:---:|:---:|:---:|
 | NA12889 | 4 | 2 | 0 |
-| NA12890 | 8 | 4 | 0 |
-| NA12891 | 16 | 8 | 0 |
+| NA12891 | 8 | 4 | 0 |
+| NA12890 | 16 | 8 | 0 |
 | NA12892 | 72 | 86 | 100 |
+
+## Quality check of the mixes
+
+Chaggai made DNA libraries with the PCR free Illumina kit and performed quality check by running a small fraction of the libraries on our MySeq; see results [here]({{ site.baseurl }}/assets/projects/bsm/ceph-dna-mix-myseq-2017-01-10.xlsx).
+
+## Designing tissue pairs
 
 Target-reference tissue pairs can be defined based on these mixes.  The term "target-reference" is the generalization of "tumor-normal" terminology that is widely used for paired-tissue callers because these were predominantly developed for calling cancer-associated somatic variants present in the target tissue.  In the context of our brain somatic mosaicism study the target tissue is NeuN+ and the reference is muscle.
 
