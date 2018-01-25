@@ -1,0 +1,18 @@
+---
+layout: default
+#title: 
+tags: []
+#featimg: ""
+---
+
+This page summarizes the testing of variant callers.
+
+Download the entire summary table [here]({{ site.baseurl}}/assets/projects/bsm/variant-callers.csv).  Below is a detail of the table:
+
+```{r}
+callers <- read.csv("~/projects/bsm/tables/variant-callers.csv")
+callers[ , c("name", "install.success", "test.success", "fix.success")]
+```
+
+Note that `NA` means the operation has not yet been attempted.  If the issue/error has been sent to the developers/authors but they have not yet replied or fixed the issue then  `fix.success` is `FALSE`.
+
