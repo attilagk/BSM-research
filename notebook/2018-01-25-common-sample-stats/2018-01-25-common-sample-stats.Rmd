@@ -1,0 +1,54 @@
+---
+layout: default
+#title: 
+tags: [alignment]
+#featimg: ""
+---
+
+The common sample for the Reference Tissue Project is a NeuN+, fibroblast sample pair.  I present some statistics of the corresponding alignment pair that was created in Peter Park's group.
+
+## Import stats
+
+The BAM pair is
+1. [Common_7_NeuN_DO16090243-final-all.bam](https://www.synapse.org/#%21Synapse:syn11053649)
+1. [Fibro_Common_7_DO16090243-final-all.bam](https://www.synapse.org/#%21Synapse:syn11053650)
+
+Samtools has a *depth* tool to get read depth for each base position but it is very slow.  A less precise but very fast method is to use *idxstats*, which contains the number of mapped and unmapped reads for each sequence (chromosome).  I ran *idxstats* and here I import the corresponding files:
+
+```{r}
+bams <-
+    c(neun.pos = "~/data/bsm/Common_7_NeuN/Common_7_NeuN_DO16090243-final-all.bam",
+      fibro = "~/data/bsm/Fibro_Common_7/Fibro_Common_7_DO16090243-final-all.bam")
+bam.idxstats <- sapply(bams, paste0, ".idxstats")
+idxstats <- lapply(bam.idxstats,
+                   read.delim,
+                   header = FALSE, col.names = c("seq.name", "seq.len", "mapped.reads", "unmapped.reads"))
+```
+
+## Coverage (read depth)
+
+To calculate coverage we use the read length, which---after inspecting FASTQ files---is 151.
+$$
+\begin{equation}
+\mathrm{coverage} = \frac{\mathrm{mapped.reads} \times \mathrm{read.len}}{\mathrm{seq.len}}
+\end{equation}
+$$
+
+```{r}
+read.len <- 151
+idxstats <- lapply(idxstats, function(y) {
+                       coverage <- y$mapped.reads * read.len / y$seq.len
+                       cbind(y, data.frame(coverage = coverage)) })
+```
+
+The mean coverage across the genome:
+
+```{r}
+sapply(idxstats, function(y) mean(y$coverage[1:23]))
+```
+
+The mean coverage---and other stats---for each chromosome:
+
+```{r}
+lapply(idxstats, head, 23)
+```
