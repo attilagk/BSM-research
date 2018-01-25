@@ -11,4 +11,4 @@ SomaticSniper,v1.0.5.0,2017-11-27 12:58:16,build,TRUE,,,/usr/local/bin/bam-somat
 VarDict,NaN,2017-11-27 14:07:49,NaN,TRUE,,,/home/attila/tools/VarDict,https://github.com/AstraZeneca-NGS/VarDict,10.1093/nar/gkw227
 FreeBayes,,,,,,,,,
 Samtools,,,,,,,,,
-DeepVariant,,,,FALSE,,,,https://github.com/google/deepvariant,10.1101/092890 
+DeepVariant,"BIN_VERSION=""0.4.1""",2018-01-22,https://github.com/google/deepvariant/blob/r0.4/docs/deepvariant-quick-start.md#download-binaries-models-and-test-data,FALSE,ImportError: libcrypto.so.1.0.0: cannot open shared object file: No such file or director; see running the pipeline https://github.com/google/deepvariant/blob/r0.4/docs/deepvariant-quick-start.md#run-the-pipeline; issue submitted https://github.com/google/deepvariant/issues/41,,/home/attila/tools/deepvariant,https://github.com/google/deepvariant,10.1101/092890 
