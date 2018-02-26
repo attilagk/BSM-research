@@ -1,0 +1,46 @@
+---
+layout: default
+title: Test runs on the common sample BAMs
+tags: [ strelka2 ]
+featimg: "runtime-length-2.png"
+---
+
+Test runs of variant callers were performed using as input data the BAM files from the common sample from the reference tissue project.  Runtime were measured as a function of the length and number of CPU cores.
+
+The analysis had the following major steps
+1. excise segments of various lengths (between 1 and 100 MB) starting at chr1 50,000,000 using `do-aln-subregion` 
+1. run callers e.g. `do-mystrelka2Somatic`
+
+```{r echo=FALSE, warning=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Import and prepare data
+
+```{r}
+runt <- read.csv("~/projects/bsm/results/2018-02-22-ref-tissue-proj-testdata/runtimes.csv")
+runt$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt$length)))
+# the whole genome is 3235 MB long according to https://en.wikipedia.org/wiki/Human_genome
+runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
+```
+
+The following plots show how runtime scales with the size of the data.  
+
+```{r runtime-length echo=FALSE}
+arg <- list(xlab = "length (bases)", ylab = "real time",
+            labels = c("1s", "7.8s", "1m", "7.8m", "1h", "7.8h", "2.5d", "2.8w", "5m"),
+            at.lin = 0:8 / 2, at.log = 60 ^ c(0:8 / 2))
+xyplot(runtime / 60 ~ length.MB, data = runt, groups = caller, subset = numcores == 6 & length != "WGS", ylab = "runtime, min", xlab = "length, MB", grid = TRUE, type = "b", auto.key = list(lines = TRUE, points = FALSE), main = "Runtime at 6 cores")
+xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = caller, subset = numcores == 6, scales = list(y = list(at = arg$at.lin, labels = arg$labels)), ylim = c(1, 2.5), grid = TRUE, ylab = "runtime (log scale)", xlab = "log length (base)", type = "b", auto.key = list(lines = TRUE, points = FALSE), main = "Runtime at 6 cores")
+```
+
+```{r runtime-ncores echo=FALSE}
+xyplot(runtime / 60 ~ numcores, data = runt, groups = caller, subset = length == "1MB", ylab = "runtime, min", xlab = "number of cores", grid = TRUE, main = "Runtime at 1MB length")
+```
