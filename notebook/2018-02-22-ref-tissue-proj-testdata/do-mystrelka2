@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=${2:-1}
+
+( time mystrelka2 -p ${nproc} -r $REFSEQ \
+    -1 $length/Common_7_NeuN_DO16090243-final-all-$length.bam \
+    -2 $length/Fibro_Common_7_DO16090243-final-all-$length.bam \
+    -o $length/${nproc}proc/ ) 1>&$length/${nproc}proc/strelka2Somatic-run.time &

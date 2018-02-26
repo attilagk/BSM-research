@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+length=${1:-3MB}
+nproc=${2:-6}
+caller=${3:-strelka2Somatic}
+
+rtimef=$length/${nproc}proc/${caller}-run.time
+
+runtime=$(sed -n '/Elapsed time for full workflow/ { s/.*flow: \([[:digit:]]\+\) sec.*/\1/ ; p }' $rtimef)
+echo $length,$nproc,$caller,$runtime
