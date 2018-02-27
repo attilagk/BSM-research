@@ -8,7 +8,7 @@ featimg: "runtime-length-2.png"
 Test runs of variant callers were performed using as input data the BAM files from the common sample from the reference tissue project.  Runtime were measured as a function of the length and number of CPU cores.
 
 The analysis had the following major steps
-1. take the BAMs for the paired common sample: `Common_7_NeuN_DO16090243-final-all.bam` and `Fibro_Common_7_DO16090243-final-all.bam`
+1. take the BAMs for the paired common sample: `Common_7_NeuN_DO16090243-final-all.bam` and `Fibro_Common_7_DO16090243-final-all.bam` generated in Peter Park's group
 1. excise segments of various lengths (between 1 and 100 MB) starting at chr1:50,000,000 using `do-aln-subregion` 
 1. run callers e.g. using `do-mystrelka2Somatic` and store runtime results
 1. parse runtime results using `runtime-length-ncores`
@@ -56,3 +56,9 @@ vcf="../../results/2018-02-22-ref-tissue-proj-testdata/WGS/6proc/strelka2Somatic
 zcat $vcf | sed -n '/^#CHROM/,$ p' | wc -l
 zcat $vcf | grep -c PASS
 ```
+
+## Caller specific notes
+
+### Sentieon Tnseq
+
+This caller is a reimplementation of GATK's mutect2 and like GATK has strict requirements for read groups (RG) in the input BAM files.  Our input files (`Common_7_NeuN_DO16090243-final-all.bam` and `Fibro_Common_7_DO16090243-final-all.bam`) do not fulfill the requirements and therefore it was necessary to create new input files with appropriately altered read groups.  See `correct-commons-bam` that implements the correction and produces output file `filename-correct-rg.bam` from `filename.bam`.

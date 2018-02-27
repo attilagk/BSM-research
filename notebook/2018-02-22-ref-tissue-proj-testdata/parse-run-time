@@ -6,5 +6,12 @@ caller=${3:-strelka2Somatic}
 
 rtimef=$length/${nproc}proc/${caller}-run.time
 
-runtime=$(sed -n '/Elapsed time for full workflow/ { s/.*flow: \([[:digit:]]\+\) sec.*/\1/ ; p }' $rtimef)
+case $caller in
+    strelka2Somatic)
+        sedcmd='/Elapsed time for full workflow/ { s/.*flow: \([[:digit:]]\+\) sec.*/\1/ ; p }';;
+    Tnseq)
+        sedcmd='/^overall/ { s/^.*\s\([[:digit:].]\+\) real.*$/\1/ ; p }';;
+esac
+
+runtime=$(sed -n "$sedcmd" $rtimef)
 echo $length,$nproc,$caller,$runtime

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=${2:-1}
+
+( time myTnseq -p ${nproc} -r $REFSEQ \
+    -1 $length/Common_7_NeuN_DO16090243-final-all-$length-correct-rg.bam \
+    -2 $length/Fibro_Common_7_DO16090243-final-all-$length-correct-rg.bam \
+    -a Common_7_NeuN \
+    -b Fibro_Common_7 \
+    -o $length/${nproc}proc/ ) 1>&$length/${nproc}proc/Tnseq-run.time &

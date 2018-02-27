@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Corrects read group in inbam to comply with GATK
+# Otherwise sentieon Tnseq (and probably GATK) throws an error
+
+inbam=$1
+sample=$(echo $inbam | sed 's/.*\(Common_7_NeuN\|Fibro_Common_7\).*/\1/')
+
+bname=`basename -s .bam $inbam`
+outbam=`dirname $inbam`/${bname}-correct-rg.bam
+
+# read group tags
+SM=$sample
+PU=PU
+LB=LB
+ID=${SM}_${LB}_$PU
+
+samtools reheader <(samtools view -H $inbam | sed '/^@RG/d') $inbam > ${outbam}~
+samtools addreplacerg -r "ID:$ID" -r "LB:$LB" -r "SM:$SM" -r "PU:$PU" ${outbam}~ |
+samtools view -hb -o $outbam
+samtools index $outbam && rm ${outbam}~
