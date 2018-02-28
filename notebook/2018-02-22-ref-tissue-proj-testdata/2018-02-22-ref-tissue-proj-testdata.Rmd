@@ -24,6 +24,11 @@ lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
 ```
 
+```{r engine="bash"}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/
+./runtime-length-ncores 2>/dev/null 1>runtimes.csv
+```
+
 Import and prepare data
 
 ```{r}
@@ -39,14 +44,14 @@ The following plots show how runtime scales with the size of the data.
 arg <- list(xlab = "length (bases)", ylab = "real time",
             labels = c("1s", "7.8s", "1m", "7.8m", "1h", "7.8h", "2.5d", "2.8w", "5m"),
             at.lin = 0:8 / 2, at.log = 60 ^ c(0:8 / 2))
-xyplot(runtime / 60 ~ length.MB, data = runt, groups = caller, subset = numcores == 6 & length != "WGS", ylab = "runtime, min", xlab = "length, MB", grid = TRUE, type = "b", auto.key = list(lines = TRUE, points = FALSE), main = "Runtime at 6 cores")
-xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = caller, subset = numcores == 6, scales = list(y = list(at = arg$at.lin, labels = arg$labels)), ylim = c(1, 2.5), grid = TRUE, ylab = "runtime (log scale)", xlab = "log length (base)", type = "b", auto.key = list(lines = TRUE, points = FALSE), main = "Runtime at 6 cores")
+xyplot(runtime / 60 ~ length.MB, data = runt, groups = caller, subset = numcores == 6 & length != "WGS", ylab = "runtime, min", xlab = "length, MB", grid = TRUE, type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21)
+xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = caller, subset = numcores == 6, scales = list(y = list(at = arg$at.lin, labels = arg$labels)), ylim = c(1, 2.5), grid = TRUE, ylab = "runtime (log scale)", xlab = "log length (base)", type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21)
 ```
 
 The next graph presents runtimes at different number of CPU cores.
 
 ```{r runtime-ncores, echo=FALSE}
-xyplot(runtime / 60 ~ numcores, data = runt, groups = caller, subset = length == "1MB", ylab = "runtime, min", xlab = "number of cores", grid = TRUE, main = "Runtime at 1MB length")
+xyplot(runtime / 60 ~ numcores | length, data = runt, groups = caller, subset = length %in% c("1MB", "10MB"), ylab = "runtime, min", xlab = "number of cores", grid = TRUE, main = "Runtime at 1MB length", auto.key = TRUE, pch = 21)
 ```
 
 The number of all SNV candidates in the whole genome by strelka2Somatic caller and of those that `PASS`ed the default filters:
@@ -62,3 +67,14 @@ zcat $vcf | grep -c PASS
 ### Sentieon Tnseq
 
 This caller is a reimplementation of GATK's mutect2 and like GATK has strict requirements for read groups (RG) in the input BAM files.  Our input files (`Common_7_NeuN_DO16090243-final-all.bam` and `Fibro_Common_7_DO16090243-final-all.bam`) do not fulfill the requirements and therefore it was necessary to create new input files with appropriately altered read groups.  See `correct-commons-bam` that implements the correction and produces output file `filename-correct-rg.bam` from `filename.bam`.
+
+The following result shows that on the 1MB long data Tnseq and GATK mutect2 (both with default settings) produce identical results
+
+```{r engine="bash"}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/1MB/4proc/isec
+cat README.txt
+echo -e "\ncounting records in each VCF file:"
+grep -c '^[^#]' 000?.vcf
+```
+
+Interestingly, mutect2 ran successfully both with and without the read group correction implemented by `correct-commons-bam`.

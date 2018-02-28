@@ -7,7 +7,7 @@ caller=${3:-strelka2Somatic}
 rtimef=$length/${nproc}proc/${caller}-run.time
 
 case $caller in
-    strelka2Somatic)
+    strelka2*)
         sedcmd='/Elapsed time for full workflow/ { s/.*flow: \([[:digit:]]\+\) sec.*/\1/ ; p }';;
     Tnseq)
         sedcmd='/^overall/ { s/^.*\s\([[:digit:].]\+\) real.*$/\1/ ; p }';;
