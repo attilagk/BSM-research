@@ -23,6 +23,6 @@ for tissue in muscle NeuN_mn NeuN_pl; do
     fq1="$indir/MSSM179_${tissue}_${rg}_1*"
     fq2="$indir/MSSM179_${tissue}_${rg}_2*"
     #cmd="align -t6 -rID:$rg -B MSSM179_${tissue}_$rg.bam $fq1 $fq2"
-    cmd="align -t6 `parse10x-fnames.1 $fq1` -r PL:Illumina -B MSSM179_${tissue}_$rg.bam $fq1 $fq2"
+    cmd="align -t6 `parseX10-fnames.1 $fq1` -r PL:Illumina -B MSSM179_${tissue}_$rg.bam $fq1 $fq2"
     $cmd && rm -f $fq1 $fq2
 done

@@ -14,7 +14,7 @@ fix1bam () {
     #rgfix1=`mktemp`
     outbam="${path_bn}.bam"
     # fix read groups with samtools
-    samtools addreplacerg `parse10x-fnames.1 $inbam` -r "PL:Illumina" $inbam |
+    samtools addreplacerg `parseX10-fnames.1 $inbam` -r "PL:Illumina" $inbam |
     samtools view -bh -o $rgfix0
     samtools reheader <(samtools view -H $rgfix0 | sed '/^@RG\s\+\S\+$/d') $rgfix0 > $rgfix1
     # if order is lexicographic change it to karyotypic
