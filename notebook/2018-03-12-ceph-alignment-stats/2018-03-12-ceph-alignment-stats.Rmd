@@ -30,16 +30,35 @@ fnames <- paste0("../../results/2018-03-12-ceph-alignment-stats/", samples, ".ba
 names(fnames) <- samples
 depths <- lapply(fnames, get.depth)
 depths <- do.call(rbind, lapply(names(depths), function(x) cbind(data.frame(sample = x), depths[[x]])))
+depths$contig <- factor(depths$contig, ordered = TRUE, levels = c(1:22, "X", "Y", "MT", levels(depths$contig)[c(23:82, 84)]))
 ```
 
-The following empirical densities are based on all contigs (chromosomes).
+The following empirical densities of depth are based on all contigs (chromosomes) and hence show overall coverage.
 
 ```{r coverage-wgs}
 densityplot(~ depth, data = depths, groups = sample, subset = depth < 300, plot.points = FALSE, ylab = "density", par.settings = list(superpose.line = list(col = c("magenta", "darkgreen"))), auto.key = TRUE)
 ```
 
+Here coverage is shown separately for contigs (only chromosomal contigs are displayed excluding the mitocondrium, the decoy sequence and other contigs).
+
+```{r coverage-contigs, fig.asp = 1.5}
+densityplot(~ depth | contig, data = depths, groups = sample, subset = depth < 300 & contig %in% c(as.character(1:22), "X", "Y"), plot.points = FALSE, ylab = "density", par.settings = list(superpose.line = list(col = c("magenta", "darkgreen"))), auto.key = TRUE, ylim = c(0, 0.03))
+```
+
+The coverage of the Y chromosome is expanded below:
+
+```{r coverage-Y}
+densityplot(~ depth | contig, data = depths, groups = sample, subset = contig %in% c("Y"), plot.points = FALSE, ylab = "density", par.settings = list(superpose.line = list(col = c("magenta", "darkgreen"))), auto.key = TRUE, xlim = c(0, 35))
+```
+
+The coverage of the mitochondrium is shown here:
+
+```{r coverage-MT}
+densityplot(~ depth | contig, data = depths, groups = sample, subset = contig %in% c("MT"), plot.points = FALSE, ylab = "density", par.settings = list(superpose.line = list(col = c("magenta", "darkgreen"))), auto.key = TRUE)
+```
+
 The depth is roughly evenly distributed along and across chromosomes, except---as expected---at pericentromeric repeat regions.
 
-```{r depth-wgs, fig.asp = 1.5}
+```{r depth-contigs, fig.asp = 1.5}
 useOuterStrips(xyplot(depth ~ pos | sample * contig, data = depths, subset = contig %in% c(as.character(1:22), "X", "Y"), ylim = c(0, 300), pch = "."))
 ```
