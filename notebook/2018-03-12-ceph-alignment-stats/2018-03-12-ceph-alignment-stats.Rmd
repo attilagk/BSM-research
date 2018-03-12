@@ -1,0 +1,45 @@
+---
+layout: default
+tags: [BAM, alignment, genome]
+featimg: "coverage-wgs-1.png"
+---
+
+Coverage and other statistics on the aligned reads based on the CEPH mixture samples.
+
+```{r echo=FALSE, warning=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+The depth was obtained with `samtools depth` based on alignments such as `Mix1A.bam`.  Every $1000$th nucleotide position in the genome was retained and written in files such as `Mix1A.bam.1000.depth`.  The following expressions filter this by 10 to arrive at every $10,000$th position being retained.
+
+```{r}
+get.depth <- function(fname = "../../results/2018-03-12-ceph-alignment-stats/Mix1A.bam.1000.depth", filter.by = 10) {
+    df <- read.delim(fname, header = FALSE, col.names = c("contig", "pos", "depth"))
+    df$contig <- factor(df$contig)
+    return(df[seq(from = 1, to = nrow(df), by = filter.by), ])
+}
+samples <- c("Mix1A", "Mix1B")
+fnames <- paste0("../../results/2018-03-12-ceph-alignment-stats/", samples, ".bam.1000.depth")
+names(fnames) <- samples
+depths <- lapply(fnames, get.depth)
+depths <- do.call(rbind, lapply(names(depths), function(x) cbind(data.frame(sample = x), depths[[x]])))
+```
+
+The following empirical densities are based on all contigs (chromosomes).
+
+```{r coverage-wgs}
+densityplot(~ depth, data = depths, groups = sample, subset = depth < 300, plot.points = FALSE, ylab = "density", par.settings = list(superpose.line = list(col = c("magenta", "darkgreen"))), auto.key = TRUE)
+```
+
+The depth is roughly evenly distributed along and across chromosomes, except---as expected---at pericentromeric repeat regions.
+
+```{r depth-wgs, fig.asp = 1.5}
+useOuterStrips(xyplot(depth ~ pos | sample * contig, data = depths, subset = contig %in% c(as.character(1:22), "X", "Y"), ylim = c(0, 300), pch = "."))
+```
