@@ -1,0 +1,25 @@
+---
+layout: default
+tags: [benchmark]
+#featimg: "coverage-wgs-1.png"
+---
+
+The benchmark study aims to study how error rates of variant calling depend on various factors, variables such as mosaic variant allele frequency.  This article outlines the derivation of error rates based on a given call set and the truth set of variants.
+
+## Obtaining the truth set
+
+1. case mixed sample: merge VCF files (`bcftools merge`) for all CEPH individuals included in case mix
+1. control mixed sample: merge VCF files (`bcftools merge`) for all CEPH individuals included in control mix
+1. subtract control VCF from case VCF (`bcftools isec`; see details below); the result is the VCF for the somatic variant truth set
+
+### Details
+
+Only those variant sites should be filtered out from the control sample whose frequency is the same in the case sample.
+
+## Comparing call set to truth set
+
+1. obtain call set: VCF file produced by a single caller or by VariantMetaCaller from a set of VCF files
+1. depending on the specific analysis optionally filter (`bcftools filter`) both the call set VCF and the somatic truth set VCF
+   1. Chaggai's table with variant allele frequencies will be used in this point
+1. get intersection, union and set differences between the call set VCF and the somatic truth set VCF (`bcftools isec`)
+1. error rates are calculated based on the size of intersection and set differences
