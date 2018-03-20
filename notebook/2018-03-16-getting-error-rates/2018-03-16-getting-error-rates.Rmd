@@ -14,12 +14,12 @@ The benchmark study aims to study how error rates of variant calling depend on v
 
 ### Details
 
-Only those variant sites should be filtered out from the control sample whose frequency is the same in the case sample.
+Those sites should be filtered out where the variant frequencies in the control sample equal those in the case sample.  This includes somatic mosaic sites as well as germline variant sites.
 
 ## Comparing call set to truth set
 
 1. obtain call set: VCF file produced by a single caller or by VariantMetaCaller from a set of VCF files
 1. depending on the specific analysis optionally filter (`bcftools filter`) both the call set VCF and the somatic truth set VCF
-   1. Chaggai's table with variant allele frequencies will be used in this point
+   - Chaggai's table with variant allele frequencies will be used in this point
 1. get intersection, union and set differences between the call set VCF and the somatic truth set VCF (`bcftools isec`)
 1. error rates are calculated based on the size of intersection and set differences

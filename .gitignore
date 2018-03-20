@@ -17,6 +17,7 @@ test
 *.swp
 *.ppt
 *.pptx
+*.jnlp
 
 # ignore knitr's cache
 **/cache/
