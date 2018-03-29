@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+echo length,numcores,caller,runtime
+
+for caller in strelka2{Somatic,Germline} Tnseq; do
+    # various length
+    for length in 1MB wgs; do
+        ./parse-run-time $length 32 $caller
+    done
+done

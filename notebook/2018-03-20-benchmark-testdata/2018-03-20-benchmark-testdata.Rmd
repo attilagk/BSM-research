@@ -1,0 +1,48 @@
+---
+layout: default
+title: Test runs for the benchmark study
+tags: [ strelka2, mutect2, tnseq ]
+featimg: "runtimes-dotplot-1.png"
+---
+
+These test runs of variant callers involves a pair of BAM files for the benchmark study.  The pair is composed of Mix1A and Mix3A.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Parse log files and collect runtimes
+
+```{r engine="bash"}
+cd ../../results/2018-03-20-benchmark-testdata/
+./runtime-length-ncores 2>/dev/null 1>runtimes.csv
+```
+
+Import runtimes along with chromosomal segment length and other information
+
+```{r}
+runt <- read.csv("~/projects/bsm/results/2018-03-20-benchmark-testdata/runtimes.csv")
+runt$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt$length)))
+# the whole genome is 3235 MB long according to https://en.wikipedia.org/wiki/Human_genome
+runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
+runt <- runt[with(runt, order(numcores, length.MB)), ]
+```
+
+```{r}
+# manually set Tnseq runtime based on failed run as long as run with fixed Tnseq version is not completed
+# see wgs/32proc/Tnseq-v201711-run.time
+runt[6, "runtime"] <- 60 * 5258 + 45.905
+```
+
+Below are the runtimes.  Tnseq is much slower than strelka2Somatic or strelka2Germline on both the small and the WGS data set.
+
+```{r runtimes-dotplot}
+dotplot(caller ~ runtime / 3600 | length, data = runt, scales = list(x = list(relation = "free")), grid = TRUE, xlab = "runtime, hours", layout = c(1, 2))
+```
