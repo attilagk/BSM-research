@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=${2:-16}
+
+outdir=$length/${nproc}proc
+
+if test -d $outdir; then
+    :
+else
+    mkdir $outdir
+fi
+
+( time mystrelka2 -p ${nproc} -r $REFSEQ \
+    -t Germline \
+    -1 $length/Mix1A-$length.bam \
+    -2 $length/Mix3A-$length.bam \
+    -o $outdir ) 1>&$outdir/strelka2Germline-run.time &
