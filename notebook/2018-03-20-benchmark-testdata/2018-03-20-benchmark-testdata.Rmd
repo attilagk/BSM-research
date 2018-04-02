@@ -35,14 +35,10 @@ runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
 runt <- runt[with(runt, order(numcores, length.MB)), ]
 ```
 
-```{r}
-# manually set Tnseq runtime based on failed run as long as run with fixed Tnseq version is not completed
-# see wgs/32proc/Tnseq-v201711-run.time
-runt[6, "runtime"] <- 60 * 5258 + 45.905
-```
-
-Below are the runtimes.  Tnseq is much slower than strelka2Somatic or strelka2Germline on both the small and the WGS data set.
+Below are the runtimes.
 
 ```{r runtimes-dotplot}
 dotplot(caller ~ runtime / 3600 | length, data = runt, scales = list(x = list(relation = "free")), grid = TRUE, xlab = "runtime, hours", layout = c(1, 2))
 ```
+
+Tnseq is much slower than strelka2Somatic or strelka2Germline on both the small and the WGS data set.  At the shallower coverage of the the difference is less striking although Tnseq is still slower; see [2018-02-22-ref-tissue-proj-testdata]({{ site.baseurl }}{% post_url 2018-02-22-ref-tissue-proj-testdata %}).
