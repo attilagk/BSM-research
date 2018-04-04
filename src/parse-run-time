@@ -11,6 +11,8 @@ case $caller in
         sedcmd='/Elapsed time for full workflow/ { s/.*flow: \([[:digit:]]\+\) sec.*/\1/ ; p }';;
     Tnseq)
         sedcmd='/^overall/ { s/^.*\s\([[:digit:].]\+\) real.*$/\1/ ; p }';;
+    *)
+        sedcmd='/^real/ { s/^.*\s\([[:digit:].]\+\)$/\1/ ; p }';;
 esac
 
 runtime=$(sed -n "$sedcmd" $rtimef)

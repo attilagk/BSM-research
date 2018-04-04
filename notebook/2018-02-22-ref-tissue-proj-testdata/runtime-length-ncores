@@ -2,7 +2,7 @@
 
 echo length,numcores,caller,runtime
 
-for caller in strelka2{Somatic,Germline} Tnseq; do
+for caller in strelka2{Somatic,Germline} Tnseq lofreq{Somatic,Germline}; do
     # various length
     for length in {1,3,10,30,100}MB wgs; do
         ./parse-run-time $length 6 $caller
