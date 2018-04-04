@@ -33,6 +33,7 @@ runt$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt$le
 # the whole genome is 3235 MB long according to https://en.wikipedia.org/wiki/Human_genome
 runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
 runt <- runt[with(runt, order(numcores, length.MB)), ]
+levels(runt$caller) <- c(levels(runt$caller)[1:2], "Tnseq.Mutect2")
 ```
 
 Below are the runtimes.

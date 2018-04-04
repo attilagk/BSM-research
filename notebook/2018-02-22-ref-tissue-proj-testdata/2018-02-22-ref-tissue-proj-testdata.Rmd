@@ -39,6 +39,7 @@ runt$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt$le
 # the whole genome is 3235 MB long according to https://en.wikipedia.org/wiki/Human_genome
 runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
 runt <- runt[with(runt, order(numcores, length.MB)), ]
+levels(runt$caller) <- c(levels(runt$caller)[1:2], "Tnseq.Mutect2")
 ```
 
 The following plots show how runtime scales with the size of the data.
@@ -54,7 +55,7 @@ xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = c
 The next graph presents runtimes at different number of CPU cores.
 
 ```{r runtime-ncores, echo=FALSE}
-xyplot(runtime / 60 ~ numcores | length, data = runt, groups = caller, subset = length %in% c("1MB", "10MB"), ylab = "runtime, min", xlab = "number of cores", grid = TRUE, main = "Runtime at 1MB length", auto.key = TRUE, type = "b", pch = 21, lty = 2)
+xyplot(runtime / 60 ~ numcores | length, data = runt, groups = caller, subset = length %in% c("1MB", "10MB"), ylab = "runtime, min", xlab = "number of cores", grid = TRUE, main = "Runtime and Multithreading", auto.key = TRUE, type = "b", pch = 21, lty = 2)
 ```
 
 The number of all SNV candidates in the whole genome by strelka2Somatic caller and of those that `PASS`ed the default filters:
