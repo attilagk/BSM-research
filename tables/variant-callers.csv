@@ -1,5 +1,5 @@
 name,reference,URL,version,install.date,install.method,install.success,install.error,own.test.data,own.test.success,own.test.error,test.data,test.success,test.error,issue.to.developers,fix.success,path.thinks,path.ada
-LoFreq,10.1093/nar/gks918,http://csb5.github.io/lofreq/,v2.1.2,2017-11-22 16:00:00,binary,TRUE,,,,,,,,,,/opt/lofreq_star/2.1.2,
+LoFreq,10.1093/nar/gks918,http://csb5.github.io/lofreq/,v2.1.3.1,2018-04-02 14:09:11,binary,TRUE,,,,,,TRUE,,,,/opt/lofreq_star/2.1.3.1,/opt/lofreq_star/2.1.3.1
 GATK Mutect2,10.1038/nbt.2514,,v3.8.0,2017-07-28 17:29:00,binary,TRUE,,,,,,TRUE,,,,/opt/gatk/3.8.0,
 GATK HaplotypeCaller,10.1038/ng.806,,v3.8.0,2017-07-28 17:29:00,binary,TRUE,,,,,,,,,,/opt/gatk/3.8.0,
 strelka2Somatic,10.1101/192872 ,https://github.com/Illumina/strelka,V2.9.2,2017-11-21 16:59:00,build,TRUE,,/usr/local/share/demo/strelka/data/,TRUE,,/big/results/bsm/2018-02-22-ref-tissue-proj-testdata,TRUE,,,,/usr/local,/usr/local
