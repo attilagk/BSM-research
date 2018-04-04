@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=${2:-16}
+
+( time -p mylofreq -p ${nproc} -r $REFSEQ \
+    -1 $length/Mix1A-$length.bam \
+    -2 $length/Mix3A-$length.bam \
+    -t Somatic -d $DBSNP_ALL \
+    -o $length/${nproc}proc/ ) 1>&$length/${nproc}proc/lofreqSomatic-run.time &
