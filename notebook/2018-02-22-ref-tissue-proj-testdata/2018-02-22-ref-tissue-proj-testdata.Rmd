@@ -39,7 +39,10 @@ runt$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt$le
 # the whole genome is 3235 MB long according to https://en.wikipedia.org/wiki/Human_genome
 runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
 runt <- runt[with(runt, order(numcores, length.MB)), ]
-levels(runt$caller) <- c(levels(runt$caller)[1:2], "Tnseq.Mutect2")
+levels(runt$caller) <- sub("Tnseq", "Tnseq.Mutect2", levels(runt$caller))
+# somatic sniper has no parallel mode
+for(l in levels(runt$length))
+    runt[with(runt, caller == "somaticSniper" & length == l & numcores != 1), "runtime"] <- subset(runt, caller == "somaticSniper" & length == l & numcores == 1, runtime, drop = TRUE)
 ```
 
 The following plots show how runtime scales with the size of the data.
@@ -82,3 +85,18 @@ grep -c '^[^#]' 000?.vcf
 ```
 
 Interestingly, GATK v3.8.0 mutect2 ran successfully both with and without the read group correction implemented by `correct-commons-bam`. Right after this I switched to GATK v4.0.2.0.
+
+### lofreq star
+
+The analysis below shows that filtering for SNPs present in DBSNP has essentially no impact on lofreq's runtime since removing this filtering `lofreq-noDBSNP` did not shorten runtime.
+
+```{r engine="bash"}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/
+./runtime-length-ncores-lofreq 2>/dev/null 1>runtimes-lofreq.csv
+```
+
+```{r lofreq-noDBSNP}
+runt.lofreq <- read.csv("~/projects/bsm/results/2018-02-22-ref-tissue-proj-testdata/runtimes-lofreq.csv")
+runt.lofreq$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt.lofreq$length)))
+dotplot(caller ~ runtime / 60, data = runt.lofreq, xlim = c(0, 60), xlab = "runtime, min")
+```

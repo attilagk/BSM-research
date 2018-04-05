@@ -18,14 +18,14 @@ cmc <- list(synapse = read.csv("Job-53521223405979528604345739.csv"))
 cmc$chesslab <- read.csv("../../data/dnalib/BSM_Project_Chess.csv")
 ```
 
-### Samples missing from the Synapse table
+### Samples in the Chesslab table missing from the Synapse table
 
 ```{r}
 dissections <- list(synapse = levels(cmc$synapse$Dissection_ID), chesslab = levels(cmc$chesslab$Institution.Dissection.ID))
 (dissections.in.chesslab.not.in.synapse <- with(dissections, setdiff(chesslab, synapse)))
 ```
 
-### Samples missing from the Chesslab table
+### Samples in the Synapse table missing from the Chesslab table
 
 ```{r}
 (dissections.in.synapse.not.in.chesslab <- with(dissections, setdiff(synapse, chesslab)))

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+echo length,numcores,caller,runtime
+length=10MB
+
+for caller in lofreqSomatic{,-noDBSNP}; do
+    ./parse-run-time $length 6 $caller
+done
