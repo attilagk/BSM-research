@@ -1,0 +1,58 @@
+#! /usr/bin/env bash
+
+indir=`realpath $1`
+outdir="`realpath $2`/vcf"
+
+mkdir -p $outdir
+mkdir -p $outdir/snvs
+mkdir -p $outdir/indels
+
+somaticSniper () {
+    insnvs=$indir/$caller/out.vcf
+    inindels=$insnvs
+}
+
+strelka2Germline () {
+    insnvs=$indir/$caller/results/variants/variants.vcf.gz
+    inindels=$insnvs
+}
+
+strelka2Somatic () {
+    insnvs=$indir/$caller/results/variants/somatic.snvs.vcf.gz
+    inindels=$indir/$caller/results/variants/somatic.indels.vcf.gz
+}
+
+lofreqSomatic () {
+    insnvs=$indir/$caller/out-somatic_final.snvs.vcf.gz
+    inindels=$indir/$caller/out-somatic_final.indels.vcf.gz
+}
+
+Tnseq () {
+    insnvs=$indir/$caller/tnseq.vcf
+    inindels=$insnvs
+}
+
+mybcftools () {
+    outsnvs=$outdir/snvs/$caller.vcf.gz
+    bcftools view -o $outsnvs -O z -v snps $insnvs
+    outindels=$outdir/indels/$caller.vcf.gz
+    bcftools view -o $outindels -O z -v indels $inindels
+    # for some callers tabix is necessary
+    tabix $outsnvs
+    tabix $outindels
+}
+
+# assume one-to-one mapping between caller and directory names
+# directories may be symlinks
+find -L $indir -mindepth 1 -maxdepth 1 -type d | \
+    sed 's|^.*/\([^/]\+\)$|\1|' | \
+    for caller in `cat`; do
+        case $caller in
+            somaticSniper) somaticSniper;;
+            strelka2Germline) strelka2Germline;;
+            strelka2Somatic) strelka2Somatic;;
+            lofreqSomatic) lofreqSomatic;;
+            Tnseq) Tnseq;;
+        esac
+        mybcftools
+    done
