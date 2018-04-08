@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Test runs on the common sample BAMs
-tags: [ strelka2, mutect2, tnseq ]
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
 featimg: "runtime-length-2.png"
 ---
 
