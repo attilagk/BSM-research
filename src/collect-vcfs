@@ -1,7 +1,19 @@
 #! /usr/bin/env bash
 
-indir=`realpath $1`
-outdir="`realpath $2`/vcf"
+# Take all VCFs in caller-specific subdirectories of indir and collect them in outdir/vcf/{snvs,indels}
+
+indir=$1
+outdir=$2
+
+usage="usage: `basename $0` indir outdir"
+
+if test $# -ne 2; then
+    echo $usage >&2
+    exit 1
+fi
+
+indir=`realpath $indir`
+outdir="`realpath $outdir`/vcf"
 
 mkdir -p $outdir
 mkdir -p $outdir/snvs
