@@ -2,7 +2,7 @@
 layout: default
 title: Call set concordance---test data
 tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
-#featimg: "runtime-length-2.png"
+featimg: "venn-common-sample-wgs-snvs-1.png"
 ---
 
 Attempt to represent the concordance among call sets corresponding to various variant callers (strelka2Somatic,strelka2Germline, Tnseq/Mutect2, lofreq, somaticSniper.
@@ -19,12 +19,11 @@ lattice.options(default.theme = "standard.theme")
 ```
 
 ```{r message=FALSE}
-library(VariantAnnotation)
 library(VennDiagram)
 source("2018-04-08-call-set-concordance.R")
 ```
 
-```{r cache=TRUE}
+```{r}
 samples <- c("common.sample", "benchmark")
 names(samples) <- samples
 segs <- c(paste0(c(1, 3, 10, 30, 100), "MB"), "wgs")
@@ -33,31 +32,62 @@ vartypes <- c("snvs", "indels")
 names(vartypes) <- vartypes
 callers <- c("lofreqSomatic", "somaticSniper", "strelka2Germline", "strelka2Somatic", "Tnseq")
 names(callers) <- sub("Tnseq", "Tnseq.Mutect2", callers)
-# benchmark study
-bm.vcf <- import.across.segments(samples[2], sgs = c("1MB", "wgs"), cal = callers)
 ```
 
 ```{r cache=TRUE}
 # common sample
-cs.vcf <- import.across.segments(samples[1], sgs = segs[- length(segs)])
+cs.vcf <- import.across.segments(samples[1], sgs = segs)
 ```
 
-```{r venn-common-sample-100MB-snvs}
-l <- lapply(cs.vcf[["100MB"]]$snvs, function(x) row.names(x))
-grid.draw(venn.diagram(l, NULL))
+```{r cache=TRUE}
+# benchmark study
+bm.vcf <- import.across.segments(samples[2], sgs = segs[c(1, 3, 5, 6)])
 ```
 
-```{r venn-common-sample-100MB-indels}
-l <- lapply(cs.vcf[["100MB"]]$indels, function(x) row.names(x))
-grid.draw(venn.diagram(l, NULL))
+## Number of unfiltered calls in the whole genome
+
+```{r call-set-size}
+ssize <- rbind(cbind(data.frame(sample = "common.sample"), set.size.length(cs.vcf)),
+               cbind(data.frame(sample = "benchmark"), set.size.length(bm.vcf)))
+barchart(caller ~ set.size | sample, data = ssize, subset = length.Mb == 3235, xlim = c(0, 5e6))
+barchart(caller ~ log10(set.size) | sample, data = ssize, subset = length.Mb == 3235, xlim = c(0, 7))
+```
+
+## Concordance of unfiltered calls
+
+### SNVs in the whole genome
+
+```{r venn-common-sample-wgs-snvs}
+my.par <- list(main.cex = 1.4, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray")
+grid.draw(venn.diagram(cs.vcf[["wgs"]]$snvs, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
 ```
 
 ```{r venn-benchmark-wgs-snvs}
-l <- lapply(bm.vcf[["wgs"]]$snvs, function(x) row.names(x))
-grid.draw(venn.diagram(l, NULL))
+grid.draw(venn.diagram(bm.vcf[["wgs"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+```
+
+### Indels in the whole genome
+
+```{r venn-common-sample-wgs-indels}
+grid.draw(venn.diagram(cs.vcf[["wgs"]]$indels, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
 ```
 
 ```{r venn-benchmark-wgs-indels}
-l <- lapply(bm.vcf[["wgs"]]$indels, function(x) row.names(x))
-grid.draw(venn.diagram(l, NULL))
+grid.draw(venn.diagram(bm.vcf[["wgs"]]$indels, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+```
+
+## Various genomic segments
+
+```{r set-size-seg-length}
+xyplot(log10(set.size) ~ log10(length.Mb) | sample, data = ssize, groups = caller, type = "b", lty = 2, auto.key = TRUE, grid = TRUE)
+```
+
+### SNVs in a 100Mb segment
+
+```{r venn-common-sample-100MB-snvs}
+grid.draw(venn.diagram(cs.vcf[["100MB"]]$snvs, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+```
+
+```{r venn-benchmark-100MB-snvs}
+grid.draw(venn.diagram(bm.vcf[["100MB"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
 ```

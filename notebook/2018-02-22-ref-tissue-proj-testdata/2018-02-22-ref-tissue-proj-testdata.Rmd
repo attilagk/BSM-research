@@ -52,7 +52,7 @@ arg <- list(xlab = "length (bases)", ylab = "real time",
             labels = c("1s", "7.8s", "1m", "7.8m", "1h", "7.8h", "2.5d", "2.8w", "5m"),
             at.lin = 0:8 / 2, at.log = 60 ^ c(0:8 / 2))
 xyplot(runtime / 60 ~ length.MB, data = runt, groups = caller, subset = numcores == 6 & length != "wgs", ylab = "runtime, min", xlab = "length, MB", grid = TRUE, type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21, lty = 2)
-xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = caller, subset = numcores == 6, scales = list(y = list(at = arg$at.lin, labels = arg$labels)), ylim = c(1, 3.0), grid = TRUE, ylab = "runtime (log scale)", xlab = "log length (base)", type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21, lty = 2)
+xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = caller, subset = numcores == 6, scales = list(y = list(at = arg$at.lin, labels = arg$labels)), ylim = c(0.5, 3.5), grid = TRUE, ylab = "runtime (log scale)", xlab = "log length (base)", type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21, lty = 2)
 ```
 
 The next graph presents runtimes at different number of CPU cores.
