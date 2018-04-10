@@ -5,6 +5,9 @@ library(vcfR)
 # (snvs/indels) and variant callers.
 # The import function is readVcf or read.vcfR of the VariantAnnotation and
 # vcfR packages, respectively.
+# Because knitr's cache cannot handle very large data only the rownames are
+# retained from each VariantAnnotation VCF object; these contain the position
+# as well as the reference and alternative allele.
 import.across.segments <- function(sam = samples[1], sgs = segs, vart = vartypes, cal = callers) {
     across.vartypes <- function(seg) {
         across.callers <- function(var) {
@@ -30,5 +33,7 @@ set.size.length <- function(vcf = cs.vcf, vtype = "snvs") {
 
 partition.sizes <- function(vcfs = cs.vcf[["100MB"]]$snvs) {
     vp <- get.venn.partitions(vcfs)
-    as.matrix(vp[ , seq.int(length(vcfs))])
+    callers.in.partition <- apply(as.matrix(vp[ , seq.int(length(vcfs))]), 1, sum)
+    df <- data.frame(callers.in.partition = callers.in.partition, calls.in.partition = vp$..count..)
+    df[with(df, order(callers.in.partition, calls.in.partition)), ]
 }

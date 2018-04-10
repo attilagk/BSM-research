@@ -44,9 +44,15 @@ cs.vcf <- import.across.segments(samples[1], sgs = segs)
 bm.vcf <- import.across.segments(samples[2], sgs = segs[c(1, 3, 5, 6)])
 ```
 
+```{r cache=TRUE}
+part.wgs <-
+    rbind(cbind(data.frame(sample = "common.sample"), partition.sizes(cs.vcf[["wgs"]]$snvs)),
+          cbind(data.frame(sample = "benchmark"), partition.sizes(bm.vcf[["wgs"]]$snvs)))
+```
+
 ## Number of unfiltered calls in the whole genome
 
-```{r call-set-size}
+```{r call-set-size, fig.asp=0.7}
 ssize <- rbind(cbind(data.frame(sample = "common.sample"), set.size.length(cs.vcf)),
                cbind(data.frame(sample = "benchmark"), set.size.length(bm.vcf)))
 barchart(caller ~ set.size | sample, data = ssize, subset = length.Mb == 3235, xlim = c(0, 5e6))
@@ -58,22 +64,26 @@ barchart(caller ~ log10(set.size) | sample, data = ssize, subset = length.Mb == 
 ### SNVs in the whole genome
 
 ```{r venn-common-sample-wgs-snvs}
-my.par <- list(main.cex = 1.4, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray")
-grid.draw(venn.diagram(cs.vcf[["wgs"]]$snvs, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray", cat.cex = 1.4)
+grid.draw(venn.diagram(cs.vcf[["wgs"]]$snvs, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
 
 ```{r venn-benchmark-wgs-snvs}
-grid.draw(venn.diagram(bm.vcf[["wgs"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+grid.draw(venn.diagram(bm.vcf[["wgs"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+```
+
+```{r part-sizes-wgs, fig.asp=0.7}
+xyplot(callers.in.partition ~ log10(calls.in.partition) | sample, data = part.wgs, pch = "|", col = "red", grid = TRUE, cex = 2)
 ```
 
 ### Indels in the whole genome
 
 ```{r venn-common-sample-wgs-indels}
-grid.draw(venn.diagram(cs.vcf[["wgs"]]$indels, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+grid.draw(venn.diagram(cs.vcf[["wgs"]]$indels, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
 
 ```{r venn-benchmark-wgs-indels}
-grid.draw(venn.diagram(bm.vcf[["wgs"]]$indels, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+grid.draw(venn.diagram(bm.vcf[["wgs"]]$indels, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
 
 ## Various genomic segments
@@ -85,9 +95,9 @@ xyplot(log10(set.size) ~ log10(length.Mb) | sample, data = ssize, groups = calle
 ### SNVs in a 100Mb segment
 
 ```{r venn-common-sample-100MB-snvs}
-grid.draw(venn.diagram(cs.vcf[["100MB"]]$snvs, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+grid.draw(venn.diagram(cs.vcf[["100MB"]]$snvs, NULL, main = "common sample", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
 
 ```{r venn-benchmark-100MB-snvs}
-grid.draw(venn.diagram(bm.vcf[["100MB"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col))
+grid.draw(venn.diagram(bm.vcf[["100MB"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
