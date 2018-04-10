@@ -50,6 +50,12 @@ part.wgs <-
           cbind(data.frame(sample = "benchmark"), partition.sizes(bm.vcf[["wgs"]]$snvs)))
 ```
 
+```{r cache=TRUE}
+part.100MB <-
+    rbind(cbind(data.frame(sample = "common.sample"), partition.sizes(cs.vcf[["100MB"]]$snvs)),
+          cbind(data.frame(sample = "benchmark"), partition.sizes(bm.vcf[["100MB"]]$snvs)))
+```
+
 ## Number of unfiltered calls in the whole genome
 
 ```{r call-set-size, fig.asp=0.7}
@@ -101,3 +107,8 @@ grid.draw(venn.diagram(cs.vcf[["100MB"]]$snvs, NULL, main = "common sample", mai
 ```{r venn-benchmark-100MB-snvs}
 grid.draw(venn.diagram(bm.vcf[["100MB"]]$snvs, NULL, main = "benchmark", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
+
+```{r part-sizes-100MB, fig.asp=0.7}
+xyplot(callers.in.partition ~ log10(calls.in.partition) | sample, data = part.100MB, pch = "|", col = "red", grid = TRUE, cex = 2)
+```
+

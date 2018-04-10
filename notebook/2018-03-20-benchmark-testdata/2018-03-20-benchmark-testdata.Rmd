@@ -5,7 +5,7 @@ tags: [ strelka2, mutect2, tnseq ]
 featimg: "runtimes-dotplot-1.png"
 ---
 
-These test runs of variant callers involves a pair of BAM files for the benchmark study.  The pair is composed of Mix1A and Mix3A.
+These testruns of variant callers involves a pair of BAM files for the benchmark study.  The pair is composed of Mix1A and Mix3A.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(lme4)

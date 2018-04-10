@@ -18,6 +18,7 @@ test
 *.ppt
 *.pptx
 *.jnlp
+*.syn_cache
 
 # ignore knitr's cache
 **/cache/
