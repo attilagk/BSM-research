@@ -2,14 +2,14 @@ get.samstats <- function(statsfile, field = "COV") {
     read.delim(pipe(paste0("grep ^", field, " ", statsfile)), header = FALSE)
 }
 
-get.fai <- function(fastaix = "~/data/GRCh37/dna/Homo_sapiens.GRCh37.dna.fa.fai") {
+get.fai <- function(fastaix = "~/data/GRCh37/karyotypic-order/Homo_sapiens.GRCh37.dna.fa.fai") {
     fai <- read.delim(fastaix , header = FALSE, stringsAsFactors = FALSE)[1:2]
     names(fai) <- c("contig", "length")
     return(fai)
 }
 
 get.read.depths <- function(fai, tissues = c("NeuN_pl", "NeuN_mn", "muscle"), suffices = "1000",
-                            prefix = "../../data/MSSM_179/aln-stats/MSSM179_", extension = ".bam.depth.") {
+                            prefix = "~/results/bsm/2017-05-24-alignment-stats/MSSM179_", extension = ".bam.depth.") {
     helper <- function(tis, suf) {
         fname <- paste0(prefix, tis, extension, suf)
         df <- read.delim(fname, header = FALSE, col.names = c("contig", "pos", "depth"))

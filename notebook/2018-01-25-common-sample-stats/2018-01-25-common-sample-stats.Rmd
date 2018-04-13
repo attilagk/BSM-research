@@ -17,8 +17,8 @@ Samtools has a *depth* tool to get read depth for each base position but it is v
 
 ```{r}
 bams <-
-    c(neun.pos = "~/data/bsm/Common_7_NeuN/Common_7_NeuN_DO16090243-final-all.bam",
-      fibro = "~/data/bsm/Fibro_Common_7/Fibro_Common_7_DO16090243-final-all.bam")
+    c(neun.pos = "~/data/bsm/ref-tissue-proj/Common_7_NeuN/Common_7_NeuN_DO16090243-final-all.bam",
+      fibro = "~/data/bsm/ref-tissue-proj/Fibro_Common_7/Fibro_Common_7_DO16090243-final-all.bam")
 bam.idxstats <- sapply(bams, paste0, ".idxstats")
 idxstats <- lapply(bam.idxstats,
                    read.delim,
