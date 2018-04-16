@@ -1,5 +1,6 @@
 ---
 layout: default
+featimg: dissections-venn-1.png
 ---
 
 Which CommonMind (CMC) samples were sequenced under the BSM grant?
@@ -9,35 +10,53 @@ From Mette Peters' message from Feb 15, 2018, at 4:27 PM to Andy Chess:
 >Jessica and I are working on a master table of all CMC samples. Can you please verify if these are [all samples generated through the BSMN grant on CMC individuals][link1]. Will there be additional samples?
 
 ```{r}
-library(synapseClient)
-synapseLogin()
+#library(synapseClient)
+library(synapser)
+library(VennDiagram)
+synLogin()
 ```
 
 ```{r}
-cmc <- list(synapse = read.csv("Job-53521223405979528604345739.csv"))
+#cmc <- list(synapse = read.csv("Job-53521223405979528604345739.csv"))
+cmc <- list(synapse = as.data.frame(synTableQuery('select * from syn11801978')))
 cmc$chesslab <- read.csv("../../data/dnalib/BSM_Project_Chess.csv")
+```
+
+### Concordance between the Chesslab and the Synapse table
+
+```{r}
+dissections <- list(synapse = unique(cmc$synapse$Dissection_ID), chesslab = levels(cmc$chesslab$Institution.Dissection.ID))
+# take care of NAs in the synapse table
+dissections$synapse <- dissections$synapse[! is.na(dissections$synapse)]
+```
+
+```{r dissections-venn}
+grid.draw(venn.diagram(dissections, filename=NULL, fill = c("blue", "red"), cat.cex = 1.8))
 ```
 
 ### Samples in the Chesslab table missing from the Synapse table
 
 ```{r}
-dissections <- list(synapse = levels(cmc$synapse$Dissection_ID), chesslab = levels(cmc$chesslab$Institution.Dissection.ID))
 (dissections.in.chesslab.not.in.synapse <- with(dissections, setdiff(chesslab, synapse)))
 ```
 
 ### Samples in the Synapse table missing from the Chesslab table
 
 ```{r}
-(dissections.in.synapse.not.in.chesslab <- with(dissections, setdiff(synapse, chesslab)))
+dissections.in.synapse.not.in.chesslab <- with(dissections, setdiff(synapse, chesslab))
+length(dissections.in.synapse.not.in.chesslab)
+head(dissections.in.synapse.not.in.chesslab, n = 20L)
 ```
 
 Based on the `Dissection_ID` let's inspect the samples in `synapse` but not in `chesslab`!  In particular, which `Brain_Bank` did they come from?
 
 ```{r}
-subset(cmc$synapse, subset = Dissection_ID %in% dissections.in.synapse.not.in.chesslab, select =  Brain_Bank, drop = TRUE)
+bbank <- subset(cmc$synapse, subset = Dissection_ID %in% dissections.in.synapse.not.in.chesslab, select =  Brain_Bank, drop = TRUE)
+length(bbank)
+unique(bbank)
 ```
 
-The all came from `PITT`.
+The came from various institutions.
 
 Now let's see the rest of the samples in `chesslab`.  Are they all from `MSSM`?
 
@@ -45,6 +64,6 @@ Now let's see the rest of the samples in `chesslab`.  Are they all from `MSSM`?
 all("MSSM" == subset(cmc$synapse, subset = ! Dissection_ID %in% dissections.in.synapse.not.in.chesslab, select =  Brain_Bank, drop = TRUE))
 ```
 
-Yes.
+No.
 
 [link1]: https://urldefense.proofpoint.com/v2/url?u=https-3A__www.synapse.org_-23-21Synapse-3Asyn11801978_tables_query_eyJzcWwiOiJTRUxFQ1QgKiBGUk9NIHN5bjExODAxOTc4IE9SREVSIEJZIFwiVGlzc3VlXCIgQVNDLCBcIkFTU0FZXCIgQVNDLCBcIkRpc3NlY3Rpb25fSURcIiBBU0MiLCAic2VsZWN0ZWRGYWNldHMiOlt7ImNvbmNyZXRlVHlwZSI6Im9yZy5zYWdlYmlvbmV0d29ya3MucmVwby5tb2RlbC50YWJsZS5GYWNldENvbHVtblZhbHVlc1JlcXVlc3QiLCAiY29sdW1uTmFtZSI6IkZ1bmRpbmciLCAiZmFjZXRWYWx1ZXMiOlsiVTAxTUgxMDY4OTEiXX1dLCAiaW5jbHVkZUVudGl0eUV0YWciOnRydWUsICJpc0NvbnNpc3RlbnQiOnRydWUsICJvZmZzZXQiOjAsICJsaW1pdCI6MjV9&d=DwMFaQ&c=shNJtf5dKgNcPZ6Yh64b-A&r=zYUNWLTGp4iMUkBLv5yRxoKLmEITRT5pxh58JUSn5VM&m=BCAIE0gpekjgq-YM68EFSGNwnAM_GdlTLGh4XLq0USI&s=RM7G5AwlrlKDSNj_XJ6CZCb9pNrPPhdWadzZ2-ZQjM4&e=
