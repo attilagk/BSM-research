@@ -1,0 +1,233 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, hyperref, color, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+\usepackage{xcolor}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{The Main Title Naming Key Concepts}
+\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Gulyas-Kovacs, Chaggai Rosenbluh, Andy Chess}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{VCFs, filtering, combination}
+\normalsize
+Tnseq.Mutect2
+\tiny
+\begin{tabular}{llllllll}
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+\textcolor{blue}{1} &
+\textcolor{blue}{50003788} &
+\textcolor{blue}{0} &
+\textcolor{blue}{A} &
+\textcolor{blue}{G} &
+\textcolor{blue}{0} &
+\textcolor{blue}{t\_lod\_fstar} &
+\textcolor{blue}{...;NLOD=30.4;TLOD=4.62} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50005034} &
+\textcolor{violet}{0} &
+\textcolor{violet}{G} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{t\_lod\_fstar} &
+\textcolor{violet}{...;NLOD=33.27;TLOD=4.51} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50007349} &
+\textcolor{violet}{0} &
+\textcolor{violet}{C} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{PASS} &
+\textcolor{violet}{...;NLOD=23.43;TLOD=10.97} \\
+\textcolor{blue}{1} &
+\textcolor{blue}{50008565} &
+\textcolor{blue}{0} &
+\textcolor{blue}{C} &
+\textcolor{blue}{A} &
+\textcolor{blue}{0} &
+\textcolor{blue}{PASS} &
+\textcolor{blue}{...;NLOD=7.69;TLOD=8.26} \\
+% \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+\end{tabular}
+\vfill
+\normalsize
+strelka2Somatic
+\tiny
+\begin{tabular}{llllllll}
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+\textcolor{red}{1} &
+\textcolor{red}{50003323} &
+\textcolor{red}{0} &
+\textcolor{red}{A} &
+\textcolor{red}{G} &
+\textcolor{red}{0} &
+\textcolor{red}{LowEVS} &
+\textcolor{red}{...;DP=274;MQ=59.86;...;SomaticEVS=0} \\
+\textcolor{red}{1} &
+\textcolor{red}{50003455} &
+\textcolor{red}{0} &
+\textcolor{red}{C} &
+\textcolor{red}{T} &
+\textcolor{red}{0} &
+\textcolor{red}{LowEVS} &
+\textcolor{red}{...;DP=226;MQ=59.9;...;SomaticEVS=0.65} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50005034} &
+\textcolor{violet}{0} &
+\textcolor{violet}{G} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{PASS} &
+\textcolor{violet}{...;DP=278;MQ=59.95;...;SomaticEVS=9.04} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50007349} &
+\textcolor{violet}{0} &
+\textcolor{violet}{C} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{LowEVS} &
+\textcolor{violet}{...;DP=192;MQ=59.88;...;SomaticEVS=4.19} \\
+% \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+\end{tabular}
+% ##INFO=<ID=SomaticEVS,Number=1,Type=Float,Description="Somatic Empirical
+% Variant Score (EVS) expressing the phred-scaled probability of thecall being
+% a false positive observation.">
+\normalsize
+\begin{columns}[]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+{\onslide<2->
+\begin{itemize}
+\item improvement?
+\begin{itemize}
+\item optimal filtering and combination
+\end{itemize}
+\item accuracy?
+\begin{itemize}
+\item truth set needed
+\item FDR control:\\precision \textit{vs} sensitivity 
+\end{itemize}
+\end{itemize}
+}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{We ran 5 callers on the common sample}
+\begin{center}
+\includegraphics[height=0.9\textheight]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Simulated germline variants}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{true calls}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2b.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}{false calls}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2c.png}
+\end{column}
+\end{columns}
+\vfill
+\tiny
+Gezsi et al 2015 BMC Genomics
+\end{frame}
+
+\begin{frame}{Medulloblastoma somatic SNVs}{Curated gold standard, \(314\times
+: 272\times\)
+coverage}
+\includegraphics[width=1\textwidth]{figures/from-others/alioto-2015-nat-comm.png}
+\vfill
+\tiny
+Alioto et al 2015 Nat Comms
+\end{frame}
+
+\begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1\textwidth]{figures/from-others/ceph-utah-pedigree-1463.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\begin{tabular}{cccc}
+genome & mix1 & mix2 & mix3\\
+\hline
+NA12889 & 4 & 2 & 0\\
+NA12891 & 8 & 4 & 0\\
+NA12890 & 16 & 8 & 0\\
+NA12892 & 72 & 86 & 100\\
+\hline
+total & 100 & 100 & 100\\
+\end{tabular}
+\end{column}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{5 callers on benchmark mix1:mix3 (case:control)}
+%{Partition sizes}
+\begin{itemize}
+\item<1-> all calls:
+\includegraphics<1->[width=0.5\textwidth]{figures/2018-04-08-call-set-concordance/venn-benchmark-wgs-snvs-1.png}
+\includegraphics<1->[width=0.4\textwidth]{figures/2018-04-08-call-set-concordance/part-sizes-wgs-benchmark-1.png}
+\item<2> true calls?
+\item<2> false calls?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Higher concordance for benchmark}
+
+\includegraphics[width=0.9\textwidth]{figures/2018-04-08-call-set-concordance/part-sizes-wgs-1.png}
+\end{frame}
+
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
+
+
+\end{document}

@@ -80,7 +80,12 @@ grid.draw(venn.diagram(bm.vcf[["wgs"]]$snvs, NULL, main = "benchmark", main.cex 
 ```
 
 ```{r part-sizes-wgs, fig.asp=0.7}
-xyplot(callers.in.partition ~ log10(calls.in.partition) | sample, data = part.wgs, pch = "|", col = "red", grid = TRUE, cex = 2)
+psize.plot <- xyplot(callers.in.partition ~ log10(calls.in.partition) | sample, data = part.wgs, pch = "|", col = "red", grid = TRUE, cex = 2)
+psize.plot
+```
+
+```{r part-sizes-wgs-benchmark, fig.asp=1.2, fig.width=4}
+psize.plot[2]
 ```
 
 ### Indels in the whole genome

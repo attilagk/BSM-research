@@ -1,8 +1,6 @@
 ---
 layout: default
-#title: 
 tags: []
-#featimg: ""
 ---
 
 This page summarizes the testing of variant callers.

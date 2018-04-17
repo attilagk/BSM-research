@@ -1,5 +1,5 @@
 library(VariantAnnotation)
-library(vcfR)
+#library(vcfR)
 
 # For a given sample import VCFs across all segments, variant types
 # (snvs/indels) and variant callers.

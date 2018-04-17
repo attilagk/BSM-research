@@ -1,8 +1,6 @@
 ---
 layout: default
-#title: 
 tags: [alignment]
-#featimg: ""
 ---
 
 The common sample for the Reference Tissue Project is a NeuN+, fibroblast sample pair.  I present some statistics of the corresponding alignment pair that was created in Peter Park's group.
