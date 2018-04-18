@@ -62,3 +62,32 @@ The depth is roughly evenly distributed along and across chromosomes, except---a
 ```{r depth-contigs, fig.asp = 1.5}
 useOuterStrips(xyplot(depth ~ pos | sample * contig, data = depths, subset = contig %in% c(as.character(1:22), "X", "Y"), ylim = c(0, 300), pch = "."))
 ```
+
+## Comparison to common sample
+
+```{r}
+get.idxstats <- function(samples, directory, extension = ".bam.idxstats", lvls = c("case", "control")) {
+    names(samples) <- samples
+    helper <- function(s)
+        cbind(data.frame(sample = s),
+              read.delim(paste0(directory, s, extension), col.names = c("name", "length", "mapped.reads", "unmapped.reads"), header = FALSE))
+    l <- lapply(samples, helper)
+    df <- do.call(rbind, l)
+    if(! is.null(lvls))
+        levels(df$sample) <- lvls
+    return(df)
+}
+idxstats <-
+    rbind(cbind(get.idxstats(c("Common_7_NeuN_DO16090243-final-all", "Fibro_Common_7_DO16090243-final-all"), "../../results/common-experiment/alignment/"),
+                data.frame(experiment = "common.sample")),
+          cbind(get.idxstats(c("Mix1A", "Mix3A"), "../../results/2018-03-12-ceph-alignment-stats/"),
+                data.frame(experiment = "benchmark")))
+sequences <- c(1:22, "X", "Y")
+idxstats <- subset(idxstats, subset = name %in% sequences)
+idxstats$name <- factor(idxstats$name, levels = sequences, ordered = TRUE)
+```
+
+```{r coverage-common-sample-benchmark}
+# read length is 151
+dotplot(name ~ mapped.reads * 151 / length | experiment, data = idxstats, groups = sample, pch = 21, auto.key = TRUE, xlab = "coverage", ylab = "chromosome")
+```
