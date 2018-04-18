@@ -89,6 +89,18 @@ grep -c '^[^#]' 000?.vcf
 
 Interestingly, GATK v3.8.0 mutect2 ran successfully both with and without the read group correction implemented by `correct-commons-bam`. Right after this I switched to GATK v4.0.2.0.
 
+```{r engine="bash", eval=TRUE}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/1MB/4proc/mutect2-correct-rg
+grep 'Total runtime' out.stderr
+```
+
+```{r tnseq-gatk-mutect2-runtime, fig.asp = 0.5}
+runt.mutect2 <-
+    rbind(subset(runt, subset = length == "1MB" & numcores == 4 & caller == "Tnseq.Mutect2", select = c("caller", "runtime")),
+          data.frame(caller = "GATK.Mutect2", runtime = 930.85))
+barchart(caller ~ runtime, runt.mutect2, xlim = c(0,1000), main = "run on 1Mb segment", xlab = "run time, s")
+```
+
 ### lofreq star
 
 The analysis below shows that filtering for SNPs present in DBSNP has essentially no impact on lofreq's runtime since removing this filtering `lofreq-noDBSNP` did not shorten runtime.

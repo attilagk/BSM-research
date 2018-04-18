@@ -29,9 +29,9 @@
 %\useoutertheme[]{tree}
 
 % title, etc
-\title{Calling SNVs with precision}
+\title{Calling somatic variants with precision}
 %\subtitle{A subtitle may be shorter and more technical}
-\author{Attila Gulyas-Kovacs, Chaggai Rosenbluh, Andy Chess}
+\author{Attila Guly\'as-Kov\'acs, Chaggai Rosenbluh, Andy Chess}
 \date{Mount Sinai School of Medicine}
 
 \begin{document}
@@ -152,7 +152,7 @@ strelka2Somatic
 \end{center}
 \end{frame}
 
-\begin{frame}{VariantMetaCaller}{Gezsi et al 2015 BMC Genomics}
+\begin{frame}{VariantMetaCaller}{G\'ezsi et al 2015 BMC Genomics}
 
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}{unfiltered call sets}
@@ -163,18 +163,21 @@ strelka2Somatic
 \begin{column}{0.5\textwidth}{VariantMetaCaller}
 \small
 \begin{itemize}
-\item assumption \\
-\(ABCDE \subset \{\text{true calls\}}\)
-\(A\cup B\cup C\cup D\cup E \subset \{\text{false calls\}}\)
-\item automated fusion% of variant calling pipelines
-\item precision-based filtering 
+\item<1-> assumption 
+\((A\cup ...\cup E) \cap \{\text{true calls\}} = \emptyset\)
+\(ABCDE \cap \{\text{false calls\}} = \emptyset\)
+%\item<2> assumption \\
+%\(A\cup B\cup C\cup D\cup E \subset \{\text{false calls\}}\)
+%\(ABCDE \subset \{\text{true calls\}}\)
+\item<1-> automated fusion% of variant calling pipelines
+\item<1-> precision-based filtering 
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}{Support for assumptions}{Simulated germline
-variants, Gezsi et al 2015 BMC Genomics}
+variants, G\'ezsi et al 2015 BMC Genomics}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}{true calls}
 
@@ -289,6 +292,13 @@ mix3:mix3 & false calls \\
 \end{columns}
 \end{frame}
 
+\begin{frame}{Tnseq: a faster reimplementation of GATK Mutect2}{Product of
+Sentieon---license?}
+\includegraphics[width=1.0\columnwidth]{figures/2018-02-22-ref-tissue-proj-testdata/tnseq-gatk-mutect2-runtime-1.pdf}
+
+%{\onslide<1-> \large license? }
+\end{frame}
+
 \begin{frame}{Limitation: indels}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}{SNVs: 5 callers}
@@ -305,7 +315,7 @@ mix3:mix3 & false calls \\
 
 \begin{frame}{Directions}
 \begin{itemize}
-\item information gain with coverage 
+\item dependence on coverage and variant allele frequency 
 \item accuracy of BSMN workflows on benchmark data
 \item amplicon-seq validation of VariantMetaCaller 
 \end{itemize}
