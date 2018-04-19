@@ -1,0 +1,146 @@
+---
+layout: default
+---
+
+NDA subject file containing the CommonMind Consortium (CMC) individuals used for the BSM project.
+
+```{r message=FALSE, warning=FALSE}
+library(synapser)
+```
+Convert `xlsb` file to `csv`:
+
+```{r engine="bash", eval=FALSE}
+# This produces error as an Rmd code chunk but runs fine in the terminal
+dnalibxls=BSM_Project_Chess.xlsb
+dnalibdir="$HOME/projects/bsm/data/dnalib"
+soffice --convert-to csv --outdir $dnalibdir $dnalibdir/$dnalibxls
+```
+
+Upload both files to Synapse, the BSM Chess Lab project (syn12119642):
+
+```{r}
+synLogin()
+```
+
+```{r}
+project.id <- "syn12119642"
+xls <- File(path = "~/projects/bsm/data/dnalib/BSM_Project_Chess.xlsb", parentId = project.id)
+invisible(synStore(xls, used = "syn12154407"))
+csv <- File(path = csv.file <- "~/projects/bsm/data/dnalib/BSM_Project_Chess.csv", parentId = project.id)
+invisible(synStore(csv, used = "syn12154411"))
+```
+
+The `dnalib` data frame contains the DNA libraries, whereas `subj` contains the CMC subjects.  `btb` is the empty brain tissue bank template for NDA.
+
+```{r}
+dnalib <- read.csv(csv.file)
+# this was uploaded by Mette
+subj.file <- synGet("syn12128754", downloadFile = TRUE, downloadLocation = getwd(), ifcollision = "overwrite.local")
+subj <- read.csv("genomics_subject02_U01MH106891_Chess.csv", skip = 1)
+# brain tissue bank template
+btb.file <- synGet("syn7896816", downloadFile = TRUE, downloadLocation = getwd(), ifcollision = "overwrite.local")
+btb <- read.csv("nichd_btb02_template.csv", skip = 1)
+```
+
+The `src_subject_id` of `subj` contains CMC subject IDs.  In this R session it is a factor whose elements are unique so that there's a one-to-one correspondence to its levels:
+
+```{r}
+all.equal(as.character(subj$src_subject_id), levels(subj$src_subject_id))
+```
+
+`Individual.ID` in `dnalib` has the same meaning as the `src_subject_id` of `subj` (i.e. CMC subject ID).  It has one more levels, though, `""`.
+
+```{r}
+setdiff(levels(dnalib$Individual.ID), subj$src_subject_id)
+setdiff(subj$src_subject_id, levels(dnalib$Individual.ID))
+```
+
+`Individual.ID == ""` corresponds to the common sample or just "empty" rows (in fact, Excel formulas that ) of the reference tissue project, therefore not part of CMC
+
+```{r}
+subset(dnalib, Individual.ID == "", select = "Library.name", drop = TRUE)
+```
+
+So let's eliminate rows of `Individual.ID == ""` from `dnalib`:
+
+```{r}
+dnalib <- subset(dnalib, Individual.ID %in% subj$src_subject_id)
+# equivalent
+#dnalib <- subset(dnalib, Individual.ID != "")
+dnalib$Individual.ID <- factor(dnalib$Individual.ID, levels = subj$src_subject_id)
+dnalib$Library.name <- factor(dnalib$Library.name, levels = unique(dnalib$Library.name))
+```
+
+It turns out there are duplicate `Library.name`s in `dnalib`; this concerns 4 libraries (rows).  It's not clear to me what distinguishes the duplicates but we can see that only one of those was `Sent.for.Sequencing`...
+
+```{r}
+length(unique(dnalib$Library.name))
+length(dnalib$Library.name)
+(dnalib.dup <- dnalib$Library.name[duplicated(dnalib$Library.name)])
+subset(dnalib, subset = Library.name %in% dnalib.dup, select = "Sent.for.Sequencing")
+```
+
+...so we get rid of duplicates accordingly
+
+```{r}
+dnalib <- rbind(subset(dnalib, subset = ! Library.name %in% dnalib.dup),
+                subset(dnalib, subset = Library.name %in% dnalib.dup)[c(1, 3), ])
+```
+
+Now that `Library.name`s are unique we can turn them into row names of `dnalib`.  We'll do this for `src_subject_id` of `subj` as well
+
+```{r}
+row.names(dnalib) <- dnalib$Library.name
+row.names(subj) <- subj$src_subject_id
+```
+
+We expand `subj` into `btb.tmp`, a data frame whose rows correspond to those of `dnalib`.  After adding info to `btb.tmp` from `dnalib`, `btb.tmp` is reduced back to `subj`, which now has the properties requested by Mette:
+
+> Can you please add your sample names in column Z (sample_id_original), and brain region in sample_description
+
+After further modifications we write it to `genomics_subject02_U01MH106891_Chess-1.csv`
+
+```{r}
+btb.tmp <- subj[dnalib$Individual.ID, ]
+rownames(btb.tmp) <- dnalib$Library.name
+btb.tmp$sample_id_original <- dnalib$Library.name
+btb.tmp$sample_description <- dnalib$Brain.Region
+mysubj <- btb.tmp[! duplicated(btb.tmp$src_subject_id), ]
+row.names(mysubj) <- mysubj$src_subject_id
+# sort it according to the original subj
+# note that as.character is necessary here
+mysubj <- mysubj[as.character(subj$src_subject_id), ]
+write.csv(mysubj, "genomics_subject02_U01MH106891_Chess-1.csv", row.names = FALSE)
+```
+
+The next step is to create `mybtb` and write it to `nichd_btb02_U01MH106891_Chess-1.csv`
+
+```{r}
+mybtb <- as.data.frame(matrix(data = NA, nrow = nrow(btb.tmp), ncol = ncol(btb)))
+names(mybtb) <- names(btb)
+rownames(mybtb) <- rownames(btb.tmp)
+x <- intersect(names(mybtb), names(mysubj))
+mybtb[x] <- btb.tmp[x]
+write.csv(mybtb, "nichd_btb02_U01MH106891_Chess-1.csv", row.names = FALSE)
+```
+
+Add back NDA header (1st row) to files and clean up
+
+```{r engine="bash", eval=TRUE}
+# subjects
+mv genomics_subject02_U01MH106891_Chess.csv gs.csv
+tr '\r' '\n' < gs.csv | sed 1q > genomics_subject02_U01MH106891_Chess.csv
+cat genomics_subject02_U01MH106891_Chess-1.csv >> genomics_subject02_U01MH106891_Chess.csv
+rm gs.csv genomics_subject02_U01MH106891_Chess-1.csv 
+# btb
+sed 1q <nichd_btb02_template.csv > nichd_btb02_U01MH106891_Chess.csv
+cat nichd_btb02_U01MH106891_Chess-1.csv >> nichd_btb02_U01MH106891_Chess.csv
+rm nichd_btb02_U01MH106891_Chess-1.csv nichd_btb02_template.csv
+```
+
+Finally store the files in Synapse
+
+```{r}
+invisible(synStore(subj.file))
+invisible(synStore(File("nichd_btb02_U01MH106891_Chess.csv", parentId = "syn12128766")))
+```
