@@ -20,7 +20,7 @@
 \mode<presentation>{
 \usetheme{Warsaw}
 %\usetheme{Antibes}
-\usecolortheme{beaver}
+\usecolortheme{seagull}
 %\usecolortheme{seahorse}
 %\usefonttheme{structureitalicserif}
 \setbeamercovered{transparent}
@@ -122,94 +122,29 @@ strelka2Somatic
 % Variant Score (EVS) expressing the phred-scaled probability of thecall being
 % a false positive observation.">
 \normalsize
-\begin{columns}[]
-\begin{column}{0.5\textwidth}
 
 \includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
-\end{column}
+\end{frame}
 
-\begin{column}{0.5\textwidth}
-{\onslide<2->
-\begin{itemize}
-\item improvement?
-\begin{itemize}
-\item optimal filtering and combination
-\end{itemize}
-\item accuracy?
-\begin{itemize}
-\item truth set needed
-\item FDR control:\\precision \textit{vs} sensitivity 
-\end{itemize}
-\end{itemize}
+\begin{frame}{}
+\includegraphics{/home/attila/figures/by-me/var-calling-workflows/var-calling-workflows.pdf}
+\vfill
+{\onslide<2>
+{\large If the \alert{true variants} were known...}
 }
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{5 unfiltered SNV call sets for the common sample}
-\begin{center}
-\includegraphics[height=0.8\textheight]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
-\end{center}
-\end{frame}
-
-\begin{frame}{VariantMetaCaller}{G\'ezsi et al 2015 BMC Genomics}
-
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}{unfiltered call sets}
-
-\includegraphics[width=1\columnwidth]{figures/from-others/symmetrical-5-set-venn-diagram.png}
-\end{column}
-
-\begin{column}{0.5\textwidth}{VariantMetaCaller}
-\small
 \begin{itemize}
-\item<1-> assumption 
-\((A\cup ...\cup E) \cap \{\text{true calls\}} = \emptyset\)
-\(ABCDE \cap \{\text{false calls\}} = \emptyset\)
-%\item<2> assumption \\
-%\(A\cup B\cup C\cup D\cup E \subset \{\text{false calls\}}\)
-%\(ABCDE \subset \{\text{true calls\}}\)
-\item<1-> automated fusion% of variant calling pipelines
-\item<1-> precision-based filtering 
+\item<2> known precision and sensitivity for \alert{callset \(i\)}
+\item<2> adjust filter \(i\) to a given precision before merging \alert{callset \(i\)} into combined \alert{callset}
+\item<2> FDR control
+%\item<2> tune data generation
 \end{itemize}
-\end{column}
-\end{columns}
 \end{frame}
 
-\begin{frame}{Support for assumptions}{Simulated germline
-variants, G\'ezsi et al 2015 BMC Genomics}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}{true calls}
-
-\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2b.png}
-\end{column}
-
-\begin{column}{0.5\textwidth}{false calls}
-
-\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2c.png}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Support for assumptions}{Medulloblastoma
-somatic SNVs, Alioto et al 2015 Nat Comms}{}
-GOLD: curated gold standard, \(314\times
-: 272\times\)
-coverage
-
-\includegraphics[width=1\textwidth]{figures/from-others/alioto-2015-nat-comm.png}
-\end{frame}
-
-\begin{frame}{Our benchmark study}
-Goals
+\begin{frame}{Approaches to true variants}
 \begin{enumerate}
-\item check VariantMetaCaller's assumptions and utility
-\item evaluate precision and sensitivity
-\begin{itemize}
-\item compare to individual callers with default filtering
-\item dependence on variant allele frequency 
-\item dependence on the coverage of case and control sample 
-\end{itemize}
+\item \textit{a posteriori} validation of calls
+\item simulated sequence data
+\item gold standard DNA  
 \end{enumerate}
 \end{frame}
 
@@ -256,13 +191,11 @@ mix3:mix3 & false calls \\
 \end{center}
 \end{frame}
 
-\begin{frame}{Illumina sequencing---coverage}
-\begin{center}
-\includegraphics[height=0.9\textheight]{figures/2018-03-12-ceph-alignment-stats/coverage-common-sample-benchmark-1.pdf}
-\end{center}
+\begin{frame}
+\includegraphics[width=1\textwidth]{figures/from-others/human-embryogenesis-wikipedia.png}
 \end{frame}
 
-\begin{frame}{5 callers on benchmark mix1:mix3}
+\begin{frame}<1>[label=5concordance]{5 callers on benchmark mix1:mix3}
 %{Partition sizes}
 \begin{itemize}
 \item<1-> all calls:
@@ -273,51 +206,101 @@ mix3:mix3 & false calls \\
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Higher concordance for benchmark}
-
-\includegraphics[width=0.9\textwidth]{figures/2018-04-08-call-set-concordance/part-sizes-wgs-1.pdf}
-\end{frame}
-
-\begin{frame}{Limitation: run time}
-
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}{common sample}
-% 2018-02-22-ref-tissue-proj-testdata/runtime-length-log-1.pdf
-\includegraphics[width=1.0\columnwidth]{figures/2018-02-22-ref-tissue-proj-testdata/runtime-length-log-1.pdf}
-\end{column}
-
-\begin{column}{0.5\textwidth}{benchmark}
-
-\end{column}
-\end{columns}
-\end{frame}
-
 \begin{frame}{Tnseq: a faster reimplementation of GATK Mutect2}{Product of
 Sentieon---license?}
 \includegraphics[width=1.0\columnwidth]{figures/2018-02-22-ref-tissue-proj-testdata/tnseq-gatk-mutect2-runtime-1.pdf}
-
-%{\onslide<1-> \large license? }
 \end{frame}
 
-\begin{frame}{Limitation: indels}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}{SNVs: 5 callers}
+\againframe<1>{5concordance}
 
-\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
+\begin{frame}{Lower concordance for common sample}
+\includegraphics[width=0.9\textwidth]{figures/2018-04-08-call-set-concordance/part-sizes-wgs-1.pdf}
+\end{frame}
+
+%\begin{frame}{5 unfiltered SNV call sets for the common sample}
+%\begin{center}
+%\includegraphics[height=0.8\textheight]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
+%\end{center}
+%\end{frame}
+
+\begin{frame}{VariantMetaCaller}{G\'ezsi et al 2015 BMC Genomics}
+
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}{unfiltered call sets}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/symmetrical-5-set-venn-diagram.png}
 \end{column}
 
-\begin{column}{0.5\textwidth}{indels: only 3 callers}
-
-\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-indels-1.pdf}
+\begin{column}{0.6\textwidth}{VariantMetaCaller}
+\small
+\begin{itemize}
+\item<1-> assumption 
+\((A\cup ...\cup E) \cap \{\text{true calls\}} = \emptyset\)
+\(ABCDE \cap \{\text{false calls\}} = \emptyset\)
+%\item<2> assumption \\
+%\(A\cup B\cup C\cup D\cup E \subset \{\text{false calls\}}\)
+%\(ABCDE \subset \{\text{true calls\}}\)
+\item<1-> optimal \alert{soft} filtering
+\begin{enumerate}
+\item<1-> estimate precision for each call within each call set % of variant calling pipelines
+\item<1-> above given precision (\(1-\mathrm{FDR}\)) retain calls
+\item<1-> max.~sensitivity in combined call set
+\end{enumerate}
+\end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Directions}
+\begin{frame}{Support for assumptions}{Simulated germline
+variants, G\'ezsi et al 2015 BMC Genomics}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{true calls}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2b.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}{false calls}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2c.png}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Support for assumptions}{Medulloblastoma
+somatic SNVs, Alioto et al 2015 Nat Comms}{}
+GOLD: curated gold standard, \(314\times
+: 272\times\)
+coverage
+
+\includegraphics[width=1\textwidth]{figures/from-others/alioto-2015-nat-comm.png}
+\end{frame}
+
+\againframe<2>{5concordance}
+
+\begin{frame}{Our benchmark study will reveal...}
+...for each caller \(+\) default filter:
 \begin{itemize}
-\item dependence on coverage and variant allele frequency 
-\item accuracy of BSMN workflows on benchmark data
-\item amplicon-seq validation of VariantMetaCaller 
+\item optimal case:control coverage ratio 
+\item overall precision/sensitivity (P/S)
+\item P/S for a given variant allele frequency 
+\end{itemize}
+\vfill
+...for VariantMetaCaller:
+\begin{itemize}
+\item how well assumptions hold
+\item improvement in terms of P/S
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Further info}
+\begin{itemize}
+\item \alert{my lab notebook} \\
+\emph{BSM Chess Lab}
+https://www.synapse.org/#!Synapse:syn12119642
+\item \alert{source code} \\
+\emph{mssm-attila-bsm} and \emph{mssm-attila-bin} on GitHub \\
+https://github.com/bsmn/mssm-attila-bsm/tree/master/notebook 
+\item<2> Thanks. Questions? 
 \end{itemize}
 \end{frame}
 
@@ -334,3 +317,38 @@ Sentieon---license?}
 
 \end{column}
 \end{columns}
+
+
+
+
+\begin{frame}{Illumina sequencing---coverage}
+\begin{center}
+\includegraphics[height=0.9\textheight]{figures/2018-03-12-ceph-alignment-stats/coverage-common-sample-benchmark-1.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Limitation: run time}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{common sample}
+% 2018-02-22-ref-tissue-proj-testdata/runtime-length-log-1.pdf
+\includegraphics[width=1.0\columnwidth]{figures/2018-02-22-ref-tissue-proj-testdata/runtime-length-log-1.pdf}
+\end{column}
+\begin{column}{0.5\textwidth}{benchmark}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Limitation: indels}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{SNVs: 5 callers}
+
+\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}{indels: only 3 callers}
+
+\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-indels-1.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
