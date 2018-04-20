@@ -1,0 +1,117 @@
+---
+layout: default
+title: Test runs on the common sample BAMs
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
+featimg: "runtime-length-log-1.png"
+---
+
+Test runs of variant callers were performed using as input data the BAM files from the common sample from the reference tissue project.  Runtime were measured as a function of the length and number of CPU cores.
+
+The analysis had the following major steps:
+1. take the BAMs for the paired common sample: `Common_7_NeuN_DO16090243-final-all.bam` and `Fibro_Common_7_DO16090243-final-all.bam` generated in Peter Park's group
+1. excise segments of various lengths (between 1 and 100 MB) starting at chr1:50,000,000 using `do-aln-subregion` 
+1. run callers e.g. using `do-mystrelka2Somatic` and store runtime results
+1. parse runtime results using `runtime-length-ncores`
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Parse the runtime files:
+
+```{r engine="bash", eval=TRUE}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/
+./runtime-length-ncores 2>/dev/null 1>runtimes.csv
+```
+
+Import and prepare data
+
+```{r cache=FALSE}
+runt <- read.csv("~/projects/bsm/results/2018-02-22-ref-tissue-proj-testdata/runtimes.csv")
+runt$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt$length)))
+# the whole genome is 3235 MB long according to https://en.wikipedia.org/wiki/Human_genome
+runt$length.MB <- ifelse(is.na(runt$length.MB), 3235, runt$length.MB)
+runt <- runt[with(runt, order(numcores, length.MB)), ]
+levels(runt$caller) <- sub("Tnseq", "Tnseq.Mutect2", levels(runt$caller))
+# somatic sniper has no parallel mode
+for(l in levels(runt$length))
+    runt[with(runt, caller == "somaticSniper" & length == l & numcores != 1), "runtime"] <- subset(runt, caller == "somaticSniper" & length == l & numcores == 1, runtime, drop = TRUE)
+```
+
+The following plots show how runtime scales with the size of the data.
+
+```{r runtime-length, echo=TRUE}
+arg <- list(xlab = "length, bases", ylab = "real time",
+            labels = c("1s", "7.8s", "1m", "7.8m", "1h", "7.8h", "2.5d", "2.8w", "5m"),
+            at.lin = 0:8 / 2, at.log = 60 ^ c(0:8 / 2))
+xyplot(runtime / 60 ~ length.MB, data = runt, groups = caller, subset = numcores == 6 & length != "wgs", ylab = "runtime, min", xlab = "length, MB", grid = TRUE, type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21, lty = 2)
+```
+
+```{r runtime-length-log, echo=TRUE}
+xyplot(log(runtime, base = 60) ~ log10(length.MB * 1e6), data = runt, groups = caller, subset = numcores == 6, scales = list(y = list(at = arg$at.lin, labels = arg$labels)), ylim = c(0.5, 3.5), grid = TRUE, ylab = "runtime (log scale)", xlab = "log length (base)", type = "b", auto.key = list(lines = FALSE, points = TRUE), main = "Runtime at 6 cores", pch = 21, lty = 2)
+```
+
+The next graph presents runtimes at different number of CPU cores.
+
+```{r runtime-ncores, echo=FALSE}
+xyplot(runtime / 60 ~ numcores | length, data = runt, groups = caller, subset = length %in% c("1MB", "10MB"), ylab = "runtime, min", xlab = "number of cores", grid = TRUE, main = "Runtime and Multithreading", auto.key = TRUE, type = "b", pch = 21, lty = 2)
+```
+
+The number of all SNV candidates in the whole genome by strelka2Somatic caller and of those that `PASS`ed the default filters:
+
+```{r engine="bash", eval=TRUE}
+vcf="../../results/2018-02-22-ref-tissue-proj-testdata/wgs/6proc/strelka2Somatic/results/variants/somatic.snvs.vcf.gz"
+zcat $vcf | sed -n '/^#CHROM/,$ p' | wc -l
+zcat $vcf | grep -c PASS
+```
+
+## Caller specific notes
+
+### Sentieon Tnseq
+
+This caller is a reimplementation of GATK's mutect2 and like GATK has strict requirements for read groups (RG) in the input BAM files.  Our input files (`Common_7_NeuN_DO16090243-final-all.bam` and `Fibro_Common_7_DO16090243-final-all.bam`) do not fulfill the requirements and therefore it was necessary to create new input files with appropriately altered read groups.  See `correct-commons-bam` that implements the correction and produces output file `filename-correct-rg.bam` from `filename.bam`.
+
+The following result shows that on the 1MB long data Tnseq and GATK v3.8.0 mutect2 (both with default settings) produce identical results
+
+```{r engine="bash", eval=TRUE}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/1MB/4proc/isec
+cat README.txt
+echo -e "\ncounting records in each VCF file:"
+grep -c '^[^#]' 000?.vcf
+```
+
+Interestingly, GATK v3.8.0 mutect2 ran successfully both with and without the read group correction implemented by `correct-commons-bam`. Right after this I switched to GATK v4.0.2.0.
+
+```{r engine="bash", eval=TRUE}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/1MB/4proc/mutect2-correct-rg
+grep 'Total runtime' out.stderr
+```
+
+```{r tnseq-gatk-mutect2-runtime, fig.asp = 0.5}
+runt.mutect2 <-
+    rbind(subset(runt, subset = length == "1MB" & numcores == 4 & caller == "Tnseq.Mutect2", select = c("caller", "runtime")),
+          data.frame(caller = "GATK.Mutect2", runtime = 930.85))
+barchart(caller ~ runtime, runt.mutect2, xlim = c(0,1000), main = "run on 1Mb segment", xlab = "run time, s")
+```
+
+### lofreq star
+
+The analysis below shows that filtering for SNPs present in DBSNP has essentially no impact on lofreq's runtime since removing this filtering `lofreq-noDBSNP` did not shorten runtime.
+
+```{r engine="bash", eval=TRUE}
+cd ../../results/2018-02-22-ref-tissue-proj-testdata/
+./runtime-length-ncores-lofreq 2>/dev/null 1>runtimes-lofreq.csv
+```
+
+```{r lofreq-noDBSNP}
+runt.lofreq <- read.csv("~/projects/bsm/results/2018-02-22-ref-tissue-proj-testdata/runtimes-lofreq.csv")
+runt.lofreq$length.MB <- as.integer(sub("([[:digit:]]+)MB", "\\1", as.character(runt.lofreq$length)))
+dotplot(caller ~ runtime / 60, data = runt.lofreq, xlim = c(0, 60), xlab = "runtime, min")
+```
