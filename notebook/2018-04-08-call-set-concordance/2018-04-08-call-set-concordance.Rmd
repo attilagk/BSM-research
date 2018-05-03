@@ -22,6 +22,7 @@ lattice.options(default.theme = "standard.theme")
 ```{r message=FALSE}
 library(VennDiagram)
 source("2018-04-08-call-set-concordance.R")
+source("../../src/vcf.R")
 ```
 
 ```{r}
@@ -80,7 +81,7 @@ grid.draw(venn.diagram(bm.vcf[["wgs"]]$snvs, NULL, main = "benchmark", main.cex 
 ```
 
 ```{r part-sizes-wgs, fig.asp=0.7}
-psize.plot <- xyplot(callers.in.partition ~ log10(calls.in.partition) | sample, data = part.wgs, pch = "|", col = "red", grid = TRUE, cex = 2)
+psize.plot <- xyplot(callsets.containing.partition ~ log10(calls.in.partition) | sample, data = part.wgs, pch = "|", col = "red", grid = TRUE, cex = 2)
 psize.plot
 ```
 
@@ -115,6 +116,6 @@ grid.draw(venn.diagram(bm.vcf[["100MB"]]$snvs, NULL, main = "benchmark", main.ce
 ```
 
 ```{r part-sizes-100MB, fig.asp=0.7}
-xyplot(callers.in.partition ~ log10(calls.in.partition) | sample, data = part.100MB, pch = "|", col = "red", grid = TRUE, cex = 2)
+xyplot(callsets.containing.partition ~ log10(calls.in.partition) | sample, data = part.100MB, pch = "|", col = "red", grid = TRUE, cex = 2)
 ```
 

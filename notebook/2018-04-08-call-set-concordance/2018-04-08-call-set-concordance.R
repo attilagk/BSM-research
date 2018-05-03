@@ -30,10 +30,3 @@ set.size.length <- function(vcf = cs.vcf, vtype = "snvs") {
     reshape(df, varying = names(d2), v.names = "set.size", timevar = "caller",
             times = names(d2), direction = "long", idvar = "length.Mb")
 }
-
-partition.sizes <- function(vcfs = cs.vcf[["100MB"]]$snvs) {
-    vp <- get.venn.partitions(vcfs)
-    callers.in.partition <- apply(as.matrix(vp[ , seq.int(length(vcfs))]), 1, sum)
-    df <- data.frame(callers.in.partition = callers.in.partition, calls.in.partition = vp$..count..)
-    df[with(df, order(callers.in.partition, calls.in.partition)), ]
-}
