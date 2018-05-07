@@ -2,7 +2,7 @@
 layout: default
 #title: 
 tags: [ ceph, utah, vcf, truthset, callset ]
-#featimg: "venn-common-sample-wgs-snvs-1.png"
+featimg: "venn-S1-1.png"
 ---
 
 Characterization of the call sets for the CEPH/Utah grandparents in Illumina BaseSpace.  The grandparents are individual NA12889, NA12890, NA12891, NA12892.  There are 3 callsets for each individual, which I refer to here as calltypes: S1, genome, and SV.  The VCF header for S1 and genome are essentially identical; both calltypes corresponds to SNPs and short indels called by Strelka.  But "genome" contains a lot more calls (VCF records) than "S1".  SV is clearly for structural variants.
