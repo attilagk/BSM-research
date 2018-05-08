@@ -1,6 +1,6 @@
 ---
 layout: default
-#title: 
+title: CEPH/Utah Illumina Call Sets
 tags: [ ceph, utah, vcf, truthset, callset ]
 featimg: "venn-S1-1.png"
 ---
