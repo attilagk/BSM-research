@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+wd=$1
+vartype=${2:-snps}
+
+gparents="NA12889 NA12890 NA12891 NA12892"
+
+mkdir $vartype
+for gp in $gparents; do
+    bcftools view --types $vartype --output-type z \
+        --output-file $vartype/$gp.vcf.gz $wd/${gp}_S1.vcf.gz
+    bcftools index --tbi $vartype/$gp.vcf.gz
+done
+exit
+
+
+bcftools isec --output snps11.vcf.gz \
+    --output-type z -n~11 $V89 $V90
