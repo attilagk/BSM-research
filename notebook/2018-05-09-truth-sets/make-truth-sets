@@ -1,18 +1,36 @@
 #! /usr/bin/env bash
 
-wd=$1
-vartype=${2:-snps}
+usage="`basename $0` inputdir [snps|indels]"
+if test $# -ne 2; then
+    echo $usage; exit 1
+fi
 
+inputdir=$1
+vartype=$2
+
+#nthreads="$((`nproc` - 1))" # only minimal speedup
+nthreads=0
 gparents="NA12889 NA12890 NA12891 NA12892"
 
-mkdir $vartype
-for gp in $gparents; do
-    bcftools view --types $vartype --output-type z \
-        --output-file $vartype/$gp.vcf.gz $wd/${gp}_S1.vcf.gz
-    bcftools index --tbi $vartype/$gp.vcf.gz
+# filter for the selected variant type
+if test ! -d $vartype; then
+    mkdir $vartype
+    for gp in $gparents; do
+        bcftools view --types $vartype --output-type z \
+            --threads $nthreads \
+            --output-file $vartype/$gp.vcf.gz $inputdir/${gp}_S1.vcf.gz
+        bcftools index --tbi $vartype/$gp.vcf.gz
+    done
+fi
+
+cd $vartype
+
+mkdir variant-{alleles,positions}
+partitions="1000 1100 1010 1001 1110 1101 1011 1111 0100 0110 0101 0111 0010 0011 0001"
+for part in $partitions; do
+    bcftools isec --collapse none --output variant-alleles/$part -n~$part --threads $nthreads NA128*.vcf.gz
+    bcftools isec --collapse all --output variant-positions/$part -n~$part --threads $nthreads NA128*.vcf.gz
 done
-exit
 
-
-bcftools isec --output snps11.vcf.gz \
-    --output-type z -n~11 $V89 $V90
+cat variant-alleles/[01][01][01][01] > variant-alleles/variant-alleles
+cat variant-positions/[01][01][01][01] > variant-positions/variant-positions
