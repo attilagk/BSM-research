@@ -1,0 +1,56 @@
+#! /usr/bin/env bash
+
+usage="`basename $0` testvcf [snps|indels|mnps|other]"
+if test $# -eq 0; then
+    echo $usage; exit 1
+fi
+
+testvcf=`realpath $1` # the filtered call set to be tested
+vartype=${2:-snps} # variant type
+
+partitionsfile=$HOME/projects/bsm/tables/callset-partitions.csv
+grandpdir=$HOME/projects/bsm/results/2018-05-09-truth-sets/chr22-$vartype
+#grandpdir=$HOME/projects/bsm/results/2018-05-09-truth-sets/S1-$vartype
+
+testbn=`basename $testvcf .vcf.gz`
+outputdir=${testbn}-$vartype
+
+if test ! -d $grandpdir; then
+    echo "$grandpdir doesn\'t exist; calling script"
+fi
+exit
+
+#nthreads="$((`nproc` - 1))" # only minimal speedup
+nthreads=0
+gparents="NA12889 NA12890 NA12891 NA12892"
+
+mkdir $outputdir
+cd $outputdir
+
+#for part in 00010 10010; do
+for part in `sed -n '/^partition\(.*\)/ {s//\1/; y/,/ /; p; q} ' $partitionsfile`; do
+    bcftools isec --output $part -n~$part $testvcf $grandpdir/NA128*.vcf.gz
+done
+
+exit
+
+part="10000"
+bcftools isec --output $part -n~$part $testvcf $grandpdir/NA128*.vcf.gz
+
+mkdir variant-{alleles,positions}
+partitions="1000 1100 1010 1001 1110 1101 1011 1111 0100 0110 0101 0111 0010 0011 0001"
+for part in $partitions; do
+    # variants distinguished by positions AND alleles
+    alleles=variant-alleles/$part
+    allelesvcf=$alleles.vcf.gz
+    bcftools isec --collapse none --output $alleles -n~$part --threads $nthreads NA128*.vcf.gz
+    cat $vcfheader $alleles |
+    bcftools view --output-file $allelesvcf --output-type z -
+    bcftools index --tbi $allelesvcf
+    # variants distinguished by ONLY positions
+    positions=variant-positions/$part
+    bcftools isec --collapse all --output $positions -n~$part --threads $nthreads NA128*.vcf.gz
+done
+
+cat variant-alleles/[01][01][01][01] > variant-alleles/variant-alleles
+cat variant-positions/[01][01][01][01] > variant-positions/variant-positions
