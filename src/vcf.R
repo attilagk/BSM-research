@@ -9,4 +9,3 @@ partition.sizes <- function(vcfs = cs.vcf[["100MB"]]$snvs) {
     df <- data.frame(callsets.containing.partition = callsets.containing.partition, calls.in.partition = vp$..count..)
     df[with(df, order(callsets.containing.partition, calls.in.partition)), ]
 }
-

@@ -2,20 +2,20 @@
 
 # Set partitions for filtered testvcf and the 4 filtered CEPH grandparent vcfs
 
-usage="`basename $0` testvcf [snps|indels|mnps|other]"
+usage="`basename $0` testvcf [snps|indels|mnps|other] [grandpdir]"
 if test $# -eq 0; then
     echo $usage; exit 1
 fi
 
 # command line arguments
 testvcf=`realpath $1` # the filtered call set to be tested
-vartype=${2:-snps} # variant type
+vartype=$2 # variant type
+grandpdir=${3:-$HOME/projects/bsm/results/2018-05-09-truth-sets/S1}
 
 # hard-coded variables
 partitionsfile=$HOME/projects/bsm/tables/callset-partitions.csv
 #grandpdir=$HOME/projects/bsm/results/2018-05-09-truth-sets/chr22
-grandpdir=$HOME/projects/bsm/results/2018-05-09-truth-sets/S1
-truthsetdir=${grandpdir}-$vartype
+truthsetdir=`realpath ${grandpdir}-$vartype`
 filterscript=$HOME/projects/bsm/notebook/2018-05-09-truth-sets/filter-ceph-grandp-vcfs
 testbn=`basename $testvcf .vcf.gz`
 outputdir=${testbn}-$vartype
