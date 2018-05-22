@@ -126,7 +126,7 @@ draw5("somaticSniper")
 
 ## Checking varied positions vs Chaggai's
 
-Chaggai made a table for each chromosome, whose rows correspond to variants contained in at least one (and possibly more) of the CEPH grandparents.  He calculated the frequency of each nucleotide allele separately for Mix1, Mix2, and Mix3 prior to the present analysis but with similar aims.  This present analysis includes an alternative approach with the advantage of using well-tested, mature tools (`bcftools`): shorter and cleaner code, less chance for bugs, less need for testing.
+Chaggai made a table for each chromosome, whose rows correspond to variants contained in at least one (and possibly more) of the CEPH grandparents.  He calculated the frequency of each nucleotide allele separately for Mix1, Mix2, and Mix3 prior to the present analysis but with similar aims.  This present analysis uses an alternative approach with the advantage of using well-tested, mature tools (`bcftools`): shorter and cleaner code, less chance for bugs, less need for testing.
 
 Below I compare the list of these variants to that collated from the partitions I generated (these are denoted as `chaggai` and `attila`, respectively).  Some of the operations leading to the two lists are very similar but show differences in implementation details.  For instance, Chaggai wrote low level scripts using command line tools like `awk` to filter for SNPs whereas I used the designated tool in the `bcftools` suite.  One consequence is that SNPs with more than one alternative alleles are represented in my filtered callsets but not in Chaggai's.
 
