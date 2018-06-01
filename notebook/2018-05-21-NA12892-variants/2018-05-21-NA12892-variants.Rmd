@@ -6,6 +6,15 @@ featimg: chess-illumina-venn-1.png
 
 Two callsets are compared to each other.  Both correspond to germline variants in the CEPH/Utah maternal grandmother NA12892.  While the "ChessLab" callset was produced based on our sequencing data and our variant calling workflow (using strelka2), the "Illumina callset was generated based on Illumina's data and workflow (using the first version of strelka).  The callsets are overwhelmingly discordant, which is not explained by the minor differences listed above.  However, there's an additional difference between the two callsets: the reference genome used to indicate positions.  This difference readily explains the discrepancy.
 
+## Introduction
+
+The differences between the *ChessLab* callset and *Illumina* callset concern...
+
+1. the sequencing data
+1. aligner
+1. the version of the strelka germline caller
+1. filtering and other parts of the workflow (besides the caller)
+
 ## Preparation
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -33,19 +42,29 @@ callsets <- import.mybcftools.isec.tsv.2(tsv, gpnames <- c("ChessLab", "Illumina
 
 ## Results
 
-The Venn diagram shows that 
+The Venn diagram shows that the two callsets are extremely discordant
 
 ```{r chess-illumina-venn}
 my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[1:2], col = "gray", cat.cex = 1.4)
 grid.draw(venn.diagram(callsets, NULL, main = "Germline variants in NA12892", main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill, cat.cex = my.par$cat.cex))
 ```
 
-## Explanation
+## Punchline
 
-The result below fully explains the discrepancy.  We see that the `chesslab` and `illumina` callsets also differ in the reference genome that was used to indicate positions in the VCF files.
+Actually, there is at least on more difference between the *ChessLab* and *Illumina* callsets:
+
+1. the sequencing data
+1. aligner
+1. the version of the strelka germline caller
+1. filtering and other parts of the workflow (besides the caller)
+1. **reference genome version**
+
+See below the reference genome version in the *ChessLab* and *Illumina* VCFs:
 
 ```{r engine="bash", eval=TRUE}
 cd /big/results/bsm/2018-05-21-NA12892-variants/chr22
 bcftools view -h NA12892-chesslab.vcf.gz | grep 'reference=file'
 bcftools view -h NA12892-illumina.vcf.gz | grep 'reference=file'
 ```
+
+This difference---the version of the reference genome---seems to explain the great discrepancy.  The next step is to remap positions in the *Illumina* callsets to remove that difference.

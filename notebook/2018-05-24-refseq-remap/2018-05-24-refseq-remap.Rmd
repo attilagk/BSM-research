@@ -1,0 +1,63 @@
+---
+layout: default
+title: Reference sequence
+#featimg: chess-illumina-venn-1.png
+---
+
+Due to two different assemblies used as reference sequence, our callsets are not directly comparable to those of Illumina on the Utah/CEPH pedigree.  Here an attempt is made to remap positions in VCF files between our reference sequence (GRCh37 + decoy) and Illumina's (GRCh38 + decoy).
+
+## The problem
+
+## Remapping
+
+### NCBI Genome Remapping Service
+
+The [NCBI Genome Remapping Service](https://www.ncbi.nlm.nih.gov/genome/tools/remap) failed in all runs.
+
+#### Run 1
+
+This was condudcted on a callset restricted to chromosome 22
+
+* Source Organism: Homo sapiens
+* Source Assembly: GRCh38.p11 :: Primary Assembly
+* Target Assembly: GRCh37.p13 :: Primary Assembly
+* Input format: VCF
+* Output format: Same as input
+* Upload file: `/big/results/bsm/2018-05-24-refseq-remap/chr22/NA12892_S1.vcf`
+
+This run failed with the [following error](https://www.ncbi.nlm.nih.gov/genome/tools/remap/JSID_01_374401_130.14.22.10_9000_remap__1527884566) (see also `/big/results/bsm/2018-05-24-refseq-remap/chr22/NCBI-remap/run1`):
+
+> Invalid User Selection/Invalid Data format
+> ...
+
+#### Run 2
+
+Identical settings to Run 1 except for using a tiny subset of `/big/results/bsm/2018-05-24-refseq-remap/chr22/NA12892_S1.vcf` with just 13 records:
+
+* Upload file: `/big/results/bsm/2018-05-24-refseq-remap/chr22/NA12892_S1-1.vcf.gz`
+
+This run was successful but is practically useless since we need all the records for all chromosomes.  See results in `/big/results/bsm/2018-05-24-refseq-remap/chr22/NCBI-remap/run2`.
+
+#### Run 3
+
+Identical settings to Run 1 except for using the entire callset (not just chr22)
+
+* Upload file: `/big/results/bsm/2018-05-24-refseq-remap/wgs/NA12892_S1.vcf.gz`
+
+The result is [the same error](https://www.ncbi.nlm.nih.gov/genome/tools/remap/JSID_01_454585_130.14.18.6_9000_remap__1527891717) as for Run 1.
+
+#### Run 4
+
+Identical settings to Run 1 except for using a slightly different source assembly
+
+* Source Assembly: GRCh38 (hg38)
+
+The result again is [the same error](https://www.ncbi.nlm.nih.gov/genome/tools/remap/JSID_01_454585_130.14.18.6_9000_remap__1527891717) as for Run 1.
+
+### CrossMap
+
+[CrossMap](http://crossmap.sourceforge.net) describes itself as follows:
+
+```{r engine="bash", eval=TRUE}
+CrossMap.py |& head -n 7
+```
