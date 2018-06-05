@@ -61,3 +61,48 @@ The result again is [the same error](https://www.ncbi.nlm.nih.gov/genome/tools/r
 ```{r engine="bash", eval=TRUE}
 CrossMap.py |& head -n 7
 ```
+
+#### GRCh38 to GRCh37+decoy
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run1/run1.cfg
+```
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run1
+myCrossMap run1.cfg .
+```
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run1/*log
+```
+
+#### GRCh38 to GRCh37.p13
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run4/run4.cfg
+```
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run4
+myCrossMap run4.cfg .
+```
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run4/*log
+```
+
+#### GRCh37 to GRCh38
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run3/run3.cfg
+```
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run3
+myCrossMap run3.cfg .
+```
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run3/*log
+```
