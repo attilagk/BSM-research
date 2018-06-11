@@ -1,0 +1,14 @@
+---
+layout: default
+title: Reference sequence
+#featimg: chess-illumina-venn-1.png
+---
+
+Here we remap and filter the CEPH/Utah Illumina platinum genome callsets.  Remapping was done from GRCh38 to GRCh37 and filtering for all records which PASSed the default filter.
+
+Hello, World!
+
+```{r engine="bash", eval=FALSE}
+./remap-filter
+```
+

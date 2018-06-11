@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+chesslabvcf=/big/results/bsm/2018-05-21-NA12892-variants/wgs/strelka2Germline/results/variants/genome.S1.vcf.gz
+
+chesslabdir=chesslab-PASS
+if test ! -d $chesslabdir; then
+    mkdir $chesslabdir
+fi
+filtervcf=$chesslabdir/PASS-NA12892.vcf.gz
+
+regions=$(echo {1..22} X Y MT | tr ' ' ',')
+bcftools view -f .,PASS --output-file $filtervcf --output-type z --regions $regions $chesslabvcf

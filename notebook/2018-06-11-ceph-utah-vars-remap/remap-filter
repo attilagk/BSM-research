@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# symlink to the directory of Illumina's unfiltered call sets based on GRCh38
+if test ! -h S1-GRCh38; then
+    ln -s /big/data/platinum-genomes/ceph-utah-vars/illumina-calls/S1 S1-GRCh38
+fi
+
+# output directory for filtered VCFs
+filterdir=S1-PASS
+if test ! -d $filterdir; then
+    mkdir $filterdir
+fi
+# output directory for remapped VCFs
+remapdir=S1-GRCh38-to-GRCh37
+if test ! -d $remapdir; then
+    mkdir $remapdir
+fi
+# output directory for first remapped and then filtered VCFs
+remapfilterdir=S1-GRCh38-to-GRCh37-PASS
+if test ! -d $remapfilterdir; then
+    mkdir $remapfilterdir
+fi
+# output directory for first filtered and then remapped VCFs
+filterremapdir=S1-PASS-GRCh38-to-GRCh37
+if test ! -d $filterremapdir; then
+    mkdir $filterremapdir
+fi
+
+#for gp in NA12889; do # for testing
+for gp in NA128{89,90,91,92}; do
+# first remap then filter
+    cfg=$remapdir/${gp}_S1.cfg
+    invcf=S1-GRCh38/${gp}_S1.vcf.gz
+cat > $cfg <<EOF
+input_VCF_file=$invcf
+input_chain_file=/big/data/refgenome/mapping/GRCh38_to_GRCh37.chain.gz
+ref_genome_file=/big/data/refgenome/GRCh37/ensembl/release-75/Homo_sapiens.GRCh37.75.dna.toplevel.fa
+fai_file=/big/data/refgenome/mapping/Homo_sapiens.GRCh37.75.dna.toplevel-hs37d5.fa.fai
+EOF
+    myCrossMap $cfg $remapdir
+    remapvcf=$remapdir/GRCh38_to_GRCh37-${gp}_S1.vcf.gz
+    remapfiltervcf=$remapfilterdir/GRCh38_to_GRCh37-PASS-${gp}_S1.vcf.gz
+    regions=$(echo {1..22} X Y MT | tr ' ' ',')
+    bcftools view -f .,PASS --output-file $remapfiltervcf --output-type z --regions $regions $remapvcf
+    bcftools index --tbi $remapfiltervcf
+
+# first filter then remap
+    filtervcf=$filterdir/PASS-${gp}_S1.vcf.gz
+    cfg=$filterremapdir/${gp}_S1_fr.cfg
+cat > $cfg <<EOF
+input_VCF_file=$filtervcf
+input_chain_file=/big/data/refgenome/mapping/GRCh38_to_GRCh37.chain.gz
+ref_genome_file=/big/data/refgenome/GRCh37/ensembl/release-75/Homo_sapiens.GRCh37.75.dna.toplevel.fa
+fai_file=/big/data/refgenome/mapping/Homo_sapiens.GRCh37.75.dna.toplevel-hs37d5.fa.fai
+EOF
+    regions=$(echo chr{1..22} chr{X,Y,M} | tr ' ' ',')
+    bcftools view -f .,PASS --output-file $filtervcf --output-type z --regions $regions $invcf
+    bcftools index --tbi $filtervcf
+    myCrossMap $cfg $filterremapdir
+done
