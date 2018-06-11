@@ -1,0 +1,44 @@
+#! /usr/bin/env bash
+
+bsmresults=/big/results/bsm
+targetdir=$bsmresults/2018-05-21-NA12892-variants
+# unfiltered wgs callset made by me using strelka2
+chesslab=$targetdir/wgs/strelka2Germline/results/variants/variants.vcf.gz
+# filtered callset, chr22, snps, made by Illumina using strelka
+illumina22=$bsmresults/2018-05-09-truth-sets/chr22/S1-snps/NA12892.vcf.gz
+
+cd $targetdir
+if test ! -d chr22; then
+    mkdir chr22
+fi
+cd chr22
+
+# prepare two VCFs to be compared
+if test ! -h NA12892-illumina.vcf.gz; then
+    ln -s $illumina22 NA12892-illumina.vcf.gz
+fi
+if test ! -h NA12892-illumina.vcf.gz.tbi; then
+    ln -s $illumina22.tbi NA12892-illumina.vcf.gz.tbi
+fi
+if test ! -f NA12892-chesslab.vcf.gz; then
+    bcftools view --output-type z --output-file NA12892-chesslab.vcf.gz \
+        --types snps \
+        --apply-filters .,PASS \
+        --targets 22 $chesslab
+fi
+if test ! -f NA12892-chesslab.vcf.gz.tbi; then
+    bcftools index --tbi NA12892-chesslab.vcf.gz
+fi
+
+# obtain set partitions
+if test ! -d isec; then
+    mkdir isec
+    # first way
+    bcftools isec -p isec NA12892-{chesslab,illumina}.vcf.gz
+    for part in 01 10 11; do
+        # second way: different output format but same result
+        bcftools isec -n~$part --output isec/$part NA12892-{chesslab,illumina}.vcf.gz
+    done
+    cd isec
+    cat [01][01] > all.tsv
+fi

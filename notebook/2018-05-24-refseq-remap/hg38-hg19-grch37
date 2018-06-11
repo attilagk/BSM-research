@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+input_VCF_file=${1:-`realpath ../NA12892_S1-1.vcf.gz`}
+input_chain_file="`realpath $HOME/data/refgenome/mapping/hg38ToHg19.over.chain.gz`"
+ref_genome_file="/big/data/refgenome/hg19/Sequence/WholeGenomeFasta/genome.fa"
+output_dir="`realpath $PWD`"
+output_file="$output_dir/hg38-hg19.vcf"
+CrossMap.py vcf $input_chain_file $input_VCF_file $ref_genome_file $output_file 2> $output_file.log

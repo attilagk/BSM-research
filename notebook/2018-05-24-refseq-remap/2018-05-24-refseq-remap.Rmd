@@ -1,0 +1,125 @@
+---
+layout: default
+title: Reference sequence
+#featimg: chess-illumina-venn-1.png
+---
+
+Due to two different assemblies used as reference sequence, our callsets are not directly comparable to those of Illumina on the Utah/CEPH pedigree.  Here several attempts are made to remap positions in VCF files between our reference sequence (GRCh37 + decoy) and Illumina's (GRCh38 + decoy).  These attempts differ in the direction of mapping (GRCh38 to GRCh37 or vice versa), the mapping tool used and the exact version (patch release) of the genome sequence.  Successful mapping is achieved with CrossMap in both directions with recent patch releases.  For mapping from GRCh38 to GRCh37 the use of GRCh37.p13 including patch sequences was essential for success.
+
+## On the direction of mapping
+
+GRCh38 to GRCh37 is more convenient for our purposes because mapping would involve only the four callsets by Illumina corresponding to CEPH/Utah grandparents.  However, this is a mapping from the newer to the older major release and this means---as demonstrated below---that patches to the older GRCh37 are essential.
+
+## NCBI Genome Remapping Service
+
+The [NCBI Genome Remapping Service](https://www.ncbi.nlm.nih.gov/genome/tools/remap) failed in all runs.  The error messages are presented below.
+
+### Run 1
+
+This was condudcted on a callset restricted to chromosome 22
+
+* Source Organism: Homo sapiens
+* Source Assembly: GRCh38.p11 :: Primary Assembly
+* Target Assembly: GRCh37.p13 :: Primary Assembly
+* Input format: VCF
+* Output format: Same as input
+* Upload file: `/big/results/bsm/2018-05-24-refseq-remap/chr22/NA12892_S1.vcf`
+
+This run failed with the [following error](https://www.ncbi.nlm.nih.gov/genome/tools/remap/JSID_01_374401_130.14.22.10_9000_remap__1527884566) (see also `/big/results/bsm/2018-05-24-refseq-remap/chr22/NCBI-remap/run1`):
+
+> Invalid User Selection/Invalid Data format
+> ...
+
+### Run 2
+
+Identical settings to Run 1 except for using a tiny subset of `/big/results/bsm/2018-05-24-refseq-remap/chr22/NA12892_S1.vcf` with just 13 records:
+
+* Upload file: `/big/results/bsm/2018-05-24-refseq-remap/chr22/NA12892_S1-1.vcf.gz`
+
+This run was successful but is practically useless since we need all the records for all chromosomes.  See results in `/big/results/bsm/2018-05-24-refseq-remap/chr22/NCBI-remap/run2`.
+
+### Run 3
+
+Identical settings to Run 1 except for using the entire callset (not just chr22)
+
+* Upload file: `/big/results/bsm/2018-05-24-refseq-remap/wgs/NA12892_S1.vcf.gz`
+
+The result is [the same error](https://www.ncbi.nlm.nih.gov/genome/tools/remap/JSID_01_454585_130.14.18.6_9000_remap__1527891717) as for Run 1.
+
+### Run 4
+
+Identical settings to Run 1 except for using a slightly different source assembly
+
+* Source Assembly: GRCh38 (hg38)
+
+The result again is [the same error](https://www.ncbi.nlm.nih.gov/genome/tools/remap/JSID_01_454585_130.14.18.6_9000_remap__1527891717) as for Run 1.
+
+## CrossMap
+
+[CrossMap](http://crossmap.sourceforge.net) describes itself as follows:
+
+```{r engine="bash", eval=TRUE}
+CrossMap.py |& head -n 7
+```
+
+Installation of CrossMap was relatively easy on Ubuntu Linux.  The shell script `~/bin/myCrossMap` was written to serve not only as a wrapper around CrossMap but also to update the `##contig` lines in the header of the `input_vcf_file` (see below) because CrossMap does not perform that but such update is necessary to sort and index the output VCF file.
+
+### GRCh38 to GRCh37+decoy
+
+Below is the configuration of the first run with CrossMap.  `input_VCF_file` is the callset for which the coordinates must be remapped.  `input_chain_file` is the alignment/mapping from GRCh38 to the destination/target GRCh37.  `ref_genome_file` refers to the exact version of mapping destination/target sequence, in this case the version of GRCh37.  `fai_file` is a standard fai index file (see `man 5 faidx`), which contains the contig names of the destination sequence.  In the case of GRCh37+decoy no patch contigs are present in `ref_genome_file` and `fai_file` but the `input_chain_file` does in fact contain patch contigs.
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run1/run1.cfg
+```
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run1
+myCrossMap run1.cfg .
+```
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run1/*log
+```
+
+We see that the missing patch sequences cause CrossMap to fail.
+
+### GRCh38 to GRCh37.p13
+
+For this run of CrossMap we introduce two changes relative to the previous, unsuccessful run:
+
+1. `ref_genome_file` is the *toplevel* version of GRCh37.p13 from Ensembl; *toplevel* differs from *primary_assembly* in that only the former contains patch sequences
+1. `fai_file` corresponds to GRCh37.p13 but note that Ensembl's original fai index file was modified such that the chromosomal contigs were rearranged to karyotypic order using the fai index of GRCh37+decoy, `hs37d5.fa.fai`
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run4/run4.cfg
+```
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run4
+myCrossMap run4.cfg .
+```
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run4/*log
+```
+
+We see that the run was successful but many variant positions could not be mapped by CrossMap.
+
+### GRCh37 to GRCh38
+
+The reverse mapping concerns the VCF files we produced under the guidelines of the BSMN consortium, which specified GRCh37+decoy as reference sequence.  In this case we don't need patch contigs in the target genome GRCh38 because it is newer than the source genome GRCh37. Therefore *primary_assembly* is sufficient to use, and there's no need for the *toplevel* version.
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run3/run3.cfg
+```
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run3
+myCrossMap run3.cfg .
+```
+
+```{r engine="bash", eval=TRUE}
+cat $HOME/projects/bsm/results/2018-05-24-refseq-remap/wgs/CrossMap/run3/*log
+```
+
+Again, CrossMap ran successfully but a substantial fraction of variants remained unmapped.

@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+vcf=$1
+fai=$2
+
+header=`tempfile`
+headertop=`tempfile`
+headermiddle=`tempfile`
+headerbottom=`tempfile`
+headernew=`tempfile`
+
+bcftools view -h -o $header $vcf
+sed '/^##reference/ q' $header > $headertop
+echo "##newreference=$fai" >> $headertop
+sed -n '/^##contig/,$ p' $header > $headerbottom
+sed -i '/^##contig/ d' $headerbottom
+sed 's/^\(\S\+\)\s\+\(\S\+\).*$/##contig=<ID=\1,length=\2>/' $fai > $headermiddle
+
+cat $headertop $headermiddle $headerbottom > $headernew
+bcftools reheader -h $headernew -o $vcf-reheader $vcf
+rm $header $headertop $headermiddle $headerbottom $headernew

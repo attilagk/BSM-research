@@ -1,0 +1,31 @@
+---
+layout: default
+---
+
+Two problematic FASTQ files are uploaded here to Synapse until they are settled in NDAR.
+
+```{r message=FALSE, warning=FALSE}
+library(synapser)
+```
+
+```{r}
+synLogin()
+```
+
+Create a folder
+
+```{r}
+project.id <- "syn12119642"
+folder <- Folder(name = "common-sample", parent = project.id)
+folder <- synStore(folder)
+folder.id <- synFindEntityId(name = "common-sample", parent = project.id)
+```
+
+Upload files
+
+```{r}
+(fn <- paste0("Fibro_Common_7_DO16090243-D701_", c("HWNFVCCXX", "HW3C2CCXX"), "_L5_2.fq.gz"))
+fn <- paste0("~/data/bsm/ref-tissue-proj/Fibro_Common_7/", fn)
+f1 <- synStore(File(path = fn[1], parentId = folder.id))
+f2 <- synStore(File(path = fn[2], parentId = folder.id))
+```

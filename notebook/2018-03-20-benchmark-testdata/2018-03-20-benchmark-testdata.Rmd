@@ -43,4 +43,4 @@ Below are the runtimes.  Note that all callers were run on 32 cores except for s
 dotplot(caller ~ runtime / 3600 | length, data = runt, scales = list(x = list(relation = "free")), grid = TRUE, xlab = "runtime, hours", layout = c(1, 3))
 ```
 
-Tnseq is much slower than strelka2Somatic or strelka2Germline on both the small and the WGS data set.  At the shallower coverage of the the difference is less striking although Tnseq is still slower; see [2018-02-22-ref-tissue-proj-testdata]({{ site.baseurl }}{% post_url 2018-02-22-ref-tissue-proj-testdata %}).
+Tnseq is much slower than strelka2Somatic or strelka2Germline on both the small and the WGS data set.  At the shallower coverage of the the difference is less striking although Tnseq is still slower; see [2018-02-22-ref-tissue-proj-testdata]({{ site.baseurl }}{% post_url /projects/bsm/2018-02-22-ref-tissue-proj-testdata %}).

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+length=${1:-1Mb}
+nproc=32
+
+outdir=$length
+
+( time mystrelka2 -p ${nproc} -r $REFSEQ \
+    -t Germline \
+    -1 $length/Mix3A.bam \
+    -2 $length/Mix3A.bam \
+    -o $outdir ) 1>&$outdir/strelka2Germline-run.time &

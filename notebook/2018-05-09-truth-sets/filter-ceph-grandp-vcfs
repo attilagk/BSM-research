@@ -1,0 +1,55 @@
+#! /usr/bin/env bash
+
+# Filter and annotate CEPH/Utah grandparent Platinum VCFs
+# The following filters are applied:
+# segments 1,..., 22, X, Y, MT
+# PASS
+# The following annotation is applied:
+# convert segment names from "Illumina platinum format" to "BSMN format"
+#
+# Inputs
+# inputdir: the directory with the 4 grandparental VCFs from Illumina
+# vartype: [snps|indels|...]
+#
+# Outputs
+# S1-[snps|indels] output directory with the following files:
+# NA12889.vcf.gz,...,NA12892.vcf.gz: the 4 call sets, i.e. grandparental VCFs filtered for vartype
+# NA12889.vcf.gz.tbi,...,NA12892.vcf.gz.tbi: the corresponding indices
+
+usage="`basename $0` inputdir [snps|indels|mnps|other]"
+if test $# -ne 2; then
+    echo $usage; exit 1
+fi
+
+inputdir=$1
+vartype=$2
+outputdir="`dirname ${inputdir}`/`basename ${inputdir}`-${vartype}"
+
+# map of chromosome names: from "Illumina platinum format" to "BSMN format"
+touch chr-map
+chrmap=`realpath chr-map`
+for s in {1..22} X Y; do echo -e "chr$s\t$s"; done > $chrmap
+echo -e "chrM\tMT" >> $chrmap
+
+#nthreads="$((`nproc` - 1))" # only minimal speedup
+nthreads=0
+gparents="NA12889 NA12890 NA12891 NA12892"
+
+# filter for the selected variant type
+if test ! -d $outputdir; then
+    mkdir $outputdir
+    for gp in $gparents; do
+        gpvcf="$outputdir/$gp.vcf.gz"
+        bcftools annotate --rename-chrs $chrmap --output-type z \
+            --threads $nthreads \
+            $inputdir/${gp}_S1.vcf.gz |
+        # keep only chromosomal contigs
+        bcftools view --types $vartype --output-type z \
+            --apply-filters .,PASS \
+            --output-file $gpvcf \
+            --targets 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT \
+            --threads $nthreads -
+        bcftools index --tbi $gpvcf
+    done
+fi
+rm $chrmap

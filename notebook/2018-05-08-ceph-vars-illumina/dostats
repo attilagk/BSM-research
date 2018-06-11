@@ -1,0 +1,39 @@
+#! /usr/bin/env bash
+
+# collect Summary Numbers stats from set partitions (intersection,...) based on
+# file pairs like NA12889_S1.vcf.gz NA12889_S1.genome.vcf.gz
+
+# indiv: one of the CEPH/Utah grandparents
+indiv=${1:-NA12889}
+# maindir: for the output of this script
+maindir=$HOME/results/bsm/2018-05-08-ceph-vars-illumina
+# vcfdir: location of the callsets by Illumina
+vcfdir=$HOME/data/platinum-genomes/ceph-utah-vars/illumina-calls
+
+# check existence of indiv's directory
+cd $maindir
+if test -d $indiv; then
+    echo "$indiv already exists; exiting"; exit 1
+else
+    mkdir $indiv
+fi
+
+# intersection and other set partitions for S1 and genome
+S1=$vcfdir/S1/${indiv}_S1.vcf.gz
+genome=$vcfdir/genome/${indiv}_S1.genome.vcf.gz
+bcftools isec -O z -p $indiv $S1 $genome
+
+# symlink input VCFs into indiv's directory
+cd $indiv
+ln -s $S1
+ln -s $genome
+
+# stats for all VCFs
+for vcf in *.vcf.gz; do
+    bcftools stats $vcf > $vcf.stats
+done
+
+# collect the SN (Summary Numbers) statistics in a single file, SN.stats.tsv
+for stat in *stats; do
+    sed -n "/^SN/ { s/SN/$stat/; p }" $stat
+done > SN.stats.tsv

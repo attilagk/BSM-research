@@ -1,0 +1,67 @@
+---
+layout: default
+title: CEPH/Utah Illumina Call Sets
+tags: [ ceph, utah, vcf, truthset, callset ]
+featimg: "venn-S1-1.png"
+---
+
+Characterization of the call sets for the CEPH/Utah grandparents in Illumina BaseSpace.  The grandparents are individual NA12889, NA12890, NA12891, NA12892.  There are 3 callsets for each individual, which I refer to here as calltypes: S1, genome, and SV.  The VCF header for S1 and genome are essentially identical; both calltypes corresponds to SNPs and short indels called by Strelka.  But "genome" contains a lot more calls (VCF records) than "S1".  SV is clearly for structural variants.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+```{r message=FALSE}
+library(VennDiagram)
+library(VariantAnnotation)
+source("2018-05-01-ceph-vars-greally.R")
+source("../../src/vcf.R")
+```
+
+In this analysis only S1 and SV calltypes are studied.  The genome calltype comes with too large callsets to be manageable (memory requirement).
+
+Import VCFs and retain only the name of each record:
+
+```{r cache=TRUE, warning=FALSE}
+indiv <- paste0("NA128", 89:92)
+names(indiv) <- indiv
+subdir <- c("S1", "genome", "SV")
+subdir <- subdir[-2] # speed things up
+names(subdir) <- subdir
+vcf <- lapply(subdir, function(s) lapply(indiv, read1vcf, subdir = s))
+```
+
+Get partition sizes:
+
+```{r cache=TRUE}
+part <- do.call(rbind, lapply(subdir, function(s) data.frame(calltype = s, partition.sizes(vcf[[s]]))))
+```
+
+Set some graphic parameters for Venn diagrams:
+
+```{r}
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(indiv)], col = "gray", cat.cex = 1.4)
+```
+
+```{r venn-S1}
+grid.draw(venn.diagram(vcf[["S1"]], NULL, main = "S1", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+```
+
+```{r venn-SV}
+grid.draw(venn.diagram(vcf[["SV"]], NULL, main = "SV", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+```
+
+Plot partition sizes
+
+```{r part-sizes}
+psize.plot <- xyplot(callsets.containing.partition ~ log10(calls.in.partition) | calltype, data = part, pch = "|", col = "red", grid = TRUE, cex = 2)
+psize.plot
+```
+

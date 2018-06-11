@@ -1,0 +1,155 @@
+---
+layout: default
+title: Unexpectedly low concordance with CEPH/Utah grandparents
+featimg: Tnseq-ceph4-venn-1.png
+---
+
+Unexpectedly the concordance is very low between the SNV testset for any caller (based on Mix1:Mix3) and the 4 CEPH grandparental SNV sets.  In contrast, the concordance is high among testsets corresponding to 5 callers and also among the 4 grandparental sets.  Further investigation is necessary to explain this surprising result.
+
+## Preliminaries
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(VennDiagram)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+source("../../src/mybcftools.R")
+```
+
+The following code comments---and those in the `bash` scripts used below---provide a concise summary of how the $$1 + 4 = 5$$-way set comparisons ($$2^5 - 1 = 31$$ partitions) are created for each caller/test set.
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-09-truth-sets
+mkdir -p chr22/S1
+# include chr22 variants only in the CEPH grandparental call sets
+for vcf in S1/NA128*.vcf.gz; do bcftools view --output-file chr22/$vcf --output-type z --targets chr22 --apply-filters .,PASS $vcf; done
+# filter CEPH grandparental sets
+./filter-ceph-grandp-vcfs chr22/S1 snps
+indir=/big/results/bsm/2018-03-20-benchmark-testdata/wgs/vcf/snvs
+outdir=chr22/S1-snps
+# filter test set (of each caller) for chr22 and default PASS
+for caller in lofreqSomatic  somaticSniper  strelka2Germline  strelka2Somatic  Tnseq; do
+    bcftools view --output-type z --output-file $outdir/$caller.vcf.gz --targets 22 --apply-filters .,PASS $indir/$caller.vcf.gz
+    bcftools index --tbi $outdir/$caller.vcf.gz
+done
+cd chr22
+# take 5-way intersections between each test set (each caller on Mix1:Mix3) and the 4 grandparental sets
+for caller in lofreqSomatic  somaticSniper  strelka2Germline  strelka2Somatic  Tnseq; do
+    ../isec-ceph-grandp S1-snps/$caller.vcf.gz snps S1
+done
+# aggregate partitions into a single file all.tsv that is ready to be imported to R
+for caller in lofreqSomatic  somaticSniper  strelka2Germline  strelka2Somatic  Tnseq; do
+    cd /big/results/bsm/2018-05-09-truth-sets/chr22/$caller-snps; mybcftools-isec-tsv [01][01][01][01][01] > all.tsv
+done
+```
+
+## Filtered callsets of CEPH grandparents
+
+The partitions of the 4 callsets representing the CEPH granparents are obtained here from aggregating partitions corresponding to 1 + 4 callsets: Tnseq + 4 grandparents.  It shouldn't and doesn't matter that Tnseq was used here; identical results were obtained with strelka2Somatic + 4 grandparents.
+
+```{r engine="bash", eval=FALSE}
+cd /big/results/bsm/2018-05-09-truth-sets/chr22/check-chaggai/attila
+# remove 5th column (Tnseq-specific info)
+mybcftools-isec-tsv [01][01][01][01] | cut -f1-4,6- > all.tsv
+```
+
+```{r ceph4-venn}
+tsv <- "/big/results/bsm/2018-05-09-truth-sets/chr22/check-chaggai/attila/all.tsv"
+l <- import.mybcftools.isec.tsv(tsv, gpnames <- paste0("NA128", 89:92))
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[1:5], col = "gray", cat.cex = 1.4)
+grid.draw(venn.diagram(l, NULL, main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill[2:5], cat.cex = my.par$cat.cex))
+```
+
+The Venn diagram above shows that the $$2^4 - 1 = 15$$ partitions have similar sizes.  In particular, the partition of the 4-way intersection contains `r get.venn.partitions(l)$..count..[1]` variants pointing to shared genetic heritage and inbreeding.
+
+## Test sets: Filtered callsets based on Mix1:Mix3
+
+```{r engine="bash", eval=FALSE}
+cd /big/results/bsm/2018-05-09-truth-sets/chr22
+# 5-way partitions for callers; code adapted from isec-ceph-grandp bash script
+partitionsfile=$HOME/projects/bsm/tables/callset-partitions.csv
+for part in `sed -n '/^partition\(.*\)/ {s//\1/; y/,/ /; p; q}' $partitionsfile`; do
+    bcftools isec -n~$part --output testsets-snps/$part --collapse none S1-snps/{lofreqSomatic,strelka2Germline,Tnseq,somaticSniper,strelka2Somatic}.vcf.gz
+done
+cd /big/results/bsm/2018-05-09-truth-sets/chr22/testsets-snps
+mybcftools-isec-tsv [01][01][01][01][01] > all.tsv
+```
+
+The following figures show substantial consistency among *filtered* call sets produced by 5 different callers on Mix1:Mix3 paired samples (except for the single sample caller strelka2Germline, which used Mix1).  Interestingly, the relative partition sizes are similar to [those]({{ site.baseurl }}{% post_url /projects/bsm/2018-04-08-call-set-concordance %}) for the *unfiltered* call sets.
+
+```{r all-callers-venn}
+tsv <- "/big/results/bsm/2018-05-09-truth-sets/chr22/testsets-snps/all.tsv"
+l <- import.mybcftools.isec.tsv(tsv, c("lofreqSomatic", "strelka2Germline", "Tnseq", "somaticSniper", "strelka2Somatic"))
+grid.draw(venn.diagram(l, NULL, main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill, cat.cex = my.par$cat.cex))
+```
+
+```{r}
+vp <- get.venn.partitions(l)
+df <- data.frame(callsets.containing.partition = apply(as.matrix(vp[1:5]), 1, sum),
+                 calls.in.partition = vp$..count..)
+xyplot(callsets.containing.partition ~ log10(calls.in.partition), data = df, pch = "|", col = "red", grid = TRUE, cex = 2)
+```
+
+
+## Testsets vs CEPH grandparents
+
+Now the main results.  The Venn diagrams show---for each caller---that the concordance is very low between the testset for any caller and the 4 CEPH grandparental sets.
+
+```{r Tnseq-ceph4-venn}
+draw5 <- function(caller, par = my.par) {
+    tsv <- paste0("/big/results/bsm/2018-05-09-truth-sets/chr22/", caller, "-snps/all.tsv")
+    l <- import.mybcftools.isec.tsv(tsv, gpnames <- c(caller, gpnames))
+    grid.draw(venn.diagram(l, NULL, main.cex = par$main.cex, col = my.par$col, fill = par$fill, cat.cex = par$cat.cex))
+}
+draw5("Tnseq")
+```
+
+```{r strelka2Somatic-ceph4-venn}
+draw5("strelka2Somatic")
+```
+
+```{r strelka2Germline-ceph4-venn}
+draw5("strelka2Germline")
+```
+
+```{r lofreqSomatic-ceph4-venn}
+draw5("lofreqSomatic")
+```
+
+```{r somaticSniper-ceph4-venn}
+draw5("somaticSniper")
+```
+
+## Checking varied positions vs Chaggai's
+
+Chaggai made a table for each chromosome, whose rows correspond to variants contained in at least one (and possibly more) of the CEPH grandparents.  He calculated the frequency of each nucleotide allele separately for Mix1, Mix2, and Mix3 prior to the present analysis but with similar aims.  This present analysis uses an alternative approach with the advantage of using well-tested, mature tools (`bcftools`): shorter and cleaner code, less chance for bugs, less need for testing.
+
+Below I compare the list of these variants to that collated from the partitions I generated (these are denoted as `chaggai` and `attila`, respectively).  Some of the operations leading to the two lists are very similar but show differences in implementation details.  For instance, Chaggai wrote low level scripts using command line tools like `awk` to filter for SNPs whereas I used the designated tool in the `bcftools` suite.  One consequence is that SNPs with more than one alternative alleles are represented in my filtered callsets but not in Chaggai's.
+
+The results below show reasonably high concordance between the two lists.
+
+```{r engine="bash", eval=FALSE}
+cd $HOME/projects/bsm/results/2018-05-09-truth-sets/chr22
+mkdir -p check-chaggai/{attila,chaggai}
+ls -1 Tnseq-snps | sed 's/.\(....\)/\1/' |
+    for part in `cat`; do cat Tnseq-snps/0$part Tnseq-snps/1$part > check-chaggai/attila/$part; done
+cat check-chaggai/attila/[01][01][01][01] | cut -f2 | sort -u > check-chaggai/attila/ceph-gp-var.pos
+cut -f2 $HOME/projects/bsm/results/Chaggai-Benchmark_NG_Jan2018/Chr22/Chr22.Final.output.txt |
+    sort -u > check-chaggai/chaggai/ceph-gp-var.pos
+```
+
+```{r chaggai-attila-var-pos}
+f <- paste0("/big/results/bsm/2018-05-09-truth-sets/chr22/check-chaggai/", c("chaggai", "attila"), "/ceph-gp-var.pos")
+names(f) <- c("chaggai", "attila")
+pos <- lapply(f, scan)
+grid.draw(venn.diagram(pos, NULL, cat.cex = 1.4, fill = my.col <- c("blue", "red"), cat.col = my.col))
+```
+
+```{r}
+tsv <- c("~/projects/bsm/results/2018-05-09-truth-sets/chr22/Tnseq-snps/all.tsv")
+l <- import.mybcftools.isec.tsv(tsv)
+```

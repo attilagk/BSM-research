@@ -1,0 +1,35 @@
+#! /usr/bin/env bash
+
+# Set partitions for filtered testvcf and the 4 filtered CEPH grandparent vcfs
+
+usage="`basename $0` testvcf [snps|indels|mnps|other] [grandpdir]"
+if test $# -eq 0; then
+    echo $usage; exit 1
+fi
+
+# command line arguments
+testvcf=`realpath $1` # the filtered call set to be tested
+vartype=$2 # variant type
+grandpdir=${3:-$HOME/projects/bsm/results/2018-05-09-truth-sets/S1}
+
+# hard-coded variables
+partitionsfile=$HOME/projects/bsm/tables/callset-partitions.csv
+#grandpdir=$HOME/projects/bsm/results/2018-05-09-truth-sets/chr22
+truthsetdir=`realpath ${grandpdir}-$vartype`
+filterscript=$HOME/projects/bsm/notebook/2018-05-09-truth-sets/filter-ceph-grandp-vcfs
+testbn=`basename $testvcf .vcf.gz`
+outputdir=${testbn}-$vartype
+collapse=none
+
+if test ! -d $truthsetdir; then
+    echo "$truthsetdir doesn't exist; calling $filterscript"
+    $filterscript $grandpdir $vartype
+fi
+
+mkdir $outputdir
+cd $outputdir
+
+for part in `sed -n '/^partition\(.*\)/ {s//\1/; y/,/ /; p; q}' $partitionsfile`; do
+    bcftools isec --collapse $collapse --output $part -n~$part \
+        $testvcf $truthsetdir/NA128*.vcf.gz
+done
