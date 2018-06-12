@@ -1,0 +1,36 @@
+#! /usr/bin/env bash
+
+regionarg=${1:-wgs}
+
+indir=/big/results/bsm/2018-03-20-benchmark-testdata/wgs/vcf/snvs
+
+callers="lofreqSomatic somaticSniper strelka2Germline strelka2Somatic Tnseq"
+# the following code worked only in an interactive bash session
+# get names of callers
+#callers=$(for v in $indir/!(*v201711).vcf.gz; do
+#    basename $v .vcf.gz
+#done | tr '\n' ' ')
+
+case $regionarg in
+    wgs) region="`echo {1..22} X Y MT | tr ' ' ','`" ;;
+    *) region=$regionarg ;;
+esac
+
+if test ! -d $regionarg; then
+    mkdir $regionarg
+fi
+
+filtercallset () {
+    invcf=$indir/$1.vcf.gz
+    outdir=$regionarg/$1
+    outvcf=$outdir/$1.vcf.gz
+    if test ! -d $outdir; then
+        mkdir $outdir
+        bcftools view --output-type z --output-file $outvcf --regions $region --apply-filters .,PASS $invcf
+        bcftools index --tbi $outvcf
+    fi
+}
+
+for caller in $callers; do
+    filtercallset $caller
+done
