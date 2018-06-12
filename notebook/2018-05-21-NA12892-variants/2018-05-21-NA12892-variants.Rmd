@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Unexpectedly low concordance with CEPH/Utah grandparents
-featimg: chess-illumina-venn-1.png
+featimg: chess-illumina-venn-chr22-1.png
 ---
 
 Two callsets are compared to each other.  Both correspond to germline variants in the CEPH/Utah maternal grandmother NA12892.  While the "ChessLab" callset was produced based on our sequencing data and our variant calling workflow (using strelka2), the "Illumina callset was generated based on Illumina's data and workflow (using the first version of strelka).  The callsets are overwhelmingly discordant, which is not explained by the minor differences listed above.  However, there's an additional difference between the two callsets: the reference genome used to indicate positions.  This difference readily explains the discrepancy.
@@ -37,16 +37,16 @@ The script `do-mystrelka2Germline` (called on `ada`) was called to produce calls
 
 ```{r cache=TRUE}
 tsv <- "/big/results/bsm/2018-05-21-NA12892-variants/chr22/isec/all.tsv"
-callsets <- import.mybcftools.isec.tsv.2(tsv, gpnames <- c("ChessLab", "Illumina"))
+callsets <- import.mybcftools.isec.tsv.2(tsv, gpnames <- c("ChessLab", "Illumina")) # needs cacheing
 ```
 
 ## Results
 
 The Venn diagram shows that the two callsets are extremely discordant
 
-```{r chess-illumina-venn}
+```{r chess-illumina-venn-chr22}
 my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[1:2], col = "gray", cat.cex = 1.4)
-grid.draw(venn.diagram(callsets, NULL, main = "Germline variants in NA12892", main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill, cat.cex = my.par$cat.cex))
+grid.draw(venn.diagram(callsets, NULL, main = "Germline variants in NA12892, chr22", main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill, cat.cex = my.par$cat.cex))
 ```
 
 ## Punchline

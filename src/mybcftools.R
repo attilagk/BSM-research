@@ -18,7 +18,7 @@ import.mybcftools.isec.tsv <- function(tsv, setnames = character(0)) {
 # not depend on mybcftools-isec-tsv and thus can be applied to comparisons of
 # any number of callsets.
 import.mybcftools.isec.tsv.2 <- function(tsv, setnames = character(0)) {
-    df <- read.delim(tsv, header = FALSE, colClasses = c("integer", "integer", "factor", "factor", "character"))
+    df <- read.delim(tsv, header = FALSE, colClasses = c("factor", "integer", "factor", "factor", "character"))
     m <- as.matrix(df[ , 1:4])
     v <- apply(m, 1, paste, collapse = ":")
     S <- data.frame(t(sapply(data.frame(strsplit(df[[5]], split = ""), stringsAsFactors = FALSE), as.integer)))
