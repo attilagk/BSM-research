@@ -1,28 +1,44 @@
 #! /usr/bin/env bash
 
-regionarg=${1:-wgs}
+usage="`basename $0` wgs|1..22|X|Y|MT snvs|indels"
 
-indir=/big/results/bsm/2018-03-20-benchmark-testdata/wgs/vcf/snvs
+regionarg=$1
+vartype=$2
 
+if test $# -ne 2; then
+    echo $usage; exit 1
+fi
+
+testsetdir=/big/results/bsm/2018-03-20-benchmark-testdata/wgs/vcf/$vartype
+truthsetdir=/big/results/bsm/2018-06-11-ceph-utah-vars-remap/S1-GRCh38-to-GRCh37-PASS
+partitionsfile=$HOME/projects/bsm/tables/callset-partitions.csv # hard-coded variables
+collapse=none
+
+#callers="lofreqSomatic"
 callers="lofreqSomatic somaticSniper strelka2Germline strelka2Somatic Tnseq"
+
 # the following code worked only in an interactive bash session
 # get names of callers
-#callers=$(for v in $indir/!(*v201711).vcf.gz; do
+#callers=$(for v in $testsetdir/!(*v201711).vcf.gz; do
 #    basename $v .vcf.gz
 #done | tr '\n' ' ')
 
+# $region will be passed to the --region option of bcftools
 case $regionarg in
     wgs) region="`echo {1..22} X Y MT | tr ' ' ','`" ;;
     *) region=$regionarg ;;
 esac
 
+# $regionarg directory at the top of the hierarchy
 if test ! -d $regionarg; then
     mkdir $regionarg
 fi
 
+# filter an $invcf, i.e. one of the testsets (our somatic callsets)
 filtercallset () {
-    invcf=$indir/$1.vcf.gz
-    outdir=$regionarg/$1
+    invcf=$testsetdir/$1.vcf.gz
+    # output dir under $regionarg dir with caller name and variant type
+    outdir=$regionarg/${1}-$vartype
     outvcf=$outdir/$1.vcf.gz
     if test ! -d $outdir; then
         mkdir $outdir
@@ -31,6 +47,19 @@ filtercallset () {
     fi
 }
 
+# 31 partitions given by a filtered testset and the 4 Illumina germline truthsets
+getpartitions () {
+    for part in `sed -n '/^partition\(.*\)/ {s//\1/; y/,/ /; p; q}' $partitionsfile`; do
+        bcftools isec --collapse $collapse --output $outdir/$part -n~$part \
+            $outvcf $truthsetdir/*NA128*.vcf.gz
+        mybcftools-isec-tsv $outdir/[01][01][01][01][01] > $outdir/all.tsv
+    done
+}
+
+# filter and get partitions for all callers
 for caller in $callers; do
+    echo "Processing $caller"
     filtercallset $caller
+    # asynchronous evaluation; number of callers must not exceed numbber of proc
+    getpartitions &
 done

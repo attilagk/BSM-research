@@ -66,6 +66,10 @@ Thus, remapping worked in the sense that it improved concordance up to a great e
   * the Illumina workflow had additional procedures relative to the Chesslab workflow
 * errors in remapping
 
+### Concordance in the literature
+
+How concerning is the discordance that we see between the Chesslab and Illumina callsets?  [This article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3706896/) presents results relevant to that question.  It seems that the concordance between various germline variant calling workflows is in general comparable or even lower to the concordance between the Chesslab and Illumina callsets.
+
 ## Unmapped positions and filtering
 
 `CrossMap` leaves certain positions unmapped presumably because these could not be mapped with sufficient confidence.  It is expected, then, that these are positions with lower quality metrics (base quality, mapping quality, etc) and therefore these tend to be marked by the variant caller for filtering out.  The following results agree with this expectation as they show that the fraction of unmapped positions decreases by pre-filtering the VCF files.
