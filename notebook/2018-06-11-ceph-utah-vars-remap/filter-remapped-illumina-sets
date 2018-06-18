@@ -24,4 +24,5 @@ if test ! -d $outdir; then mkdir -p $outdir; fi
 for invcf in $indir/*NA128*.vcf.gz; do
     outvcf=$outdir/`basename $invcf`
     bcftools view --output-file $outvcf --output-type z --types $bcfvartype --regions $bcfregions $invcf
+    bcftools index --tbi $outvcf
 done
