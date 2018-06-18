@@ -120,3 +120,11 @@ ismapped$isfiltered <- sub("^.*PASS.*$", "PASS", ismapped$callset)
 ismapped$isfiltered <- sub("^.*\\.vcf$", "unfiltered", ismapped$isfiltered)
 barchart(individual ~ count | isfiltered, data = subset(ismapped, subset = set != "total"), groups = set, stack = TRUE, auto.key = list(columns = 1), xlab = "candidate variants (records in VCF)")
 ```
+
+## Filtering for snvs and indels
+
+The wrapper script below calls `filter-remapped-illumina-sets` for remapped and PASS filtered VCFs filtering for both snvs and indels as well as both wgs and chr22 regions (wgs means here all chromosomal contigs: 1,..., 22, X, Y, MT).
+
+```{r engine="bash", eval=FALSE}
+./filter-remapped-illumina-sets-do-all
+```

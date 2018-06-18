@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+
+# calls filter-remapped-illumina-sets for remapped and PASS filtered VCFs
+# filtering for both snvs and indels as well as both wgs and 22 regions
+
+cd /big/results/bsm/2018-06-11-ceph-utah-vars-remap
+
+for indir in S1-PASS-GRCh38-to-GRCh37 S1-GRCh38-to-GRCh37-PASS; do
+    for vartype in snvs indels; do
+        for regions in wgs 22; do
+            echo processing $indir $vartype $regions
+            ./filter-remapped-illumina-sets $indir $vartype $regions
+        done
+    done
+done
