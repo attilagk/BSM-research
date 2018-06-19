@@ -1,0 +1,129 @@
+---
+layout: default
+title: Error rate estimation
+#featimg: Tnseq-ceph4-venn-1.png
+---
+
+Precision and recall are discussed as standard quantities of variant calling accuracy.  Related error rates are noted and estimates of precision and recall are defined in terms of CEPH/Utah grandparental truth sets, grandparent combinations and truth set partitions, which correspond to various mosaic allele frequencies in the modeled tissue with somatic mosaicism.
+
+## Precision, recall and error rates
+
+We want to identify the set $$V$$ of real variants in our sample.  We apply a variant calling workflow $$w$$ (typically including steps like sequencing, alignment, calling, filtering) that yields callset $$C_w$$.  There are two widely used quantities that characterize the accuracy (performance) of worklflow $$w$$.
+
+$$
+\begin{eqnarray}
+\mathrm{precision}_w &=& \mathrm{Pr}(x \in V | x \in C_w) = \text{prob. a call by } w \text{ is a variant} \\
+\mathrm{recall}_w &=& \mathrm{Pr}(x \in C_w | x \in V) = \text{prob. } w \text{ calls a variant}
+\end{eqnarray}
+$$
+
+Precision and recall both have synonyms as well associated error rates.
+
+|quantity            |synonym             |assoc. error rate   |
+|:------------------:|:------------------:|:------------------:|
+|precision           |specificity or pos. predictive value         |false discovery rate, FDR |
+|recall              |sensitivity         |false negative rate, FNR |
+
+The error rates can be derived simply as
+
+$$
+\begin{eqnarray}
+\mathrm{FDR}_w &=& 1 - \mathrm{precision}_w  \\
+\mathrm{FNR}_w &=& 1 - \mathrm{recall}_w
+\end{eqnarray}
+$$
+
+## Estimating precision and recall
+
+Even for our mixes of the CEPH/Utah grandparents (NA12889,...,NA12892) we do not know $$V$$ itself.  Instead, we obtain truth sets $$T$$ based on Illumina's and/or our own germline variant calling workflow and **estimate** precision and sensitivity as follows.
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_w &=& \frac{|C_w \cap T|}{|C_w|} \\
+\widehat{\mathrm{recall}}_w &=& \frac{|C_w \cap T|}{|T|}
+\end{eqnarray}
+$$
+
+These definitions, however, are still not concrete enough to be useful in practice.  More details are needed on $$T$$.
+
+### Grandparent combinations and truth set partitions
+
+Recall that the CEPH/Utah grandparent DNA mixes were designed like this:
+
+|grandparent         |Mix1                |Mix2                |Mix3                |
+|:------------------:|:------------------:|:------------------:|:------------------:|
+|NA12889             |0.04                |0.02                |0                   |
+|NA12890             |0.16                |0.08                |0                   |
+|NA12891             |0.08                |0.04                |0                   |
+|NA12892             |0.72                |0.86                |1                   |
+
+The design uses NA12892 as the genetic background in the sense that somatic variants are modeled as those that are absent from NA12892 but contained in NA12889, NA12890, or NA12891, or in some combination of NA12889, NA12890, and NA12891.  Recall that we do not know the real variants in the grandparents but we have our (or Illumina's) truth sets denoted as $$T_{89},T_{90},T_{91},T_{92}$$, respectively.
+
+For example, consider a variant that is in both $$T_{89}$$ and $$T_{91}$$ but is missing from both $$T_{90}$$ and $$T_{92}$$.
+
+$$
+\begin{equation}
+x \in T_{1010} \Leftrightarrow x \in T_{89}, x \notin T_{90}, x \in T_{91}, x \notin T_{92}
+\end{equation}
+$$
+
+Note that this modeled somatic variant has mosaic allele frequency in Mix1 of $$0.04 + 0.08 = 0.12$$ and in Mix2 of $$0.02 + 0.04 = 0.06$$.
+
+We will refer to a set such as $$T_{1010}$$ as a truth set **partition** $$T_\pi$$ based on $$T_{89},T_{90},T_{91},T_{92}$$.  We will denote the **combination** with $$\pi$$ so that in the previous example $$\pi = 1010$$.
+
+There are $$2^4 = 16$$ grandparent combinations or, equivalently, truth set partitions.  The following table lists all combinations/partitions and the corresponding mosaic allele frequency in Mix1, Mix2 and Mix3.
+
+|combination $$\pi$$ |Mix1                |Mix2                |Mix3                |
+|:------------------:|:------------------:|:------------------:|:------------------:|
+|0000                |0.00                |0.00                |0                   |
+|                    |                    |                    |                    |
+|1000                |0.04                |0.02                |0                   |
+|0100                |0.16                |0.08                |0                   |
+|0010                |0.08                |0.04                |0                   |
+|0001                |0.72                |0.86                |1                   |
+|                    |                    |                    |                    |
+|1100                |0.20                |0.10                |0                   |
+|1010                |0.12                |0.06                |0                   |
+|1001                |0.76                |0.88                |1                   |
+|0110                |0.24                |0.12                |0                   |
+|0101                |0.88                |0.94                |1                   |
+|0011                |0.80                |0.90                |1                   |
+|                    |                    |                    |                    |
+|1110                |0.28                |0.14                |0                   |
+|1101                |0.92                |0.96                |1                   |
+|1011                |0.84                |0.92                |1                   |
+|0111                |0.96                |0.98                |1                   |
+|                    |                    |                    |                    |
+|1111                |1.00                |1.00                |1                   |
+
+
+Now we are ready to give a practical definition of the precision and recall estimates.
+
+### Practical definitions of precision and recall estimate
+
+Given a grandparent combination $$\pi$$ (or equivalently a truth set partition $$T_\pi$$) and variant calling workflow $$w$$ we estimate precision and recall as
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_{w,\pi} &=& \frac{|C_w \cap T_\pi|}{|C_w|} \\
+\widehat{\mathrm{recall}}_{w,\pi} &=& \frac{|C_w \cap T_\pi|}{|T_\pi|}
+\end{eqnarray}
+$$
+
+As mentioned, variants in $$T_{92}$$ constitute the genetic background, that is the germline variants of the modeled tissue with somatic mosaic variants.  Therefore only those combinations are relevant that exclude NA12892. Let us denote the set of these combinations with
+
+$$
+\begin{equation}
+\Pi_\mathrm{bsm} = \{0000, 1000, 0100, 0010, 1100, 1010, 0110, 1110 \}
+\end{equation}
+$$
+
+Then we can give a definition for the estimates that ignores mosaic allele frequency; we can call them *marginal* estimates:
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_{w} &=& \frac{|C_w \cap (\bigcup_{\pi \in \Pi_\mathrm{bsm}} T_\pi)|}{|C_w|} \\
+\widehat{\mathrm{recall}}_{w} &=& \frac{|C_w \cap (\bigcup_{\pi \in \Pi_\mathrm{bsm}} T_\pi)|}{|(\bigcup_{\pi \in \Pi_\mathrm{bsm}} T_\pi)|}
+\end{eqnarray}
+$$
+
