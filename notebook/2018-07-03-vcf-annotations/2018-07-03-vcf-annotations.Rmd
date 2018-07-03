@@ -1,0 +1,83 @@
+---
+layout: default
+#title: 
+featimg: density-1.png
+---
+
+Annotations in VCF files provide information for variant calling and filtering.  Therefore (joint) distribution of annotations across candidate variants (VCF records) is of interest.  Since each variant caller produces its own set of annotations, those annotations must be examined separately for each caller.
+
+## Preparations
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(VennDiagram)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Making a list of data frames based on a list of callers.  Each data frame contains a random subsample of VCF records and a subset of VCF fields.
+
+```{r engine="bash", eval=FALSE}
+# SNVs
+cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/snvs
+for vcf in vcf/*.vcf.gz; do vcfinfo2tsv $vcf& done
+# indels
+cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/indels
+for vcf in vcf/*.vcf.gz; do vcfinfo2tsv $vcf& done
+```
+
+```{r cache=TRUE}
+callers <- c("strelka2Somatic", "strelka2Germline", "lofreqSomatic", "somaticSniper", "Tnseq")
+names(callers) <- callers
+# helper function
+import.subsample <- function(caller, ssize = 1e4, indir = "../../results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/snvs/") {
+    df <- read.delim(paste0(indir, caller, ".vcf.gz.info.tsv"), na.strings = c("NA", "."))
+    mycols <- sapply(df, function(y) ! all(is.na(y)))
+    mysample <- sample(seq.int(nr <- nrow(df)), size = min(nr, ssize), replace = FALSE)
+    df[mysample, mycols]
+}
+info <- list() # list of lists
+info$snvs <- lapply(callers, import.subsample, ssize = 1e4, indir = "../../results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/snvs/")
+info$indels <- lapply(callers, import.subsample, ssize = 1e4, indir = "../../results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/indels/")
+```
+
+Reshaping data frames into long format.
+
+```{r}
+myreshape <- function(caller, infolist = info$snvs) {
+    df <- infolist[[caller]]
+    df <- df[sapply(df, is.numeric)]
+    foo <- function(key) data.frame(Annotation = key, Value = df[[key]])
+    l <- lapply(names(df), foo)
+    do.call(rbind, l)
+}
+info.long <- list()
+info.long$snvs <- lapply(callers, myreshape, info$snvs)
+info.long$indels <- lapply(callers, myreshape, info$indels)
+```
+
+## Marginal distributions
+
+### SNVs
+
+```{r density}
+lapply(callers, function(y) densityplot(~ Value | Annotation, data = info.long$snvs[[y]], pch = ".", main = y, scales = list(relation = "free")))
+```
+
+## Pairwise joint distributions
+
+### SNVs
+
+```{r splom}
+mysplom <- function(caller, infolist = info$snvs) {
+    df <- infolist[[caller]]
+    df <- df[sapply(df, is.numeric)]
+    splom(df, pch = '.', main = caller)
+}
+lapply(callers["somaticSniper" != callers], mysplom, info$snvs)
+```
+

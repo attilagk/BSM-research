@@ -14,4 +14,4 @@ VarDict,10.1093/nar/gkw227,https://github.com/AstraZeneca-NGS/VarDict,NaN,2017-1
 FreeBayes,https://arxiv.org/abs/1207.3907,https://github.com/ekg/freebayes,,,,,,,,,,,,,,,
 Samtools,10.1093/bioinformatics/btp352,http://www.htslib.org/,v1.6,2017-09-29 16:57:24,,TRUE,,,,,,,,,,,
 DeepVariant,10.1101/092890 ,https://github.com/google/deepvariant,"BIN_VERSION=""0.4.1""",2018-01-22,https://github.com/google/deepvariant/blob/r0.4/docs/deepvariant-quick-start.md#download-binaries-models-and-test-data,FALSE,ImportError: libcrypto.so.1.0.0: cannot open shared object file: No such file or director; see running the pipeline https://github.com/google/deepvariant/blob/r0.4/docs/deepvariant-quick-start.md#run-the-pipeline,,,,,,,issue submitted https://github.com/google/deepvariant/issues/41,FALSE,/home/attila/tools/deepvariant,
-MosaicHunter,10.1093/nar/gkx024,http://mosaichunter.cbi.pku.edu.cn/index.php,v1.0,,,,,,,,,,,,,,
+MosaicHunter,10.1093/nar/gkx024,http://mosaichunter.cbi.pku.edu.cn/index.php,v1.0,,,,,,,,,,custom (non-VCF) output,,,,

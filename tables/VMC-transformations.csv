@@ -1,0 +1,7 @@
+name,definition
+Log,log x
+Uniformization,(x – min(x)) / (max(x) – min(x))
+UniformizationWithoutRange,x / (max(x) – min(x))
+MeanNormalization,x – mean(x)
+MeanNormalizationWithRange,x – mean(x) / ((max(x) - min(x))
+ZScore,x – mean(x) / sdev(x)
