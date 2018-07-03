@@ -8,20 +8,12 @@ Annotations in VCF files provide information for variant calling and filtering. 
 
 ## Preparations
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-library(lme4)
-library(lattice)
-library(VennDiagram)
-opts_chunk$set(dpi = 144)
-opts_chunk$set(out.width = "600px")
-opts_chunk$set(dev = c("png", "pdf"))
-lattice.options(default.args = list(as.table = TRUE))
-lattice.options(default.theme = "standard.theme")
-```
+
 
 Making a list of data frames based on a list of callers.  Each data frame contains a random subsample of VCF records and a subset of VCF fields.
 
-```{r engine="bash", eval=FALSE}
+
+```bash
 # SNVs
 cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/snvs
 for vcf in vcf/*.vcf.gz; do vcfinfo2tsv $vcf& done
@@ -30,7 +22,8 @@ cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/i
 for vcf in vcf/*.vcf.gz; do vcfinfo2tsv $vcf& done
 ```
 
-```{r cache=TRUE}
+
+```r
 callers <- c("strelka2Somatic", "strelka2Germline", "lofreqSomatic", "somaticSniper", "Tnseq")
 names(callers) <- callers
 # helper function
@@ -45,14 +38,16 @@ info$snvs <- lapply(callers, import.subsample, ssize = 1e4, indir = "../../resul
 info$indels <- lapply(callers, import.subsample, ssize = 1e4, indir = "../../results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/indels/")
 ```
 
-```{r engine="bash", eval=TRUE}
+
+```bash
 cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/
 ./parse-header-info
 ```
 
 Reshaping data frames into long format.
 
-```{r}
+
+```r
 myreshape <- function(caller, infolist = info$snvs) {
     df <- infolist[[caller]]
     df <- df[sapply(df, is.numeric)]
@@ -65,19 +60,59 @@ info.long$snvs <- lapply(callers, myreshape, info$snvs)
 info.long$indels <- lapply(callers, myreshape, info$indels)
 ```
 
+```
+## Error in `[.default`(df, sapply(df, is.numeric)): invalid subscript type 'list'
+```
+
 ## Marginal distributions
 
 ### SNVs
 
-```{r density}
+
+```r
 lapply(callers, function(y) densityplot(~ Value | Annotation, data = info.long$snvs[[y]], pch = ".", main = y, scales = list(relation = "free")))
 ```
+
+```
+## $strelka2Somatic
+```
+
+<img src="figure/density-1.png" title="plot of chunk density" alt="plot of chunk density" width="600px" />
+
+```
+## 
+## $strelka2Germline
+```
+
+<img src="figure/density-2.png" title="plot of chunk density" alt="plot of chunk density" width="600px" />
+
+```
+## 
+## $lofreqSomatic
+```
+
+<img src="figure/density-3.png" title="plot of chunk density" alt="plot of chunk density" width="600px" />
+
+```
+## 
+## $somaticSniper
+```
+
+<img src="figure/density-4.png" title="plot of chunk density" alt="plot of chunk density" width="600px" />
+
+```
+## 
+## $Tnseq
+```
+
+<img src="figure/density-5.png" title="plot of chunk density" alt="plot of chunk density" width="600px" />
 
 ## Pairwise joint distributions
 
 ### SNVs
 
-```{r splom}
+
+```r
 mysplom <- function(caller, infolist = info$snvs) {
     df <- infolist[[caller]]
     df <- df[sapply(df, is.numeric)]
@@ -85,4 +120,31 @@ mysplom <- function(caller, infolist = info$snvs) {
 }
 lapply(callers["somaticSniper" != callers], mysplom, info$snvs)
 ```
+
+```
+## $strelka2Somatic
+```
+
+<img src="figure/splom-1.png" title="plot of chunk splom" alt="plot of chunk splom" width="600px" />
+
+```
+## 
+## $strelka2Germline
+```
+
+<img src="figure/splom-2.png" title="plot of chunk splom" alt="plot of chunk splom" width="600px" />
+
+```
+## 
+## $lofreqSomatic
+```
+
+<img src="figure/splom-3.png" title="plot of chunk splom" alt="plot of chunk splom" width="600px" />
+
+```
+## 
+## $Tnseq
+```
+
+<img src="figure/splom-4.png" title="plot of chunk splom" alt="plot of chunk splom" width="600px" />
 
