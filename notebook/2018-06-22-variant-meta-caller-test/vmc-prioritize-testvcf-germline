@@ -3,7 +3,7 @@
 maindir=/home/attila/tools/VariantMetaCaller
 vcfdir=$maindir/testVCFs-germline
 cfg=$maindir/VariantMetaCaller_v1.0/definitions.config
-wd=/big/results/bsm/2018-06-22-variant-meta-caller-test/vmc-prioritize-testvcf-germline
+wd=/projects/bsm/attila/results/2018-06-22-variant-meta-caller-test/vmc-prioritize-testvcf-germline
 
 cd $wd
 VariantMetaCaller \

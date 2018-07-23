@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+caller=${1:-freebayes}
+indir=$HOME/tools/VariantMetaCaller/testVCFs-germline/
+comp=$indir/bwa.${caller}_group-1_D100.vcf
+truth=$indir/true-variants_group-1.vcf
+compbn=`basename $comp .vcf`
+truthbn=`basename $truth .vcf`
+outbn=${compbn}-${truthbn}
+wd=/projects/bsm/attila/results/2018-06-22-variant-meta-caller-test/genotypeconcordance/testvcf-germline
+
+cd $wd
+
+VariantMetaCaller -comp $comp -truth $truth \
+    -o $outbn -t genotypeconcordance 2> $outbn.log
