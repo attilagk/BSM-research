@@ -1,9 +1,11 @@
 #! /usr/bin/env bash
 
-echo -e "Caller,InfoTag,Number,Type,Description" > info-fields.csv
+echo -e "Caller,Field,Annotation,Number,Type,Description" > info-fields.csv
 
 for vcf in snvs/vcf/*.vcf.gz; do
     caller=`basename $vcf .vcf.gz`
     bcftools view -h $vcf | \
-        sed -n "/^##INFO=<ID=\(.*\)>/ { s//$caller,\1/; s/\(Number\|Type\|Description\)=//g; p }"
+        sed -n "/^##INFO=<ID=\(.*\)>/ { s//$caller,INFO,\1/; s/\(Number\|Type\|Description\)=//g; p }"
+    bcftools view -h $vcf | \
+        sed -n "/^##FORMAT=<ID=\(.*\)>/ { s//$caller,FORMAT,\1/; s/\(Number\|Type\|Description\)=//g; p }"
 done >> info-fields.csv

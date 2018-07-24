@@ -48,7 +48,10 @@ info$indels <- lapply(callers, import.subsample, ssize = 1e4, indir = "../../res
 ```{r engine="bash", eval=TRUE}
 cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/
 ./parse-header-info
+cp info-fields.csv $HOME/lab-notebook/assets/projects/bsm/
 ```
+
+See [this table]({{ site.baseurl}}/assets/projects/bsm/info-fields.csv) for annotations for each caller.
 
 Reshaping data frames into long format.
 
