@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+segment=${1:-22}
+maindir=/big/results/bsm/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark
+wd=$maindir/$segment
+vcfd=$wd/invcfs
+
+cd $wd
+callers="lofreqSomatic somaticSniper strelka2Germline strelka2Somatic Tnseq"
+
+for caller in $callers; do
+    ls $vcfd/$caller-snvs/$caller.vcf.gz
+done

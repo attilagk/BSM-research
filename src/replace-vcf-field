@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Replace a field in all records in VCF with some value
+
+vcf=`realpath $1`
+field=${2:-6} # default 6 is QUAL
+value=${3:-999}
+
+# the index of the previous and next field
+prevfield=$(($field - 1))
+nextfield=$(($field + 1))
+
+# store parts of VCF in different files
+vcfleft=`tempfile`
+vcfcenter=`tempfile`
+vcfright=`tempfile`
+
+bcftools view -H $vcf | cut -f1-$prevfield > $vcfleft
+bcftools view -H $vcf | cut -f$nextfield- > $vcfright
+sed "s/.*/$value/" $vcfleft > $vcfcenter
+
+bcftools view -h $vcf
+paste $vcfleft $vcfcenter $vcfright && rm $vcfleft $vcfcenter $vcfright

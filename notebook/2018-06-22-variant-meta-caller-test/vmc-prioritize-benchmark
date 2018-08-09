@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
-segment=${1:-22}
-maindir=/big/results/bsm/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark
-wd=$maindir/$segment
-vcfd=$wd/invcfs
+maindir="$HOME/projects/bsm/results/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark/"
+vcfdir=$maindir/22/invcfs/
+cfg=$1
+wd=`dirname $cfg`
+wd=`realpath $wd`
+outvcf=$wd/results.vcf
 
-cd $wd
-callers="lofreqSomatic somaticSniper strelka2Germline strelka2Somatic Tnseq"
-
-for caller in $callers; do
-    ls $vcfd/$caller-snvs/$caller.vcf.gz
-done
+VariantMetaCaller \
+    --verbosity 1 \
+    --type snp \
+    -t prioritize \
+    -c $cfg \
+    -v somaticSniper somaticSniper <(bcftools view $vcfdir/somaticSniper-snvs/somaticSniper.vcf.gz) \
+    -v strelka2Germline strelka2Germline <(bcftools view $vcfdir/strelka2Germline-snvs/strelka2Germline.vcf.gz) \
+    -v strelka2Somatic strelka2Somatic <(bcftools view $vcfdir/strelka2Somatic-snvs/strelka2Somatic.vcf.gz) \
+    -v Tnseq Tnseq <(bcftools view $vcfdir/Tnseq-snvs/Tnseq.vcf.gz) > $outvcf
