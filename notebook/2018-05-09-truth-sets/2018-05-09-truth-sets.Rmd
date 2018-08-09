@@ -32,7 +32,7 @@ for vcf in S1/NA128*.vcf.gz; do bcftools view --output-file chr22/$vcf --output-
 indir=/big/results/bsm/2018-03-20-benchmark-testdata/wgs/vcf/snvs
 outdir=chr22/S1-snps
 # filter test set (of each caller) for chr22 and default PASS
-for caller in lofreqSomatic  somaticSniper  strelka2Germline  strelka2Somatic  Tnseq; do
+for caller in lofreqSomatic  somaticSniper  strelka2Germline  strelka2Germline2s  strelka2Somatic  Tnseq; do
     bcftools view --output-type z --output-file $outdir/$caller.vcf.gz --targets 22 --apply-filters .,PASS $indir/$caller.vcf.gz
     bcftools index --tbi $outdir/$caller.vcf.gz
 done

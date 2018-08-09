@@ -1,0 +1,3 @@
+##INFO=<ID=EntropyLeft_15,Number=1,Type=Float,Description="Entropy of left-flanking sequence of 15bp">
+##INFO=<ID=EntropyCenter_15,Number=1,Type=Float,Description="Entropy of centered sequence of 15bp">
+##INFO=<ID=EntropyRight_15,Number=1,Type=Float,Description="Entropy of right-flanking sequence of 15bp">
