@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+
+invcf=$1
+outvcf=`basename $invcf .vcf`-gt.vcf
+
+echo -e "Ref\tAlt\tNormal.DP\tNormal.FDP\tNormal.SDP\tNormal.SUBDP\tNormal.AU\tNormal.CU\tNormal.GU\tNormal.TU\tTumor.DP\tTumor.FDP\tTumor.SDP\tTumor.SUBDP\tTumor.AU\tTumor.CU\tTumor.GU\tTumor.TU"
+
+bcftools view -H $invcf |
+cut -f 4,5,10,11 |
+sed 's/,[[:digit:]]\+//g' |
+tr ':' '\t'
