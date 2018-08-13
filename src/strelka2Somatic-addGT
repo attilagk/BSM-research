@@ -1,11 +1,51 @@
 #! /usr/bin/env bash
 
+# Add GT (genotype) annotation to VCF produced by strelka2Somatic
+
 invcf=$1
-outvcf=`basename $invcf .vcf`-gt.vcf
+outputType=v
 
-echo -e "Ref\tAlt\tNormal.DP\tNormal.FDP\tNormal.SDP\tNormal.SUBDP\tNormal.AU\tNormal.CU\tNormal.GU\tNormal.TU\tTumor.DP\tTumor.FDP\tTumor.SDP\tTumor.SUBDP\tTumor.AU\tTumor.CU\tTumor.GU\tTumor.TU"
+while getopts ":O" opt; do
+    case $opt in
+        O) outputType=$OPTARG;;
+    esac
+done
+shift $(($OPTIND - 1))
 
-bcftools view -H $invcf |
-cut -f 4,5,10,11 |
-sed 's/,[[:digit:]]\+//g' |
-tr ':' '\t'
+usage="usage: `basename $0` [-O v|z] invcf > outvcf"
+if test $# -ne 1; then
+    echo $usage; exit 0
+fi
+
+# temp files for VCF pieces
+part1=`tempfile`
+GT=`tempfile`
+format=`tempfile`
+GTformat=`tempfile`
+sample1=`tempfile`
+sample2=`tempfile`
+GT1=`tempfile`
+GT2=`tempfile`
+GT1sample1=`tempfile`
+GT2sample2=`tempfile`
+outvcf=`tempfile`
+
+# smaller pieces of output
+bcftools view -H $invcf | cut -f 1-8 >> $part1
+bcftools view -H $invcf | cut -f 9 >> $format
+bcftools view -H $invcf | cut -f 10 >> $sample1
+bcftools view -H $invcf | cut -f 11 >> $sample2
+sed 's/.*/GT:/' $part1 >> $GT
+sed 's/.*/0\/0:/' $part1 >> $GT1
+sed 's/.*/0\/1:/' $part1 >> $GT2
+
+# larger pieces of output
+bcftools view -h $invcf >> $outvcf
+paste -d '' $GT $format >> $GTformat
+paste -d '' $GT1 $sample1 >> $GT1sample1
+paste -d '' $GT2 $sample2 >> $GT2sample2
+
+# entire output in desired type; clean-up
+paste $part1 $GTformat $GT1sample1 $GT2sample2 >> $outvcf
+bcftools view -O $outputType $outvcf
+rm $part1 $GT $format $GTformat $sample1 $sample2 $GT1 $GT2 $GT1sample1 $GT2sample2 $outvcf
