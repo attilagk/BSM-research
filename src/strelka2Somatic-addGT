@@ -2,18 +2,18 @@
 
 # Add GT (genotype) annotation to VCF produced by strelka2Somatic
 
-invcf=$1
 outputType=v
 
-while getopts ":O" opt; do
+while getopts "O:" opt; do
     case $opt in
         O) outputType=$OPTARG;;
     esac
 done
 shift $(($OPTIND - 1))
+invcf=$1
 
 usage="usage: `basename $0` [-O v|z] invcf > outvcf"
-if test $# -ne 1; then
+if test $# -eq 0; then
     echo $usage; exit 0
 fi
 
