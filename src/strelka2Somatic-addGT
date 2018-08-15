@@ -40,7 +40,9 @@ sed 's/.*/0\/0:/' $part1 >> $GT1
 sed 's/.*/0\/1:/' $part1 >> $GT2
 
 # larger pieces of output
-bcftools view -h $invcf >> $outvcf
+bcftools view -h $invcf | sed '/^##FORMAT/q' >> $outvcf
+echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $outvcf
+bcftools view -h $invcf | sed -n '/^##FORMAT/,$ p' | sed -n '2,$ p' >> $outvcf
 paste -d '' $GT $format >> $GTformat
 paste -d '' $GT1 $sample1 >> $GT1sample1
 paste -d '' $GT2 $sample2 >> $GT2sample2
