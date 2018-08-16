@@ -15,4 +15,6 @@ fi
     -t Somatic \
     -1 $length/Mix1A-$length.bam \
     -2 $length/Mix3A-$length.bam \
+    -a Mix1A \
+    -b Mix3A \
     -o $outdir ) 1>&$outdir/strelka2Somatic-run.time &
