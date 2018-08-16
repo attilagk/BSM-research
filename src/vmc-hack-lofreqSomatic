@@ -3,10 +3,14 @@
 # Add GT (genotype) annotation to VCF produced by lofreqSomatic
 
 outputType=v
+caseSample=TUMOR
+controlSample=NORMAL
 
-while getopts "O:" opt; do
+while getopts "O:a:b:" opt; do
     case $opt in
         O) outputType=$OPTARG;;
+        a) caseSample=$OPTARG;;
+        b) controlSample=$OPTARG;;
     esac
 done
 shift $(($OPTIND - 1))
@@ -34,7 +38,7 @@ sed 's/.*/0\/1/' $invcf >> $sample2
 bcftools view -h $invcf | sed '/^##FILTER/q' >> $outvcf
 echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $outvcf
 bcftools view -h $invcf | sed -n '/^##FILTER/,$ p' | sed -n '2,$ p' >> $outvcf
-sed -i '/\(^#CHROM.*$\)/ s//\1\tFORMAT\tNORMAL\tTUMOR/' $outvcf
+sed -i "/\(^#CHROM.*$\)/ s//\1\tFORMAT\t$controlSample\t$caseSample/" $outvcf
 paste $part1 $format $sample1 $sample2 >> $outvcf
 
 # entire output in desired type; clean-up
