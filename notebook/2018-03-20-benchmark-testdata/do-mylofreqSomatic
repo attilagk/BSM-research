@@ -7,4 +7,6 @@ nproc=${2:-16}
     -1 $length/Mix1A-$length.bam \
     -2 $length/Mix3A-$length.bam \
     -t Somatic -d $DBSNP_ALL \
+    -a Mix1A \
+    -b Mix3A \
     -o $length/${nproc}proc/ ) 1>&$length/${nproc}proc/lofreqSomatic-run.time &
