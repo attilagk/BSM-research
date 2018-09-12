@@ -1,0 +1,8 @@
+---
+layout: default
+#title: 
+#featimg: density-1.png
+---
+
+Which individuals have been sequenced?
+
