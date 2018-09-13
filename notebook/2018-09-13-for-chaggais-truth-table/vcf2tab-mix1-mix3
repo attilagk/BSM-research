@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+
+# Extract selected columns in each VCF file for Mix1A Mix3A benchmark.
+# TSV output files are written into 'outdir', which must exist.
+# Column selection should follow the form of LIST of fields for the cut
+# utility (see -f LIST or --fields=LIST in the manpage of cut).  Default:
+# extract all columns.
+
+usage="usage: `basename $0` outdir [columns]"
+
+outdir=$1
+#outdir=/projects/bsm/attila/results/2018-09-13-for-chaggais-truth-table/benchmark-Mix1A-Mix3A/
+columns=${2:-'1-'}
+indir=/projects/bsm/attila/results/2018-03-20-benchmark-testdata/wgs/vcf/
+
+# check if outdir exists and was specified
+if ! test -d $outdir || test $# -eq 0; then
+    echo $usage; exit 1
+fi
+
+# do everything separately for snvs and indels
+for vartype in snvs indels; do
+    # make directory if needed
+    if ! test -d $vartype; then
+        mkdir $vartype
+    fi
+    # do the work for each input VCF
+    # note that some VCFs are empty
+    for vcf in $indir/$vartype/*.vcf.gz; do
+        bn=`basename $vcf .vcf.gz`
+        outfile=$outdir/$vartype/$bn.tsv
+        bcftools view -H $vcf | cut -f $columns > $outfile
+    done
+done
