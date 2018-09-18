@@ -4,7 +4,7 @@ layout: default
 featimg: density-1.png
 ---
 
-Annotations in VCF files provide information for variant calling and filtering.  Therefore (joint) distribution of annotations across candidate variants (VCF records) is of interest.  Since each variant caller produces its own set of annotations, those annotations must be examined separately for each caller.
+Annotations in VCF files provide information for variant calling and filtering.  They can be used as input variables to VariantMetaCaller.  Therefore (joint) distribution of annotations across candidate variants (VCF records) is of interest.  Since each variant caller produces its own set of annotations, those annotations must be examined separately for each caller.
 
 ## Introduction
 
@@ -64,7 +64,21 @@ cd $HOME/projects/bsm/results/2018-07-03-vcf-annotations/benchmark-mix1a-mix3a/
 cp info-fields.csv $HOME/lab-notebook/assets/projects/bsm/
 ```
 
-See [this table]({{ site.baseurl}}/assets/projects/bsm/info-fields.csv) for annotations for each caller.
+## Annotations and input variables
+
+### Annotations readily present in VCFs
+
+VCF files contain various annotations that may be used as input variables to VariantMetaCaller.  These are most typically tags in the sample non-specific INFO field or the sample specific fields structured as given in the FORMAT field.  The QUAL field is another example for such annotation.  [This table]({{ site.baseurl}}/assets/projects/bsm/info-fields.csv) details annotations present in the VCFs produced by each caller.  Of these *only numeric* annotations can be used as input variables to VariantMetaCaller.
+
+### Extra annotations in extended VCFs
+
+VCFs produced by each caller can be extended with extra annotations that are derived from those readily present in the those VCFs.  One set of such extra annotations is obtained by the [vcflib](https://github.com/vcflib/vcflib) package.  More specifically *BasesToClosestVariant* is obtained by the `vcfdistance` tool of `vcflib`, whereas entropies like *EntropyLeft_7* or *EntropyCenter_7* by `vcfentropy`.
+
+### Example: selected annotations for VariantMetaCaller
+
+This [configuration file]({{ site.baseurl}}/assets/projects/bsm/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark/test09/definitions.config) lists which annotations---readily present or extra---are selected for VariantMetaCaller for test run *test09*.  Further test runs will extend and fine tune the set of annotations to improve VariantMetaCaller's performance.
+
+## More preparations
 
 Reshaping data frames into long format.
 
