@@ -16,7 +16,7 @@ done
 shift $(($OPTIND - 1))
 invcf=$1
 
-usage="usage: `basename $0` [-O v|z] invcf > outvcf"
+usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] invcf > outvcf"
 if test $# -eq 0; then
     echo $usage; exit 0
 fi
