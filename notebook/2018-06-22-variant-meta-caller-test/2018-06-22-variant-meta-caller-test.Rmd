@@ -39,7 +39,7 @@ The somatic caller of strelka2 ([see paper](https://www.nature.com/articles/s415
 
 It follows that, at least for the tumor sample, it makes no sense to assign a single genotype.  Therefore strelka2Somatic VCFs lack the GT (genotype) tag in the sample fields.  The problem is that VariantMetaCaller requires GT tag when it calculates the *positive threshold*, which is the "Minimum number of callers supporting a variant to consider as positive training instance for SVM" (see VariantMetaCaller's help).
 
-The `vmc-hack-strelka2Somatic` script solve that problem by adding GT 0/1 for TUMOR and GT 0/0 for NORMAL. This is, of course, a simplification which ignores the typically mixed genotypes in the tumor sample.  But it seems to be a reasonable simplification based on the following analysis.
+The `$HOME/bin/vcf-add-GT` script solve that problem by adding GT 0/1 for TUMOR and GT 0/0 for NORMAL. This is, of course, a simplification which ignores the typically mixed genotypes in the tumor sample.  But it seems to be a reasonable simplification based on the following analysis.
 
 The `strelka2Somatic-getsamplefields` script takes all the tags from the NORMAL and TUMOR sample fields in `strelka2Somatic.vcf` and stores those into a tsv file.
 
@@ -99,5 +99,5 @@ xyplot(Alt.VAF.Normal ~ Alt.VAF.Tumor, data = vaf, pch = "+", subset = Alt.VAF.N
        xlab = "Tumor", ylab = "Normal")
 ```
 
-The `vmc-hack-strelka2Somatic` script assumes the normal sample has 0/0 GT for each somatic variant and the plots above do seem to suggest this assumption is reasonable.  So what about 0/1 genotype in the normal tissue?  Somatic variants in the tissue may then be of genotype 0/0 or 1/1.  But these types of variants are the more difficult to detect by strelka2's somatic calling model ([see paper](https://www.nature.com/articles/s41592-018-0051-x)) therefore these will be unlikely to end up in `strelka2Somatic.vcf`
+The `$HOME/bin/vcf-add-GT` script assumes the normal sample has 0/0 GT for each somatic variant and the plots above do seem to suggest this assumption is reasonable.  So what about 0/1 genotype in the normal tissue?  Somatic variants in the tissue may then be of genotype 0/0 or 1/1.  But these types of variants are the more difficult to detect by strelka2's somatic calling model ([see paper](https://www.nature.com/articles/s41592-018-0051-x)) therefore these will be unlikely to end up in `strelka2Somatic.vcf`
 
