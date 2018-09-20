@@ -15,8 +15,9 @@ while getopts "O:a:b:" opt; do
 done
 shift $(($OPTIND - 1))
 invcf=$1
+outvcf=$2
 
-usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] invcf > outvcf"
+usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] invcf outvcf"
 if test $# -eq 0; then
     echo $usage; exit 0
 fi
@@ -42,7 +43,7 @@ controlGT=`tempfile`
 caseGT=`tempfile`
 controlGTsample=`tempfile`
 caseGTsample=`tempfile`
-outvcf=`tempfile`
+tmpoutvcf=`tempfile`
 
 bcftools view -H $invcf | cut -f 1-8 >> $leftPart
 
@@ -58,10 +59,10 @@ case $missingFormat in
         cp $format $controlSampleFile
         cp $format $caseSampleFile
         # larger pieces
-        bcftools view -h $invcf | sed '/^##fileformat/q' >> $outvcf
-        echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $outvcf
-        bcftools view -h $invcf | sed -n '/^##fileformat/,$ p' | sed -n '2,$ p' >> $outvcf
-        sed -i "s/^#CHROM.*$/&\tFORMAT\t$controlSample\t$caseSample/" $outvcf
+        bcftools view -h $invcf | sed '/^##fileformat/q' >> $tmpoutvcf
+        echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $tmpoutvcf
+        bcftools view -h $invcf | sed -n '/^##fileformat/,$ p' | sed -n '2,$ p' >> $tmpoutvcf
+        sed -i "s/^#CHROM.*$/&\tFORMAT\t$controlSample\t$caseSample/" $tmpoutvcf
         tagdelim=''
         ;;
     F)
@@ -70,9 +71,9 @@ case $missingFormat in
         bcftools view -H $invcf | cut -f $controlCol >> $controlSampleFile
         bcftools view -H $invcf | cut -f $caseCol >> $caseSampleFile
         # larger pieces
-        bcftools view -h $invcf | sed '/^##FORMAT/q' >> $outvcf
-        echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $outvcf
-        bcftools view -h $invcf | sed -n '/^##FORMAT/,$ p' | sed -n '2,$ p' >> $outvcf
+        bcftools view -h $invcf | sed '/^##FORMAT/q' >> $tmpoutvcf
+        echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $tmpoutvcf
+        bcftools view -h $invcf | sed -n '/^##FORMAT/,$ p' | sed -n '2,$ p' >> $tmpoutvcf
         tagdelim=':'
         ;;
 esac
@@ -86,7 +87,7 @@ paste -d '' $controlGT $controlSampleFile >> $controlGTsample
 paste -d '' $caseGT $caseSampleFile >> $caseGTsample
 
 # entire output in desired type; clean-up
-paste $leftPart $GTformat $controlGTsample $caseGTsample >> $outvcf
+paste $leftPart $GTformat $controlGTsample $caseGTsample >> $tmpoutvcf
 
-bcftools view -O $outputType $outvcf
-rm $leftPart $GT $format $GTformat $controlSampleFile $caseSampleFile $controlGT $caseGT $controlGTsample $caseGTsample $outvcf
+bcftools view -O $outputType -o $outvcf $tmpoutvcf
+rm $leftPart $GT $format $GTformat $controlSampleFile $caseSampleFile $controlGT $caseGT $controlGTsample $caseGTsample $tmpoutvcf
