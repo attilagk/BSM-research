@@ -22,9 +22,11 @@ if test $# -eq 0; then
     echo $usage; exit 0
 fi
 
-# silently exit if there's already a GT tag in FORMAT: nothing to do
+# if there's already a GT tag in FORMAT just write invcf to outvcf
 if bcftools view -h $invcf | grep --quiet '##FORMAT=<ID=GT'
-then exit
+then
+    bcftools view -O $outputType -o $outvcf $invcf
+    exit
 fi
 
 # get index of case and control sample fields/columns

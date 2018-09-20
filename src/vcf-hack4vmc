@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# hack invcf for VariantMetaCaller and write it to outvcf
+
+scriptdir=`dirname $0`
+outputType=v
+caseSample=TUMOR
+controlSample=NORMAL
+while getopts "a:b:" opt; do
+    case $opt in
+        a) caseSample=$OPTARG;;
+        b) controlSample=$OPTARG;;
+    esac
+done
+shift $(($OPTIND - 1))
+invcf=$1
+outvcf=$2
+
+usage="usage: `basename $0` [-a caseSample -b controlSample] invcf outvcf"
+if test $# -eq 0; then
+    echo $usage; exit 0
+fi
+# invcf and outvcf must not be the same file
+if test `realpath $invcf` == `realpath $outvcf`; then
+    echo $usage 1>&2; exit 1
+fi
+
+tempvcf=`tempfile`
+
+$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample $invcf $tempvcf
+$scriptdir/annotate1vcf.sh -O $outputType $tempvcf $outvcf
+rm $tempvcf
