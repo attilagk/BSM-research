@@ -1,0 +1,44 @@
+#! /usr/bin/env bash
+
+# Filters a set of input VCFs for PASS, vartype, and region specified by
+# chromosome number 'chr'.
+# The resulting VCFs still need annotation and other hacks before they are fed
+# to VariantMetaCaller.
+
+usage="`basename $0` [-v snps|indels -O z|v] chr"
+
+callers="lofreqSomatic somaticSniper strelka2Germline strelka2Germline2s strelka2Somatic Tnseq"
+srcdir=/big/results/bsm/2018-03-20-benchmark-testdata/wgs/vcf/snvs/
+dstdir=/big/results/bsm/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark/
+
+vartype=snps
+outputType=z
+while getopts "v:O:" opt; do
+    case $opt in
+        v) vartype=$OPTARG;;
+        O) outputType=$OPTARG;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+if test $# -eq 0; then
+    echo $usage; exit
+fi
+
+chr=$1
+dstdir=$dstdir/chr$chr/$vartype
+if test ! -d $dstdir; then
+    mkdir -p $dstdir
+fi
+
+vcfsuffix=''
+case $outputType in
+    z) vcfsuffix='.gz';;
+    v) vcfsuffix='';;
+esac
+
+for caller in $callers; do
+    invcf=$srcdir/$caller.vcf.gz
+    outvcf=$dstdir/$caller.vcf$vcfsuffix
+    bcftools view -r $chr -v $vartype -f .,PASS -O $outputType -o $outvcf $invcf
+done

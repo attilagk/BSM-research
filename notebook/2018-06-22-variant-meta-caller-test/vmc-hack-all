@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Takes a set of PASS, vartype and region (chr)-filtered VCFs and hacks them
+# for VariantMetaCaller
+
+callers="lofreqSomatic somaticSniper strelka2Germline strelka2Germline2s strelka2Somatic Tnseq"
+maindir=/big/results/bsm/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark/
+indir=${1:-$maindir/chr22/snps}
+outdir=${2:-$maindir/chr22-hacked4vmc/snps}
+
+if test ! -d $outdir; then
+    mkdir -p $outdir
+fi
+
+#for vcf in $indir/*.vcf*; do
+for caller in $callers; do
+    vcf=$indir/$caller.*
+    $HOME/projects/bsm/src/vcf-hack4vmc -a Mix1A -b Mix3A $vcf $outdir/$caller.vcf
+done
