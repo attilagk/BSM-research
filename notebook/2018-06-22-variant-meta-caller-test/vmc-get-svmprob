@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+
+vcf=`realpath $1`
+out=`dirname $vcf`/`basename $vcf .vcf`-svmprob.tsv
+
+echo -e 'chrom\tpos\tref\talt\tsvmprob' > $out
+bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n' $vcf |
+sed 's/,\S\+//g' >> $out
+#echo -e 'chrom,pos,ref,alt,svmprob' > $out
+#bcftools query -f '%CHROM,%POS,%REF,%ALT,%INFO/SVMPROB\n' $vcf >> $out
