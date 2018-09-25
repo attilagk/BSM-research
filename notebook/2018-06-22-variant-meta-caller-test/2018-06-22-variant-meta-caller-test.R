@@ -15,9 +15,3 @@ get.vaf <- function(df) {
 reshape.vaf <- function(v)
     reshape(v, varying = list(c("Ref.VAF.Normal", "Ref.VAF.Tumor"), c("Alt.VAF.Normal", "Alt.VAF.Tumor")),
             v.names = c("Ref.VAF", "Alt.VAF"), timevar = "Sample", times = c("Normal", "Tumor"), direction = "long")
-
-vmc.precision <- function(svmprobs) {
-    numer <- sort(svmprobs, decreasing = TRUE)
-    denom <- seq_along(numer)
-    return(numer / denom)
-}
