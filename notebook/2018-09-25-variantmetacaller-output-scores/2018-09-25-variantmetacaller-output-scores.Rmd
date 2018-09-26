@@ -27,6 +27,8 @@ $$
 \end{equation}
 $$
 
+See Eq. 2 of [the VariantMetaCaller paper](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-2050-y#Sec10).
+
 ## Some results
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -63,8 +65,6 @@ sapply(vmc.test, function(test) sum(test$svmprob))
 ```
 
 ### Precision given the k highest probability calls
-
-To estimate precision refer to Eq. 2 of [the VariantMetaCaller paper](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-2050-y#Sec10)
 
 ```{r prec-rank}
 plot(vmc.precision(vmc.test$test09$svmprob), main = paste(testruns[testrun], regions[testrun], ": precision"), xlab = "k: # of highest probability calls called true", ylab = "E[prec_k]", pch = ".")
