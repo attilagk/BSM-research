@@ -3,26 +3,18 @@
 import sys
 import vcf
 
-invcf = vcf.Reader(open("../results/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark/test10/results.vcf", "r"))
+invcfname = sys.argv[1]
 
-#def foo(invcf_file):
-#    return(invcf_file * 2)
-#    invcf = vcf.Reader(open(invcf_file, "r"))
-#    i = 0
-#    for record in invcf:
-#        i += 1
-#        if i >= 10:
-#            break
-#        print(record.INFO)
-#
+def print_records(invcf_file, nrec = 2):
+    f = open(invcf_file, "r")
+    invcf = vcf.Reader(f)
+    i = 0
+    for r in invcf:
+        if i >= nrec:
+            break
+        print(r.INFO)
+        i += 1
+    f.close()
 
-i = 0
-for record in invcf:
-    i += 1
-    if i >= 10:
-        break
-    print(record.INFO)
-
-
-def foo(invcf_file):
-    return(invcf_file * 2)
+if __name__ == "__main__":
+    print_records(invcfname)
