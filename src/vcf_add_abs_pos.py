@@ -1,13 +1,17 @@
 #! /usr/bin/env python3
 
+import os
 import sys
 import vcf
 import csv
 
 invcfname = sys.argv[1]
-faifname = "/big/data/refgenome/GRCh37/hs37d5/hs37d5.fa.fai"
+if len(sys.argv) <= 2:
+    faifname = os.environ["REFSEQ"] + ".fai"
+else:
+    faifname = sys.argv[2]
 
-def fai2dict(fai_file = faifname):
+def fai2dict(fai_file):
     with open(fai_file, "r") as f:
         csv_reader = csv.reader(f, delimiter = "\t")
         d = {}
@@ -15,7 +19,7 @@ def fai2dict(fai_file = faifname):
             d[r[0]] = int(r[2])
         return(d)
 
-def print_records(invcf_file, fai = fai2dict(faifname), nrec = 2):
+def print_records(invcf_file, fai, nrec = 2):
     i = 0
     with open(invcf_file, "r") as f:
         invcf = vcf.Reader(f)
@@ -29,4 +33,4 @@ def print_records(invcf_file, fai = fai2dict(faifname), nrec = 2):
         return(r)
 
 if __name__ == "__main__":
-    print_records(invcfname)
+    print_records(invcfname, fai = fai2dict(faifname))
