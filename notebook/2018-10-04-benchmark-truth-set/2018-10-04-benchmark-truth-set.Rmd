@@ -1,0 +1,54 @@
+---
+layout: default
+#title: 
+#featimg: 
+---
+
+Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Utah grandparents to model somatic variants.  Shortcomings of the initial design include: (1) some variants can neither be considered clearly somatic nor otherwise, which complicates the definition of the truth set; (2) too many modeled somatic variants relative to what may be expected based on single cell sequencing studies; (3) in each mix there is a set of multiple alternative allele frequencies (AAF), which allows us to study the dependence on AAF of only recall but not that of precision.
+
+## Introduction
+
+### Clearly somatic modeled variants
+
+Our benchmark experiment uses DNA mixes (Mix1, Mix2) of three CEPH/Utah grandparents as case sample and compares that to a control sample.  The control sample may be one of Mix1 or Mix2 or it may be the DNA from the fourth grandparent (NA12892/Mix3).  The latter case---in particular Mix1 vs Mix3---represents the clearest separation between the case and control sample and thus the set of variants that can be considered clearly somatic.  But even in that case there are some less clear variants, whose alternative allele frequency (AAF) in the control sample is neither 0 nor 1 but 0.5 due to the fourth grandparent being heterozygous for these variant.  Here we set out to exclude these variants from both the truth sets as well as the test sets (the call sets by our somatic variant callers).
+
+### The realistic number of somatic variants
+
+We can regard the remaining (modeled) clearly somatic variants as the set of actual positives but this set is orders of magnitude larger than what we expect, which leads to highly inflated precision.  Therefore we discard also most of these somatic variants to match the size of the positive set in our benchmark to that expected in real tissue pairs.
+
+Excluding the variants (1) for which NA12892/Mix3 is heterozygous as well as (2) those for which our variant calling results contradict Illumina's results retains clearly somatic variants.  But these are too many: Chr22 alone contains 42289 of them.  On the other hand, single cell sequencing studies estimated, for the whole genome, 2000 or even just 100 somatic mutations per cell in average; see [Lodato 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4664477/) and [Hazen 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4795965/), respectively.  It is not straight forward to establish how the expected number of mutations $$\mathrm{E} N_\mathrm{scell}$$ per cell determines the expected number of mutations $$\mathrm{E} N_\mathrm{paired}$$ in our paired sample bulk sequencing design.  However, it is safe to assume that $$\mathrm{E} N_\mathrm{scell} < \mathrm{E} N_\mathrm{paired}$$ because some of the cells in the tissue sample may contain somatic mutations that other cells lack and vice versa.
+
+### Dependence of precision on alternative allele frequency
+
+Conditioning recall and precision on AAF requires different kind of information.
+
+1. recall: AAF for each modeled somatic variant; available
+1. precision: AAF for each call; unavailable
+
+The AAF for each call is unavailable in the initial design either because if the call is true the caller cannot provide a precise and unbiased estimate for AAF and if the call is false there is no variant thus AAF is undefined.  But the design of the benchmark experiment can be modified to fix that.  One needs to remove all variants but those whose AAF equals to a certain value.
+
+## Design
+
+Suppose $$\mathrm{E} N_\mathrm{paired} = 1000$$ is realistic for the whole genome.  The expected number of positives in the unrealistic initial design:
+
+```{r}
+len <- list(genome = 3153681224, chr22 = 51304566)
+npos <- list(genome = NA, chr22 = 42289)
+(npos$genome <- npos$chr22 * len$genome / len$chr22)
+```
+
+So we have `r npos$genome` positives instead of only 1000 positives, which means we need to retain only a fraction of `r 1000 / npos$genome` of them.  Let's round it to $$4 \times 10^{-4}$$!
+
+It may be worth trying also $$\mathrm{E} N_\mathrm{paired} = 10000$$ and 100000, which correspond to retaining fractions of $$4 \times 10^{-3}$$ and $$4 \times 10^{-2}$$, respectively.
+
+1. let $$\mathrm{AAF} = f$$; note that $$f\in E$$, the set of possible AAFs given the DNA mix
+1. remove variants for which NA12892/Mix3 is heterozygous
+1. remove variants for which our variant calling results contradict Illumina's results
+1. remove purely germline variants (the *100% alternative allele variants* in Chaggai's jargon)
+1. (optional) remove all variants but those whose AAF equals to $$f$$
+1. using the remaining variants randomly retain a fraction of $$4 \times 10^{-2}$$, $$4 \times 10^{-3}$$ and $$4 \times 10^{-4}$$ as actual positives and filter out the rest
+
+## TODOs
+
+1. review Chaggai's truth table and the tools he developed
+1. implement the above procedures using `bcftools` or the `vcf` python module.
