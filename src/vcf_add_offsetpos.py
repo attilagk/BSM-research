@@ -6,7 +6,6 @@ import sys
 import vcfpy
 import collections
 
-invcfname = sys.argv[1]
 faifname = os.environ["REFSEQ"] + ".fai"
 
 def fai2dict(fai_file):
@@ -20,7 +19,7 @@ def fai2dict(fai_file):
             d[r[0]] = int(r[2])
         return(d)
 
-def add_offsetpos(invcf_file, outvcf_file = invcfname + ".offsetpos", faidict = fai2dict(faifname)):
+def add_offsetpos(invcf_file, faidict = fai2dict(faifname)):
     """Add OFFSETPOS to INFO
     """
     reader = vcfpy.Reader.from_path(invcf_file)
@@ -32,4 +31,4 @@ def add_offsetpos(invcf_file, outvcf_file = invcfname + ".offsetpos", faidict = 
         writer.write_record(r)
 
 if __name__ == "__main__":
-    add_offsetpos(invcfname)
+    add_offsetpos("/dev/stdin")

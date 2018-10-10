@@ -1,31 +1,36 @@
 #! /usr/bin/env bash
 
-# Add GT (genotype) annotation to VCF produced by strelka2Somatic and other callers
+# Add GT (genotype) annotation to VCF produced by strelka2Somatic and other callers.
+# Input is any type of VCF from STDIN; output is uncompressed (default) or
+# compressed VCF to STDOUT---see; by default output type -O option.
 
 outputType=v
 caseSample=TUMOR
 controlSample=NORMAL
 
-while getopts "O:a:b:" opt; do
+while getopts "O:a:b:h" opt; do
     case $opt in
         O) outputType=$OPTARG;;
         a) caseSample=$OPTARG;;
         b) controlSample=$OPTARG;;
+        h) displayhelp=T
     esac
 done
 shift $(($OPTIND - 1))
-invcf=$1
-outvcf=$2
 
-usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] invcf outvcf"
-if test $# -eq 0; then
+# input VCF from STDIN will be read multiple times so direct STDIN to invcf
+invcf=`tempfile`
+cat > $invcf
+
+usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] < invcf > outvcf"
+if test $displayhelp = T; then
     echo $usage; exit 0
 fi
 
 # if there's already a GT tag in FORMAT just write invcf to outvcf
 if bcftools view -h $invcf | grep --quiet '##FORMAT=<ID=GT'
 then
-    bcftools view -O $outputType -o $outvcf $invcf
+    bcftools view -O $outputType $invcf
     exit
 fi
 
@@ -91,5 +96,6 @@ paste -d '' $caseGT $caseSampleFile >> $caseGTsample
 # entire output in desired type; clean-up
 paste $leftPart $GTformat $controlGTsample $caseGTsample >> $tmpoutvcf
 
-bcftools view -O $outputType -o $outvcf $tmpoutvcf
+bcftools view -O $outputType $tmpoutvcf
+#bcftools view -O $outputType -o $outvcf $tmpoutvcf
 rm $leftPart $GT $format $GTformat $controlSampleFile $caseSampleFile $controlGT $caseGT $controlGTsample $caseGTsample $tmpoutvcf
