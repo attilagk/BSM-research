@@ -20,7 +20,7 @@ shift $(($OPTIND - 1))
 
 # input VCF from STDIN will be read multiple times so direct STDIN to invcf
 invcf=`tempfile`
-cat > $invcf
+bcftools view > $invcf
 
 usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] < invcf > outvcf"
 if test $displayhelp = T; then
@@ -98,4 +98,5 @@ paste $leftPart $GTformat $controlGTsample $caseGTsample >> $tmpoutvcf
 
 bcftools view -O $outputType $tmpoutvcf
 #bcftools view -O $outputType -o $outvcf $tmpoutvcf
-rm $leftPart $GT $format $GTformat $controlSampleFile $caseSampleFile $controlGT $caseGT $controlGTsample $caseGTsample $tmpoutvcf
+rm $leftPart $GT $format $GTformat $controlSampleFile $caseSampleFile \
+    $controlGT $caseGT $controlGTsample $caseGTsample $tmpoutvcf $invcf
