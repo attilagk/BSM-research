@@ -6,27 +6,26 @@ scriptdir=`dirname $0`
 outputType=v
 caseSample=TUMOR
 controlSample=NORMAL
-while getopts "a:b:" opt; do
+while getopts "a:b:h" opt; do
     case $opt in
         a) caseSample=$OPTARG;;
         b) controlSample=$OPTARG;;
+        h) displayhelp=T;;
     esac
 done
 shift $(($OPTIND - 1))
 invcf=$1
 outvcf=$2
 
-usage="usage: `basename $0` [-a caseSample -b controlSample] invcf outvcf"
-if test $# -eq 0; then
-    echo $usage; exit 0
-fi
+usage="usage: `basename $0` [-a caseSample -b controlSample -h] invcf outvcf"
+
 # invcf and outvcf must not be the same file
-if test `realpath $invcf` == `realpath $outvcf`; then
+if test $# -eq 0 || test `realpath $invcf` == `realpath $outvcf` || test $displayhelp = T; then
     echo $usage 1>&2; exit 1
 fi
 
-tempvcf=`tempfile`
-
-$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample $invcf $tempvcf
-$scriptdir/annotate1vcf.sh -O $outputType $tempvcf $outvcf
-rm $tempvcf
+bcftools view -O v $invcf |
+$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample |
+$scriptdir/annotate1vcf.sh -O v |
+#$scriptdir/vcf_add_offsetpos.py |
+bcftools view -O v -o $outvcf
