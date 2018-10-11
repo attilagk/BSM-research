@@ -1,50 +1,55 @@
 #!/usr/bin/env bash
 
-# Hack invcf for VariantMetaCaller and write it to outvcf.
-#
-# Options
-# -a caseSample; default: TUMOR
-# -b controlSample; default: NORMAL
-# -r region; chr[:from-to]; default: 22
-# -v varType; default: snps
-# -h display usage and exit
+# Hack invcf for VariantMetaCaller and write it to outvcf
 
+# variables and options
 scriptdir=`dirname $0`
 outputType=v
 caseSample=TUMOR
 controlSample=NORMAL
 region=22
 varType=snps
+logFile=/dev/stderr
 displayhelp=F
-while getopts "a:b:r:v:h" opt; do
+while getopts "a:b:r:v:l:h" opt; do
     case $opt in
         a) caseSample=$OPTARG;;
         b) controlSample=$OPTARG;;
         r) region=$OPTARG;;
         v) varType=$OPTARG;;
+        l) logFile=$OPTARG;;
         h) displayhelp=T;;
     esac
 done
 shift $(($OPTIND - 1))
 invcf=$1
 outvcf=$2
-logf=`tempfile`
-
-usage="usage: `basename $0` [-a caseSample -b controlSample -r chr[:from-to] -v snps|indels -h] invcf outvcf"
 
 # 1) check number of arguments
 # 2) invcf and outvcf must not be the same file
 # 3) check if help is to be displayed
 if test $# -ne 2 || test `realpath $invcf` = `realpath $outvcf` || test $displayhelp = T; then
-    echo $usage 1>&2; exit 1
+    cat<<EOF
+    Hack invcf for VariantMetaCaller and write it to outvcf.
+
+    usage: `realpath $0` [-a caseSample -b controlSample -r chr[:from-to] -v snps|indels -h] invcf outvcf
+
+    Options
+    -a caseSample; default: TUMOR
+    -b controlSample; default: NORMAL
+    -r region; chr[:from-to]; default: 22
+    -v varType; default: snps
+    -l logFile; default: /dev/stderr; use /dev/null to discard
+    -h display usage and exit
+EOF
+    exit 1
 fi
 
-bcftools view -O v -r $region -v $varType $invcf 2>> $logf |
+# open and filter VCF
+bcftools view -O v -r $region -v $varType $invcf 2>> $logFile |
 # add GT field if missing
-$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample 2>> $logf |
+$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample 2>> $logFile |
 # annotate with entropy
-$scriptdir/annotate1vcf.sh -O v 2>> $logf |
+$scriptdir/annotate1vcf.sh -O v 2>> $logFile |
 # annotate with INFO/OFFSETPOS
-$scriptdir/vcf_add_offsetpos.py > $outvcf 2>> $logf
-
-cat $logf 2>&1 && rm $logf
+$scriptdir/vcf_add_offsetpos.py > $outvcf 2>> $logFile
