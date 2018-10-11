@@ -1,31 +1,50 @@
 #!/usr/bin/env bash
 
-# hack invcf for VariantMetaCaller and write it to outvcf
+# Hack invcf for VariantMetaCaller and write it to outvcf.
+#
+# Options
+# -a caseSample; default: TUMOR
+# -b controlSample; default: NORMAL
+# -r region; chr[:from-to]; default: 22
+# -v varType; default: snps
+# -h display usage and exit
 
 scriptdir=`dirname $0`
 outputType=v
 caseSample=TUMOR
 controlSample=NORMAL
-while getopts "a:b:h" opt; do
+region=22
+varType=snps
+displayhelp=F
+while getopts "a:b:r:v:h" opt; do
     case $opt in
         a) caseSample=$OPTARG;;
         b) controlSample=$OPTARG;;
+        r) region=$OPTARG;;
+        v) varType=$OPTARG;;
         h) displayhelp=T;;
     esac
 done
 shift $(($OPTIND - 1))
 invcf=$1
 outvcf=$2
+logf=`tempfile`
 
-usage="usage: `basename $0` [-a caseSample -b controlSample -h] invcf outvcf"
+usage="usage: `basename $0` [-a caseSample -b controlSample -r chr[:from-to] -v snps|indels -h] invcf outvcf"
 
-# invcf and outvcf must not be the same file
-if test $# -eq 0 || test `realpath $invcf` == `realpath $outvcf` || test $displayhelp = T; then
+# 1) check number of arguments
+# 2) invcf and outvcf must not be the same file
+# 3) check if help is to be displayed
+if test $# -ne 2 || test `realpath $invcf` = `realpath $outvcf` || test $displayhelp = T; then
     echo $usage 1>&2; exit 1
 fi
 
-bcftools view -O v $invcf |
-$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample |
-$scriptdir/annotate1vcf.sh -O v |
-#$scriptdir/vcf_add_offsetpos.py |
-bcftools view -O v -o $outvcf
+bcftools view -O v -r $region -v $varType $invcf 2>> $logf |
+# add GT field if missing
+$scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample 2>> $logf |
+# annotate with entropy
+$scriptdir/annotate1vcf.sh -O v 2>> $logf |
+# annotate with INFO/OFFSETPOS
+$scriptdir/vcf_add_offsetpos.py > $outvcf 2>> $logf
+
+cat $logf 2>&1 && rm $logf
