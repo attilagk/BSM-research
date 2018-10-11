@@ -4,13 +4,22 @@ layout: default
 #featimg: 
 ---
 
-Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Utah grandparents to model somatic variants.  Shortcomings of the initial design include: (1) some variants can neither be considered clearly somatic nor otherwise, which complicates the definition of the truth set; (2) too many modeled somatic variants relative to what may be expected based on single cell sequencing studies; (3) in each mix there is a set of multiple alternative allele frequencies (AAF), which allows us to study the dependence on AAF of only recall but not that of precision.
+Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Utah grandparents to model somatic variants.  We refer to such sample pairs as benchmark sample pairs and aim to label as positive those variants therein, which are clearly somatic.  Labeling is done based on gold standard germline variant call sets from the unmixed grandparental DNA, and results in a truth set for each benchmark sample pair.  The truth set contains somatic variants (the positives) distributed into 14 distinct alternative allele frequencies (AAF).  We began our study with benchmark sample pair Mix1A:Mix3A but realized the following shortcomings of the initial design: (1) poor decisions on labeling different types of variants; (2) too many positives; (3) the dependence on AAF could be determined only for recall but not for precision.  Here we revise our design.
 
 ## Introduction
 
-### Clearly somatic modeled variants
+### Labeling of variants in Mix1A:Mix3A
 
-Our benchmark experiment uses DNA mixes (Mix1, Mix2) of three CEPH/Utah grandparents as case sample and compares that to a control sample.  The control sample may be one of Mix1 or Mix2 or it may be the DNA from the fourth grandparent (NA12892/Mix3).  The latter case---in particular Mix1 vs Mix3---represents the clearest separation between the case and control sample and thus the set of variants that can be considered clearly somatic.  But even in that case there are some less clear variants, whose alternative allele frequency (AAF) in the control sample is neither 0 nor 1 but 0.5 due to the fourth grandparent being heterozygous for these variant.  Here we set out to exclude these variants from both the truth sets as well as the test sets (the call sets by our somatic variant callers).
+Our benchmark experiment uses DNA mixes (Mix1, Mix2) of three CEPH/Utah grandparents as case sample and compares that to a control/reference sample.  The control sample may be one of Mix1 or Mix2 or it may be the DNA from the fourth grandparent (NA12892/Mix3).  The latter case---in particular Mix1 vs Mix3---represents the clearest separation between the case and control sample and thus the set of variants that can be considered clearly somatic.  But even in that case there are some less clear variants, whose alternative allele frequency (AAF) in the control sample is neither 0 nor 1 but 0.5 due to the fourth grandparent being heterozygous for these variant.  Here we set out to exclude these variants from both the truth sets as well as the test sets (the call sets by our somatic variant callers).
+
+|-------------------------------------------------------------------------------
+|variant type in benchmark sample pair |label (is somatic variant?)|filter out?|
+|-------------------------------------------------------------------------------
+|conflicting genotype                  |    negative        |    yes           |
+|100% alternative allele               |    negative        |    no            |
+|heterozygous reference sample         |    negative        |    no            |
+|homozygous reference sample           |    positive        |remove some\*     |
+|-------------------------------------------------------------------------------
 
 ### The realistic number of somatic variants
 
