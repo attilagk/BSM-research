@@ -38,8 +38,9 @@ Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Uta
   * in the present context positive labels somatic variants and negative anything but those note that both positives and negatives may be germline variants;
   * in the truth table benchmark variants are labeled by considering which benchmark variant types represent somatic variants; the positively labeled variants are the *(actual) positives* in the sense of ground truth
   * in the context of a benchmark somatic callset labeling is nothing but calling and filtering; these *called positives* or simply *calls* are either *true positives* or *false positives*; the (actual) positives not called are *false negatives*
-* *precision* is defined based on the expected number of true and false positives as $$\mathrm{E} [N_\mathrm{TP}] / (\mathrm{E} [N_\mathrm{TP}] + \mathrm{E} [N_\mathrm{FP}])$$
-* *recall* is defined based on the expected number of true positives and false negatives as $$\mathrm{E} [N_\mathrm{TP}] / (\mathrm{E} [N_\mathrm{TP}] + \mathrm{E} [N_\mathrm{FN}])$$
+* let $$\mathrm{E} [N_\mathrm{TP}], \mathrm{E} [N_\mathrm{FP}], \mathrm{E} [N_\mathrm{FN}]$$ denote the expected number of true positives, false positives and false negatives
+    * *precision* is defined as $$\mathrm{E} [N_\mathrm{TP}] / (\mathrm{E} [N_\mathrm{TP}] + \mathrm{E} [N_\mathrm{FP}])$$
+    * *recall* is defined as $$\mathrm{E} [N_\mathrm{TP}] / (\mathrm{E} [N_\mathrm{TP}] + \mathrm{E} [N_\mathrm{FN}])$$
 * *precision-recall curve* is the set of precision and recall values evaluated at an ordered sequence of filter settings; such an ordered sequence is given by the probability that a call is true, estimated by VariantMetaCaller
 
 ## Initial design
@@ -61,10 +62,37 @@ Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Uta
 |conflicting genotype                  |    negative        |    yes           |
 |100% alternative allele               |    negative        |    no            |
 |heterozygous control sample           |    negative        |    no            |
-|homozygous control sample             |    positive        |remove some\*     |
+|homozygous control sample             |    positive        |remove some       |
 |-------------------------------------------------------------------------------
 
-### The realistic number of somatic variants
+### Remaining positives (homozygous control sample)
+
+The *remove some* in the new design alludes to the plan to randomly filter the positives (homozygous control sample) to approach the hypothetical biological reality that the number of somatic variants in the genome is orders of magnitude lower than the number of positives in the initial design.  There are two random filters (below), each with different rationale.
+
+|---------------------------------------------------------------------------------------
+| remaining positives | genomic region | AAF spectrum  | rationale |
+|---------------------------------------------------------------------------------------
+| 100 | whole genome |  uniform |  biologically realistic |
+| 1000 | chr22 |  fixed at a single frequency $$f$$ |  accurate precision-recall estimation for any given $$\mathrm{AAF} = f$$ |
+|-------------------------------------------------------------------------------
+
+Filtering can be implemented in two ways: *a priori* and *a posteriori* (top and bottom expressions, respectively, below):
+
+$$
+\begin{eqnarray}
+\mathrm{precision-recall} \, &|& \, \text{training spectrum} = \{f\},  \mathrm{AAF} = f \\
+\mathrm{precision-recall} \, &|& \, \text{uniform training spectrum},  \mathrm{AAF} = f
+\end{eqnarray}
+$$
+The a priori implementation means that variants are filtered out from the VCFs that are input to VariantMetaCaller.  Therefore VariantMetaCaller is trained on somatic variants at a given AAF, say, $$f$$.  In the a posteriori implementation, however, variants at all possible frequencies contribute to the training of VariantMetaCaller.  After training the variants whose $$\mathrm{AAF}\neq f$$ are removed from the output VCF of VariantMetaCaller.
+
+## Notes
+
+* The *filter out?* column in the tables above means that benchmark variants of a certain type should (or should not) be filtered out from any benchmark somatic callset.
+* The *conflicting genotype* subset of benchmark variants will be filtered out because they emerge from differences between the germline calling workflows of Illumina and Chesslab therefore they reflect technical noise.
+* The *remove some* for homozygous control sample means random filtering in order to diminish the excessive number of positives to a biologically realistic number (see discussion below)
+
+### Biologically realistic number of somatic variants
 
 We can regard the remaining (modeled) clearly somatic variants as the set of actual positives but this set is orders of magnitude larger than what we expect, which leads to highly inflated precision.  Therefore we discard also most of these somatic variants to match the size of the positive set in our benchmark to that expected in real tissue pairs.
 
