@@ -65,18 +65,49 @@ Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Uta
 |homozygous control sample             |    positive        |remove some       |
 |-------------------------------------------------------------------------------
 
-### Remaining positives (homozygous control sample)
+### Notes
+
+* The *filter out?* column in the tables above means that benchmark variants of a certain type should (or should not) be filtered out from any benchmark somatic callset.
+* The *conflicting genotype* subset of benchmark variants will be filtered out because they emerge from differences between the germline calling workflows of Illumina and Chesslab therefore they reflect technical noise.
+* The *remove some* for homozygous control sample means random filtering in order to diminish the excessive number of positives to a biologically realistic number (see discussion below)
+
+### What's changed
+
+Observe the changes. The new design
+
+1. removes all benchmark variants with heterozygous control sample from the set of positives
+1. filters out benchmark variants with conflicting genotype
+1. removes some of the benchmark variants with homozygous control sample (see section *Remaining positives* below)
+
+## Remaining positives (homozygous control sample)
+
+When designing the number of positives, i.e. the how many "homozygous" benchmark variants should remain after filtering, we must consider what is or might be biologically realistic.
+
+### Biologically realistic number of somatic variants
+
+We can regard the remaining (modeled) clearly somatic variants as the set of actual positives but this set is orders of magnitude larger than what we expect, which leads to highly inflated precision.  Therefore we discard also most of these somatic variants to match the size of the positive set in our benchmark to that expected in real tissue pairs.
+
+Chr22 alone contains 42289 of benchmark variants with homozygous control sample.  On the other hand, single cell sequencing studies estimated, for the whole genome, 2000 or even just 100 somatic mutations per cell in average; see [Lodato 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4664477/) and [Hazen 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4795965/), respectively.  Moreover, it was suggested by both studies that the majority of these mutations are not recurrent in (or shared by) cells.  Thus, there seem to be orders of magnitude fewer somatic variants per genome per bulk tissue sample (pair) than positives in the initial design.  This holds especially for somatic variants with higher AAF.
+
+### Two cases for the number of remaining positives
 
 The *remove some* in the new design alludes to the plan to randomly filter the positives (homozygous control sample) to approach the hypothetical biological reality that the number of somatic variants in the genome is orders of magnitude lower than the number of positives in the initial design.  There are two random filters (below), each with different rationale.
 
 |---------------------------------------------------------------------------------------
-| remaining positives | genomic region | AAF spectrum  | rationale |
+| case | remaining positives | genomic region | AAF spectrum  | rationale |
 |---------------------------------------------------------------------------------------
-| 100 | whole genome |  uniform |  biologically realistic |
-| 1000 | chr22 |  fixed at a single frequency $$f$$ |  accurate precision-recall estimation for any given $$\mathrm{AAF} = f$$ |
+| 1 | 100 | whole genome |  uniform |  biologically realistic |
+| 2 | 1000 | chr22 |  fixed at a single frequency $$f$$ |  accurate precision-recall estimation for any given $$\mathrm{AAF} = f$$ |
 |-------------------------------------------------------------------------------
 
-Filtering can be implemented in two ways: *a priori* and *a posteriori* (top and bottom expressions, respectively, below):
+### A priori and posteriori filtering
+
+Filtering can be done *a priori* and *a posteriori* with respect to running VariantMetaCaller.
+
+* *a priori*: filter the input VCF files to VariantMetaCaller
+* *a posteriori*: filter the output VCF file of VariantMetaCaller
+
+This difference affects the results since in the *a priori* case the removed variants are not part of the training set of VariantMetaCaller while in the *a posteriori* case they are.  This is especially important for case 2 of filtering (above). The top and bottom expressions below clarify the conditions for obtaining precision-recall relationships for the *a priori* and *a posteriori* method, respectively:
 
 $$
 \begin{eqnarray}
@@ -84,19 +115,6 @@ $$
 \mathrm{precision-recall} \, &|& \, \text{uniform training spectrum},  \mathrm{AAF} = f
 \end{eqnarray}
 $$
-The a priori implementation means that variants are filtered out from the VCFs that are input to VariantMetaCaller.  Therefore VariantMetaCaller is trained on somatic variants at a given AAF, say, $$f$$.  In the a posteriori implementation, however, variants at all possible frequencies contribute to the training of VariantMetaCaller.  After training the variants whose $$\mathrm{AAF}\neq f$$ are removed from the output VCF of VariantMetaCaller.
-
-## Notes
-
-* The *filter out?* column in the tables above means that benchmark variants of a certain type should (or should not) be filtered out from any benchmark somatic callset.
-* The *conflicting genotype* subset of benchmark variants will be filtered out because they emerge from differences between the germline calling workflows of Illumina and Chesslab therefore they reflect technical noise.
-* The *remove some* for homozygous control sample means random filtering in order to diminish the excessive number of positives to a biologically realistic number (see discussion below)
-
-### Biologically realistic number of somatic variants
-
-We can regard the remaining (modeled) clearly somatic variants as the set of actual positives but this set is orders of magnitude larger than what we expect, which leads to highly inflated precision.  Therefore we discard also most of these somatic variants to match the size of the positive set in our benchmark to that expected in real tissue pairs.
-
-Excluding the variants (1) for which NA12892/Mix3 is heterozygous as well as (2) those for which our variant calling results contradict Illumina's results retains clearly somatic variants.  But these are too many: Chr22 alone contains 42289 of them.  On the other hand, single cell sequencing studies estimated, for the whole genome, 2000 or even just 100 somatic mutations per cell in average; see [Lodato 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4664477/) and [Hazen 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4795965/), respectively.  It is not straight forward to establish how the expected number of mutations $$\mathrm{E} N_\mathrm{scell}$$ per cell determines the expected number of mutations $$\mathrm{E} N_\mathrm{paired}$$ in our paired sample bulk sequencing design.  However, it is safe to assume that $$\mathrm{E} N_\mathrm{scell} < \mathrm{E} N_\mathrm{paired}$$ because some of the cells in the tissue sample may contain somatic mutations that other cells lack and vice versa.
 
 ### Dependence of precision on alternative allele frequency
 
