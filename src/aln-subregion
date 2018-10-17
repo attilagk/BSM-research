@@ -4,7 +4,8 @@
 # the regions' lenght in MB each region is implicitly defined by
 # chrom_i:start_i such that the explicit definition is chrom_i:start_i-end_i,
 # where end_i = start_i + 10^6 * n.  The indexed bam is written in a
-# subdirectory named as 'nMB'.
+# subdirectory named as 'nMB' relative to the CWD.  The default
+# chrom_i:start_i is 1:50,000,000.
 
 usage="usage: `basename $0` -@ nthreads inbam lengthmegabase [chromA:startA [chromB:startB ...]] "
 if test $# -lt 2; then
@@ -22,6 +23,10 @@ nthreads=${nthreads:-6} # 6 threads by default
 inbam=$1
 seglen=${2:-1} # 1 MB by default
 shift 2 # remaining positional arguments will be used in a loop
+
+if test $# -eq 0; then
+    set "1:50,000,000"
+fi
 
 # define output dir and files
 tissue=`basename $inbam .bam`
