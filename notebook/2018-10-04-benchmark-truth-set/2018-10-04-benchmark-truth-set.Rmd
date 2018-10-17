@@ -43,7 +43,9 @@ Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Uta
     * *recall* is defined as $$\mathrm{E} [N_\mathrm{TP}] / (\mathrm{E} [N_\mathrm{TP}] + \mathrm{E} [N_\mathrm{FN}])$$
 * *precision-recall curve* is the set of precision and recall values evaluated at an ordered sequence of filter settings; such an ordered sequence is given by the probability that a call is true, estimated by VariantMetaCaller
 
-## Initial design
+## Design
+
+### Initial design
 
 |-------------------------------------------------------------------------------
 |variant type in benchmark sample pair |label (is somatic variant?)|filter out?|
@@ -54,7 +56,7 @@ Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Uta
 |homozygous control sample             |    positive        |    no            |
 |-------------------------------------------------------------------------------
 
-## New design
+### New design
 
 |-------------------------------------------------------------------------------
 |variant type in benchmark sample pair |label (is somatic variant?)|filter out?|
@@ -65,29 +67,33 @@ Our benchmark experiment uses paired samples of DNA mixes from the four CEPH/Uta
 |homozygous control sample             |    positive        |remove some       |
 |-------------------------------------------------------------------------------
 
-### Notes
-
-* The *filter out?* column in the tables above means that benchmark variants of a certain type should (or should not) be filtered out from any benchmark somatic callset.
-* The *conflicting genotype* subset of benchmark variants will be filtered out because they emerge from differences between the germline calling workflows of Illumina and Chesslab therefore they reflect technical noise.
-* The *remove some* for homozygous control sample means random filtering in order to diminish the excessive number of positives to a biologically realistic number (see discussion below)
-
 ### What's changed
 
 Observe the changes. The new design
 
 1. removes all benchmark variants with heterozygous control sample from the set of positives
 1. filters out benchmark variants with conflicting genotype
-1. removes some of the benchmark variants with homozygous control sample (see section *Remaining positives* below)
+1. removes some of the benchmark variants with homozygous control sample (see section *Number of somatic variants* below)
 
-## Remaining positives (homozygous control sample)
+### Notes
 
-When designing the number of positives, i.e. the how many "homozygous" benchmark variants should remain after filtering, we must consider what is or might be biologically realistic.
+* the rationale for removing all benchmark variants with heterozygous control sample from the set of positives: let  $$\mathrm{AAF}_\mathrm{case}$$ and  $$\mathrm{AAF}_\mathrm{control}$$ denote the AAF for the case and control sample, respectively.  It can be shown that for most of the benchmark variants $$\mathrm{AAF}_\mathrm{case}\approx\mathrm{AAF}_\mathrm{control}=0.5$$ (the exact equality $$=$$ follows from the heterozygousity of the control sample), which means that even if there is mosaicism, it essentially cannot be detected
+* The *filter out?* column in the tables above means that benchmark variants of a certain type should (or should not) be filtered out from any benchmark somatic callset.
+* The *conflicting genotype* subset of benchmark variants will be filtered out because they emerge from differences between the germline calling workflows of Illumina and Chesslab therefore they reflect technical noise.
+* The *remove some* for homozygous control sample means random filtering in order to diminish the excessive number of positives to a biologically realistic number (see discussion below)
 
-### Biologically realistic number of somatic variants
+## Number of somatic variants (remaining positives)
 
-We can regard the remaining (modeled) clearly somatic variants as the set of actual positives but this set is orders of magnitude larger than what we expect, which leads to highly inflated precision.  Therefore we discard also most of these somatic variants to match the size of the positive set in our benchmark to that expected in real tissue pairs.
+When designing the number of positives, i.e. the how many benchmark variants with homozygous control sample should remain after filtering, we must consider the number of somatic variants in our case sample that is or might be biologically realistic.  Estimates of somatic mutations per single neuron per genome are useful although not directly translatable to our paired bulk sample setup.  The reason is that bulk samples are inherently tied to the following complications:
 
-Chr22 alone contains 42289 of benchmark variants with homozygous control sample.  On the other hand, single cell sequencing studies estimated, for the whole genome, 2000 or even just 100 somatic mutations per cell in average; see [Lodato 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4664477/) and [Hazen 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4795965/), respectively.  Moreover, it was suggested by both studies that the majority of these mutations are not recurrent in (or shared by) cells.  Thus, there seem to be orders of magnitude fewer somatic variants per genome per bulk tissue sample (pair) than positives in the initial design.  This holds especially for somatic variants with higher AAF.
+* unknown number of cells in the sample
+* unknown spectrum of AAF across cells
+
+The last point means that somatic variants have different phylogenetic histories: ontogenetically earlier mutations will result larger patches of genetic mosaicism that will affect more cells and result in higher AAF in the case sample than later mutations.
+
+### Single cell studies
+
+In the initial design of the benchmark experiment Chr22 alone contains 42289 of benchmark variants with homozygous control sample.  On the other hand, single cell sequencing studies estimated, for the whole genome, 2000 or even just 100 somatic mutations per cell in average; see [Lodato 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4664477/) and [Hazen 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4795965/), respectively.  Moreover, it was suggested by both studies that the majority of these mutations are not recurrent in (or shared by) cells.  This means that the spectrum is shifted to the left such that many somatic mutations have low AAF.  Thus, there seem to be orders of magnitude fewer somatic variants per genome per bulk tissue sample (pair) than positives in the initial design.  This holds especially for somatic variants with higher AAF.
 
 ### Two cases for the number of remaining positives
 
@@ -100,9 +106,11 @@ The *remove some* in the new design alludes to the plan to randomly filter the p
 | 2 | 1000 | chr22 |  fixed at a single frequency $$f$$ |  accurate precision-recall estimation for any given $$\mathrm{AAF} = f$$ |
 |-------------------------------------------------------------------------------
 
+Thus case 1 is biologically more realistic but case 2 allows the study of how precision-recall depend of AAF.  However, the following question needs to be addressed: when to perform the filtering relative to running VariantMetaCaller (below).
+
 ### A priori and posteriori filtering
 
-Filtering can be done *a priori* and *a posteriori* with respect to running VariantMetaCaller.
+Filtering can be done *a priori* and *a posteriori* with respect to training the support vector machines (SVMs) of VariantMetaCaller.
 
 * *a priori*: filter the input VCF files to VariantMetaCaller
 * *a posteriori*: filter the output VCF file of VariantMetaCaller
@@ -116,16 +124,9 @@ $$
 \end{eqnarray}
 $$
 
-### Dependence of precision on alternative allele frequency
+## Miscellaneous
 
-Conditioning recall and precision on AAF requires different kind of information.
-
-1. recall: AAF for each modeled somatic variant; available
-1. precision: AAF for each call; unavailable
-
-The AAF for each call is unavailable in the initial design either because if the call is true the caller cannot provide a precise and unbiased estimate for AAF and if the call is false there is no variant thus AAF is undefined.  But the design of the benchmark experiment can be modified to fix that.  One needs to remove all variants but those whose AAF equals to a certain value.
-
-## Design
+### Calculations
 
 Suppose $$\mathrm{E} N_\mathrm{paired} = 1000$$ is realistic for the whole genome.  The expected number of positives in the unrealistic initial design:
 
@@ -143,8 +144,8 @@ It may be worth trying also $$\mathrm{E} N_\mathrm{paired} = 10000$$ and 100000,
 1. remove variants for which NA12892/Mix3 is heterozygous
 1. remove variants for which our variant calling results contradict Illumina's results
 1. remove purely germline variants (the *100% alternative allele variants* in Chaggai's jargon)
-1. (optional) remove all variants but those whose AAF equals to $$f$$
-1. using the remaining variants randomly retain a fraction of $$4 \times 10^{-2}$$, $$4 \times 10^{-3}$$ and $$4 \times 10^{-4}$$ as actual positives and filter out the rest
+1. (case 2) remove all variants but those whose AAF equals to $$f$$
+1. using the remaining variants randomly retain 100 / genome (case 1) or 1000 / Chr22 (case 2) and remove the rest by filtering *a priori* or *a posteriori* with respect to VariantMetaCaller
 
 ## TODOs
 
