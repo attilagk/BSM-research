@@ -1,0 +1,63 @@
+---
+layout: default
+#title: 
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
+featimg: "venn-common-sample-snvs-1.png"
+---
+
+A summary of called variants by multiple callers is presented here on control individual MSSM106.
+
+## Title
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+```{r message=FALSE}
+library(VennDiagram)
+source("../../src/vcf.R")
+```
+
+Import VCF for each caller (separately for SNVs and indels) and store only the called variants' identity by position.
+
+```{r cache=TRUE}
+callers <- c("somaticSniper", "strelka2Germline2s", "strelka2Somatic")
+#callers <- c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq")
+names(callers) <- sub("T(n|N)seq", "T\\1seq.Mutect2", callers)
+vartypes <- c("snvs", "indels")
+names(vartypes) <- vartypes
+import.vcfs <- function(vartype = "snvs", cal = callers) {
+    fl <- paste0("../../results/calls/MSSM_106/", vartype, "/", cal, ".vcf.gz")
+    names(fl) <- names(callers)
+    l <- lapply(fl, readVcf, "hg19")
+    lapply(l, row.names)
+}
+vcf <- lapply(vartypes, import.vcfs, cal = callers)
+```
+
+```{r cache=TRUE}
+part <-
+    rbind(cbind(data.frame(vartype = "snvs"), partition.sizes(vcf$snvs)),
+          cbind(data.frame(vartype = "indels"), partition.sizes(vcf$indels)))
+```
+
+```{r call-set-size, fig.asp=0.7}
+ssize <- data.frame(t(sapply(vartypes, function(vartype) sapply(vcf[[vartype]], length))))
+ssize <- reshape(ssize, varying = names(ssize), v.names = "set.size", timevar = "caller", times = names(ssize), direction = "long", idvar = "var.type", ids = vartypes)
+ssize$var.type <- factor(ssize$var.type, ordered = TRUE, levels = vartypes)
+barchart(caller ~ set.size | var.type, data = ssize, xlim = c(0, ceiling(max(ssize$set.size) / 1e6) * 1e6))
+barchart(caller ~ log10(set.size) | var.type, data = ssize, xlim = c(0, 7))
+```
+
+```{r venn-common-sample-snvs}
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray", cat.cex = 1.4)
+grid.draw(venn.diagram(vcf$snvs, NULL, main = "SNVs", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+```
+
