@@ -1,0 +1,265 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+%\usepackage{amsmath, multimedia, hyperref, multirow}
+\usepackage{amsmath, multimedia, hyperref, xcolor, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+%\AtBeginSubsection[]{
+%  \begin{frame}<beamer>{Contents}
+%    \tableofcontents[currentsection,currentsubsection]
+%  \end{frame}
+%}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{The Main Title Naming Key Concepts}
+\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Gulyas-Kovacs}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Schizophrenia genetics}
+
+\end{frame}
+
+\begin{frame}{Our workflow}
+\footnotesize
+\begin{enumerate}
+\item
+\begin{itemize}
+\item
+brain sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
+{NeuN+, HiSeq, align} (4.0,0); \texttt{neuron.bam}
+\includegraphics[width=0.7\textwidth]{figures/bsm-science-fig2.jpg}
+\item<2->
+muscle sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
+{HiSeq, align} (3.5,0); \texttt{muscle.bam}
+\end{itemize}
+\item<3->
+\begin{itemize}
+\item \texttt{TNseq.Mutect2.vcf}
+\item \texttt{lofreqSomatic.vcf}
+\item \texttt{somaticSniper.vcf}
+\item \texttt{strelka2Germline2s.vcf}
+\item \texttt{strelka2Somatic.vcf}
+\end{itemize}
+\item<4-> \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
+{machine learning} (2.5,0); \texttt{VariantMetaCaller.vcf}
+\begin{itemize}
+\item precision-based filtering
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\input{two-vcfs.tex}
+
+\includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
+\end{frame}
+
+\begin{frame}{VCF annotations for classification (idealized figures)}
+\begin{center}
+labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n}\)
+{\small
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+}
+\end{center}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+\(j=1\)\\
+TNseq.Mutect2
+\end{center}
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {TLOD---neuronal sample} (B);
+\path (A) -- node [below] {NLOD---muscle sample} (D);
+\end{tikzpicture}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+...
+\end{center}
+
+\end{column}
+
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+\(j=5\) \\
+strelka2Somatic
+\end{center}
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {SomaticEVS} (B);
+\path (A) -- node [below] {DP---depth} (D);
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Support Vector Machine classifier}% of true and false positives}
+\begin{columns}[t]
+\begin{column}{0.45\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/ben-hur-2008-ploscompbio-fig6middle.png}
+
+{\tiny Ben-Hur 2008 PLoS Comp Bio}
+\end{column}
+
+\begin{column}{0.55\textwidth}
+labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{ij}\)
+{\small
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+}
+
+\hfill
+
+SVM classifier \(j\)
+{\small
+
+\tikz[baseline=-0.5ex] \draw[line width=2pt] (0,0) -- (1,0); decision boundary
+
+\tikz[baseline=-0.5ex] \shadedraw [shading=axis, shading angle=90] (0,0) node
+[anchor=north] {0} (0,-0.75ex) rectangle (0.75,0.75ex) (0.75,0ex) node
+[anchor=north] {1}; prob.~call true: \(P_j(y_{ij} = 1 | \mathbf{x}_{ij})\)
+}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Probability that call \(i\) is true given all info}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+\(P_1\)\\
+TNseq.Mutect2
+\end{center}
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {TLOD---neuronal sample} (B);
+\path (A) -- node [below] {NLOD---muscle sample} (D);
+\end{tikzpicture}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+...
+\end{center}
+
+\end{column}
+
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+\(P_5\) \\
+strelka2Somatic
+\end{center}
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {SomaticEVS} (B);
+\path (A) -- node [below] {DP---depth} (D);
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\vfill
+\begin{center}
+\[
+P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
+\]
+\end{center}
+\end{frame}
+
+\begin{frame}{Precision-based filtering in \texttt{VariantMetaCaller.vcf}}
+\begin{enumerate}
+\item probability \(P(i) \rightarrow \) rank \(k\)
+\item estimate precision for each \(k=1,...,n\)
+\[
+\mathrm{E}_\mathrm{prec}(k) = \frac{1}{k} \sum_{i=1}^k P(i)
+\] 
+\item
+\begin{itemize}
+\item fix precision (FDR) at desired value
+\item find corresponding rank
+\item remove calls below that rank 
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\end{document}
+
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
