@@ -28,7 +28,7 @@ source("../../src/vcf.R")
 Import VCF for each caller (separately for SNVs and indels) and store only the called variants' identity by position.
 
 ```{r cache=TRUE}
-callers <- c("somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq")
+callers <- c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq")
 names(callers) <- sub("T(n|N)seq", "T\\1seq.Mutect2", callers)
 vartypes <- c("snvs", "indels")
 names(vartypes) <- vartypes
@@ -53,6 +53,10 @@ ssize <- reshape(ssize, varying = names(ssize), v.names = "set.size", timevar = 
 ssize$var.type <- factor(ssize$var.type, ordered = TRUE, levels = vartypes)
 barchart(caller ~ set.size | var.type, data = ssize, xlim = c(0, ceiling(max(ssize$set.size) / 1e6) * 1e6))
 barchart(caller ~ log10(set.size) | var.type, data = ssize, xlim = c(0, 7))
+```
+
+```{r call-set-size-snvs, fig.asp=1.2, fig.width=4}
+barchart(caller ~ log10(set.size) | var.type, data = ssize, xlim = c(0, 7))[1]
 ```
 
 ```{r venn-common-sample-snvs}

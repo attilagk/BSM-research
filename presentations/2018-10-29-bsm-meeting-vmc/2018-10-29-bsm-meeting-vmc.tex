@@ -35,7 +35,7 @@
 % title, etc
 \title{The Main Title Naming Key Concepts}
 \subtitle{A subtitle may be shorter and more technical}
-\author{Attila Gulyas-Kovacs}
+\author{Attila Gulyas-Kovacs, Chaggai Rosenbluh, Andy Chess}
 \date{Mount Sinai School of Medicine}
 
 \begin{document}
@@ -90,8 +90,8 @@ muscle sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 
 \begin{frame}{VCF annotations for classification (idealized figures)}
 \begin{center}
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
-\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n}\)
+labeled set \(j\): \(\{\overbrace{y_{i}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
 {\small
 
 \tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
@@ -260,8 +260,103 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 
 \section{Results}
 
-\begin{frame}{Common sample}
+\begin{frame}{Number of calls depends on caller and data set}
+TODO: make filtered version
 
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[width=0.9\columnwidth]{figures/call-set-size-snvs-1-MSSM_106.pdf}
+%\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2.pdf}
+\end{column}
+
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2-cs-benchmark.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Concordance of calls}{Common sample}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+unfiltered + PASS
+
+labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{column}
+
+\begin{column}{0.5\textwidth}
+unfiltered
+
+\includegraphics[width=1.0\columnwidth]{figures/venn-common-sample-wgs-snvs-1.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Ranking calls according to probabilities}{Common sample}
+NOTE: current figure shows results for benchmark; run VariantMetaCaller on
+common sample
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/svmprob-rank1-benchmark.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/prec-rank1-benchmark.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Benchmark experiment}
+
+labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{frame}
+
+\begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
+\begin{center}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1\textwidth]{figures/from-others/ceph-utah-pedigree-1463.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\small
+{\onslide<1>
+\begin{tabular}{cccc}
+genome & mix1 & mix2 & mix3\\
+\hline
+NA12889 & 4 & 2 & 0\\
+NA12891 & 8 & 4 & 0\\
+NA12890 & 16 & 8 & 0\\
+NA12892 & 72 & 86 & 100\\
+\hline
+total & 100 & 100 & 100\\
+\end{tabular}
+}
+\vfill
+{\onslide<2->
+\begin{tabular}{cc}
+case:control & utility \\
+\hline
+\hline
+mix1:mix3 & later somatic mut. \\
+mix2:mix3 & later somatic mut. \\
+\hline
+mix1:mix1 & early somatic mut. \\
+mix2:mix2 & early somatic mut. \\
+\hline
+mix3:mix3 & false calls \\
+\end{tabular}
+}
+\end{column}
+\end{columns}
+\end{center}
 \end{frame}
 
 \end{document}
