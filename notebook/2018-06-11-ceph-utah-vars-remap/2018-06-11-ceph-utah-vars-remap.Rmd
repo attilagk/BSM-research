@@ -1,0 +1,130 @@
+---
+layout: default
+title: Remapped and filtered Illumina callsets
+featimg:  chess-illumina-venn-chr22-1.png
+---
+
+Here we remap and filter the CEPH/Utah Illumina platinum genome callsets.  Remapping was done from GRCh38 to GRCh37 and filtering for all records which PASSed the default filter.  Without remapping our [previous analysis]({{ site.baseurl }}{% post_url /projects/bsm/2018-05-21-NA12892-variants %}) found negligible concordance with the Chesslab callset regarding individual NA12892 (maternal grandmother).  The current analysis demonstrates that remapping leads to high although not complete concordance.  Possible reasons for the remaining discordance are differences in DNA library preparation, differences in sequencing procedures, differences in the variant calling workflow, and errors in remapping.  We also find that pre-filtering VCF files improves diminishes the fraction of unmapped positions.
+
+## Preliminaries
+
+The two shell scripts below perform
+
+1. remapping of positions in Illumina's VCFs from GRCh38 to GRCh37
+1. filtering by retaining only `PASS`ed records in both the Chesslab and the remapped Illumina VCFs
+1. comparing the filtered Chesslab and Illumina VCFs
+
+```{r engine="bash", eval=FALSE}
+cd /big/results/bsm/2018-06-11-ceph-utah-vars-remap
+./remap-filter # remap and filter Illumina's callsets including NA12892
+./compare-to-chesslab # filter Chesslab's callset for NA12892 and compare it to Illumina's
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(VennDiagram)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+source("../../src/mybcftools.R")
+```
+
+## Concordance between Chesslab and Illumina
+
+For this part of the analysis we use NA12892 and essentially repeat the [earlier procedure]({{ site.baseurl }}{% post_url /projects/bsm/2018-05-21-NA12892-variants %}) that yielded almost no overlap between the Chesslab and Illumina callsets.  The difference now, of course, is that the positions of the Illumina callset are remapped to be directly comparable to the Chesslab callset.
+
+The following results show that the two callsets agree on most records.
+
+```{r cache=TRUE}
+tsv <- "/big/results/bsm/2018-06-11-ceph-utah-vars-remap/chesslab-PASS/all.tsv"
+callsets <- import.mybcftools.isec.tsv.2(tsv, gpnames <- c("ChessLab", "Illumina")) # the following expression takes a while to evaluate
+```
+
+```{r cache=TRUE}
+tsv <- "/big/results/bsm/2018-06-11-ceph-utah-vars-remap/chesslab-PASS/chr22/all.tsv"
+callsets.22 <- import.mybcftools.isec.tsv.2(tsv, gpnames <- c("ChessLab", "Illumina"))
+```
+
+```{r chess-illumina-venn}
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[1:2], col = "gray", cat.cex = 1.4)
+grid.draw(venn.diagram(callsets, NULL, main = "Germline variants in NA12892", main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill, cat.cex = my.par$cat.cex))
+```
+
+```{r chess-illumina-venn-chr22}
+grid.draw(venn.diagram(callsets.22, NULL, main = "Germline variants in NA12892, chr22", main.cex = my.par$main.cex, col = my.par$col, fill = my.par$fill, cat.cex = my.par$cat.cex))
+```
+
+Thus, remapping worked in the sense that it improved concordance up to a great extent.  Possible reasons for the remaining discordance include
+
+* differences in DNA library preparation
+* differences in sequencing procedures
+* differences in the variant calling workflow
+  * different version of the variant caller (strelka vs strelka2)
+  * the Illumina workflow had additional procedures relative to the Chesslab workflow
+* errors in remapping
+
+### Distribution of discordant variants with respect to genomic position
+
+The goal of this section is to see if and how discordant variants cluster on contigs (chromosomes).  Below are the positions of variants plotted for each partition (only Illumina, only Chesslab, or both) as dots and the probability density estimate for the distribution of positions is also plotted as solid lines.
+
+```{r}
+tsv <- "/big/results/bsm/2018-06-11-ceph-utah-vars-remap/chesslab-PASS/all.tsv"
+part <- read.delim(tsv, header = FALSE, colClasses = c("factor", "integer", "factor", "factor", "factor"), col.names = c("contig", "position", "ref", "alt", "partition"))
+levels(part$partition) <- c("only Illumina", "only Chesslab", "both")
+part$contig <- factor(part$contig, levels = c(1:22, "X", "Y", "MT"), ordered = TRUE)
+mydensityplot <- function(sel.contig, dat = part) {
+    densityplot(~ position | partition, data = dat, subset = contig == sel.contig, pch = ".", layout = c(1, 3), main = paste("chr", sel.contig))
+}
+```
+
+```{r partition-positions-1}
+mydensityplot("1")
+```
+
+```{r partition-positions-22}
+mydensityplot("22")
+```
+
+```{r partition-positions-X}
+mydensityplot("X")
+```
+
+```{r partition-positions-MT}
+mydensityplot("MT")
+```
+
+### Concordance in the literature
+
+How concerning is the discordance that we see between the Chesslab and Illumina callsets?  [This article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3706896/) presents results relevant to that question.  It seems that the concordance between various germline variant calling workflows is in general comparable or even lower to the concordance between the Chesslab and Illumina callsets.
+
+## Unmapped positions and filtering
+
+`CrossMap` leaves certain positions unmapped presumably because these could not be mapped with sufficient confidence.  It is expected, then, that these are positions with lower quality metrics (base quality, mapping quality, etc) and therefore these tend to be marked by the variant caller for filtering out.  The following results agree with this expectation as they show that the fraction of unmapped positions decreases by pre-filtering the VCF files.
+
+```{r engine="bash", eval=TRUE}
+cd /big/results/bsm/2018-06-11-ceph-utah-vars-remap
+find . -name '*.log' | for log in `cat`; do myCrossMap-log2csv $log; done > total-unmapped-pos.csv
+```
+
+```{r crossmap-ismapped}
+ismapped <- read.csv("/big/results/bsm/2018-06-11-ceph-utah-vars-remap/total-unmapped-pos.csv",
+                     colClasses = c("integer", "integer", "factor"), header = FALSE, col.names = c("total", "unmapped", "callset"))
+ismapped$mapped <- with(ismapped, total - unmapped)
+ismapped$individual <- sub("^.*(NA128..).*$", "\\1", ismapped$callset)
+ismapped <- reshape(ismapped, varying = x <- c("total", "unmapped", "mapped"), v.names = "count", timevar = "set", times = x, direction = "long")
+ismapped$individual <- sub("^.*(NA128..).*$", "\\1", ismapped$callset)
+ismapped$isfiltered <- sub("^.*PASS.*$", "PASS", ismapped$callset)
+ismapped$isfiltered <- sub("^.*\\.vcf$", "unfiltered", ismapped$isfiltered)
+barchart(individual ~ count | isfiltered, data = subset(ismapped, subset = set != "total"), groups = set, stack = TRUE, auto.key = list(columns = 1), xlab = "candidate variants (records in VCF)")
+```
+
+## Filtering for snvs and indels
+
+The wrapper script below calls `filter-remapped-illumina-sets` for remapped and PASS filtered VCFs filtering for both snvs and indels as well as both wgs and chr22 regions (wgs means here all chromosomal contigs: 1,..., 22, X, Y, MT).
+
+```{r engine="bash", eval=FALSE}
+./filter-remapped-illumina-sets-do-all
+```

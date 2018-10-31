@@ -1,0 +1,21 @@
+---
+layout: default
+#title: 
+#featimg: density-1.png
+---
+
+Which individuals have been sequenced?
+
+For the answer see the `src/sequenced-individuals.sh` as well as the `data/dnalib/get-cmc-individuals` scripts.
+
+```{r engine="bash"}
+indivs=$HOME/projects/bsm/results/2018-09-12-sequenced-individuals/sequenced-individuals
+cat $indivs
+```
+
+Thus the number of sequenced individuals is
+
+```{r engine="bash", echo=FALSE}
+indivs=$HOME/projects/bsm/results/2018-09-12-sequenced-individuals/sequenced-individuals
+wc -w $indivs
+```

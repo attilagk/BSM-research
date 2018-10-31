@@ -1,0 +1,64 @@
+---
+layout: default
+#title: 
+featimg: Tnseq-ceph4-venn-1.png
+---
+
+Towards estimating error rates for different somatic calling workflows we present here callset partitions.  For each somatic callset there are 31 partitions coming from 5 callsets: the somatic callset itself, and the 4 CEPH/Utah grandparental platinum callsets by Illumina.  Each partition corresponds to a certain variant allele frequency.  The results indicate that all 5 caller workflows provide useful information but they seem to greatly differ in their specificity and sensitivity. Very different partitions were obtained and presented in [an earlier post]({{ site.baseurl }}{% post_url /projects/bsm/2018-05-09-truth-sets %}), in which positions in the Illumina callsets were not remapped from GRCh38 to GRCh37 and therefore those callsets (using GRCh38) were not directly comparable to the somatic callsets (using GRCh37).
+
+
+## Preparation
+
+The `run-me` `bash` script takes all somatic callsets, filters them, and for each somatic callset calculates the 31 partitions with the 4 CEPH/Utah grandparental platinum germline callsets by Illumina.  Note that `run-me` uses asynchronous execution of partition calculations to reduce runtime so it must be ensured that all processes completed before this document is knitted (produced).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(VennDiagram)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+source("../../src/mybcftools.R")
+```
+
+Only set partitions for chromosome 22 are imported and stored in the list `l`.  Whole genome partitions would be too large in their memory requirement in R.
+
+```{r cache=TRUE}
+gpnames <- paste0("NA128", 89:92)
+callers <- c("lofreqSomatic", "somaticSniper", "strelka2Germline", "strelka2Somatic", "Tnseq")
+names(callers) <- callers
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[1:5], col = "gray", cat.cex = 1.4)
+import5 <- function(caller, gpnam = gpnames, vartype = "snvs") {
+    tsv <- paste0("/big/results/bsm/2018-06-12-somatic-callsets-vs-remapped-truthsets/22/", caller, "-", vartype, "/all.tsv")
+    import.mybcftools.isec.tsv(tsv, c(caller, gpnam))
+}
+l <- lapply(callers, import5)
+```
+
+## Results
+
+```{r Tnseq-ceph4-venn}
+draw5 <- function(l, par = my.par) {
+    grid.draw(venn.diagram(l, NULL, main.cex = par$main.cex, col = my.par$col, fill = par$fill, cat.cex = par$cat.cex))
+}
+draw5(l$Tnseq)
+```
+
+```{r strelka2Somatic-ceph4-venn}
+draw5(l$strelka2Somatic)
+```
+
+```{r strelka2Germline-ceph4-venn}
+draw5(l$strelka2Germline)
+```
+
+```{r lofreqSomatic-ceph4-venn}
+draw5(l$lofreqSomatic)
+```
+
+```{r somaticSniper-ceph4-venn}
+draw5(l$somaticSniper)
+```
+

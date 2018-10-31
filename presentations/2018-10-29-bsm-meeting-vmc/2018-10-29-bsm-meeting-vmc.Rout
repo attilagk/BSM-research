@@ -1,0 +1,36 @@
+
+R version 3.4.1 (2017-06-30) -- "Single Candle"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> library(VennDiagram)
+Loading required package: grid
+Loading required package: futile.logger
+> pos <- list(TNseq.Mutect2 = read.delim("figures/benchmark-Tnseq-4.csv")$POS,
++             strelka2Somatic = read.delim("figures/benchmark-strelka2Somatic-4.csv")$POS)
+> v <- venn.diagram(pos, NULL, col = "gray", fill = c("cyan", "brown"), cex = 2, cat.cex = 2, cat.pos = c(-30, 30))
+> png("figures/Tnseq-4-strelka2Somatic-4-venn.png")
+> grid.draw(v)
+> dev.off()
+null device 
+          1 
+> 
+> proc.time()
+   user  system elapsed 
+  1.016   1.244   0.618 

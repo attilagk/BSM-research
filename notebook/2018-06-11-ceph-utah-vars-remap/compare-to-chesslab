@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+chesslabvcf=/big/results/bsm/2018-05-21-NA12892-variants/wgs/strelka2Germline/results/variants/genome.S1.vcf.gz
+illuminafiltervcf=/big/results/bsm/2018-06-11-ceph-utah-vars-remap/S1-GRCh38-to-GRCh37-PASS/GRCh38_to_GRCh37-PASS-NA12892_S1.vcf.gz
+
+chesslabdir=chesslab-PASS
+if test ! -d $chesslabdir; then
+    mkdir $chesslabdir
+fi
+chessfiltervcf=$chesslabdir/PASS-NA12892.vcf.gz
+
+# whole genome
+regions=$(echo {1..22} X Y MT | tr ' ' ',')
+bcftools view --types snps -f .,PASS --output-file $chessfiltervcf --output-type z --regions $regions $chesslabvcf
+bcftools index --tbi $chessfiltervcf
+
+# first way
+bcftools isec -p $chesslabdir $chessfiltervcf $illuminafiltervcf
+for part in 01 10 11; do
+    # second way: different output format but same result
+    bcftools isec -n~$part --output $chesslabdir/$part $chessfiltervcf $illuminafiltervcf
+done
+cat $chesslabdir/[01][01] > $chesslabdir/all.tsv
+
+# chr22
+regions=22
+if test ! -d $chesslabdir/chr22; then
+    mkdir $chesslabdir/chr22
+fi
+chess22vcf=$chesslabdir/chr22/chess-NA12892.vcf.gz
+illumina22vcf=$chesslabdir/chr22/illumina-NA12892.vcf.gz
+bcftools view --types snps -f .,PASS --output-file $chess22vcf --output-type z --regions $regions $chessfiltervcf
+bcftools index --tbi $chess22vcf 
+bcftools view --types snps -f .,PASS --output-file $illumina22vcf --output-type z --regions $regions $illuminafiltervcf
+bcftools index --tbi $illumina22vcf 
+
+# first way
+bcftools isec -p $chesslabdir/chr22 $chess22vcf $illumina22vcf
+for part in 01 10 11; do
+    # second way: different output format but same result
+    bcftools isec -n~$part --output $chesslabdir/chr22/$part $chess22vcf $illumina22vcf
+done
+cat $chesslabdir/chr22/[01][01] > $chesslabdir/chr22/all.tsv

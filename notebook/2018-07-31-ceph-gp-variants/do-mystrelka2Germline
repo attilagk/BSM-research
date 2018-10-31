@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+grandparent=${1:-NA12889}
+length=wgs
+nproc=16
+
+outdir=$length/$grandparent
+test ! -d $outdir && mkdir $outdir
+
+( time mystrelka2 -p ${nproc} -r $REFSEQ \
+    -t Germline \
+    -1 $length/$grandparent.bam \
+    -2 $length/$grandparent.bam \
+    -o $outdir ) 1>&$outdir/strelka2Germline-run-$grandparent.time &

@@ -1,6 +1,7 @@
 data
 results
 test
+calls
 
 .tmp
 *.log
@@ -53,3 +54,5 @@ vignettes/*.pdf
 .httr-oauth
 
 bsm-network
+**/.ipynb_checkpoints/
+**/__pycache__/

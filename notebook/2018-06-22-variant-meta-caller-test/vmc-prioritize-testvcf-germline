@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+maindir=/home/attila/tools/VariantMetaCaller
+vcfdir=$maindir/testVCFs-germline
+cfg=$maindir/VariantMetaCaller_v1.0/definitions.config
+wd=/projects/bsm/attila/results/2018-06-22-variant-meta-caller-test/vmc-prioritize-testvcf-germline
+
+cd $wd
+VariantMetaCaller \
+    -t prioritize \
+    -c $cfg \
+    -v HC HaplotypeCaller $vcfdir/bwa.HC_group-1_D100.vcf \
+    -v samtools samtools $vcfdir/bwa.samtools_group-1_D100.vcf \
+    -v freebayes freebayes $vcfdir/bwa.freebayes_group-1_D100.vcf \
+    -v UG UnifiedGenotyper $vcfdir/bwa.UG_group-1_D100.vcf > result.vcf

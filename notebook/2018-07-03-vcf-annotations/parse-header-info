@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+
+echo -e "Caller,Field,Annotation,Number,Type,Description" > info-fields.csv
+echo -e ",QUAL,QUAL,,Integer,quality: Phred-scaled quality score for the assertion made in ALT. i.e. −10log 10 prob(call in ALT is wrong). If ALT is ‘.’ (no variant) then this is −10log 10 prob(variant); and if ALT is not ‘.’ this is −10log 10 prob(no variant). If unknown; the missing value should be specified." >> info-fields.csv
+
+for vcf in snvs/vcf/*.vcf.gz; do
+    caller=`basename $vcf .vcf.gz`
+    bcftools view -h $vcf | \
+        sed -n "/^##INFO=<ID=\(.*\)>/ { s//$caller,INFO,\1/; s/\(Number\|Type\|Description\)=//g; p }"
+    bcftools view -h $vcf | \
+        sed -n "/^##FORMAT=<ID=\(.*\)>/ { s//$caller,FORMAT,\1/; s/\(Number\|Type\|Description\)=//g; p }"
+done >> info-fields.csv

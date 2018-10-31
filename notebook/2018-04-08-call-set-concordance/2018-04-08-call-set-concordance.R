@@ -13,7 +13,7 @@ import.across.segments <- function(sam = samples[1], sgs = segs, vart = vartypes
         across.callers <- function(var) {
             d <- paste0(sam, "/", seg, "/vcf/", var)
             fl <- paste0(d, "/", cal, ".vcf.gz")
-            names(fl) <- sub("Tnseq", "Tnseq.Mutect2", cal)
+            names(fl) <- sub("T(n|N)seq", "T\\1seq.Mutect2", cal)
             #lapply(fl, read.vcfR, verbose = FALSE)
             l <- lapply(fl, readVcf, "hg19")
             lapply(l, row.names)

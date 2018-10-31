@@ -1,0 +1,72 @@
+---
+layout: default
+#title: 
+featimg: prec-rank-2.png
+---
+
+The output of VariantMetaCaller is a VCF file with all the candidate variants called by at least one caller and with extra annotations/scores that VariantMetaCaller calculates.  These scores include SVMPROB, the probability that a call in question is true given all the selected annotations/quality scores that VariantMetaCaller was configured to use from the input VCF files.  This article presents the distribution of SVMPROB and how other quantities of interest---precision and the number of true variants---can be estimated from that distribution.
+
+## SVMPROB and related quantities
+
+SVMPROB or $$P_\mathrm{SVM}$$ is the probability that a call is true.  More precisely, for variant $$j$$ we have $$P_\mathrm{SVM}^{(j)}$$ 
+
+If the number of all calls is $$N$$, the estimate for number $$N_T$$ of true variants is
+
+$$
+\begin{equation}
+\mathrm{E}[N_T] = \sum_{j=1}^N P_\mathrm{SVM}^{(j)}
+\end{equation}
+$$
+
+
+Let $$k$$ be the number of highest probability calls that we consider true while filtering out all lower probability calls.  Then precision $$\mathrm{prec}_k$$ can be estimated as
+
+$$
+\begin{equation}
+\mathrm{E}[\mathrm{prec}_k] = \frac{1}{k} \sum_{j=1}^k P_\mathrm{SVM}^{(k)}
+\end{equation}
+$$
+
+See Eq. 2 of [the VariantMetaCaller paper](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-2050-y#Sec10).
+
+## Some results
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(VennDiagram)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+#lattice.options(default.theme = "standard.theme")
+source("2018-09-25-variantmetacaller-output-scores.R")
+```
+
+### Probability that a given call j is true
+
+```{r svmprob-distro}
+testruns <- c(test09 = "test09", test11 = "test11")
+regions <- c(test09 = "chr22", test11 = "chr14")
+vmc.test <- lapply(testruns, function(testrun) read.delim(paste0("~/projects/bsm/results/2018-06-22-variant-meta-caller-test/vmc-prioritize-benchmark/", testrun, "/results-svmprob.tsv")))
+testrun <- "test09"
+plot(ecdf(vmc.test[[testrun]]$svmprob), xlab = "SVMPROB", ylab = "Fn(SVMPROB)", main = paste(testruns[testrun], regions[testrun], ": distribution of SVMSPROB"))
+```
+
+```{r svmprob-rank}
+plot(sort(vmc.test[[testrun]]$svmprob, decreasing = TRUE), main = paste(testruns[testrun], regions[testrun], ": SVMPROB"), xlab = "rank, k", ylab = "SVMPROB_k", pch = ".")
+plot(sort(vmc.test[[testrun]]$svmprob, decreasing = TRUE)[1:100], main = paste(testruns[testrun], regions[testrun], ": SVMPROB"), xlab = "rank, k", ylab = "SVMPROB_k")
+```
+
+### Estimates of the number of true variants
+
+```{r}
+sapply(vmc.test, function(test) sum(test$svmprob))
+```
+
+### Precision given the k highest probability calls
+
+```{r prec-rank}
+plot(vmc.precision(vmc.test$test09$svmprob), main = paste(testruns[testrun], regions[testrun], ": precision"), xlab = "k: # of highest probability calls called true", ylab = "E[prec_k]", pch = ".")
+plot(vmc.precision(vmc.test$test09$svmprob)[1:100], main = paste(testruns[testrun], regions[testrun], ": precision"), xlab = "k: # of highest probability calls called true", ylab = "E[prec_k]")
+```

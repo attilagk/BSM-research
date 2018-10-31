@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+comp=${1:-/big/results/bsm/2018-06-12-somatic-callsets-vs-remapped-truthsets/22/lofreqSomatic-snvs/lofreqSomatic.vcf.gz}
+comp=`realpath $comp`
+truth=${2:-/big/results/bsm/2018-06-11-ceph-utah-vars-remap/S1-GRCh38-to-GRCh37-PASS/snvs/22/GRCh38_to_GRCh37-PASS-NA12889_S1.vcf.gz}
+truth=`realpath $truth`
+compbn=`basename $comp .vcf.gz`
+truthbn=`basename $truth .vcf.gz`
+outbn=${compbn}-${truthbn}
+outdir=${outbn}-`date +%s` # seconds since 1970-01-01 00:00:00 UTC
+
+mkdir $outdir && cd $outdir
+
+VariantMetaCaller -comp <(bcftools view -O v $comp) \
+    -truth <(bcftools view -O v $truth) \
+    -o $outbn -t genotypeconcordance 2> $outbn.log

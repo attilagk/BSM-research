@@ -1,0 +1,103 @@
+#! /usr/bin/env bash
+
+# Add GT (genotype) annotation to VCF produced by strelka2Somatic and other callers.
+# Input is any type of VCF from STDIN; output is uncompressed (default) or
+# compressed VCF to STDOUT---see; by default output type -O option.
+
+outputType=v
+caseSample=TUMOR
+controlSample=NORMAL
+displayhelp=F
+
+while getopts "O:a:b:h" opt; do
+    case $opt in
+        O) outputType=$OPTARG;;
+        a) caseSample=$OPTARG;;
+        b) controlSample=$OPTARG;;
+        h) displayhelp=T
+    esac
+done
+shift $(($OPTIND - 1))
+
+# input VCF from STDIN will be read multiple times so direct STDIN to invcf
+invcf=`tempfile`
+bcftools view > $invcf
+
+usage="usage: `basename $0` [-O v|z -a caseSample -b controlSample] < invcf > outvcf"
+if test $displayhelp = T; then
+    echo $usage; exit 0
+fi
+
+# if there's already a GT tag in FORMAT just write invcf to outvcf
+if bcftools view -h $invcf | grep --quiet '##FORMAT=<ID=GT'
+then
+    bcftools view -O $outputType $invcf
+    exit
+fi
+
+# get index of case and control sample fields/columns
+fieldnames=$(bcftools view -h $invcf | grep '^#CHROM')
+caseCol=$(sed "s/^\(.*$caseSample\).*$/\1/" <<<$fieldnames | wc -w)
+controlCol=$(sed "s/^\(.*$controlSample\).*$/\1/" <<<$fieldnames | wc -w)
+
+# temp files for VCF pieces
+leftPart=`tempfile`
+GT=`tempfile`
+format=`tempfile`
+GTformat=`tempfile`
+controlSampleFile=`tempfile`
+caseSampleFile=`tempfile`
+controlGT=`tempfile`
+caseGT=`tempfile`
+controlGTsample=`tempfile`
+caseGTsample=`tempfile`
+tmpoutvcf=`tempfile`
+
+bcftools view -H $invcf | cut -f 1-8 >> $leftPart
+
+# FORMAT should be the 9th column (right next to INFO); check if it's missing
+missingFormat=F
+if test $caseCol -eq 8 && test $controlCol -eq 8; then
+    missingFormat=T
+fi
+case $missingFormat in
+    T)
+        # smaller pieces of output
+        bcftools view -H $invcf | sed 's/.*//' >> $format
+        cp $format $controlSampleFile
+        cp $format $caseSampleFile
+        # larger pieces
+        bcftools view -h $invcf | sed '/^##fileformat/q' >> $tmpoutvcf
+        echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $tmpoutvcf
+        bcftools view -h $invcf | sed -n '/^##fileformat/,$ p' | sed -n '2,$ p' >> $tmpoutvcf
+        sed -i "s/^#CHROM.*$/&\tFORMAT\t$controlSample\t$caseSample/" $tmpoutvcf
+        tagdelim=''
+        ;;
+    F)
+        # smaller pieces of output
+        bcftools view -H $invcf | cut -f 9 >> $format
+        bcftools view -H $invcf | cut -f $controlCol >> $controlSampleFile
+        bcftools view -H $invcf | cut -f $caseCol >> $caseSampleFile
+        # larger pieces
+        bcftools view -h $invcf | sed '/^##FORMAT/q' >> $tmpoutvcf
+        echo '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">' >> $tmpoutvcf
+        bcftools view -h $invcf | sed -n '/^##FORMAT/,$ p' | sed -n '2,$ p' >> $tmpoutvcf
+        tagdelim=':'
+        ;;
+esac
+
+sed "s/.*/GT$tagdelim/" $leftPart >> $GT
+sed "s/.*/0\/0$tagdelim/" $leftPart >> $controlGT
+sed "s/.*/0\/1$tagdelim/" $leftPart >> $caseGT
+
+paste -d '' $GT $format >> $GTformat
+paste -d '' $controlGT $controlSampleFile >> $controlGTsample
+paste -d '' $caseGT $caseSampleFile >> $caseGTsample
+
+# entire output in desired type; clean-up
+paste $leftPart $GTformat $controlGTsample $caseGTsample >> $tmpoutvcf
+
+bcftools view -O $outputType $tmpoutvcf
+#bcftools view -O $outputType -o $outvcf $tmpoutvcf
+rm $leftPart $GT $format $GTformat $controlSampleFile $caseSampleFile \
+    $controlGT $caseGT $controlGTsample $caseGTsample $tmpoutvcf $invcf

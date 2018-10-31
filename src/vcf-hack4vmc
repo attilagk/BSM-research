@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+# Hack gzipped VCFs in "indir" for VariantMetaCaller and write them to "outdir".
+
+# variables and options
+scriptdir=`dirname $0`
+outputType=v
+caseSample=TUMOR
+controlSample=NORMAL
+region=22
+varType=snps
+displayhelp=F
+while getopts "a:b:r:v:l:h" opt; do
+    case $opt in
+        a) caseSample=$OPTARG;;
+        b) controlSample=$OPTARG;;
+        r) region=$OPTARG;;
+        v) varType=$OPTARG;;
+        h) displayhelp=T;;
+    esac
+done
+shift $(($OPTIND - 1))
+indir=$1
+outdir=$2
+
+if test ! -d $outdir; then
+    mkdir -p $outdir/log
+fi
+
+# 1) check number of arguments
+# 2) invcf and outvcf must not be the same file
+# 3) check if help is to be displayed
+if test $# -ne 2 || test `realpath $indir` = `realpath $outdir` || test $displayhelp = T; then
+    cat<<EOF
+    Hack gzipped VCFs in "indir" for VariantMetaCaller and write them to "outdir".
+
+    usage: `realpath $0` [-a caseSample -b controlSample -r chr[:from-to] -v snps|indels -h] indir outdir
+
+    Options
+    -a caseSample; default: TUMOR
+    -b controlSample; default: NORMAL
+    -r region; chr[:from-to]; default: 22
+    -v varType; default: snps
+    -h display usage and exit
+EOF
+    exit 1
+fi
+
+# hack a single VCF
+hack1vcf () {
+    invcf=$1
+    outvcf=$2
+    logFile=`dirname $outvcf`/log/`basename $outvcf .vcf`.log
+    # open and filter VCF
+    bcftools view -O v -r $region -v $varType $invcf 2>> $logFile |
+    # add GT field if missing
+    $scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample 2>> $logFile |
+    # annotate with entropy
+    $scriptdir/annotate1vcf.sh -O v 2>> $logFile |
+    # annotate with INFO/OFFSETPOS
+    $scriptdir/vcf_add_offsetpos.py > $outvcf 2>> $logFile
+}
+
+# hack all VCFs
+for inputvcf in $indir/*.vcf.gz; do
+    outputvcf=$outdir/`basename $inputvcf .vcf.gz`.vcf
+    hack1vcf $inputvcf $outputvcf
+done

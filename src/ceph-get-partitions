@@ -1,0 +1,30 @@
+#! /usr/bin/env bash
+
+usage="`basename $0` invcf outdir vartype region [caller]"
+
+if test $# -lt 4 -o $# -gt 5; then
+    echo $usage; exit 1
+fi
+
+invcf=$1
+outdir=$2
+vartype=$3
+region=$4
+caller=${5:-`basename $invcf .vcf.gz`}
+
+outdir=$outdir/$vartype/$region/$caller
+if test ! -d $outdir; then
+    mkdir -p $outdir
+fi
+
+collapse=none
+partitionsfile=$HOME/projects/bsm/tables/callset-partitions.csv # hard-coded variables
+truthsetdir=/big/results/bsm/2018-06-11-ceph-utah-vars-remap/S1-GRCh38-to-GRCh37-PASS
+truthsetdir=$truthsetdir/$vartype/$region
+
+# 31 partitions given by a filtered testset and the 4 Illumina germline truthsets
+for part in `sed -n '/^partition\(.*\)/ {s//\1/; y/,/ /; p; q}' $partitionsfile`; do
+    bcftools isec --collapse $collapse --output $outdir/$part -n~$part \
+        $invcf $truthsetdir/*NA128*.vcf.gz
+    mybcftools-isec-tsv $outdir/[01][01][01][01][01] > $outdir/all.tsv
+done

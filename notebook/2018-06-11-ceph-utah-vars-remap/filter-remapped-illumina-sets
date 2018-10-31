@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+# take all CEPH/Utah grandparental VCFs in 'indir' and filter for 'vartype' and for 'regions'
+usage="`basename $0` indir snvs|indels wgs|1|...|22|X|Y|MT"
+
+indir=$1
+vartype=$2
+regions=$3
+
+case $vartype in
+    snvs) bcfvartype=snps;;
+    *) bcfvartype=$vartype;;
+esac
+
+case $regions in
+    wgs) bcfregions=$(echo {1..22} X Y MT | tr ' ' ',');;
+    *) bcfregions=$regions;;
+esac
+
+outdir=$indir/$vartype/$regions
+if test ! -d $outdir; then mkdir -p $outdir; fi
+
+#for invcf in $indir/*NA12889*.vcf.gz; do # for testing
+for invcf in $indir/*NA128*.vcf.gz; do
+    outvcf=$outdir/`basename $invcf`
+    bcftools view --output-file $outvcf --output-type z --types $bcfvartype --regions $bcfregions $invcf
+    bcftools index --tbi $outvcf
+done

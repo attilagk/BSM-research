@@ -15,7 +15,7 @@ opts_chunk$set(dpi = 144)
 opts_chunk$set(out.width = "600px")
 opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
-lattice.options(default.theme = "standard.theme")
+#lattice.options(default.theme = "standard.theme")
 ```
 
 The `dostats` bash script produces call set partitions and related statistics (counts) based on *S1* and *S1.genome* for each of the individuals (grandparents).
@@ -49,7 +49,6 @@ SN <- do.call(rbind, SN)
 SN$Set <- sub(".vcf.gz.stats", "", SN$Set) # remove file extension
 SN$Set <- factor(sub("^.*_(S1.*$)", "\\1", SN$Set)) # remove individual-specific info from Set
 SN$Set <- factor(SN$Set, levels = levels(SN$Set)[c(5:6, 1:4)], ordered = TRUE)
-#levels(SN$Set) <- levels(SN$Set)[c(5:6, 1:4)]
 ```
 
 ## Counts of variants by type and callset partition

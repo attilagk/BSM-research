@@ -1,0 +1,273 @@
+---
+layout: default
+title: Error rate estimation
+#featimg: Tnseq-ceph4-venn-1.png
+---
+
+Precision and recall are discussed as standard quantities of variant calling accuracy.  Related error rates are noted and estimates of precision and recall are defined in terms of CEPH/Utah grandparental truth sets, grandparent combinations and truth set partitions, which correspond to various mosaic allele frequencies in the modeled tissue with somatic mosaicism.
+
+## Precision, recall and error rates
+
+We want to identify the set $$V$$ of real variants in our sample.  We apply a variant calling workflow $$w$$ (typically including steps like sequencing, alignment, calling, filtering) that yields callset $$C_w$$.  There are two widely used quantities that characterize the accuracy (performance) of worklflow $$w$$.
+
+$$
+\begin{eqnarray}
+\mathrm{precision}_w &=& \mathrm{Pr}(x \in V | x \in C_w) = \text{prob. a call by } w \text{ is a variant} \\
+\mathrm{recall}_w &=& \mathrm{Pr}(x \in C_w | x \in V) = \text{prob. } w \text{ calls a variant}
+\end{eqnarray}
+$$
+
+Precision and recall both have synonyms as well associated error rates.
+
+|quantity            |synonym             |assoc. error rate   |
+|:------------------:|:------------------:|:------------------:|
+|precision           |specificity or pos. predictive value         |false discovery rate, FDR |
+|recall              |sensitivity         |false negative rate, FNR |
+
+The error rates can be derived simply as
+
+$$
+\begin{eqnarray}
+\mathrm{FDR}_w &=& 1 - \mathrm{precision}_w  \\
+\mathrm{FNR}_w &=& 1 - \mathrm{recall}_w
+\end{eqnarray}
+$$
+
+## Estimating precision and recall
+
+Even for our mixes of the CEPH/Utah grandparents (NA12889,...,NA12892) we do not know $$V$$ itself.  Instead, we obtain truth sets $$T$$ based on Illumina's and/or our own germline variant calling workflow and **estimate** precision and sensitivity as follows.
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_w &=& \frac{|C_w \cap T|}{|C_w|} \\
+\widehat{\mathrm{recall}}_w &=& \frac{|C_w \cap T|}{|T|}
+\end{eqnarray}
+$$
+
+These definitions, however, are still not concrete enough to be useful in practice.  More details are needed on $$T$$.
+
+### Grandparent combinations and truth set partitions
+
+Recall that the CEPH/Utah grandparent DNA mixes were designed with the following mixing proportions:
+
+|grandparent         |Mix1                |Mix2                |Mix3                |
+|:------------------:|:------------------:|:------------------:|:------------------:|
+|NA12889             |0.04                |0.02                |0                   |
+|NA12890             |0.16                |0.08                |0                   |
+|NA12891             |0.08                |0.04                |0                   |
+|NA12892             |0.72                |0.86                |1                   |
+
+The design uses NA12892 as the genetic background in the sense that somatic variants are modeled as those that are absent from NA12892 but contained in NA12889, NA12890, or NA12891, or in some combination of NA12889, NA12890, and NA12891.  Recall that we do not know the real variants in the grandparents but we have our (or Illumina's) truth sets denoted as $$T_{89},T_{90},T_{91},T_{92}$$, respectively.
+
+### A simple case: only homozygots
+
+First let us consider only the subset of variants for which any grandparents is either homozygous or lacks the variant.  Then the mixing proportions also correspond to allele frequencies.
+
+For example, consider a variant that is in both $$T_{89}$$ and $$T_{91}$$ but is missing from both $$T_{90}$$ and $$T_{92}$$.
+
+$$
+\begin{equation}
+x \in T_{1010} \Leftrightarrow x \in T_{89}, x \notin T_{90}, x \in T_{91}, x \notin T_{92}
+\end{equation}
+$$
+
+Note that this modeled somatic variant has mosaic allele frequency in Mix1 of $$0.04 + 0.08 = 0.12$$ and in Mix2 of $$0.02 + 0.04 = 0.06$$.
+
+We will refer to a set such as $$T_{1010}$$ as a truth set **partition** $$T_\pi$$ based on $$T_{89},T_{90},T_{91},T_{92}$$.  We will denote the **combination** with $$\pi$$ so that in the previous example $$\pi = 1010$$.
+
+There are $$2^4 = 16$$ grandparent combinations or, equivalently, truth set partitions.  The following table lists all combinations/partitions. It also lists the mosaic allele frequency in Mix1, Mix2 and Mix3 for variants.
+
+|combination $$\pi$$ |Mix1                |Mix2                |Mix3                |
+|:------------------:|:------------------:|:------------------:|:------------------:|
+|0000                |0.00                |0.00                |0                   |
+|                    |                    |                    |                    |
+|1000                |0.04                |0.02                |0                   |
+|0100                |0.16                |0.08                |0                   |
+|0010                |0.08                |0.04                |0                   |
+|0001                |0.72                |0.86                |1                   |
+|                    |                    |                    |                    |
+|1100                |0.20                |0.10                |0                   |
+|1010                |0.12                |0.06                |0                   |
+|1001                |0.76                |0.88                |1                   |
+|0110                |0.24                |0.12                |0                   |
+|0101                |0.88                |0.94                |1                   |
+|0011                |0.80                |0.90                |1                   |
+|                    |                    |                    |                    |
+|1110                |0.28                |0.14                |0                   |
+|1101                |0.92                |0.96                |1                   |
+|1011                |0.84                |0.92                |1                   |
+|0111                |0.96                |0.98                |1                   |
+|                    |                    |                    |                    |
+|1111                |1.00                |1.00                |1                   |
+
+
+Now we are ready to give a practical definition of the precision and recall estimates.
+
+#### Practical definitions of precision and recall estimate
+
+Given a grandparent combination $$\pi$$ (or equivalently a truth set partition $$T_\pi$$) and variant calling workflow $$w$$ we estimate precision and recall as
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_{w,\pi} &=& \frac{|C_w \cap T_\pi|}{|C_w|} \\
+\widehat{\mathrm{recall}}_{w,\pi} &=& \frac{|C_w \cap T_\pi|}{|T_\pi|}
+\end{eqnarray}
+$$
+
+As mentioned, variants in $$T_{92}$$ constitute the genetic background, that is the germline variants of the modeled tissue with somatic mosaic variants.  Therefore only those combinations are relevant that exclude NA12892. Let us denote the set of these combinations with
+
+$$
+\begin{equation}
+\Pi_\mathrm{bsm} = \{0000, 1000, 0100, 0010, 1100, 1010, 0110, 1110 \}
+\end{equation}
+$$
+
+Given $$\Pi$$ we can define the estimators as
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_{w,\Pi} &=& \frac{|C_w \cap (\bigcup_{\pi \in \Pi} T_\pi)|}{|C_w|} \\
+\widehat{\mathrm{recall}}_{w,\Pi} &=& \frac{|C_w \cap (\bigcup_{\pi \in \Pi} T_\pi)|}{|(\bigcup_{\pi \in \Pi} T_\pi)|}
+\end{eqnarray}
+$$
+
+We may call $$\widehat{\mathrm{precision}}_{w,\Pi}$$ and $$\widehat{\mathrm{recall}}_{w,\Pi}$$ *marginal* estimates to distinguish from $$\widehat{\mathrm{precision}}_{w,\pi}$$ and $$\widehat{\mathrm{recall}}_{w,\pi}$$, which we may call *conditional* estimates. 
+
+$$\Pi_\mathrm{bsm}$$ denotes the set of variants in NA12889 and/or NA12890 and/or NA12891 that are missing from NA12892.  Note that in Mix1 $$\Pi_\mathrm{bsm}$$ corresponds to the whole range of possible mosaic allele frequencies: $$\{0, 0.04, 0.16, 0.08, 0.20, 0.12, 0.24, 0.28 \}$$.
+
+We may want to use a more restrictive definition of $$\Pi$$.  For example to consider variants with mosaic allele frequency that falls within $$[0.1, 0.2]$$ then the definition is
+$$
+\begin{equation}
+\Pi_{[0.1, 0.2]} = \{0000, 0100, 1100, 1010, 0110 \}
+\end{equation}
+$$
+
+### Another simple case: only heterozygots
+
+When we consider only heterozygous variants the notation and definitions are the same as for the homozygous case.  The mosaic allele frequencies, however, are modified by halving the frequencies for the homozygous case (for brevity not all 16 rows of the table are shown).
+
+|combination $$\pi$$ |Mix1                |Mix2                |Mix3                |
+|:------------------:|:------------------:|:------------------:|:------------------:|
+|0000                |0.00                |0.00                |0                   |
+|                    |                    |                    |                    |
+|1000                |0.02                |0.01                |0                   |
+|...                 |...                 |...                 |...                 |
+
+### The complex case: both homo and heterozygots
+
+If we want to consider all variants $$v$$ in $$T_{89},T_{90},T_{91},$$ or $$T_{92}$$ we need to distinguish between two cases:
+
+1. $$v\in T_g^\mathrm{hom}$$: grandparent $$g$$ is *homozygous* for variant $$v$$
+1. $$v\in T_g^\mathrm{het}$$: grandparent $$g$$ is *heterozygous* for variant $$v$$
+
+Note that for any grandparent $$g$$ we have $$T_g = T_g^\mathrm{hom} \cup T_g^\mathrm{het}$$ assuming that for all variants in $$T_g$$ the genotype is either homo or heterozygous and not "missing".
+
+Then our notation must be extended so that we distinguish variants for which any grandparent $$g$$ is homo or heterozygous.  Let $$T_g^\mathrm{hom}$$ and $$T_g^\mathrm{het}$$ denote the variants for which $$g$$ is homo and heterozygous, respectively.  Then our combinations and set partitions may be denoted as follows.
+
+$$
+\begin{equation}
+x \in T_{1020} \Leftrightarrow x \in T_{89}^\mathrm{het}, x \notin T_{90}, x \in T_{91}^\mathrm{hom}, x \notin T_{92}
+\end{equation}
+$$
+
+In the present case the number of relevant grandparent combinations is $$3^4 = 81$$ because each of the four grandparent either is homozygous for some variant, or is heterozygous, or lacks the variant.
+
+With this extended notation, again, only the table mosaic allele frequencies change (we have 81 rows in the table now) but the definitions of the precision and recall estimates have the same form.  I re-iterate these here:
+
+Precision and recall estimate given combination $$\pi$$:
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_{w,\pi} &=& \frac{|C_w \cap T_\pi|}{|C_w|} \\
+\widehat{\mathrm{recall}}_{w,\pi} &=& \frac{|C_w \cap T_\pi|}{|T_\pi|}
+\end{eqnarray}
+$$
+
+Precision and recall estimate given the set $$\Pi$$ of combinations
+
+$$
+\begin{eqnarray}
+\widehat{\mathrm{precision}}_{w,\Pi} &=& \frac{|C_w \cap (\bigcup_{\pi \in \Pi} T_\pi)|}{|C_w|} \\
+\widehat{\mathrm{recall}}_{w,\Pi} &=& \frac{|C_w \cap (\bigcup_{\pi \in \Pi} T_\pi)|}{|(\bigcup_{\pi \in \Pi} T_\pi)|}
+\end{eqnarray}
+$$
+
+## The equivalence between Chaggai's truth table and the truth set paritions
+
+Suppose truth set partitions have been obtained for the complex case above (distinguishing homo and heterozygots).
+
+### Chaggai's tables
+
+For each contig in chr1,...chrX, chrY Chaggai made a table whose rows are positions with a SNP in at least one of the grandparents.  Below is an excerpt from the table for chr1.
+
+| contig| position | ref allele | GT: NA12889,...,92 | Mix1 freq: A,C,T,G | Mix2 freq        | Mix3 freq  |
+|-------|----------|------------|--------------------|--------------------|------------------|------------|
+| chr1  | 15922    | A          | AA, AG, AA, AA     | 0.92, 0, 0, 0.08   | 0.96, 0, 0, 0.04 | 1, 0, 0, 0 |
+| chr1  | 15956    | G          | GA, GG, GA, GG     | 0.06, 0, 0, 0.94   | 0.03, 0, 0, 0.97 | 0, 0, 0, 1 |
+| ...   | ...      | ...        | ...                | ...                | ...              | ...        |
+| chr1  | 28563    | A          | AA, AA, GG, GG     | 0.2,  0, 0, 0.8    | 0.1,  0, 0, 0.9  | 0, 0, 0, 1 |
+| ...   | ...      | ...        | ...                | ...                | ...              | ...        |
+| chr1  | 248946407| A          | AG, AA, AA, AA     | 0.98, 0, 0, 0.02   | 0.99, 0, 0, 0.01 | 1, 0, 0, 0 |
+
+The *GT: NA12889,...,92* column indicates the genotype for each grandparent, and comparing these to the ref allele yields the combination $$\pi$$ (or equivalently truth set partition $$T_\pi$$). Note that the allele frequencies for Mix1,..., Mix3 are implied by the genotypes so they can be removed from the table without loss of information.  Inserting $$\pi$$ in a column right to the *GT: NA12889,...,92* column and removing the redundant allele frequencies yields
+
+| contig| position | ref allele | GT: NA12889,...,92 |$$\pi$$            |
+|-------|----------|------------|--------------------|-------------------|
+| chr1  | 15922    | A          | AA, AG, AA, AA     |0100               |
+| chr1  | 15956    | G          | GA, GG, GA, GG     |1010               |
+| ...   | ...      | ...        | ...                |...                |
+| chr1  | 28563    | A          | AA, AA, GG, GG     |0022               |
+| ...   | ...      | ...        | ...                |...                |
+| chr1  | 248946407| A          | AG, AA, AA, AA     |1000               |
+
+The genotype column can be further simplified because some of its information is contained in $$\pi$$:
+
+| contig| position | ref allele | alt allele         |$$\pi$$            |
+|-------|----------|------------|--------------------|-------------------|
+| chr1  | 15922    | A          | G                  |0100               |
+| chr1  | 15956    | G          | A                  |1010               |
+| ...   | ...      | ...        | ...                |...                |
+| chr1  | 28563    | A          | G                  |0022               |
+| ...   | ...      | ...        | ...                |...                |
+| chr1  | 248946407| A          | G                  |1000               |
+
+### Tables based on partitioning: equivalence to Chaggai's tables
+
+The `bcftools isec` tool creates tables of the same form as above except that it creates a separate table for each combination $$\pi$$ or---equivalently--- for each partition $$T_\pi$$.
+
+| contig| position | ref allele | alt allele         |$$\pi = 1000$$     |
+|-------|----------|------------|--------------------|-------------------|
+| chr1  | ...      | ...        | ...                |1000               |
+| ...   | ...      | ...        | ...                |...                |
+| chr1  | 248946407| A          | G                  |1000               |
+| ...   | ...      | ...        | ...                |...                |
+| chrM  | ...      | ...        | ...                |1000               |
+
+| contig| position | ref allele | alt allele         |$$\pi = 0100$$     |
+|-------|----------|------------|--------------------|-------------------|
+| chr1  | 15922    | A          | G                  |0100               |
+| ...   | ...      | ...        | ...                |...                |
+| chrM  | ...      | ...        | ...                |0100               |
+
+This shows that the approach using `bcftools isec` is essentially equivalent to Chaggai's approach.
+
+## Implementation: comparing truth sets to callset $$C_w$$
+
+How can we compare the above tables (Chaggai's or equivalently those obtained with `bcftools isec`) to an input callset $$C_w$$ that is stored in a VCF file?  Given a partition $$T_\pi$$ we need the intersection $$C_w \cap T_\pi$$.
+
+Possible implementations include:
+
+1. looping over variants and checking equality
+   * inefficient because we have two tables so we need two nested loops and inside the loop we need a slow string operation to compare alt alleles
+1. turn truth table and input VCF into a relational database (Andy's idea) or hash arrays in a fast programming language
+   * requires special computer science and programming skills beyond the Chesslab's expertise
+   * memory requirement may be excessive
+1. use `bcftools isec` for 5-way comparisons (Attila's preferred implementation)
+   * for example, if $$\pi = 1020$$ then take $$C_w \cap T_{89}^\mathrm{het} \cap T_{91}^\mathrm{hom} \backslash (T_{90} \cup T_{92})$$
+   * the command is simply `bcftools isec -n~01010 C_w.vcf T_89.het.vcf T_90.vcf T_91.hom.vcf T_92.vcf`
+   * fast, well-tested, well-documented
+   * can perform filtering too
+   * not only SNVs but also indels
+   * 5-way comparisons for SNVs ignoring zygosity have already been performed; see 5-way Venn diagrams in a [recent post]({{ site.baseurl }}{% post_url /projects/bsm/2018-05-09-truth-sets %})
+   * taking zygosity into account requires: truth sets filtered for both hetero and homozygous variants, which is easy with `bcftools view`
+   * the truth tables presented above are not needed

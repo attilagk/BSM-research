@@ -29,6 +29,11 @@ strelka2Germline () {
     inindels=$insnvs
 }
 
+strelka2Germline2s () {
+    insnvs=$indir/$caller/results/variants/variants.vcf.gz
+    inindels=$insnvs
+}
+
 strelka2Somatic () {
     insnvs=$indir/$caller/results/variants/somatic.snvs.vcf.gz
     inindels=$indir/$caller/results/variants/somatic.indels.vcf.gz
@@ -62,6 +67,7 @@ find -L $indir -mindepth 1 -maxdepth 1 -type d | \
         case $caller in
             somaticSniper) somaticSniper;;
             strelka2Germline) strelka2Germline;;
+            strelka2Germline2s) strelka2Germline2s;;
             strelka2Somatic) strelka2Somatic;;
             lofreqSomatic) lofreqSomatic;;
             Tnseq) Tnseq;;

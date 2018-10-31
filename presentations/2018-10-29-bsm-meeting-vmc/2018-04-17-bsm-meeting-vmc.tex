@@ -1,0 +1,354 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, hyperref, color, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+\usepackage{xcolor}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Calling somatic variants with precision}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Guly\'as-Kov\'acs, Chaggai Rosenbluh, Andy Chess}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{VCFs, filtering, combination}
+\normalsize
+Tnseq.Mutect2
+\tiny
+\begin{tabular}{llllllll}
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+\textcolor{blue}{1} &
+\textcolor{blue}{50003788} &
+\textcolor{blue}{0} &
+\textcolor{blue}{A} &
+\textcolor{blue}{G} &
+\textcolor{blue}{0} &
+\textcolor{blue}{t\_lod\_fstar} &
+\textcolor{blue}{...;NLOD=30.4;TLOD=4.62} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50005034} &
+\textcolor{violet}{0} &
+\textcolor{violet}{G} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{t\_lod\_fstar} &
+\textcolor{violet}{...;NLOD=33.27;TLOD=4.51} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50007349} &
+\textcolor{violet}{0} &
+\textcolor{violet}{C} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{PASS} &
+\textcolor{violet}{...;NLOD=23.43;TLOD=10.97} \\
+\textcolor{blue}{1} &
+\textcolor{blue}{50008565} &
+\textcolor{blue}{0} &
+\textcolor{blue}{C} &
+\textcolor{blue}{A} &
+\textcolor{blue}{0} &
+\textcolor{blue}{PASS} &
+\textcolor{blue}{...;NLOD=7.69;TLOD=8.26} \\
+% \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+\end{tabular}
+\vfill
+\normalsize
+strelka2Somatic
+\tiny
+\begin{tabular}{llllllll}
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+\textcolor{red}{1} &
+\textcolor{red}{50003323} &
+\textcolor{red}{0} &
+\textcolor{red}{A} &
+\textcolor{red}{G} &
+\textcolor{red}{0} &
+\textcolor{red}{LowEVS} &
+\textcolor{red}{...;DP=274;MQ=59.86;...;SomaticEVS=0} \\
+\textcolor{red}{1} &
+\textcolor{red}{50003455} &
+\textcolor{red}{0} &
+\textcolor{red}{C} &
+\textcolor{red}{T} &
+\textcolor{red}{0} &
+\textcolor{red}{LowEVS} &
+\textcolor{red}{...;DP=226;MQ=59.9;...;SomaticEVS=0.65} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50005034} &
+\textcolor{violet}{0} &
+\textcolor{violet}{G} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{PASS} &
+\textcolor{violet}{...;DP=278;MQ=59.95;...;SomaticEVS=9.04} \\
+\textcolor{violet}{1} &
+\textcolor{violet}{50007349} &
+\textcolor{violet}{0} &
+\textcolor{violet}{C} &
+\textcolor{violet}{T} &
+\textcolor{violet}{0} &
+\textcolor{violet}{LowEVS} &
+\textcolor{violet}{...;DP=192;MQ=59.88;...;SomaticEVS=4.19} \\
+% \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+\end{tabular}
+% ##INFO=<ID=SomaticEVS,Number=1,Type=Float,Description="Somatic Empirical
+% Variant Score (EVS) expressing the phred-scaled probability of thecall being
+% a false positive observation.">
+\normalsize
+
+\includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
+\end{frame}
+
+\begin{frame}{}
+\includegraphics{/home/attila/figures/by-me/var-calling-workflows/var-calling-workflows.pdf}
+\vfill
+{\onslide<2>
+{\large If the \alert{true variants} were known...}
+}
+\begin{itemize}
+\item<2> known precision and sensitivity for \alert{callset \(i\)}
+\item<2> adjust filter \(i\) to a given precision before merging \alert{callset \(i\)} into combined \alert{callset}
+\item<2> FDR control
+%\item<2> tune data generation
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Approaches to true variants}
+\begin{enumerate}
+\item \textit{a posteriori} validation of calls
+\item simulated sequence data
+\item gold standard DNA  
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
+\begin{center}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1\textwidth]{figures/from-others/ceph-utah-pedigree-1463.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\small
+{\onslide<1>
+\begin{tabular}{cccc}
+genome & mix1 & mix2 & mix3\\
+\hline
+NA12889 & 4 & 2 & 0\\
+NA12891 & 8 & 4 & 0\\
+NA12890 & 16 & 8 & 0\\
+NA12892 & 72 & 86 & 100\\
+\hline
+total & 100 & 100 & 100\\
+\end{tabular}
+}
+\vfill
+{\onslide<2->
+\begin{tabular}{cc}
+case:control & utility \\
+\hline
+\hline
+mix1:mix3 & later somatic mut. \\
+mix2:mix3 & later somatic mut. \\
+\hline
+mix1:mix1 & early somatic mut. \\
+mix2:mix2 & early somatic mut. \\
+\hline
+mix3:mix3 & false calls \\
+\end{tabular}
+}
+\end{column}
+\end{columns}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\includegraphics[width=1\textwidth]{figures/from-others/human-embryogenesis-wikipedia.png}
+\end{frame}
+
+\begin{frame}<1>[label=5concordance]{5 callers on benchmark mix1:mix3}
+%{Partition sizes}
+\begin{itemize}
+\item<1-> all calls:
+\includegraphics<1->[width=0.5\textwidth]{figures/2018-04-08-call-set-concordance/venn-benchmark-wgs-snvs-1.pdf}
+\includegraphics<1->[width=0.4\textwidth]{figures/2018-04-08-call-set-concordance/part-sizes-wgs-benchmark-1.pdf}
+\item<2> true calls?
+\item<2> false calls?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tnseq: a faster reimplementation of GATK Mutect2}{Product of
+Sentieon---license?}
+\includegraphics[width=1.0\columnwidth]{figures/2018-02-22-ref-tissue-proj-testdata/tnseq-gatk-mutect2-runtime-1.pdf}
+\end{frame}
+
+\againframe<1>{5concordance}
+
+\begin{frame}{Lower concordance for common sample}
+\includegraphics[width=0.9\textwidth]{figures/2018-04-08-call-set-concordance/part-sizes-wgs-1.pdf}
+\end{frame}
+
+%\begin{frame}{5 unfiltered SNV call sets for the common sample}
+%\begin{center}
+%\includegraphics[height=0.8\textheight]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
+%\end{center}
+%\end{frame}
+
+\begin{frame}{VariantMetaCaller}{G\'ezsi et al 2015 BMC Genomics}
+
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}{unfiltered call sets}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/symmetrical-5-set-venn-diagram.png}
+\end{column}
+
+\begin{column}{0.6\textwidth}{VariantMetaCaller}
+\small
+\begin{itemize}
+\item<1-> assumption 
+\((A\cup ...\cup E) \cap \{\text{true calls\}} = \emptyset\)
+\(ABCDE \cap \{\text{false calls\}} = \emptyset\)
+%\item<2> assumption \\
+%\(A\cup B\cup C\cup D\cup E \subset \{\text{false calls\}}\)
+%\(ABCDE \subset \{\text{true calls\}}\)
+\item<1-> optimal \alert{soft} filtering
+\begin{enumerate}
+\item<1-> estimate precision for each call within each call set % of variant calling pipelines
+\item<1-> above given precision (\(1-\mathrm{FDR}\)) retain calls
+\item<1-> max.~sensitivity in combined call set
+\end{enumerate}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Support for assumptions}{Simulated germline
+variants, G\'ezsi et al 2015 BMC Genomics}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{true calls}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2b.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}{false calls}
+
+\includegraphics[width=1\columnwidth]{figures/from-others/vmc-fig2c.png}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Support for assumptions}{Medulloblastoma
+somatic SNVs, Alioto et al 2015 Nat Comms}{}
+GOLD: curated gold standard, \(314\times
+: 272\times\)
+coverage
+
+\includegraphics[width=1\textwidth]{figures/from-others/alioto-2015-nat-comm.png}
+\end{frame}
+
+\againframe<2>{5concordance}
+
+\begin{frame}{Our benchmark study will reveal...}
+...for each caller \(+\) default filter:
+\begin{itemize}
+\item optimal case:control coverage ratio 
+\item overall precision/sensitivity (P/S)
+\item P/S for a given variant allele frequency 
+\end{itemize}
+\vfill
+...for VariantMetaCaller:
+\begin{itemize}
+\item how well assumptions hold
+\item improvement in terms of P/S
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Further info}
+\begin{itemize}
+\item \alert{my lab notebook} \\
+\emph{BSM Chess Lab}
+https://www.synapse.org/#!Synapse:syn12119642
+\item \alert{source code} \\
+\emph{mssm-attila-bsm} and \emph{mssm-attila-bin} on GitHub \\
+https://github.com/bsmn/mssm-attila-bsm/tree/master/notebook 
+\item<2> Thanks. Questions? 
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
+
+
+
+
+\begin{frame}{Illumina sequencing---coverage}
+\begin{center}
+\includegraphics[height=0.9\textheight]{figures/2018-03-12-ceph-alignment-stats/coverage-common-sample-benchmark-1.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Limitation: run time}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{common sample}
+% 2018-02-22-ref-tissue-proj-testdata/runtime-length-log-1.pdf
+\includegraphics[width=1.0\columnwidth]{figures/2018-02-22-ref-tissue-proj-testdata/runtime-length-log-1.pdf}
+\end{column}
+\begin{column}{0.5\textwidth}{benchmark}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Limitation: indels}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}{SNVs: 5 callers}
+
+\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}{indels: only 3 callers}
+
+\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-indels-1.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
