@@ -17,8 +17,8 @@
 
 % beamer styles
 \mode<presentation>{
-\usetheme{Warsaw}
-%\usetheme{Antibes}
+%\usetheme{Warsaw}
+\usetheme{Pittsburgh}
 \usecolortheme{beaver}
 %\usecolortheme{seahorse}
 %\usefonttheme{structureitalicserif}
@@ -42,8 +42,15 @@
 
 \maketitle
 
-\begin{frame}{Schizophrenia genetics}
+\section{Introduction}
 
+\begin{frame}{Schizophrenia genetics}
+\begin{itemize}
+\item GWAS
+\item highly complex 
+\item de novo mutations
+\item somatic mutations?
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Our workflow}
@@ -70,7 +77,7 @@ muscle sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 \item<4-> \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 {machine learning} (2.5,0); \texttt{VariantMetaCaller.vcf}
 \begin{itemize}
-\item precision-based filtering
+\item precision-based filtering; Gezsi et al 2015 BMC Genomics
 \end{itemize}
 \end{enumerate}
 \end{frame}
@@ -249,6 +256,12 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \item remove calls below that rank 
 \end{itemize}
 \end{enumerate}
+\end{frame}
+
+\section{Results}
+
+\begin{frame}{Common sample}
+
 \end{frame}
 
 \end{document}
