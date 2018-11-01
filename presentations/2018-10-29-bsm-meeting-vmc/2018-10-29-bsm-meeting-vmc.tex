@@ -82,6 +82,145 @@ muscle sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 \end{enumerate}
 \end{frame}
 
+\begin{frame}{Number of calls depends on caller and data set}
+TODO: make filtered version
+
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[width=0.9\columnwidth]{figures/call-set-size-snvs-1-MSSM_106.pdf}
+%\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2.pdf}
+\end{column}
+
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2-cs-benchmark.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}<1>[label=hardfilterlimit]{Limitations of hard filters}
+\begin{enumerate}
+\item<1-> unknown precision \(\Rightarrow\) callers not comparable
+\begin{itemize}
+\item<3-> labeled benchmark data: true precision \& recall
+\item<4-> machine learning: estimated precision
+\end{itemize}
+\item<2-> discards info in the interdependence of annotations
+\begin{itemize}
+\item<4-> machine learning
+\end{itemize}
+\end{enumerate}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+\(j=1\)\\
+TNseq.Mutect2
+\end{center}
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {TLOD---neuronal sample} (B);
+\path (A) -- node [below] {NLOD---muscle sample} (D);
+\end{tikzpicture}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+...
+\end{center}
+
+\end{column}
+
+\begin{column}{0.33\textwidth}
+
+\begin{center}
+\(j=5\) \\
+strelka2Somatic
+\end{center}
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {SomaticEVS} (B);
+\path (A) -- node [below] {DP---depth} (D);
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Callsets in precision-recall space}
+\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
+\end{frame}
+
+\againframe<2->{hardfilterlimit}
+
+\begin{frame}{Benchmark experiment}
+
+labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{frame}
+
+\begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
+\begin{center}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1\textwidth]{figures/from-others/ceph-utah-pedigree-1463.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\small
+{\onslide<1>
+\begin{tabular}{cccc}
+genome & mix1 & mix2 & mix3\\
+\hline
+NA12889 & 4 & 2 & 0\\
+NA12891 & 8 & 4 & 0\\
+NA12890 & 16 & 8 & 0\\
+NA12892 & 72 & 86 & 100\\
+\hline
+total & 100 & 100 & 100\\
+\end{tabular}
+}
+\vfill
+{\onslide<2->
+\begin{tabular}{cc}
+case:control & utility \\
+\hline
+\hline
+mix1:mix3 & later somatic mut. \\
+mix2:mix3 & later somatic mut. \\
+\hline
+mix1:mix1 & early somatic mut. \\
+mix2:mix2 & early somatic mut. \\
+\hline
+mix3:mix3 & false calls \\
+\end{tabular}
+}
+\end{column}
+\end{columns}
+\end{center}
+\end{frame}
+
+\begin{frame}{Machine learning: VariantMetaCaller}
+\includegraphics[width=1\textwidth]{figures/from-others/vmc-fig1.png}
+
+{\tiny Gezsi et al 2015 BMC Genomics}
+\end{frame}
+
 \begin{frame}
 \input{two-vcfs.tex}
 
@@ -150,7 +289,7 @@ strelka2Somatic
 \end{columns}
 \end{frame}
 
-\begin{frame}{Support Vector Machine classifier}% of true and false positives}
+\begin{frame}{VariantMetaCaller trains support vector machines (SVMs)}% of true and false positives}
 \begin{columns}[t]
 \begin{column}{0.45\textwidth}
 
@@ -260,23 +399,6 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 
 \section{Results}
 
-\begin{frame}{Number of calls depends on caller and data set}
-TODO: make filtered version
-
-\begin{columns}[t]
-\begin{column}{0.4\textwidth}
-
-\includegraphics[width=0.9\columnwidth]{figures/call-set-size-snvs-1-MSSM_106.pdf}
-%\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2.pdf}
-\end{column}
-
-\begin{column}{0.6\textwidth}
-
-\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2-cs-benchmark.pdf}
-\end{column}
-\end{columns}
-\end{frame}
-
 \begin{frame}{Concordance of calls}{Common sample}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -308,55 +430,6 @@ common sample
 \includegraphics[width=1.0\columnwidth]{figures/prec-rank1-benchmark.pdf}
 \end{column}
 \end{columns}
-\end{frame}
-
-\begin{frame}{Benchmark experiment}
-
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
-\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
-\end{frame}
-
-\begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
-\begin{center}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-
-\includegraphics[width=1\textwidth]{figures/from-others/ceph-utah-pedigree-1463.png}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-
-\small
-{\onslide<1>
-\begin{tabular}{cccc}
-genome & mix1 & mix2 & mix3\\
-\hline
-NA12889 & 4 & 2 & 0\\
-NA12891 & 8 & 4 & 0\\
-NA12890 & 16 & 8 & 0\\
-NA12892 & 72 & 86 & 100\\
-\hline
-total & 100 & 100 & 100\\
-\end{tabular}
-}
-\vfill
-{\onslide<2->
-\begin{tabular}{cc}
-case:control & utility \\
-\hline
-\hline
-mix1:mix3 & later somatic mut. \\
-mix2:mix3 & later somatic mut. \\
-\hline
-mix1:mix1 & early somatic mut. \\
-mix2:mix2 & early somatic mut. \\
-\hline
-mix3:mix3 & false calls \\
-\end{tabular}
-}
-\end{column}
-\end{columns}
-\end{center}
 \end{frame}
 
 \end{document}
