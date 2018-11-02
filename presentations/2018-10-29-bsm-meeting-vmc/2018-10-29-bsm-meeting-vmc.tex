@@ -161,15 +161,61 @@ strelka2Somatic
 \end{frame}
 
 \begin{frame}{Callsets in precision-recall space}
+TODO: idealized precision-recall figure
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{center}
+idealistic
+
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {precision} (B);
+\path (A) -- node [below] {recall} (D);
+\end{tikzpicture}
+\end{center}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{center}
+realistic
+
+\begin{tikzpicture}
+\footnotesize
+%\draw (1in,0) -- (0,0) -- (0,1in);
+\node (A) at (0in,0in) {};
+\node (B) at (0in,1.2in) {};
+\node (C) at (1.2in,1.2in) {};
+\node (D) at (1.2in,0in) {};
+\draw (A) rectangle (C);
+\path (A) -- node [rotate=90, anchor=south] {precision} (B);
+\path (A) -- node [below] {recall} (D);
+\end{tikzpicture}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Callsets in precision-recall space}
 \includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
 \end{frame}
 
 \againframe<2->{hardfilterlimit}
 
 \begin{frame}{Benchmark experiment}
-
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\begin{center}
+labeled callset \(j\): \(\{\overbrace{y_{ij}}^\text{label},
 \overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{center}
+\vfill
+
+\input{two-vcfs-black.tex}
 \end{frame}
 
 \begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
