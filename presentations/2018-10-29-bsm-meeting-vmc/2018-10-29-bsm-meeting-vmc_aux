@@ -48,32 +48,48 @@
 \@writefile{nav}{\headcommand {\beamer@framepages {14}{16}}}
 \@writefile{nav}{\headcommand {\slideentry {1}{0}{8}{17/17}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {17}{17}}}
+\newlabel{benchmark<1>}{{10}{18}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {benchmark<1>}{18}}
+\newlabel{benchmark}{{10}{18}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {benchmark}{18}}
+\newlabel{benchmark<2>}{{10}{19}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {benchmark<2>}{19}}
 \@writefile{nav}{\headcommand {\slideentry {1}{0}{9}{18/19}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {18}{19}}}
 \@writefile{nav}{\headcommand {\slideentry {1}{0}{10}{20/20}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {20}{20}}}
+\newlabel{precrecall<1>}{{12}{21}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall<1>}{21}}
+\newlabel{precrecall}{{12}{21}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall}{21}}
 \@writefile{nav}{\headcommand {\slideentry {1}{0}{11}{21/21}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {21}{21}}}
 \@writefile{nav}{\headcommand {\slideentry {1}{0}{12}{22/22}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {22}{22}}}
-\@writefile{nav}{\headcommand {\slideentry {1}{0}{13}{23/23}{}{0}}}
-\@writefile{nav}{\headcommand {\beamer@framepages {23}{23}}}
-\@writefile{nav}{\headcommand {\slideentry {1}{0}{14}{24/24}{}{0}}}
-\@writefile{nav}{\headcommand {\beamer@framepages {24}{24}}}
-\@writefile{nav}{\headcommand {\slideentry {1}{0}{15}{25/25}{}{0}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{13}{23/24}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {23}{24}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{14}{25/25}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {25}{25}}}
-\@writefile{nav}{\headcommand {\slideentry {1}{0}{16}{26/26}{}{0}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{15}{26/26}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {26}{26}}}
-\@writefile{toc}{\beamer@sectionintoc {2}{Results}{27}{0}{2}}
-\@writefile{nav}{\headcommand {\beamer@sectionpages {2}{26}}}
-\@writefile{nav}{\headcommand {\beamer@subsectionpages {2}{26}}}
-\@writefile{nav}{\headcommand {\sectionentry {2}{Results}{27}{Results}{0}}}
-\@writefile{nav}{\headcommand {\slideentry {2}{0}{1}{27/27}{}{0}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{16}{27/27}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {27}{27}}}
-\@writefile{nav}{\headcommand {\slideentry {2}{0}{2}{28/28}{}{0}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{17}{28/28}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {28}{28}}}
-\@writefile{nav}{\headcommand {\beamer@partpages {1}{28}}}
-\@writefile{nav}{\headcommand {\beamer@subsectionpages {27}{28}}}
-\@writefile{nav}{\headcommand {\beamer@sectionpages {27}{28}}}
-\@writefile{nav}{\headcommand {\beamer@documentpages {28}}}
-\@writefile{nav}{\headcommand {\gdef \inserttotalframenumber {19}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{18}{29/29}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {29}{29}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{19}{30/30}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {30}{30}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{20}{31/32}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {31}{32}}}
+\newlabel{precrecall<1>}{{22}{33}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall<1>}{33}}
+\newlabel{precrecall}{{22}{33}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall}{33}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{21}{33/33}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {33}{33}}}
+\@writefile{nav}{\headcommand {\beamer@partpages {1}{33}}}
+\@writefile{nav}{\headcommand {\beamer@subsectionpages {2}{33}}}
+\@writefile{nav}{\headcommand {\beamer@sectionpages {2}{33}}}
+\@writefile{nav}{\headcommand {\beamer@documentpages {33}}}
+\@writefile{nav}{\headcommand {\gdef \inserttotalframenumber {22}}}
