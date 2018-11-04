@@ -111,102 +111,56 @@ TODO: make filtered version
 \item<4-> machine learning
 \end{itemize}
 \end{enumerate}
-\begin{columns}[t]
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-\(j=1\)\\
-TNseq.Mutect2
-\end{center}
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {TLOD---neuronal sample} (B);
-\path (A) -- node [below] {NLOD---muscle sample} (D);
-\end{tikzpicture}
-\end{column}
-
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-...
-\end{center}
-
-\end{column}
-
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-\(j=5\) \\
-strelka2Somatic
-\end{center}
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {SomaticEVS} (B);
-\path (A) -- node [below] {DP---depth} (D);
-\end{tikzpicture}
-\end{column}
-\end{columns}
 \end{frame}
 
-\begin{frame}{Callsets in precision-recall space}
-TODO: idealized precision-recall figure
-
+\begin{frame}{Controlling precision}
+\[\mathrm{precision} = 1 - \mathrm{FDR}\]
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 \begin{center}
-idealistic
-
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {precision} (B);
-\path (A) -- node [below] {recall} (D);
-\end{tikzpicture}
+without control
 \end{center}
+\includegraphics<1-2>[width=1\columnwidth]{figures/by-me/precision-recall/pr-realistic.pdf}
 \end{column}
 
 \begin{column}{0.5\textwidth}
 \begin{center}
-realistic
-
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {precision} (B);
-\path (A) -- node [below] {recall} (D);
-\end{tikzpicture}
+\only<2>{with control }
 \end{center}
+\includegraphics<2>[width=1\columnwidth]{figures/by-me/precision-recall/pr.pdf}
 \end{column}
 \end{columns}
-\end{frame}
-
-\begin{frame}{Callsets in precision-recall space}
-\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
 \end{frame}
 
 \againframe<2->{hardfilterlimit}
+
+\begin{frame}
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+sep=3.0pt] {} (1,0);true positive
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+sep=2.5pt] {} (1,0);false positive
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{center}
+\only<1>{calls}
+\only<2->{\emph{in}dependent filters}
+\end{center}
+
+\includegraphics<1>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq.pdf}
+
+\includegraphics<2->[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq-hardfilter.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{center}
+\only<3>{\emph{inter}dependent filters}
+\end{center}
+
+\includegraphics<3>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq-svm.pdf}
+\end{column}
+\end{columns}
+\end{frame}
 
 \begin{frame}{Benchmark experiment}
 \begin{center}
@@ -261,10 +215,26 @@ mix3:mix3 & false calls \\
 \end{center}
 \end{frame}
 
-\begin{frame}{Machine learning: VariantMetaCaller}
-\includegraphics[width=1\textwidth]{figures/from-others/vmc-fig1.png}
+\begin{frame}{Callsets in precision-recall space}
+\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
+\end{frame}
 
-{\tiny Gezsi et al 2015 BMC Genomics}
+\begin{frame}{Machine learning}{VariantMetaCaller; Gezsi et al 2015 BMC Genomics}
+\begin{enumerate}
+\item annotation selection
+\begin{itemize}
+\item evaluate performance using benchmark; repeat
+\end{itemize}
+\item training SVMs
+\begin{itemize}
+\end{itemize}
+\item prediction  
+\begin{itemize}
+\item probabilistic filtering (precision/FDR)
+\item optimal combination of callsets
+\end{itemize}
+\end{enumerate}
+\includegraphics[width=0.7\textwidth]{figures/from-others/vmc-fig1.png}
 \end{frame}
 
 \begin{frame}
@@ -274,8 +244,7 @@ mix3:mix3 & false calls \\
 \end{frame}
 
 \begin{frame}{VCF annotations for classification (idealized figures)}
-\begin{center}
-labeled set \(j\): \(\{\overbrace{y_{i}}^\text{label},
+labeled callset \(j\): \(\{\overbrace{y_{i}}^\text{label},
 \overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
 {\small
 
@@ -285,7 +254,6 @@ sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
 \tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
 sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
 }
-\end{center}
 \begin{columns}[t]
 \begin{column}{0.33\textwidth}
 
