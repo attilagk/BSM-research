@@ -48,10 +48,10 @@
 
 \includegraphics<1>[width=1.0\textwidth]{figures/from-others/ripke2014nature-fig1.png}
 
-\only<1>{\tiny Nature.~2014 24;511:421-7}
+\only<1>{\tiny Ripke et al Nature.~2014}
 
 \includegraphics<2>[width=0.7\textwidth]{figures/from-others/ripke2013natgen-fig1a.jpg}
-\only<2>{\tiny Nat Genet.~2013 45:1150-9}
+\only<2>{\tiny Ripke et al Nat Genet.~2013}
 \end{frame}
 
 \begin{frame}{Our workflow}
@@ -136,6 +136,8 @@ without control
 \againframe<2>{hardfilterlimit}
 
 \begin{frame}
+\textbf{unfiltered VCF}
+
 \tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
 sep=3.0pt] {} (1,0);true positive
 
@@ -220,7 +222,7 @@ mix3:mix3 & false calls \\
 \end{center}
 \end{frame}
 
-\begin{frame}{Impact of alternative allele frequency (admixture)}
+\begin{frame}{Impact of alternative allele frequency}
 \includegraphics[width=1\textwidth]{figures/from-others/chaggai-recall-aaf.png}
 \end{frame}
 
@@ -266,9 +268,16 @@ mix3:mix3 & false calls \\
 
 \begin{frame}{VCF annotations for classification (idealized figures)}
 \begin{columns}[t]
-\begin{column}{0.5\textwidth}
-labeled callset \(j\): \(\{\overbrace{y_{i}}^\text{label},
+\begin{column}{0.3\textwidth}
+
+partially labeled, unfiltered, callset \(j\):
+
+\(\{\overbrace{y_{i}}^\text{label},
 \overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{column}
+
+\begin{column}{0.7\textwidth}
+
 {\small
 
 \tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
@@ -276,7 +285,14 @@ sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
 
 \tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
 sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, diamond, inner
+sep=3.0pt] {} (1,0); unlabeled: \(y_{ij}=?\)
 }
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
 \end{column}
 
 \begin{column}{0.5\textwidth}
@@ -289,7 +305,7 @@ sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
 \(j=1\)
 \end{center}
 
-\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2.pdf}
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-unlabeled.pdf}
 \end{column}
 
 \begin{column}{0.33\textwidth}
@@ -361,7 +377,7 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \(j=1\)
 \end{center}
 
-\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm.pdf}
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm-unlabeled.pdf}
 \end{column}
 
 \begin{column}{0.33\textwidth}
@@ -425,7 +441,7 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \item (update annotations)
 \item (\(\cdots\))
 \end{enumerate}
-\item apply to ``real'' data
+\item apply to CommonMind data
 \begin{enumerate}
 \item train SVMs
 \item rank and filter calls
@@ -462,17 +478,17 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \begin{itemize}
 \item 5 callers applied to paired sample data
 \item benchmark experiment: labeled callsets
-\begin{itemize}
-\item performance: precision--recall
-\item caller's relative performance depended on alt.~allele freq.
-\item callers aren't directly comparable (default filters)
-\end{itemize}
+%\begin{itemize}
+%\item performance: precision--recall
+%\item caller's relative performance depended on alt.~allele freq.
+%\item callers aren't directly comparable (default filters)
+%\end{itemize}
 \item probabilistic combination and filtering
-\begin{itemize}
-\item \texttt{VariantMetaCaller} trains support vector machines on VCF annotations
-\item manual selection of annotations is in progress 
-\item precision/FDR control 
-\end{itemize}
+%\begin{itemize}
+%\item \texttt{VariantMetaCaller} trains support vector machines on VCF annotations
+%\item manual selection of annotations is in progress 
+%\item precision/FDR control 
+%\end{itemize}
 \end{itemize}
 \end{frame}
 
