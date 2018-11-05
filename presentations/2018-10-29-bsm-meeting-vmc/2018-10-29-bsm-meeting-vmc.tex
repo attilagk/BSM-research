@@ -19,7 +19,7 @@
 \mode<presentation>{
 \usetheme{Singapore}
 %\usetheme{Pittsburgh}
-\usecolortheme{dove}
+\usecolortheme{orchid}
 %\usecolortheme{seahorse}
 %\usefonttheme{structureitalicserif}
 \setbeamercovered{transparent}
@@ -133,7 +133,7 @@ without control
 \end{columns}
 \end{frame}
 
-\againframe<2->{hardfilterlimit}
+\againframe<2>{hardfilterlimit}
 
 \begin{frame}
 \tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
@@ -155,13 +155,17 @@ sep=2.5pt] {} (1,0);false positive
 
 \begin{column}{0.5\textwidth}
 \begin{center}
-\only<3>{interdependent filters}
+\only<3>{our approach}
 \end{center}
 
 \includegraphics<3>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm.pdf}
 \end{column}
 \end{columns}
 \end{frame}
+
+\againframe<4->{hardfilterlimit}
+
+\section{Benchmark}
 
 \begin{frame}{Benchmark experiment}
 \begin{center}
@@ -224,22 +228,24 @@ mix3:mix3 & false calls \\
 \includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
 \end{frame}
 
+\section{Machine Learning}
+
 \begin{frame}{Machine learning}{VariantMetaCaller; Gezsi et al 2015 BMC Genomics}
-\begin{enumerate}
-\item annotation selection
-\begin{itemize}
-\item evaluate performance using benchmark; repeat
-\end{itemize}
-\item training SVMs
-\begin{itemize}
-\end{itemize}
-\item prediction  
-\begin{itemize}
-\item probabilistic filtering (precision/FDR)
-\item optimal combination of callsets
-\end{itemize}
-\end{enumerate}
-\includegraphics[width=0.7\textwidth]{figures/from-others/vmc-fig1.png}
+%\begin{enumerate}
+%\item annotation selection
+%\begin{itemize}
+%\item evaluate performance using benchmark; repeat
+%\end{itemize}
+%\item training SVMs
+%\begin{itemize}
+%\end{itemize}
+%\item prediction  
+%\begin{itemize}
+%\item probabilistic filtering (precision/FDR)
+%\item optimal combination of callsets
+%\end{itemize}
+%\end{enumerate}
+\includegraphics[width=0.8\textwidth]{figures/from-others/vmc-fig1.png}
 \end{frame}
 
 \begin{frame}
