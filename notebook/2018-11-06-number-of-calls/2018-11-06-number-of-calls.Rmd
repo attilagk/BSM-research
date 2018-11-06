@@ -2,10 +2,10 @@
 layout: default
 #title: 
 tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
-#featimg: "venn-common-sample-wgs-snvs-1.png"
+featimg: "all-1.png"
 ---
 
-Hello, World!
+Number of calls in VCF files for various sample pairs, variant types (SNVs or indels), filter setting (unfiltered or PASS: default-filtered), and callers.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(lattice)
@@ -17,17 +17,20 @@ lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
 ```
 
-Import data
+Import, engineer and plot data.
 
 ```{r}
 csv <- "~/projects/bsm/results/2018-11-06-number-of-calls/numcalls.csv"
 df <- read.csv(csv)
-df$caller <- factor(gsub("Tnseq", "TNseq", df$caller))
+df$caller <- factor(gsub("Tnseq", "TNseq.Mutect2", df$caller))
 df$vartype <- factor(df$vartype, levels = c("snvs", "indels"), ordered = TRUE)
 ```
 
-```{r snvs}
-bc <- barchart(caller ~ numcalls | sample + vartype, data = df, groups = filter, subset = caller != "TNseq-v201711", xlab = "number of calls")
+```{r all}
+bc <- barchart(caller ~ numcalls | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "number of calls")
 print(bc)
+```
+
+```{r snvs, fig.asp=0.7}
 print(bc[2:3, 1])
 ```
