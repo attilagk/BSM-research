@@ -78,26 +78,13 @@ muscle sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 \item<4-> \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 {machine learning} (2.5,0); \texttt{VariantMetaCaller.vcf}
 \begin{itemize}
-\item precision-based filtering; Gezsi et al 2015 BMC Genomics
+\item probabilistic combination and filtering
 \end{itemize}
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Number of calls depends on caller and data set}
-TODO: make filtered version
-
-\begin{columns}[t]
-\begin{column}{0.4\textwidth}
-
-\includegraphics[width=0.9\columnwidth]{figures/call-set-size-snvs-1-MSSM_106.pdf}
-%\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2.pdf}
-\end{column}
-
-\begin{column}{0.6\textwidth}
-
-\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2-cs-benchmark.pdf}
-\end{column}
-\end{columns}
+\begin{frame}{Number of calls depends on caller (and data set)}
+\includegraphics[height=0.9\textheight]{figures/call-set-size-snvs-1-MSSM_106.pdf}
 \end{frame}
 
 \begin{frame}<1>[label=hardfilterlimit]{Limitations of traditional filtering}
@@ -433,7 +420,7 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 
 \begin{frame}{\texttt{VariantMetaCaller} workflow}
 \begin{enumerate}
-\item configure on benchmark data
+\item<2> configure on benchmark data
 \begin{enumerate}
 \item inspect \& select annotations---manual
 \item train SVMs---automatic
@@ -443,7 +430,7 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \end{enumerate}
 \item apply to CommonMind data
 \begin{enumerate}
-\item train SVMs
+\item train SVMs given selected annotations
 \item rank and filter calls
 \end{enumerate}
 \end{enumerate} 
