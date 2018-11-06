@@ -90,16 +90,18 @@
 \@writefile{nav}{\headcommand {\beamer@framepages {30}{31}}}
 \@writefile{nav}{\headcommand {\slideentry {3}{0}{9}{32/33}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {32}{33}}}
-\newlabel{precrecall<1>}{{23}{34}{Machine Learning}{Doc-Start}{}}
-\@writefile{snm}{\beamer@slide {precrecall<1>}{34}}
-\newlabel{precrecall}{{23}{34}{Machine Learning}{Doc-Start}{}}
-\@writefile{snm}{\beamer@slide {precrecall}{34}}
 \@writefile{nav}{\headcommand {\slideentry {3}{0}{10}{34/34}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {34}{34}}}
+\newlabel{precrecall<1>}{{24}{35}{Machine Learning}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall<1>}{35}}
+\newlabel{precrecall}{{24}{35}{Machine Learning}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall}{35}}
 \@writefile{nav}{\headcommand {\slideentry {3}{0}{11}{35/35}{}{0}}}
 \@writefile{nav}{\headcommand {\beamer@framepages {35}{35}}}
-\@writefile{nav}{\headcommand {\beamer@partpages {1}{35}}}
-\@writefile{nav}{\headcommand {\beamer@subsectionpages {22}{35}}}
-\@writefile{nav}{\headcommand {\beamer@sectionpages {22}{35}}}
-\@writefile{nav}{\headcommand {\beamer@documentpages {35}}}
-\@writefile{nav}{\headcommand {\gdef \inserttotalframenumber {24}}}
+\@writefile{nav}{\headcommand {\slideentry {3}{0}{12}{36/36}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {36}{36}}}
+\@writefile{nav}{\headcommand {\beamer@partpages {1}{36}}}
+\@writefile{nav}{\headcommand {\beamer@subsectionpages {22}{36}}}
+\@writefile{nav}{\headcommand {\beamer@sectionpages {22}{36}}}
+\@writefile{nav}{\headcommand {\beamer@documentpages {36}}}
+\@writefile{nav}{\headcommand {\gdef \inserttotalframenumber {25}}}

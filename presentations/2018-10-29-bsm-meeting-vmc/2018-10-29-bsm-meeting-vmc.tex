@@ -12,7 +12,7 @@
 
 % TikZ
 \usepackage{tikz}
-%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
 %\usetikzlibrary{shapes.geometric,fadings,bayesnet}
 
 % beamer styles
@@ -134,7 +134,7 @@ sep=2.5pt] {} (1,0);false positive
 \begin{column}{0.5\textwidth}
 \begin{center}
 \only<1>{calls}
-\only<2->{traditional}
+\only<2->{traditional filtering}
 \end{center}
 
 \includegraphics<1>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2.pdf}
@@ -144,7 +144,7 @@ sep=2.5pt] {} (1,0);false positive
 
 \begin{column}{0.5\textwidth}
 \begin{center}
-\only<3>{our approach}
+\only<3>{flexible filtering}
 \end{center}
 
 \includegraphics<3>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm.pdf}
@@ -316,7 +316,7 @@ sep=3.0pt] {} (1,0); unlabeled: \(y_{ij}=?\)
 \end{columns}
 \end{frame}
 
-\begin{frame}{Filtering with support vector machines (SVMs)}% of true and false positives}
+\begin{frame}{Support vector machine (SVM)}% of true and false positives}
 \begin{columns}[t]
 \begin{column}{0.45\textwidth}
 
@@ -326,18 +326,18 @@ sep=3.0pt] {} (1,0); unlabeled: \(y_{ij}=?\)
 \end{column}
 
 \begin{column}{0.55\textwidth}
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
-\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{ij}\)
-{\small
-
-\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
-sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
-
-\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
-sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
-}
-
-\hfill
+%labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+%\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{ij}\)
+%{\small
+%
+%\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+%sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
+%
+%\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+%sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+%}
+%
+%\hfill
 
 SVM classifier \(j\)
 {\small
@@ -388,19 +388,14 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \end{columns}
 \end{frame}
 
-\begin{frame}{Probabilistic soft filtering}
+\begin{frame}{Probabilistic filtering}
 \begin{enumerate}
 \item probability \(P(i) \rightarrow \) rank \(k\)
 \item estimate precision for each \(k=1,...,n\)
 \[
 \mathrm{E}_\mathrm{prec}(k) = \frac{1}{k} \sum_{i=1}^k P(i)
 \] 
-\item
-\begin{itemize}
-\item fix precision (FDR) at desired value
-\item find corresponding rank
-\item remove calls below that rank 
-\end{itemize}
+\item filter at desired precision (i.e.~FDR control)
 \end{enumerate}
 \end{frame}
 
@@ -459,24 +454,83 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \end{columns}
 \end{frame}
 
+\begin{frame}{Selected annotations (preliminary)}
+\begin{itemize}
+\item all callers
+
+\footnotesize
+\(\{\)
+	INFO.BasesToClosestVariant,
+	INFO.EntropyLeft\_7,
+	INFO.EntropyCenter\_7,
+	INFO.EntropyRight\_7,
+	INFO.EntropyLeft\_15,
+	INFO.EntropyCenter\_15,
+	INFO.EntropyRight\_15
+\(\}\)
+\end{itemize}
+\begin{enumerate}
+\normalsize
+\item lofreqSomatic
+
+\footnotesize
+\(\{\)
+    INFO.DP,
+    INFO.AF,
+    INFO.SB,
+    INFO.UQ
+\(\}\)
+\normalsize
+\item strelka2Somatic
+
+\footnotesize
+\(\{\)
+	INFO.ReadPosRankSum,
+	INFO.SomaticEVS
+\(\}\)
+\normalsize
+\item strelka2Germline2s
+
+\footnotesize
+\(\{\)
+	QUAL,
+	INFO.MQ
+\(\}\)
+\normalsize
+\item somaticSniper
+
+\footnotesize
+\(\{\)
+	GENOTYPE.VAQ,
+	GENOTYPE.MQ
+\(\}\)
+\normalsize
+\item TNseq.Mutect2
+
+\footnotesize
+\(\{\)
+	INFO.HCNT,
+	INFO.MAX\_ED
+\(\}\)
+\end{enumerate}
+\end{frame}
+
 \againframe{precrecall}
 
 \begin{frame}{Summary}
-\begin{itemize}
+\begin{enumerate}
 \item 5 callers applied to paired sample data
 \item benchmark experiment: labeled callsets
-%\begin{itemize}
-%\item performance: precision--recall
-%\item caller's relative performance depended on alt.~allele freq.
-%\item callers aren't directly comparable (default filters)
-%\end{itemize}
-\item probabilistic combination and filtering
-%\begin{itemize}
-%\item \texttt{VariantMetaCaller} trains support vector machines on VCF annotations
-%\item manual selection of annotations is in progress 
-%\item precision/FDR control 
-%\end{itemize}
+\begin{itemize}
+\item precision-recall
+\item alternative allele frequency
 \end{itemize}
+\item probabilistic combination and filtering
+\begin{itemize}
+\item complementary VCFs, annotations
+\item support vector machines by \texttt{VariantMetaCaller}
+\end{itemize}
+\end{enumerate}
 \end{frame}
 
 \end{document}
