@@ -25,7 +25,7 @@ getnumcalls() {
     echo $S,$t,$F,$caller,$numcalls
 }
 
-echo "sample,filter,caller,numcalls"
+echo "sample,vartype,filter,caller,numcalls"
 for sample in $samples; do
     for vartype in $vartypes; do
         for filter in $filters; do

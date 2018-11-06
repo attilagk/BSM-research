@@ -1,0 +1,33 @@
+---
+layout: default
+#title: 
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
+#featimg: "venn-common-sample-wgs-snvs-1.png"
+---
+
+Hello, World!
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Import data
+
+```{r}
+csv <- "~/projects/bsm/results/2018-11-06-number-of-calls/numcalls.csv"
+df <- read.csv(csv)
+df$caller <- factor(gsub("Tnseq", "TNseq", df$caller))
+df$vartype <- factor(df$vartype, levels = c("snvs", "indels"), ordered = TRUE)
+```
+
+```{r snvs}
+bc <- barchart(caller ~ numcalls | sample + vartype, data = df, groups = filter, subset = caller != "TNseq-v201711", xlab = "number of calls")
+print(bc)
+print(bc[2:3, 1])
+```
