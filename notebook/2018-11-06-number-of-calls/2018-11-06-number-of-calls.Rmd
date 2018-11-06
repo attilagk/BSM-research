@@ -25,11 +25,12 @@ df <- read.csv(csv)
 df$caller <- factor(gsub("Tnseq", "TNseq", df$caller))
 df$caller <- factor(gsub("TNseq", "TNseq.Mutect2", df$caller))
 df$vartype <- factor(df$vartype, levels = c("snvs", "indels"), ordered = TRUE)
+df$filter <- factor(df$filter, levels = c("unfiltered", "PASS"), ordered = TRUE)
 ```
 
 ```{r all}
-bc <- barchart(caller ~ numcalls | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "number of calls", xlim = c(0, ceiling(max(df$numcalls) / 1e5) * 1e5))
-bc.log <- barchart(caller ~ log10(numcalls) | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "log10 number of calls", xlim = c(0, 7))
+bc <- barchart(caller ~ numcalls | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "number of calls", xlim = c(0, ceiling(max(df$numcalls) / 1e5) * 1e5), auto.key = list(columns = 2))
+bc.log <- barchart(caller ~ log10(numcalls) | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "log10 number of calls", xlim = c(0, 7), auto.key = list(columns = 2))
 print(bc)
 print(bc.log)
 ```
