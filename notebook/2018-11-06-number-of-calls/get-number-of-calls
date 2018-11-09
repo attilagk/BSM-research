@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+callsdir=/big/results/bsm/calls
+
+samples="benchmark-mix1-mix3 common-sample MSSM_106"
+filters=". PASS"
+vartypes="snvs indels"
+
+getnumcalls() {
+    v=$1
+    s=$2
+    t=$3
+    f=$4
+    case $f in
+        .) F=unfiltered;;
+        *) F=$f;;
+    esac
+    case $s in
+        benchmark-mix1-mix3) S=benchmark;;
+        common-sample) S=commonsample;;
+        *) S=$s;;
+    esac
+    caller=`basename $1 .vcf.gz`
+    numcalls=`bcftools view -H $v | wc -l`
+    echo $S,$t,$F,$caller,$numcalls
+}
+
+echo "sample,vartype,filter,caller,numcalls"
+for sample in $samples; do
+    for vartype in $vartypes; do
+        for filter in $filters; do
+            indir=$callsdir/$sample/$vartype/$filter
+            for vcf in $indir/*.vcf.gz; do
+                getnumcalls $vcf $sample $vartype $filter
+            done
+        done
+    done
+done
+
+exit
+
+for vcf in $indir/*.vcf.gz; do
+    getnumcalls $vcf
+done

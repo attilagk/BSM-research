@@ -1,0 +1,41 @@
+---
+layout: default
+#title: 
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
+featimg: "all-1.png"
+---
+
+Number of calls in VCF files for various sample pairs, variant types (SNVs or indels), filter setting (unfiltered or PASS: default-filtered), and callers.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+Import, engineer and plot data.
+
+```{r}
+csv <- "~/projects/bsm/results/2018-11-06-number-of-calls/numcalls.csv"
+df <- read.csv(csv)
+df$caller <- factor(gsub("Tnseq", "TNseq", df$caller))
+df$caller <- factor(gsub("TNseq", "TNseq.Mutect2", df$caller))
+df$vartype <- factor(df$vartype, levels = c("snvs", "indels"), ordered = TRUE)
+df$filter <- factor(df$filter, levels = c("unfiltered", "PASS"), ordered = TRUE)
+```
+
+```{r all}
+bc <- barchart(caller ~ numcalls | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "number of calls", xlim = c(0, ceiling(max(df$numcalls) / 1e5) * 1e5), auto.key = list(columns = 2))
+bc.log <- barchart(caller ~ log10(numcalls) | sample + vartype, data = df, groups = filter, subset = caller != "TNseq.Mutect2-v201711", xlab = "log10 number of calls", xlim = c(0, 7), auto.key = list(columns = 2))
+print(bc)
+print(bc.log)
+```
+
+```{r snvs, fig.asp=0.7}
+print(bc[2:3, 1])
+print(bc.log[2:3, 1])
+```

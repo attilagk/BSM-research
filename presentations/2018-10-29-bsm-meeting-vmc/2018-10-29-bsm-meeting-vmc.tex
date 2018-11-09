@@ -12,14 +12,14 @@
 
 % TikZ
 \usepackage{tikz}
-%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
 %\usetikzlibrary{shapes.geometric,fadings,bayesnet}
 
 % beamer styles
 \mode<presentation>{
-%\usetheme{Warsaw}
-\usetheme{Pittsburgh}
-\usecolortheme{beaver}
+\usetheme{Singapore}
+%\usetheme{Pittsburgh}
+\usecolortheme{orchid}
 %\usecolortheme{seahorse}
 %\usefonttheme{structureitalicserif}
 \setbeamercovered{transparent}
@@ -33,10 +33,10 @@
 %\useoutertheme[]{tree}
 
 % title, etc
-\title{The Main Title Naming Key Concepts}
-\subtitle{A subtitle may be shorter and more technical}
+\title{Probabilistic Combination and Filtering of Callers}
+\subtitle{Benchmark Experiment and Machine Learning}
 \author{Attila Gulyas-Kovacs, Chaggai Rosenbluh, Andy Chess}
-\date{Mount Sinai School of Medicine}
+\date{Chess Lab, Mount Sinai}
 
 \begin{document}
 
@@ -45,12 +45,13 @@
 \section{Introduction}
 
 \begin{frame}{Schizophrenia genetics}
-\begin{itemize}
-\item GWAS
-\item highly complex 
-\item de novo mutations
-\item somatic mutations?
-\end{itemize}
+
+\includegraphics<1>[width=1.0\textwidth]{figures/from-others/ripke2014nature-fig1.png}
+
+\only<1>{\tiny Ripke et al Nature.~2014}
+
+\includegraphics<2>[width=0.7\textwidth]{figures/from-others/ripke2013natgen-fig1a.jpg}
+\only<2>{\tiny Ripke et al Nat Genet.~2013}
 \end{frame}
 
 \begin{frame}{Our workflow}
@@ -77,246 +78,97 @@ muscle sample \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 \item<4-> \tikz[baseline=-0.5ex] \draw[->] (0,0) -- node[above] (A)
 {machine learning} (2.5,0); \texttt{VariantMetaCaller.vcf}
 \begin{itemize}
-\item precision-based filtering; Gezsi et al 2015 BMC Genomics
+\item probabilistic combination and filtering
 \end{itemize}
 \end{enumerate}
 \end{frame}
 
 \begin{frame}
-\input{two-vcfs.tex}
+\includegraphics<1>[height=0.9\textheight]{figures/2018-11-06-number-of-calls/snvs-1.pdf}
 
-\includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
+\includegraphics<2>[height=0.9\textheight]{figures/2018-11-06-number-of-calls/snvs-2.pdf}
 \end{frame}
 
-\begin{frame}{VCF annotations for classification (idealized figures)}
-\begin{center}
-labeled set \(j\): \(\{\overbrace{y_{i}}^\text{label},
-\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
-{\small
-
-\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
-sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
-
-\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
-sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
-}
-\end{center}
-\begin{columns}[t]
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-\(j=1\)\\
-TNseq.Mutect2
-\end{center}
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {TLOD---neuronal sample} (B);
-\path (A) -- node [below] {NLOD---muscle sample} (D);
-\end{tikzpicture}
-\end{column}
-
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-...
-\end{center}
-
-\end{column}
-
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-\(j=5\) \\
-strelka2Somatic
-\end{center}
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {SomaticEVS} (B);
-\path (A) -- node [below] {DP---depth} (D);
-\end{tikzpicture}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Support Vector Machine classifier}% of true and false positives}
-\begin{columns}[t]
-\begin{column}{0.45\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{figures/ben-hur-2008-ploscompbio-fig6middle.png}
-
-{\tiny Ben-Hur 2008 PLoS Comp Bio}
-\end{column}
-
-\begin{column}{0.55\textwidth}
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
-\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{ij}\)
-{\small
-
-\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
-sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
-
-\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
-sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
-}
-
-\hfill
-
-SVM classifier \(j\)
-{\small
-
-\tikz[baseline=-0.5ex] \draw[line width=2pt] (0,0) -- (1,0); decision boundary
-
-\tikz[baseline=-0.5ex] \shadedraw [shading=axis, shading angle=90] (0,0) node
-[anchor=north] {0} (0,-0.75ex) rectangle (0.75,0.75ex) (0.75,0ex) node
-[anchor=north] {1}; prob.~call true: \(P_j(y_{ij} = 1 | \mathbf{x}_{ij})\)
-}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Probability that call \(i\) is true given all info}
-\begin{columns}[t]
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-\(P_1\)\\
-TNseq.Mutect2
-\end{center}
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {TLOD---neuronal sample} (B);
-\path (A) -- node [below] {NLOD---muscle sample} (D);
-\end{tikzpicture}
-\end{column}
-
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-...
-\end{center}
-
-\end{column}
-
-\begin{column}{0.33\textwidth}
-
-\begin{center}
-\(P_5\) \\
-strelka2Somatic
-\end{center}
-\begin{tikzpicture}
-\footnotesize
-%\draw (1in,0) -- (0,0) -- (0,1in);
-\node (A) at (0in,0in) {};
-\node (B) at (0in,1.2in) {};
-\node (C) at (1.2in,1.2in) {};
-\node (D) at (1.2in,0in) {};
-\draw (A) rectangle (C);
-\path (A) -- node [rotate=90, anchor=south] {SomaticEVS} (B);
-\path (A) -- node [below] {DP---depth} (D);
-\end{tikzpicture}
-\end{column}
-\end{columns}
-\vfill
-\begin{center}
-\[
-P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
-\]
-\end{center}
-\end{frame}
-
-\begin{frame}{Precision-based filtering in \texttt{VariantMetaCaller.vcf}}
+\begin{frame}<1>[label=hardfilterlimit]{Limitations of traditional filtering}
 \begin{enumerate}
-\item probability \(P(i) \rightarrow \) rank \(k\)
-\item estimate precision for each \(k=1,...,n\)
-\[
-\mathrm{E}_\mathrm{prec}(k) = \frac{1}{k} \sum_{i=1}^k P(i)
-\] 
-\item
+\item<1-> unknown precision \(\Rightarrow\) callers not comparable
 \begin{itemize}
-\item fix precision (FDR) at desired value
-\item find corresponding rank
-\item remove calls below that rank 
+\item<3-> labeled benchmark data: true precision \& recall
+\item<4-> machine learning: estimated precision
+\end{itemize}
+\item<2-> discards info in the interdependence of annotations
+\begin{itemize}
+\item<4-> machine learning
 \end{itemize}
 \end{enumerate}
 \end{frame}
 
-\section{Results}
-
-\begin{frame}{Number of calls depends on caller and data set}
-TODO: make filtered version
-
+\begin{frame}{Controlling precision}
+\[\mathrm{precision} = 1 - \mathrm{FDR}\]
 \begin{columns}[t]
-\begin{column}{0.4\textwidth}
-
-\includegraphics[width=0.9\columnwidth]{figures/call-set-size-snvs-1-MSSM_106.pdf}
-%\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2.pdf}
+\begin{column}{0.5\textwidth}
+\begin{center}
+without control
+\end{center}
+\includegraphics<1-2>[width=1\columnwidth]{figures/by-me/precision-recall/pr-realistic.pdf}
 \end{column}
 
-\begin{column}{0.6\textwidth}
-
-\includegraphics[width=0.9\columnwidth]{figures/call-set-size-2-cs-benchmark.pdf}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\only<2>{with control }
+\end{center}
+\includegraphics<2>[width=1\columnwidth]{figures/by-me/precision-recall/pr.pdf}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Concordance of calls}{Common sample}
+\againframe<2>{hardfilterlimit}
+
+\begin{frame}
+\textbf{unfiltered VCF}
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+sep=3.0pt] {} (1,0);true positive
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+sep=2.5pt] {} (1,0);false positive
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
-unfiltered + PASS
+\begin{center}
+\only<1>{calls}
+\only<2->{traditional filtering}
+\end{center}
 
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
-\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\includegraphics<1>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2.pdf}
+
+\includegraphics<2->[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-hardfilter.pdf}
 \end{column}
 
 \begin{column}{0.5\textwidth}
-unfiltered
+\begin{center}
+\only<3>{flexible filtering}
+\end{center}
 
-\includegraphics[width=1.0\columnwidth]{figures/venn-common-sample-wgs-snvs-1.pdf}
+\includegraphics<3>[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm.pdf}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Ranking calls according to probabilities}{Common sample}
-NOTE: current figure shows results for benchmark; run VariantMetaCaller on
-common sample
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
+\againframe<4->{hardfilterlimit}
 
-\includegraphics[width=1.0\columnwidth]{figures/svmprob-rank1-benchmark.pdf}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{figures/prec-rank1-benchmark.pdf}
-\end{column}
-\end{columns}
-\end{frame}
+\section{Benchmark}
 
 \begin{frame}{Benchmark experiment}
-
-labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+\begin{center}
+labeled callset \(j\): \(\{\overbrace{y_{ij}}^\text{label},
 \overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{center}
+\vfill
+
+\input{two-vcfs-black.tex}
 \end{frame}
 
-\begin{frame}{Benchmark sample}{CEPH/Utah grandparents mixed}
+\begin{frame}[label=benchmark]{Benchmark sample}{CEPH/Utah grandparents mixed}
 \begin{center}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -327,7 +179,7 @@ labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
 \begin{column}{0.5\textwidth}
 
 \small
-{\onslide<1>
+{\onslide<1->
 \begin{tabular}{cccc}
 genome & mix1 & mix2 & mix3\\
 \hline
@@ -357,6 +209,330 @@ mix3:mix3 & false calls \\
 \end{column}
 \end{columns}
 \end{center}
+\end{frame}
+
+\begin{frame}{Impact of alternative allele frequency}
+\includegraphics[width=1\textwidth]{figures/from-others/chaggai-recall-aaf.png}
+\end{frame}
+
+\begin{frame}[label=precrecall]{Callers in precision-recall space}
+\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
+\end{frame}
+
+\section{Machine Learning}
+
+\begin{frame}{Machine learning}{VariantMetaCaller; Gezsi et al 2015 BMC Genomics}
+%\begin{enumerate}
+%\item annotation selection
+%\begin{itemize}
+%\item evaluate performance using benchmark; repeat
+%\end{itemize}
+%\item training SVMs
+%\begin{itemize}
+%\end{itemize}
+%\item prediction  
+%\begin{itemize}
+%\item probabilistic filtering (precision/FDR)
+%\item optimal combination of callsets
+%\end{itemize}
+%\end{enumerate}
+\includegraphics[width=0.8\textwidth]{figures/from-others/vmc-fig1.png}
+\end{frame}
+
+\begin{frame}
+\input{two-vcfs.tex}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics<2>[width=1.0\columnwidth]{figures/venn-common-sample-wgs-snvs-1.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{VCF annotations for classification (idealized figures)}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+
+partially labeled, unfiltered, callset \(j\):
+
+\(\{\overbrace{y_{i}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{column}
+
+\begin{column}{0.7\textwidth}
+
+{\small
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, diamond, inner
+sep=3.0pt] {} (1,0); unlabeled: \(y_{ij}=?\)
+}
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=1\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-unlabeled.pdf}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=...\)
+
+\vspace{0.7in}
+\large
+\(\cdots\)
+\normalsize
+\end{center}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=5\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq-unlabeled.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Support vector machine (SVM)}% of true and false positives}
+\begin{columns}[t]
+\begin{column}{0.45\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/ben-hur-2008-ploscompbio-fig6middle.png}
+
+{\tiny Ben-Hur 2008 PLoS Comp Bio}
+\end{column}
+
+\begin{column}{0.55\textwidth}
+%labeled set \(j\): \(\{\overbrace{y_{ij}}^\text{label},
+%\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{ij}\)
+%{\small
+%
+%\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+%sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
+%
+%\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+%sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+%}
+%
+%\hfill
+
+SVM classifier \(j\)
+{\small
+
+\tikz[baseline=-0.5ex] \draw[line width=2pt] (0,0) -- (1,0); decision boundary
+
+\tikz[baseline=-0.5ex] \shadedraw [shading=axis, shading angle=90] (0,0) node
+[anchor=north] {0} (0,-0.75ex) rectangle (0.75,0.75ex) (0.75,0ex) node
+[anchor=north] {1}; prob.~call true: \(P_j(y_{ij} = 1 | \mathbf{x}_{ij})\)
+}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Probability that a call is true: weighted combination of callers}
+\begin{center}
+\[
+P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
+\]
+\end{center}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=1\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm-unlabeled.pdf}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=...\)
+
+\vspace{0.7in}
+\large
+\(\cdots\)
+\normalsize
+\end{center}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=5\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq-svm-unlabeled.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Probabilistic filtering}
+\begin{enumerate}
+\item probability \(P(i) \rightarrow \) rank \(k\)
+\item estimate precision for each \(k=1,...,n\)
+\[
+\mathrm{E}_\mathrm{prec}(k) = \frac{1}{k} \sum_{i=1}^k P(i)
+\] 
+\item filter at desired precision (i.e.~FDR control)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Ranking calls according to their probability}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/svmprob-rank1-benchmark.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{figures/prec-rank1-benchmark.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{\texttt{VariantMetaCaller} workflow}
+\begin{enumerate}
+\item<2> configure on benchmark data
+\begin{enumerate}
+\item inspect \& select annotations---manual
+\item train SVMs---automatic
+\item rank calls \(\Rightarrow\) precision-recall curve---benchmark
+\item (update annotations)
+\item (\(\cdots\))
+\end{enumerate}
+\item apply to CommonMind data
+\begin{enumerate}
+\item train SVMs given selected annotations
+\item rank and filter calls
+\end{enumerate}
+\end{enumerate} 
+\end{frame}
+
+\begin{frame}{Inspecting annotations}
+\begin{center}
+\only<1>{marginal distributions}
+
+\only<2>{joint distributions}
+\end{center}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics<1>[width=1.0\columnwidth]{figures/2018-07-03-vcf-annotations/density-1.pdf}
+
+\includegraphics<2>[width=1.0\columnwidth]{figures/2018-07-03-vcf-annotations/splom-1.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics<1>[width=1.0\columnwidth]{figures/2018-07-03-vcf-annotations/density-3.pdf}
+
+\includegraphics<2>[width=1.0\columnwidth]{figures/2018-07-03-vcf-annotations/splom-3.png}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Selected annotations (preliminary)}
+\begin{itemize}
+\item all callers
+
+\footnotesize
+\(\{\)
+	INFO.BasesToClosestVariant,
+	INFO.EntropyLeft\_7,
+	INFO.EntropyCenter\_7,
+	INFO.EntropyRight\_7,
+	INFO.EntropyLeft\_15,
+	INFO.EntropyCenter\_15,
+	INFO.EntropyRight\_15
+\(\}\)
+\end{itemize}
+\begin{enumerate}
+\normalsize
+\item lofreqSomatic
+
+\footnotesize
+\(\{\)
+    INFO.DP,
+    INFO.AF,
+    INFO.SB,
+    INFO.UQ
+\(\}\)
+\normalsize
+\item strelka2Somatic
+
+\footnotesize
+\(\{\)
+	INFO.ReadPosRankSum,
+	INFO.SomaticEVS
+\(\}\)
+\normalsize
+\item strelka2Germline2s
+
+\footnotesize
+\(\{\)
+	QUAL,
+	INFO.MQ
+\(\}\)
+\normalsize
+\item somaticSniper
+
+\footnotesize
+\(\{\)
+	GENOTYPE.VAQ,
+	GENOTYPE.MQ
+\(\}\)
+\normalsize
+\item TNseq.Mutect2
+
+\footnotesize
+\(\{\)
+	INFO.HCNT,
+	INFO.MAX\_ED
+\(\}\)
+\end{enumerate}
+\end{frame}
+
+\againframe{precrecall}
+
+\begin{frame}{Summary}
+\begin{enumerate}
+\item 5 callers applied to paired sample data
+\item benchmark experiment: labeled callsets
+\begin{itemize}
+\item precision-recall
+\item alternative allele frequency
+\end{itemize}
+\item probabilistic combination and filtering
+\begin{itemize}
+\item complementary VCFs, annotations
+\item support vector machines by \texttt{VariantMetaCaller}
+\end{itemize}
+\end{enumerate}
 \end{frame}
 
 \end{document}

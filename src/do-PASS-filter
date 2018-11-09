@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+invcfdir=`realpath $1`
+outvcfdir=$invcfdir/PASS
+
+if test ! -d $outvcfdir; then
+    mkdir $outvcfdir
+fi
+
+for vcf in $invcfdir/*.vcf.gz; do
+    bn=`basename $vcf`
+    outvcf=$outvcfdir/$bn
+    bcftools view -O z -o $outvcf -f .,PASS $vcf
+    bcftools index --tbi $outvcf
+done
