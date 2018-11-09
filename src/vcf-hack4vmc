@@ -7,7 +7,7 @@ scriptdir=`dirname $0`
 outputType=v
 caseSample=TUMOR
 controlSample=NORMAL
-region=22
+region=''
 varType=snps
 displayhelp=F
 while getopts "a:b:r:v:l:h" opt; do
@@ -45,6 +45,13 @@ if test $# -ne 2 || test `realpath $indir` = `realpath $outdir` || test $display
 EOF
     exit 1
 fi
+
+if test -z $region; then
+    regionstr=''
+else
+    regionstr="-r $region"
+fi
+echo $regionstr; exit
 
 # hack a single VCF
 hack1vcf () {
