@@ -9,12 +9,23 @@ def jsm_edit_records(jsm_tsv, out_tsv = "/dev/stdout", max_nrows = 5):
         csv_reader = csv.reader(in_file, delimiter = "\t")
         csv_writer = csv.writer(out_file, delimiter = "\t")
         counter = 0
+        m = []
+        format_id = "counts_a:counts_b"
         for r in csv_reader:
-            counter += 1
             if counter > max_nrows:
                 break
             d = ["."] # dot
             rr = r[0:2] + d + r[2:4] + d * 2
             normal = [ ":".join(str(x) for x in r[4:6]) ]
             tumor = [ ":".join(str(x) for x in r[6:8]) ]
-            csv_writer.writerow(rr + normal + tumor)
+            info = r[8:17]
+            if counter == 0:
+                info_id = info
+            else:
+                #format_id = normal + tumor
+                info_tagged = ";".join([ "=".join(x) for x in zip(info_id, info)])
+                row = rr + [info_tagged] + [format_id] + normal + tumor
+                csv_writer.writerow(row)
+                m.append(row)
+            counter += 1
+        return(m)
