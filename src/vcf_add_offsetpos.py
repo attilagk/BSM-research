@@ -19,13 +19,13 @@ def fai2dict(fai_file):
             d[r[0]] = int(r[2])
         return(d)
 
-def add_offsetpos(invcf_file, faidict = fai2dict(faifname)):
+def add_offsetpos(invcf_file, outvcf_file = "/dev/stdout", faidict = fai2dict(faifname)):
     """Add OFFSETPOS to INFO
     """
     reader = vcfpy.Reader.from_path(invcf_file)
     reader.header.add_info_line(collections.OrderedDict([("ID", "OFFSETPOS"),
         ("Number", 1), ("Type", "Integer"), ("Description", "Position offset by cumulative contig length")]))
-    writer = vcfpy.Writer.from_path("/dev/stdout", reader.header)
+    writer = vcfpy.Writer.from_path(outvcf_file, reader.header)
     for r in reader:
         r.INFO["OFFSETPOS"] = r.POS + faidict[r.CHROM]
         writer.write_record(r)
