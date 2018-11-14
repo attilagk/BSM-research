@@ -1,6 +1,0 @@
-#! /usr/bin/env bash
-
-jsmVCF=$1
-templateVCF=$2
-
-bcftools view -h $templateVCF
