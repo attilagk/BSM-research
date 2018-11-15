@@ -5,7 +5,9 @@ tags: [ JointSNVMix2 ]
 #featimg: "all-1.png"
 ---
 
-Testing JointSNVMix and inspecting its output.
+Testing JointSNVMix2 and inspecting its output: the posterior probability of various genotypes for the case or control sample and of various types of somatic mutation.
+
+## Preparation
 
 The `bash` code below shows how the `jsm.tsv` files have been generated.  See details in each `runme` file.
 
@@ -20,12 +22,12 @@ done
 $HOME/projects/bsm/notebook/2018-11-12-JointSNVMix/sample-every chr22/jsm.tsv 1000
 ```
 
+The output of JointSNVMix2 is a tab delimited file in which rows are records (for each base position) and columns are various annotations.
+
 ```{r engine="bash", eval=TRUE}
-# run JointSNVMix2 
 cd $HOME/projects/bsm/results/2018-11-12-JointSNVMix
 head -n2 chr22/jsm.tsv.every-1000
 ```
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(lattice)
@@ -38,54 +40,103 @@ lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
 ```
 
+The script contains the importer for `jsm.tsv` files.
+
 ```{r}
-tsv <- "~/projects/bsm/results/2018-11-12-JointSNVMix/chr22/jsm.tsv.every-1000"
-records <- read.delim(tsv)
-# aggregate probabilities
-# across genotypes for the case/tumor sample
-records$p_AA_XY <- with(records, p_AA_AA + p_AA_AB + p_AA_BB)
-records$p_AB_XY <- with(records, p_AB_AA + p_AB_AB + p_AB_BB)
-records$p_BB_XY <- with(records, p_BB_AA + p_BB_AB + p_BB_BB)
-# across genotypes for the control/normal sample
-records$p_XY_AA <- with(records, p_AA_AA + p_AB_AA + p_BB_AA)
-records$p_XY_AB <- with(records, p_AA_AB + p_AB_AB + p_BB_AB)
-records$p_XY_BB <- with(records, p_AA_BB + p_AB_BB + p_BB_BB)
-# all somatic mutations from AA
-records$p_AA_XB <- with(records, p_AA_AB + p_AA_BB)
-# all somatic mutations from AB
-records$p_AB_XX <- with(records, p_AA_AB + p_AA_BB)
-# all somatic mutations from BB
-records$p_BB_AX <- with(records, p_BB_AB + p_BB_AA)
-records.l <-
-    reshape(records, varying = v <- grep("p_", names(records), value = TRUE),
-            v.names = "p", timevar = "GT", times = sub("p_", "", v), direction = "long")
+source("2018-11-12-JointSNVMix.R")
 ```
 
-```{r hist-controlGT}
-GThist <- function(sset, dt = records.l, lay = c(length(sset), 1), ...) {
-    histogram(~ p | GT, data = records.l, subset = GT %in% sset,
+Import and process data.
+
+```{r}
+tsv <- c(benchmark = "~/projects/bsm/results/2018-11-12-JointSNVMix/chr22/jsm.tsv.every-1000")
+records <- lapply(tsv, get.records, TRUE)
+# high level graphic function
+GThist <- function(sset, dt = records$benchmark, lay = c(length(sset), 1), ...) {
+    histogram(~ p | GT, data = records$benchmark, subset = GT %in% sset,
               layout = lay, xlab = "Posterior Probability", ...)
 }
-GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotype")
-GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotype", ylim = c(0, 1.5))
 ```
 
-```{r hist-caseGT}
-GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotype")
-GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotype", ylim = c(0, 1.5))
+## Results: benchmark
+
+### Genotype probabilities for control sample (Mix3)
+
+The upper and lower graphs show the same distributions but on different scaling of the $$y$$ axis (percentage: relative frequency).  The three panels have the following meaning:
+
+|--------------------|--------------------|--------------------|
+| symbol             |control sample GT   |case sample genotype|
+|--------------------|--------------------|--------------------|
+| AA_XY              | AA (Ref/Ref)       | any genotype       |
+| AB_XY              | AB (Ref/Alt)       | any genotype       |
+| BB_XY              | BB (Alt/Alt)       | any genotype       |
+|--------------------|--------------------|--------------------|
+
+```{r benchmark-controlGT}
+GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotypes")
+GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotypes", ylim = c(0, 1.5))
 ```
 
-```{r hist-som-mut-AA}
-GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA")
-GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA", ylim = c(0, 1.5))
+Clearly, most but few positions are likely to have AA (Ref/Ref) genotype.
+
+### Genotype probabilities for case sample (Mix1)
+
+|--------------------|--------------------|--------------------|
+| symbol             |control sample GT   |case sample genotype|
+|--------------------|--------------------|--------------------|
+| XY_AA              | any genotype       | AA (Ref/Ref)       |
+| XY_AB              | any genotype       | AB (Ref/Alt)       |
+| XY_BB              | any genotype       | BB (Alt/Alt)       |
+|--------------------|--------------------|--------------------|
+
+```{r benchmark-caseGT, echo=TRUE}
+GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotypes")
+GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotypes", ylim = c(0, 1.5))
 ```
 
-```{r hist-som-mut-AB}
-GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB")
-GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB", ylim = c(0, 1.5))
+## Probability of somatic mutation from AA genotype
+
+|--------------------|--------------------|--------------------|
+| symbol             |control sample GT   |case sample genotype|
+|--------------------|--------------------|--------------------|
+| AA_AB              | AA (Ref/Ref)       | AB (Ref/Alt)       |
+| AA_BB              | AA (Ref/Ref)       | BB (Alt/Alt)       |
+| AA_XB              | AA (Ref/Ref)       | AB or BB           |
+|--------------------|--------------------|--------------------|
+
+```{r benchmark-som-mut-AA, echo=TRUE}
+GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype")
+GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", ylim = c(0, 1.5))
 ```
 
-```{r hist-som-mut-BB}
-GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB")
-GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB", ylim = c(0, 1.5))
+## Probability of somatic mutation from AB genotype
+
+|--------------------|--------------------|--------------------|
+| symbol             |control sample GT   |case sample genotype|
+|--------------------|--------------------|--------------------|
+| AB_AA              | AB (Ref/Alt)       | AA (Ref/Ref)       |
+| AB_BB              | AB (Ref/Alt)       | BB (Alt/Alt)       |
+| AB_XX              | AB (Ref/Alt)       | AA or BB           |
+|--------------------|--------------------|--------------------|
+
+```{r benchmark-som-mut-AB, echo=TRUE}
+GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype")
+GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype", ylim = c(0, 1.5))
 ```
+
+## Probability of somatic mutation from BB genotype
+
+|--------------------|--------------------|--------------------|
+| symbol             |control sample GT   |case sample genotype|
+|--------------------|--------------------|--------------------|
+| BB_AA              | BB (Alt/Alt)       | AA (Ref/Ref)       |
+| BB_AB              | BB (Alt/Alt)       | AB (Ref/Alt)       |
+| BB_AX              | BB (Alt/Alt)       | AA or AB           |
+|--------------------|--------------------|--------------------|
+
+```{r benchmark-som-mut-BB, echo=TRUE}
+GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB genotype")
+GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB genotype", ylim = c(0, 1.5))
+```
+
+### Common sample
