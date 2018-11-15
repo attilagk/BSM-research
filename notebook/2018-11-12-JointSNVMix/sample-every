@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+
+# Sample every 'step' row from 'infile'
+
+infile=`realpath $1`
+step=${2:-100}
+outfile="$infile.every-$step"
+usage="`basename $0` in.tsv step"
+
+sed -n "1~$step p" $infile > $outfile
