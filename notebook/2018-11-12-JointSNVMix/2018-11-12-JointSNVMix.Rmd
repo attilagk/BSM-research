@@ -2,10 +2,10 @@
 layout: default
 title: JointSNVMix2
 tags: [ JointSNVMix2 ]
-#featimg: "all-1.png"
+featimg: "benchmark-som-mut-AA-2.png"
 ---
 
-Testing JointSNVMix2 and inspecting its output: the posterior probability of various genotypes for the case or control sample and of various types of somatic mutation.
+Testing JointSNVMix2 and inspecting its output: the posterior probability of various genotypes for the case or control sample and of various types of somatic mutation.  The unfiltered output of JointSNVMix2 is an impractically large table, whose rows correspond to genomic positions.  One of the goals of this analysis to make JointSNVMix2 practical by finding a reasonable somatic threshold for filtering (defined as the sum of probabilities p_AA_AB + p_AA_BB).  Based on the results below a somatic threshold of 0.1 seems reasonable.
 
 ## Preparation
 
@@ -60,17 +60,21 @@ GThist <- function(sset, dt = records$benchmark, lay = c(length(sset), 1), ...) 
 
 ## Results: benchmark
 
+This part of the analysis is based on the benchmark experiment: Mix1 is the case sample and Mix3 is the control sample.
+
 ### Genotype probabilities for control sample (Mix3)
 
-The upper and lower graphs show the same distributions but on different scaling of the $$y$$ axis (percentage: relative frequency).  The three panels have the following meaning:
+The upper and lower graphs show the same distributions but on different scaling of the $$y$$ axis (percentage: relative frequency).  The three panels are genotype pairs (for the paired sample) with the following meaning:
 
-|--------------------|--------------------|--------------------|
-| symbol             |control sample GT   |case sample genotype|
-|--------------------|--------------------|--------------------|
-| AA_XY              | AA (Ref/Ref)       | any genotype       |
-| AB_XY              | AB (Ref/Alt)       | any genotype       |
-| BB_XY              | BB (Alt/Alt)       | any genotype       |
-|--------------------|--------------------|--------------------|
+|--------------------|------------------------|--------------------|
+| symbol             |control sample genotype |case sample genotype|
+|--------------------|------------------------|--------------------|
+| AA_XY              | AA (Ref/Ref)           | any genotype       |
+| AB_XY              | AB (Ref/Alt)           | any genotype       |
+| BB_XY              | BB (Alt/Alt)           | any genotype       |
+|--------------------|------------------------|--------------------|
+
+In other words the figure presents a histogram of marginal probabilities for each *control* sample genotype.
 
 ```{r benchmark-controlGT}
 GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotypes")
@@ -81,13 +85,15 @@ Clearly, most but few positions are likely to have AA (Ref/Ref) genotype.
 
 ### Genotype probabilities for case sample (Mix1)
 
-|--------------------|--------------------|--------------------|
-| symbol             |control sample GT   |case sample genotype|
-|--------------------|--------------------|--------------------|
-| XY_AA              | any genotype       | AA (Ref/Ref)       |
-| XY_AB              | any genotype       | AB (Ref/Alt)       |
-| XY_BB              | any genotype       | BB (Alt/Alt)       |
-|--------------------|--------------------|--------------------|
+Here I present a histogram of marginal probabilities for each *case*  sample genotype.
+
+|--------------------|------------------------|--------------------|
+| symbol             |control sample genotype |case sample genotype|
+|--------------------|------------------------|--------------------|
+| XY_AA              | any genotype           | AA (Ref/Ref)       |
+| XY_AB              | any genotype           | AB (Ref/Alt)       |
+| XY_BB              | any genotype           | BB (Alt/Alt)       |
+|--------------------|------------------------|--------------------|
 
 ```{r benchmark-caseGT, echo=TRUE}
 GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotypes")
@@ -96,47 +102,61 @@ GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotypes", ylim = c(0,
 
 ## Probability of somatic mutation from AA genotype
 
-|--------------------|--------------------|--------------------|
-| symbol             |control sample GT   |case sample genotype|
-|--------------------|--------------------|--------------------|
-| AA_AB              | AA (Ref/Ref)       | AB (Ref/Alt)       |
-| AA_BB              | AA (Ref/Ref)       | BB (Alt/Alt)       |
-| AA_XB              | AA (Ref/Ref)       | AB or BB           |
-|--------------------|--------------------|--------------------|
+Below, each histogram shows the distribution of the probability of somatic mutation when the case sample genotype is AA (Ref/Ref).  The somatic mutation may be single (one allele is changed: AA_AB) or double (both alleles are changed: AA_BB).
+
+|--------------------|------------------------|--------------------|
+| symbol             |control sample genotype |case sample genotype|
+|--------------------|------------------------|--------------------|
+| AA_AB              | AA (Ref/Ref)           | AB (Ref/Alt)       |
+| AA_BB              | AA (Ref/Ref)           | BB (Alt/Alt)       |
+| AA_XB              | AA (Ref/Ref)           | AB or BB           |
+|--------------------|------------------------|--------------------|
 
 ```{r benchmark-som-mut-AA, echo=TRUE}
 GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype")
 GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", ylim = c(0, 1.5))
 ```
 
-## Probability of somatic mutation from AB genotype
-
-|--------------------|--------------------|--------------------|
-| symbol             |control sample GT   |case sample genotype|
-|--------------------|--------------------|--------------------|
-| AB_AA              | AB (Ref/Alt)       | AA (Ref/Ref)       |
-| AB_BB              | AB (Ref/Alt)       | BB (Alt/Alt)       |
-| AB_XX              | AB (Ref/Alt)       | AA or BB           |
-|--------------------|--------------------|--------------------|
-
-```{r benchmark-som-mut-AB, echo=TRUE}
-GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype")
-GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype", ylim = c(0, 1.5))
-```
+The histograms on the right (AA_XB) help establish that the vast majority of $$p_\mathrm{somatic} = p_{AA\_XB} = p_{AA\_AB} + p_{AA\_BB}$$ values are below $$0.1$$.  Therefore, $$0.1$$ can be used as `SOMATIC_THRESHOLD` argument to the `--somatic_threshold` option for the `jsm.py classify` command. 
 
 ## Probability of somatic mutation from BB genotype
 
-|--------------------|--------------------|--------------------|
-| symbol             |control sample GT   |case sample genotype|
-|--------------------|--------------------|--------------------|
-| BB_AA              | BB (Alt/Alt)       | AA (Ref/Ref)       |
-| BB_AB              | BB (Alt/Alt)       | AB (Ref/Alt)       |
-| BB_AX              | BB (Alt/Alt)       | AA or AB           |
-|--------------------|--------------------|--------------------|
+Like above but the sample genotype is BB so that single mutation is BB_AB and double mutation is BB_AA.
+
+|--------------------|------------------------|--------------------|
+| symbol             |control sample genotype |case sample genotype|
+|--------------------|------------------------|--------------------|
+| BB_AA              | BB (Alt/Alt)           | AA (Ref/Ref)       |
+| BB_AB              | BB (Alt/Alt)           | AB (Ref/Alt)       |
+| BB_AX              | BB (Alt/Alt)           | AA or AB           |
+|--------------------|------------------------|--------------------|
 
 ```{r benchmark-som-mut-BB, echo=TRUE}
 GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB genotype")
 GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB genotype", ylim = c(0, 1.5))
 ```
 
+The results suggest there are essentially no mutations from BB genotype.
+
+## Probability of somatic mutation from AB genotype
+
+Here the control sample has genotype AB and there are two kinds of single mutation: AB_AA (the Ref allele A replaces the Alt allele A in the case sample) and AB_BB (the Alt allele B replaces the Ref allele A in the case sample).
+
+|--------------------|------------------------|--------------------|
+| symbol             |control sample genotype |case sample genotype|
+|--------------------|------------------------|--------------------|
+| AB_AA              | AB (Ref/Alt)           | AA (Ref/Ref)       |
+| AB_BB              | AB (Ref/Alt)           | BB (Alt/Alt)       |
+| AB_XX              | AB (Ref/Alt)           | AA or BB           |
+|--------------------|------------------------|--------------------|
+
+```{r benchmark-som-mut-AB, echo=TRUE}
+GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype")
+GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype", ylim = c(0, 1.5))
+```
+
+The picture is more similar to mutations from AA genotype (in contrast with those from BB genotype).
+
 ### Common sample
+
+In this section the case sample is NeuN+ brain cells and the control sample is fibroblast cells, both from the BSM Network's common experiment.
