@@ -9,38 +9,56 @@ A summary of called variants by multiple callers is presented here on control in
 
 ## Title
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-library(lme4)
-library(lattice)
-library(latticeExtra)
-opts_chunk$set(dpi = 144)
-opts_chunk$set(out.width = "600px")
-opts_chunk$set(dev = c("png", "pdf"))
-lattice.options(default.args = list(as.table = TRUE))
-lattice.options(default.theme = "standard.theme")
-```
 
-```{r message=FALSE}
+
+
+```r
 library(VennDiagram)
 source("../../src/vcf.R")
 ```
 
 Import VCF for each caller (separately for SNVs and indels) and store only the called variants' identity by position.
 
-```{r cache=TRUE}
+
+```r
 results <- get.calls4indiv(indiv = "MSSM_106", callers = c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq"))
 ```
 
-```{r call-set-size, fig.asp=0.7}
+
+```r
 barchart(caller ~ set.size | var.type, data = results$ssize, xlim = c(0, ceiling(max(ssize$set.size) / 1e6) * 1e6))
+```
+
+```
+## Error in limitsFromLimitlist(have.lim = have.xlim, lim = xlim, relation = x.relation, : object 'ssize' not found
+```
+
+```r
 barchart(caller ~ log10(set.size) | var.type, data = results$ssize, xlim = c(0, 7))
 ```
 
-```{r call-set-size-snvs, fig.asp=1.2, fig.width=4}
+<img src="figure/call-set-size-1.png" title="plot of chunk call-set-size" alt="plot of chunk call-set-size" width="600px" />
+
+
+```r
 barchart(caller ~ log10(set.size) | var.type, data = results$ssize, xlim = c(0, 7))[1]
 ```
 
-```{r venn-common-sample-snvs}
+<img src="figure/call-set-size-snvs-1.png" title="plot of chunk call-set-size-snvs" alt="plot of chunk call-set-size-snvs" width="600px" />
+
+
+```r
 my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray", cat.cex = 1.4)
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'callers' not found
+```
+
+```r
 grid.draw(venn.diagram(results$vcf$snvs, NULL, main = "SNVs", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+```
+
+```
+## Error in VennDiagram::draw.quintuple.venn(area1 = length(A), area2 = length(B), : object 'my.par' not found
 ```
