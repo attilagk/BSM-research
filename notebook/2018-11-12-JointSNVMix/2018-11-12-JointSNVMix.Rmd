@@ -118,6 +118,13 @@ GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype"
 GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", ylim = c(0, 1.5))
 ```
 
+The same histograms with counts instead of relative frequencies:
+
+```{r benchmark-som-mut-AA-counts, echo=TRUE}
+GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", type = "count")
+GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", type = "count", ylim = c(0, 60))
+```
+
 The histograms on the right (AA_XB) help establish that the vast majority of $$p_\mathrm{somatic} = p_{AA\_XB} = p_{AA\_AB} + p_{AA\_BB}$$ values are below $$0.1$$.  Therefore, $$0.1$$ can be used as `SOMATIC_THRESHOLD` argument to the `--somatic_threshold` option for the `jsm.py classify` command. 
 
 ### Probability of somatic mutation from BB genotype
