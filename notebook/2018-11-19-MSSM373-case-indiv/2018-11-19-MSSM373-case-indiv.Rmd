@@ -5,7 +5,7 @@ tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
 featimg: "venn-common-sample-snvs-1.png"
 ---
 
-A summary of called variants by multiple callers is presented here on control individual MSSM106.
+A summary of called variants by multiple callers is presented here on control individual MSSM373.
 
 ## Title
 
@@ -28,16 +28,13 @@ source("../../src/vcf.R")
 Import VCF for each caller (separately for SNVs and indels) and store only the called variants' identity by position.
 
 ```{r cache=TRUE}
-results <- get.calls4indiv(indiv = "MSSM_106", callers = c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq"))
+callers <- c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq")
+results <- get.calls4indiv(indiv = "MSSM_373", callers = callers)
 ```
 
 ```{r call-set-size, fig.asp=0.7}
-barchart(caller ~ set.size | var.type, data = results$ssize, xlim = c(0, ceiling(max(ssize$set.size) / 1e6) * 1e6))
+barchart(caller ~ set.size | var.type, data = results$ssize, xlim = c(0, ceiling(max(results$ssize$set.size) / 1e6) * 1e6))
 barchart(caller ~ log10(set.size) | var.type, data = results$ssize, xlim = c(0, 7))
-```
-
-```{r call-set-size-snvs, fig.asp=1.2, fig.width=4}
-barchart(caller ~ log10(set.size) | var.type, data = results$ssize, xlim = c(0, 7))[1]
 ```
 
 ```{r venn-common-sample-snvs}
