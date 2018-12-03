@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+
+# Ensures there is underscore within individual names in filenames
+# E.g. change: MSSM106_NeuN_pl.bam -> MSSM_106_NeuN_pl.bam
+
+case $HOSTNAME in
+    ada) : ;;
+    *) exit ;;
+esac
+
+indiv=$1
+indiv_wo_underscore=$(echo $indiv | tr -d _ )
+indivno_=$indiv_wo_underscore # shorter name for simplicity
+
+bamdir=/projects/bsm/alignments/$indiv
+#cd $bamdir
+for oldname in $bamdir/*; do
+    newname=$(echo $oldname | sed "s/$indivno_/$indiv/")
+    mv $oldname $newname
+done
