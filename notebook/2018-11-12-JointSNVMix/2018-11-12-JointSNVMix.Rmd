@@ -165,7 +165,7 @@ GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype"
 
 The picture is more similar to mutations from AA genotype (in contrast with those from BB genotype).
 
-### Common sample
+## Results: common sample
 
 In this section the case sample is NeuN+ brain cells and the control sample is fibroblast cells, both from the BSM Network's common experiment.
 

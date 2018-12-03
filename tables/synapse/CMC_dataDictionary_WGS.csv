@@ -1,0 +1,39 @@
+"Variable","Description","Value"
+"Library ID",NA,NA
+"Library Replicate",NA,NA
+"Sample DNA ID",NA,NA
+"DNA Amount(ng)",NA,NA
+"cleanup Concentration (ng/ul)",NA,NA
+"Index",NA,NA
+"Library qPCR Date",NA,NA
+"Library Conc (nM)",NA,NA
+"Library prep by",NA,NA
+"X10 Sequencing Mix",NA,NA
+"Chess- Mix qPCR Date",NA,NA
+"Chess- Mix qPCR conc. (nM)",NA,NA
+"Chess- Mix Fragment Size (bp)",NA,NA
+"Sent for Sequencing",NA,NA
+"Sequencing Location",NA,NA
+"Arrival Date at Novogene",NA,NA
+"Novogene- Sample ID",NA,NA
+"Novogene- Library ID",NA,NA
+"Novogene- Sample Receiver",NA,NA
+"Novogene- Library Quality Control Date",NA,NA
+"Novogene- Library Quality Control Performed by",NA,NA
+"Novogene- Verified date",NA,NA
+"Novogene- Verified by",NA,NA
+"Novogene- Library Volume (ul)",NA,NA
+"Novogene- qPCR molarity (nmol/L)",NA,NA
+"Novogene Comments",NA,NA
+"Lanes Sequenced",NA,NA
+"Mi-Seq Date",NA,NA
+"Mi-Seq- Total Reads",NA,NA
+"Mi-Seq- Unique & Concordant Reads",NA,NA
+"MiSeq- % Reads Unique & Concordant",NA,NA
+"Mi-Seq- Avg Insert Size (bp)",NA,NA
+"Mi-Seq- Avg Effective Insert Size (bp)",NA,NA
+"Mi-Seq- % Total Genome 1Mb Bins in 75%-130% Range",NA,NA
+"Mi-Seq- % Autosomes 1Mb Bins in 75%-130% Range",NA,NA
+"Mi-Seq- % of Expected Total Reads",NA,NA
+"Mi-Seq- % of Expected Unique & Concordant",NA,NA
+"Exclude?",NA,NA

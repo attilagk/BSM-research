@@ -20,6 +20,8 @@ calls
 *.pptx
 *.jnlp
 *.syn_cache
+*.s_cache
+*.s.Rmd
 
 # ignore knitr's cache
 **/cache/
