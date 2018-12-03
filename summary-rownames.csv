@@ -1,0 +1,14 @@
+subject
+NeuN_pl.fastq
+NeuN_mn.fastq
+muscle.fastq
+NeuN_pl.bam
+NeuN_mn.bam
+muscle.bam
+lofreqSomatic.vcf
+somaticSniper.vcf
+strelka2Germline.vcf
+strelka2Germline2s.vcf
+TNseq.vcf
+JointSNVMix2.vcf
+VariantMetaCaller.vcf
