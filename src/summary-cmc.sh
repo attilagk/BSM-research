@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 
+# Summarize progress in workflow on CMC individuals
+
+usage="$0"
+
 case $HOSTNAME in
     ada) : ;;
     *) exit ;;
