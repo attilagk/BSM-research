@@ -7,8 +7,9 @@ esac
 
 tablesdir=$HOME/projects/bsm/tables
 rownames=$tablesdir/summary-rownames.csv
-summarydir=$tablesdir/summary
-summaryfile=$tablesdir/summary.tsv
+resultdir=/projects/bsm/attila/results/2018-09-12-sequenced-individuals
+summarydir=$resultdir/summary-cmc
+summaryfile=$resultdir/summary-cmc.tsv
 if ! test -d $summarydir; then
     mkdir $summarydir
 fi
@@ -18,6 +19,8 @@ do1indiv () {
     # subject a.k.a. individual
     indiv=$1
     bamdir=/projects/bsm/alignments/$indiv/
+    # subject
+    echo $indiv
     # FASTQs
     for sample in $(sed -n "/fastq/ { s/.fastq//; p }" $rownames); do
         fqnames=$bamdir/${indiv}_${sample}-fastq-names
@@ -50,9 +53,10 @@ do1indiv () {
 }
 
 cp $rownames $summaryfile
-indivs="$(cut -f1 $seqind)"
+indivs="$(cut -f1 $seqind | sed 's/CMC_//')"
 for ind in $indivs; do
     do1indiv $ind > $summarydir/$ind
 done
 cd $summarydir
-paste $rownames $indivs
+paste $rownames $indivs > $summaryfile
+cd .. && rm -r $summarydir
