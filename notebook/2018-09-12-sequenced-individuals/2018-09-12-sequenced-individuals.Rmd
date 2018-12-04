@@ -1,12 +1,23 @@
 ---
 layout: default
 title: Summary on CMC and Benchmark
-#featimg: density-1.png
+featimg: summary-1.png
 ---
 
 Which individuals have been sequenced?
 
 For the answer see the `src/sequenced-individuals.sh` as well as the `data/dnalib/get-cmc-individuals` scripts.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
 
 ```{r engine="bash"}
 indivs=$HOME/projects/bsm/results/2018-09-12-sequenced-individuals/sequenced-individuals
@@ -33,16 +44,23 @@ cat $samples
 
 ```{r}
 fl <- c(cmc = "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv",
-        cs = "~/projects/bsm/tables/summary-common-sample.tsv",
-        bm = "~/projects/bsm/tables/summary-benchmark.tsv")
+        common.sample = "~/projects/bsm/tables/summary-common-sample.tsv",
+        benchmark = "~/projects/bsm/tables/summary-benchmark.tsv")
 summ <- lapply(fl, read.delim, row.names = 1)
 summ
+summ.all <- do.call(cbind, summ)
+```
+
+```{r summary}
+summ.all.long <- expand.grid(row.names(summ.all), names(summ.all))
+summ.all.long$done <- sapply(seq.int(dim(summ.all.long)[1]), function(y) summ.all[as.character(summ.all.long[y, 1]), as.character(summ.all.long[y, 2])])
+my.col <- c("white", "gray")
+levelplot(done ~ Var2 * Var1, data = summ.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
 ```
 
 Write results to file
 
 ```{r}
-summ.all <- do.call(cbind, summ)
 write.csv(summ.all, "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-all.csv")
 ```
 
