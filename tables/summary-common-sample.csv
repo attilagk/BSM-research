@@ -1,0 +1,15 @@
+subject	common_sample
+NeuN_pl.fastq	1
+NeuN_mn.fastq	0
+muscle.fastq	NA
+NeuN_pl.bam	1
+NeuN_mn.bam	0
+muscle.bam	NA
+lofreqSomatic.vcf	1
+somaticSniper.vcf	1
+strelka2Somatic.vcf	1
+strelka2Germline.vcf	1
+strelka2Germline2s.vcf	0
+TNseq.vcf	1
+JointSNVMix2.vcf	0
+VariantMetaCaller.vcf	0

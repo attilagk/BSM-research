@@ -7,6 +7,7 @@ NeuN_mn.bam
 muscle.bam
 lofreqSomatic.vcf
 somaticSniper.vcf
+strelka2Somatic.vcf
 strelka2Germline.vcf
 strelka2Germline2s.vcf
 TNseq.vcf

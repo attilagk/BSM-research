@@ -29,4 +29,11 @@ samples=$HOME/projects/bsm/results/2018-09-12-sequenced-individuals/sequenced-sa
 cat $samples
 ```
 
+## Summary
+
+```{r}
+summ <- list(cmc = read.delim("~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv"))
+summ$cmc
+```
+
 The printed inventory on the hard disks received from the sequencing company is accessible [here](https://photos.app.goo.gl/ttjSFEHPcSV1Wrvt5).  It shows that the samples that are missing from server `ada` are also missing from the printed inventory, therefore these samples are missing because haven't been sequenced yet.  Note that the contents of one of the hard drives has been verified to match the printed inventory.
