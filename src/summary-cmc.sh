@@ -4,11 +4,13 @@
 
 usage="$0"
 
+# only run on Ada
 case $HOSTNAME in
     ada) : ;;
     *) exit ;;
 esac
 
+# assignments
 tablesdir=$HOME/projects/bsm/tables
 rownames=$tablesdir/summary-rownames.csv
 resultdir=/projects/bsm/attila/results/2018-09-12-sequenced-individuals
@@ -19,6 +21,7 @@ if ! test -d $summarydir; then
 fi
 seqind=/projects/bsm/attila/results/2018-09-12-sequenced-individuals/sequenced-individuals
 
+# get info for a single indiv
 do1indiv () {
     # subject a.k.a. individual
     indiv=$1
@@ -56,6 +59,7 @@ do1indiv () {
     done
 }
 
+# do all individuals
 cp $rownames $summaryfile
 indivs="$(cut -f1 $seqind | sed 's/CMC_//')"
 for ind in $indivs; do
