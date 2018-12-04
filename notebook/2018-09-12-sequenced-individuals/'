@@ -44,14 +44,6 @@ The printed inventory on the hard disks received from the sequencing company is 
 
 ## Summary: from FASTQs to VCFs
 
-This section presents results generated semi-autimatically.  Key files include
-
-* `tables/summary-rownames.csv` is a boiler plate containing row names (pertaining to the workflow) for the following tables:
-* `tables/summary-common-sample.tsv` and `tables/summary-benchmark.tsv` have been manually filled out
-* `src/summary-cmc.sh` (run on `ada`) automatically generates `results/2018-09-12-sequenced-individuals/summary-cmc.tsv`
-
-Note that the location of `summary-cmc.tsv` is not the `tables/` directory but under `results/`, reflecting the fact that it has been generated not manually but by running a script (therefore should not be version controlled).
-
 The table below summarizes progress in the analytic workflow across experiments on various individuals (i.e. real or modeled subjects/individuals).
 
 Object types of workflow:
