@@ -1,6 +1,6 @@
 ---
 layout: default
-#title: 
+title: Summary on CMC and Benchmark
 #featimg: density-1.png
 ---
 
@@ -32,8 +32,18 @@ cat $samples
 ## Summary
 
 ```{r}
-summ <- list(cmc = read.delim("~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv"))
-summ$cmc
+fl <- c(cmc = "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv",
+        cs = "~/projects/bsm/tables/summary-common-sample.tsv",
+        bm = "~/projects/bsm/tables/summary-benchmark.tsv")
+summ <- lapply(fl, read.delim, row.names = 1)
+summ
+```
+
+Write results to file
+
+```{r}
+summ.all <- do.call(cbind, summ)
+write.csv(summ.all, "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-all.csv")
 ```
 
 The printed inventory on the hard disks received from the sequencing company is accessible [here](https://photos.app.goo.gl/ttjSFEHPcSV1Wrvt5).  It shows that the samples that are missing from server `ada` are also missing from the printed inventory, therefore these samples are missing because haven't been sequenced yet.  Note that the contents of one of the hard drives has been verified to match the printed inventory.
