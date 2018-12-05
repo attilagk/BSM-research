@@ -7,6 +7,7 @@ featimg: "benchmark-som-mut-AA-2.png"
 
 Testing JointSNVMix2 and inspecting its output: the posterior probability of various genotypes for the case or control sample and of various types of somatic mutation.  The unfiltered output of JointSNVMix2 is an impractically large table, whose rows correspond to genomic positions.  One of the goals of this analysis to make JointSNVMix2 practical by finding a reasonable somatic threshold for filtering (defined as the sum of probabilities p_AA_AB + p_AA_BB).  Based on the results below a somatic threshold of 0.1 seems reasonable.
 
+
 ## Preparation
 
 The `bash` code below shows how the `jsm.tsv` files have been generated.  See details in each `runme` file.
@@ -57,6 +58,16 @@ GThist <- function(sset, dt = records$benchmark, lay = c(length(sset), 1), ...) 
     histogram(~ p | GT, data = dt, subset = GT %in% sset,
               layout = lay, xlab = "Posterior Probability", ...)
 }
+```
+
+### Runtimes
+
+```{r runtimes}
+runtimes <- read.csv("/big/results/bsm/2018-11-12-JointSNVMix/runtime.csv")
+runtimes <- rbind(runtimes,
+                  data.frame(task = "both", length.Mb = runtimes$length.Mb[1:3],
+                             realtime.s = runtimes$realtime.s[1:3] + runtimes$realtime.s[4:6]))
+xyplot(realtime.s ~ length.Mb | task, data = runtimes, layout = c(3, 1), type = "b", pch = 16, lty = 3)
 ```
 
 ## Results: benchmark

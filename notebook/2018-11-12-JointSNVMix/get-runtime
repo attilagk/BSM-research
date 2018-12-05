@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+indir=/big/results/bsm/2018-11-12-JointSNVMix
+outfile=$indir/runtime.csv
+
+echo task,length.Mb,realtime.s > $outfile
+
+gettimes4task () {
+task=$1
+for len in 1{,0,00}; do
+    f=$indir/${len}Mb/jsm-$task.log
+    echo -n $task,$len,
+    sed -n '/real/ { s/^real\s*\([[:digit:]]\+\).*$/\1/; p }' $f
+done
+}
+
+gettimes4task train >> $outfile
+gettimes4task classify >> $outfile
