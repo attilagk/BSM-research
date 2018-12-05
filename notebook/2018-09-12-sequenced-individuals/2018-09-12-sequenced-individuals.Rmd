@@ -42,6 +42,11 @@ cat $samples
 
 The printed inventory on the hard disks received from the sequencing company is accessible [here](https://photos.app.goo.gl/ttjSFEHPcSV1Wrvt5).  It shows that the samples that are missing from server `ada` are also missing from the printed inventory, therefore these samples are missing because haven't been sequenced yet.  Note that the contents of one of the hard drives has been verified to match the printed inventory.
 
+Inspecting `BSM_Project_Chess_v2.csv` shows that the lack of FASTQ files can have two reasons
+
+1. existing library not sequenced; see MSSM_295 and MSSM_304
+1. nonexisting library; see PITT_064, PITT_118
+
 ## Summary: from FASTQs to VCFs
 
 This section presents results generated semi-autimatically.  Key files include
