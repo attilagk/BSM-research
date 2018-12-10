@@ -81,16 +81,16 @@ The upper and lower graphs show the same distributions but on different scaling 
 |--------------------|------------------------|--------------------|
 | symbol             |control sample genotype |case sample genotype|
 |--------------------|------------------------|--------------------|
-| AA_XY              | AA (Ref/Ref)           | any genotype       |
-| AB_XY              | AB (Ref/Alt)           | any genotype       |
-| BB_XY              | BB (Alt/Alt)           | any genotype       |
+| AA_UV              | AA (Ref/Ref)           | any genotype       |
+| AB_UV              | AB (Ref/Alt)           | any genotype       |
+| BB_UV              | BB (Alt/Alt)           | any genotype       |
 |--------------------|------------------------|--------------------|
 
 In other words the figure presents a histogram of marginal probabilities for each *control* sample genotype.
 
 ```{r benchmark-controlGT}
-GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotypes")
-GThist(c("AA_XY", "AB_XY", "BB_XY"), main = "Control sample genotypes", ylim = c(0, 1.5))
+GThist(c("AA_UV", "AB_UV", "BB_UV"), main = "Control sample genotypes")
+GThist(c("AA_UV", "AB_UV", "BB_UV"), main = "Control sample genotypes", ylim = c(0, 1.5))
 ```
 
 Clearly, most but few positions are likely to have AA (Ref/Ref) genotype.
@@ -102,14 +102,14 @@ Here I present a histogram of marginal probabilities for each *case*  sample gen
 |--------------------|------------------------|--------------------|
 | symbol             |control sample genotype |case sample genotype|
 |--------------------|------------------------|--------------------|
-| XY_AA              | any genotype           | AA (Ref/Ref)       |
-| XY_AB              | any genotype           | AB (Ref/Alt)       |
-| XY_BB              | any genotype           | BB (Alt/Alt)       |
+| UV_AA              | any genotype           | AA (Ref/Ref)       |
+| UV_AB              | any genotype           | AB (Ref/Alt)       |
+| UV_BB              | any genotype           | BB (Alt/Alt)       |
 |--------------------|------------------------|--------------------|
 
 ```{r benchmark-caseGT, echo=TRUE}
-GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotypes")
-GThist(c("XY_AA", "XY_AB", "XY_BB"), main = "Case sample genotypes", ylim = c(0, 1.5))
+GThist(c("UV_AA", "UV_AB", "UV_BB"), main = "Case sample genotypes")
+GThist(c("UV_AA", "UV_AB", "UV_BB"), main = "Case sample genotypes", ylim = c(0, 1.5))
 ```
 
 ### Probability of somatic mutation from AA genotype
@@ -121,22 +121,22 @@ Below, each histogram shows the distribution of the probability of somatic mutat
 |--------------------|------------------------|--------------------|
 | AA_AB              | AA (Ref/Ref)           | AB (Ref/Alt)       |
 | AA_BB              | AA (Ref/Ref)           | BB (Alt/Alt)       |
-| AA_XB              | AA (Ref/Ref)           | AB or BB           |
+| AA_UB              | AA (Ref/Ref)           | AB or BB           |
 |--------------------|------------------------|--------------------|
 
 ```{r benchmark-som-mut-AA, echo=TRUE}
-GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype")
-GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", ylim = c(0, 1.5))
+GThist(c("AA_AB", "AA_BB", "AA_UB"), main = "Somatic mutations from AA genotype")
+GThist(c("AA_AB", "AA_BB", "AA_UB"), main = "Somatic mutations from AA genotype", ylim = c(0, 1.5))
 ```
 
 The same histograms with counts instead of relative frequencies:
 
 ```{r benchmark-som-mut-AA-counts, echo=TRUE}
-GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", type = "count")
-GThist(c("AA_AB", "AA_BB", "AA_XB"), main = "Somatic mutations from AA genotype", type = "count", ylim = c(0, 60))
+GThist(c("AA_AB", "AA_BB", "AA_UB"), main = "Somatic mutations from AA genotype", type = "count")
+GThist(c("AA_AB", "AA_BB", "AA_UB"), main = "Somatic mutations from AA genotype", type = "count", ylim = c(0, 60))
 ```
 
-The histograms on the right (AA_XB) help establish that the vast majority of $$p_\mathrm{somatic} = p_{AA\_XB} = p_{AA\_AB} + p_{AA\_BB}$$ values are below $$0.1$$.  Therefore, $$0.1$$ can be used as `SOMATIC_THRESHOLD` argument to the `--somatic_threshold` option for the `jsm.py classify` command. 
+The histograms on the right (AA_UB) help establish that the vast majority of $$p_\mathrm{somatic} = p_{AA\_UB} = p_{AA\_AB} + p_{AA\_BB}$$ values are below $$0.1$$.  Therefore, $$0.1$$ can be used as `SOMATIC_THRESHOLD` argument to the `--somatic_threshold` option for the `jsm.py classify` command. 
 
 ### Probability of somatic mutation from BB genotype
 
@@ -147,12 +147,12 @@ Like above but the sample genotype is BB so that single mutation is BB_AB and do
 |--------------------|------------------------|--------------------|
 | BB_AA              | BB (Alt/Alt)           | AA (Ref/Ref)       |
 | BB_AB              | BB (Alt/Alt)           | AB (Ref/Alt)       |
-| BB_AX              | BB (Alt/Alt)           | AA or AB           |
+| BB_AU              | BB (Alt/Alt)           | AA or AB           |
 |--------------------|------------------------|--------------------|
 
 ```{r benchmark-som-mut-BB, echo=TRUE}
-GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB genotype")
-GThist(c("BB_AB", "BB_AA", "BB_AX"), main = "Somatic mutations from BB genotype", ylim = c(0, 1.5))
+GThist(c("BB_AB", "BB_AA", "BB_AU"), main = "Somatic mutations from BB genotype")
+GThist(c("BB_AB", "BB_AA", "BB_AU"), main = "Somatic mutations from BB genotype", ylim = c(0, 1.5))
 ```
 
 The results suggest there are essentially no mutations from BB genotype.
@@ -166,12 +166,12 @@ Here the control sample has genotype AB and there are two kinds of single mutati
 |--------------------|------------------------|--------------------|
 | AB_AA              | AB (Ref/Alt)           | AA (Ref/Ref)       |
 | AB_BB              | AB (Ref/Alt)           | BB (Alt/Alt)       |
-| AB_XX              | AB (Ref/Alt)           | AA or BB           |
+| AB_UU              | AB (Ref/Alt)           | AA or BB           |
 |--------------------|------------------------|--------------------|
 
 ```{r benchmark-som-mut-AB, echo=TRUE}
-GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype")
-GThist(c("AB_AA", "AB_BB", "AB_XX"), main = "Somatic mutations from AB genotype", ylim = c(0, 1.5))
+GThist(c("AB_AA", "AB_BB", "AB_UU"), main = "Somatic mutations from AB genotype")
+GThist(c("AB_AA", "AB_BB", "AB_UU"), main = "Somatic mutations from AB genotype", ylim = c(0, 1.5))
 ```
 
 The picture is more similar to mutations from AA genotype (in contrast with those from BB genotype).
@@ -183,8 +183,8 @@ In this section the case sample is NeuN+ brain cells and the control sample is f
 ### Genotype probabilities for control sample (Mix3)
 
 ```{r common-sample-controlGT}
-GThist(c("AA_XY", "AB_XY", "BB_XY"), dt = records$common.sample, main = "Control sample genotypes")
-GThist(c("AA_XY", "AB_XY", "BB_XY"), dt = records$common.sample, main = "Control sample genotypes", ylim = c(0, 0.1))
+GThist(c("AA_UV", "AB_UV", "BB_UV"), dt = records$common.sample, main = "Control sample genotypes")
+GThist(c("AA_UV", "AB_UV", "BB_UV"), dt = records$common.sample, main = "Control sample genotypes", ylim = c(0, 0.1))
 ```
 
 ### Genotype probabilities for case sample (Mix1)
@@ -192,8 +192,8 @@ GThist(c("AA_XY", "AB_XY", "BB_XY"), dt = records$common.sample, main = "Control
 Here I present a histogram of marginal probabilities for each *case*  sample genotype.
 
 ```{r common-sample-caseGT, echo=TRUE}
-GThist(c("XY_AA", "XY_AB", "XY_BB"), dt = records$common.sample, main = "Case sample genotypes")
-GThist(c("XY_AA", "XY_AB", "XY_BB"), dt = records$common.sample, main = "Case sample genotypes", ylim = c(0, 0.1))
+GThist(c("UV_AA", "UV_AB", "UV_BB"), dt = records$common.sample, main = "Case sample genotypes")
+GThist(c("UV_AA", "UV_AB", "UV_BB"), dt = records$common.sample, main = "Case sample genotypes", ylim = c(0, 0.1))
 ```
 
 ### Probability of somatic mutation from AA genotype
@@ -201,15 +201,15 @@ GThist(c("XY_AA", "XY_AB", "XY_BB"), dt = records$common.sample, main = "Case sa
 Below, each histogram shows the distribution of the probability of somatic mutation when the case sample genotype is AA (Ref/Ref).  The somatic mutation may be single (one allele is changed: AA_AB) or double (both alleles are changed: AA_BB).
 
 ```{r common-sample-som-mut-AA, echo=TRUE}
-GThist(c("AA_AB", "AA_BB", "AA_XB"), dt = records$common.sample, main = "Somatic mutations from AA genotype")
-GThist(c("AA_AB", "AA_BB", "AA_XB"), dt = records$common.sample, main = "Somatic mutations from AA genotype", ylim = c(0, 0.1))
+GThist(c("AA_AB", "AA_BB", "AA_UB"), dt = records$common.sample, main = "Somatic mutations from AA genotype")
+GThist(c("AA_AB", "AA_BB", "AA_UB"), dt = records$common.sample, main = "Somatic mutations from AA genotype", ylim = c(0, 0.1))
 ```
 
 The same histograms with counts instead of relative frequencies:
 
 ```{r common-sample-som-mut-AA-counts, echo=TRUE}
-GThist(c("AA_AB", "AA_BB", "AA_XB"), dt = records$common.sample, main = "Somatic mutations from AA genotype", type = "count")
-GThist(c("AA_AB", "AA_BB", "AA_XB"), dt = records$common.sample, main = "Somatic mutations from AA genotype", type = "count", ylim = c(0, 10))
+GThist(c("AA_AB", "AA_BB", "AA_UB"), dt = records$common.sample, main = "Somatic mutations from AA genotype", type = "count")
+GThist(c("AA_AB", "AA_BB", "AA_UB"), dt = records$common.sample, main = "Somatic mutations from AA genotype", type = "count", ylim = c(0, 10))
 ```
 
 ### Probability of somatic mutation from BB genotype
@@ -217,15 +217,15 @@ GThist(c("AA_AB", "AA_BB", "AA_XB"), dt = records$common.sample, main = "Somatic
 Like above but the sample genotype is BB so that single mutation is BB_AB and double mutation is BB_AA.
 
 ```{r common-sample-som-mut-BB, echo=TRUE}
-GThist(c("BB_AB", "BB_AA", "BB_AX"), dt = records$common.sample, main = "Somatic mutations from BB genotype")
-GThist(c("BB_AB", "BB_AA", "BB_AX"), dt = records$common.sample, main = "Somatic mutations from BB genotype", ylim = c(0, 0.1))
+GThist(c("BB_AB", "BB_AA", "BB_AU"), dt = records$common.sample, main = "Somatic mutations from BB genotype")
+GThist(c("BB_AB", "BB_AA", "BB_AU"), dt = records$common.sample, main = "Somatic mutations from BB genotype", ylim = c(0, 0.1))
 ```
 
 The same histograms with counts instead of relative frequencies:
 
 ```{r common-sample-som-mut-BB-counts, echo=TRUE}
-GThist(c("BB_AB", "BB_AA", "BB_AX"), dt = records$common.sample, main = "Somatic mutations from BB genotype", type = "count")
-GThist(c("BB_AB", "BB_AA", "BB_AX"), dt = records$common.sample, main = "Somatic mutations from BB genotype", type = "count", ylim = c(0, 10))
+GThist(c("BB_AB", "BB_AA", "BB_AU"), dt = records$common.sample, main = "Somatic mutations from BB genotype", type = "count")
+GThist(c("BB_AB", "BB_AA", "BB_AU"), dt = records$common.sample, main = "Somatic mutations from BB genotype", type = "count", ylim = c(0, 10))
 ```
 
 
@@ -234,13 +234,13 @@ GThist(c("BB_AB", "BB_AA", "BB_AX"), dt = records$common.sample, main = "Somatic
 Here the control sample has genotype AB and there are two kinds of single mutation: AB_AA (the Ref allele A replaces the Alt allele A in the case sample) and AB_BB (the Alt allele B replaces the Ref allele A in the case sample).
 
 ```{r common-sample-som-mut-AB, echo=TRUE}
-GThist(c("AB_AA", "AB_BB", "AB_XX"), dt = records$common.sample, main = "Somatic mutations from AB genotype")
-GThist(c("AB_AA", "AB_BB", "AB_XX"), dt = records$common.sample, main = "Somatic mutations from AB genotype", ylim = c(0, 0.1))
+GThist(c("AB_AA", "AB_BB", "AB_UU"), dt = records$common.sample, main = "Somatic mutations from AB genotype")
+GThist(c("AB_AA", "AB_BB", "AB_UU"), dt = records$common.sample, main = "Somatic mutations from AB genotype", ylim = c(0, 0.1))
 ```
 
 The same histograms with counts instead of relative frequencies:
 
 ```{r common-sample-som-mut-AB-counts, echo=TRUE}
-GThist(c("AB_AA", "AB_BB", "AB_XX"), dt = records$common.sample, main = "Somatic mutations from AB genotype", type = "count")
-GThist(c("AB_AA", "AB_BB", "AB_XX"), dt = records$common.sample, main = "Somatic mutations from AB genotype", type = "count", ylim = c(0, 10))
+GThist(c("AB_AA", "AB_BB", "AB_UU"), dt = records$common.sample, main = "Somatic mutations from AB genotype", type = "count")
+GThist(c("AB_AA", "AB_BB", "AB_UU"), dt = records$common.sample, main = "Somatic mutations from AB genotype", type = "count", ylim = c(0, 10))
 ```
