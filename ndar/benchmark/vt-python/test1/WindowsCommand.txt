@@ -1,0 +1,20 @@
+C:\Users\obenshaindw\Downloads\vtcmd-attila-test0.tar\vtcmd-attila-test0\test0>vtcmd nichd_btb02.csv genomics_subject02.csv genomics_sample03.csv --username attilagk --password Chesslab13 --listDir . --collectionID 2458 --title test0 --buildPackage --description "Testing submission"
+
+Validating files...
+100%|####################################################################################| 3/3 [00:07<00:00,  2.58s/it]
+
+Error! Check file: genomics_sample03.csv
+
+Error! Check file: genomics_subject02.csv
+
+Error! Check file: nichd_btb02.csv
+Validation report output to: C:\Users\obenshaindw\NDAValidationResults\validation_results_20181211T165255.csv
+
+Note: Your data has warnings. To save warnings, run again with -w argument.
+
+All files have finished validating.
+
+
+No files passed validation, please correct any errors and validate again.
+Please contact NDAHelp@mail.nih.gov.
+

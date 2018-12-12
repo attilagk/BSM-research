@@ -1,3 +1,3 @@
 genomics_sample,3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 subjectkey,experiment_id,src_subject_id,interview_age,interview_date,sample_description,sample_id_original,organism,sample_amount,sample_unit,data_code,data_file1_type,data_file1,data_file2_type,data_file2,data_file3,data_file3_type,data_file4,data_file4_type,storage_protocol,data_file_location,biorepository,patient_id_biorepository,sample_id_biorepository,cell_id_original,cell_id_biorepository,comments_misc,site,rat280,rat230,gqn,seq_batch
-NDARXB836NBA,,Mix1A,0,01/10/18,,,human,,,,FASTQ,/home/attila/projects/bsm/ndar/benchmark/vt-python/test0/test_1.fq,FASTQ,/home/attila/projects/bsm/ndar/benchmark/vt-python/test0/test_2.fq,,,,,,,,,,,,,,,,,
+NDARXB836NBA,benchmark,Mix1A,0,01/10/2018,NA,,human,NA,NA,,FASTQ,/home/attila/projects/bsm/ndar/benchmark/vt-python/test0/test_1.fq,FASTQ,/home/attila/projects/bsm/ndar/benchmark/vt-python/test0/test_2.fq,,,,,NA,.,Coriell,Coriell,Coriell,NA,,,,,,,

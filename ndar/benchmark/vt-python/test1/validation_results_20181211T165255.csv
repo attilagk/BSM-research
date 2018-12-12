@@ -1,0 +1,20 @@
+FILE,ID,STATUS,EXPIRATION_DATE,ERRORS,COLUMN,MESSAGE,RECORD
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,experiment_id,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sample_description,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sample_id_original,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sample_amount,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sample_unit,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,storage_protocol,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,data_file_location,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,biorepository,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,patient_id_biorepository,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sample_id_biorepository,Required fields must not be null.,1
+genomics_sample03.csv,5dcf67ab-9d24-4a7e-861b-46ead8c33909,CompleteWithErrors,2018-12-12T16:52:55.757-0500,invalidDate,interview_date,The DATE field does not match the NDA definition for Date fields which is MM/DD/YYYY. Leading zeroes are required for single digit day and month.,1
+genomics_subject02.csv,1fdffd64-4af3-4a4d-9422-bd796dc5f873,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,phenotype,Required fields must not be null.,1
+genomics_subject02.csv,1fdffd64-4af3-4a4d-9422-bd796dc5f873,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,twins_study,Required fields must not be null.,1
+genomics_subject02.csv,1fdffd64-4af3-4a4d-9422-bd796dc5f873,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sibling_study,Required fields must not be null.,1
+genomics_subject02.csv,1fdffd64-4af3-4a4d-9422-bd796dc5f873,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,family_study,Required fields must not be null.,1
+genomics_subject02.csv,1fdffd64-4af3-4a4d-9422-bd796dc5f873,CompleteWithErrors,2018-12-12T16:52:55.757-0500,nullRequired,sample_taken,Required fields must not be null.,1
+genomics_subject02.csv,1fdffd64-4af3-4a4d-9422-bd796dc5f873,CompleteWithErrors,2018-12-12T16:52:55.757-0500,invalidDate,interview_date,The DATE field does not match the NDA definition for Date fields which is MM/DD/YYYY. Leading zeroes are required for single digit day and month.,1
+nichd_btb02.csv,359ca551-fba0-4144-ab88-cc9a86567b33,CompleteWithErrors,2018-12-12T16:52:55.765-0500,notInteger,interview_age,The field provided was not an integer.,1
+nichd_btb02.csv,359ca551-fba0-4144-ab88-cc9a86567b33,CompleteWithErrors,2018-12-12T16:52:55.765-0500,invalidDate,interview_date,The DATE field does not match the NDA definition for Date fields which is MM/DD/YYYY. Leading zeroes are required for single digit day and month.,1

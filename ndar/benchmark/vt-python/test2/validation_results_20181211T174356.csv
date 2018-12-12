@@ -1,0 +1,9 @@
+FILE,ID,STATUS,EXPIRATION_DATE,ERRORS,COLUMN,MESSAGE,RECORD
+nichd_btb02.csv,e287063f-2d86-40bd-87dc-cb1a9034ad7d,CompleteWithWarnings,2018-12-12T17:43:56.630-0500,None,None,None,None
+genomics_subject02.csv,cc7c0e35-8ddc-4c6a-a072-4c123b0e5e47,CompleteWithErrors,2018-12-12T17:43:56.581-0500,conditionalValidation,sample_id_original,Field sample_id_original is conditionally required when sample_taken == 'Yes',1
+genomics_subject02.csv,cc7c0e35-8ddc-4c6a-a072-4c123b0e5e47,CompleteWithErrors,2018-12-12T17:43:56.581-0500,conditionalValidation,sample_description,Field sample_description is conditionally required when sample_taken == 'Yes',1
+genomics_subject02.csv,cc7c0e35-8ddc-4c6a-a072-4c123b0e5e47,CompleteWithErrors,2018-12-12T17:43:56.581-0500,conditionalValidation,biorepository,Field biorepository is conditionally required when sample_taken == 'Yes',1
+genomics_sample03.csv,7920638f-0216-4118-a62d-a8d6dccd8d7c,CompleteWithErrors,2018-12-12T17:43:56.757-0500,invalidRange,sample_description,Data fields must match the value range fields. Please note that texts are case sensitive.,1
+genomics_sample03.csv,7920638f-0216-4118-a62d-a8d6dccd8d7c,CompleteWithErrors,2018-12-12T17:43:56.757-0500,notFloat,sample_amount,The field provided was not a number.,1
+genomics_sample03.csv,7920638f-0216-4118-a62d-a8d6dccd8d7c,CompleteWithErrors,2018-12-12T17:43:56.757-0500,nullRequired,sample_id_original,Required fields must not be null.,1
+genomics_sample03.csv,7920638f-0216-4118-a62d-a8d6dccd8d7c,CompleteWithErrors,2018-12-12T17:43:56.757-0500,notInteger,experiment_id,The field provided was not an integer.,1

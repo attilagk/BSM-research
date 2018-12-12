@@ -1,3 +1,3 @@
 genomics_subject,2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 subjectkey,src_subject_id,interview_date,interview_age,gender,race,ethnic_group,phenotype,phenotype_description,twins_study,sibling_study,family_study,family_user_def_id,subjectkey_mother,subjectkey_father,subjectkey_sibling1,sibling_type1,subjectkey_sibling2,sibling_type2,subjectkey_sibling3,sibling_type3,subjectkey_sibling4,sibling_type4,zygosity,sample_taken,sample_id_original,sample_description,biorepository,patient_id_biorepository,sample_id_biorepository,cell_id_original,cell_id_biorepository,adi_dx,ados_dx
-NDARXB836NBA,Mix1A,01/10/18,0,F,White,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+NDARXB836NBA,Mix1A,01/10/2018,0,F,White,,normal,,No,No,No,,,,,,,,,,,,,Yes,,,,,,,,,
