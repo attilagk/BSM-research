@@ -1,5 +1,0 @@
-FILE,ID,STATUS,EXPIRATION_DATE,ERRORS,COLUMN,MESSAGE,RECORD
-genomics_subject02.csv,4cf5be80-7178-4c14-85ba-ea09fd8bf064,CompleteWithWarnings,2018-12-12T17:55:26.801-0500,None,None,None,None
-nichd_btb02.csv,7b44df22-a7cd-477e-a5ff-88bf7ecdffd6,CompleteWithWarnings,2018-12-12T17:55:26.775-0500,None,None,None,None
-genomics_sample03.csv,da61b9c8-5be4-4d0c-ab23-39029f92ba70,CompleteWithErrors,2018-12-12T17:55:26.775-0500,missingExperiment,experiment_id,Experiment 0 provided was not found.,1
-genomics_sample03.csv,da61b9c8-5be4-4d0c-ab23-39029f92ba70,CompleteWithErrors,2018-12-12T17:55:26.775-0500,invalidRange,sample_description,Data fields must match the value range fields. Please note that texts are case sensitive.,1

@@ -1,0 +1,4 @@
+FILE,ID,STATUS,EXPIRATION_DATE,ERRORS,COLUMN,MESSAGE,RECORD
+genomics_subject02.csv,36bbcb57-2fbd-4062-a583-4a30095fd040,CompleteWithWarnings,2018-12-14T12:23:26.450-0500,None,None,None,None
+genomics_sample03.csv,2d849ed2-43fc-453e-8fbb-5520626037a2,CompleteWithWarnings,2018-12-14T12:23:26.450-0500,None,None,None,None
+nichd_btb02.csv,93fc2964-05dc-407c-8d52-db1a9eeda45a,CompleteWithWarnings,2018-12-14T12:23:26.450-0500,None,None,None,None

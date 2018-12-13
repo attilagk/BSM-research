@@ -1,0 +1,4 @@
+FILE,ID,STATUS,EXPIRATION_DATE,ERRORS,COLUMN,MESSAGE,RECORD
+nichd_btb02.csv,40a99742-d202-4590-ba68-8a9aaf9f0146,CompleteWithWarnings,2018-12-14T12:50:25.850-0500,None,None,None,None
+genomics_subject02.csv,a0b8b6a9-6c04-45ee-b92c-c4a89a7bbb5b,CompleteWithWarnings,2018-12-14T12:50:25.856-0500,None,None,None,None
+genomics_sample03.csv,575a27fb-1b77-4292-86ff-696e45be2010,CompleteWithErrors,2018-12-14T12:50:25.861-0500,tooLong,data_file_location,Alphanumeric fields must be less than or equal to the strings length.,1
