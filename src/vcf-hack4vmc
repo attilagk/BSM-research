@@ -51,7 +51,6 @@ if test -z $region; then
 else
     regionstr="-r $region"
 fi
-echo $regionstr; exit
 
 # hack a single VCF
 hack1vcf () {
@@ -59,7 +58,8 @@ hack1vcf () {
     outvcf=$2
     logFile=`dirname $outvcf`/log/`basename $outvcf .vcf`.log
     # open and filter VCF
-    bcftools view -O v -r $region -v $varType $invcf 2>> $logFile |
+    #bcftools view -O v -r $region -v $varType $invcf 2>> $logFile |
+    bcftools view -O v $regionstr -v $varType $invcf 2>> $logFile |
     # add GT field if missing
     $scriptdir/vcf-add-GT -O v -a $caseSample -b $controlSample 2>> $logFile |
     # annotate with entropy
