@@ -22,6 +22,8 @@ calls
 *.syn_cache
 *.s_cache
 *.s.Rmd
+*.tar
+*.tar.gz
 
 # ignore knitr's cache
 **/cache/
