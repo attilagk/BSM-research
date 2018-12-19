@@ -8,11 +8,10 @@ f3=genomics_sample03.csv
 
 vtcmd \
 	$f1 $f2 $f3 \
-    --username attilagk \
-    --password Chesslab13 \
-    --listDir $d \
-    --collectionID 2458 \
-    --title Benchmark \
-    --buildPackage \
-    --description "FASTQs and BAMs for Benchmark (CEPH/Utah DNA mixes), Chess lab" \
-    
+    -u attilagk \
+    -p Chesslab13 \
+    -l /projects/bsm /projects/bsm/reads/2018-01-10-Benchmark-DV-X10 \
+    -c 2458 \
+    -t Benchmark \
+    -d "FASTQs and BAMs for Benchmark (CEPH/Utah DNA mixes), Chess lab" \
+    -b
