@@ -12,13 +12,13 @@ fi
 for fname in *.selfSM; do
     indivID=$(echo $fname | sed "s/$fname_pattern/\1/")
     tissue=$(echo $fname | sed "s/$fname_pattern/\3/")
-    leftcols=$(echo -ne "$indivID\t$tissue\t")
+    leftcols=$(echo -ne "${indivID}_$tissue\t$indivID\t$tissue\t")
     rightcols=$(sed 1d $fname)
     echo "$leftcols$rightcols">> $body
-    sed 2d $fname >> $header
+    sed 2d $fname | tr -d '#' >> $header
 done
 
-leftcols=$(echo -ne "indivID\ttissue\t")
+leftcols=$(echo -ne "sample\tindivID\ttissue\t")
 rightcols=$(sed -n 1p $header)
 echo "$leftcols$rightcols" > all.selfSM
 cat $body >> all.selfSM
