@@ -5,6 +5,9 @@ fname_pattern='\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\([^.]\+\)\..*$'
 header=`mktemp`
 body=`mktemp`
 
+if test -f all.selfSM; then
+    rm all.selfSM
+fi
 
 for fname in *.selfSM; do
     indivID=$(echo $fname | sed "s/$fname_pattern/\1/")
