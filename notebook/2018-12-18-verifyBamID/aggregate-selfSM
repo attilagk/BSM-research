@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# PITT_118_NeuN_pl.selfSM
+# aggregate .selfSM files of verifyBamID across multiple samples
 
 fname_pattern='\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\([^.]\+\)\..*$'
 header=`mktemp`
@@ -8,13 +8,15 @@ body=`mktemp`
 
 for fname in *.selfSM; do
     indivID=$(echo $fname | sed "s/$fname_pattern/\1/")
-    celltype=$(echo $fname | sed "s/$fname_pattern/\3/")
-    leftcols=$(echo -ne "$indivID\t$celltype\t")
+    tissue=$(echo $fname | sed "s/$fname_pattern/\3/")
+    leftcols=$(echo -ne "$indivID\t$tissue\t")
     rightcols=$(sed 1d $fname)
     echo "$leftcols$rightcols">> $body
     sed 2d $fname >> $header
 done
 
-sed -n 1p $header > all.selfSM
+leftcols=$(echo -ne "indivID\ttissue\t")
+rightcols=$(sed -n 1p $header)
+echo "$leftcols$rightcols" > all.selfSM
 cat $body >> all.selfSM
 rm $header $body
