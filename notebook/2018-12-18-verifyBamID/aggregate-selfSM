@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+# PITT_118_NeuN_pl.selfSM
+
+fname_pattern='\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\([^.]\+\)\..*$'
+header=`mktemp`
+body=`mktemp`
+
+
+for fname in *.selfSM; do
+    indivID=$(echo $fname | sed "s/$fname_pattern/\1/")
+    celltype=$(echo $fname | sed "s/$fname_pattern/\3/")
+    leftcols=$(echo -ne "$indivID\t$celltype\t")
+    rightcols=$(sed 1d $fname)
+    echo "$leftcols$rightcols">> $body
+    sed 2d $fname >> $header
+done
+
+sed -n 1p $header > all.selfSM
+cat $body >> all.selfSM
+rm $header $body

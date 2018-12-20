@@ -12,6 +12,6 @@ vtcmd \
     -p Chesslab13 \
     -l /projects/bsm/alignments/ceph-benchmark/ /projects/bsm/reads/2018-01-10-Benchmark-DV-X10/ \
     -a BSMN-S3 \
-    -t Benchmark \
+    -t "U01MH106891, reference_tissue, benchmark/mixin" \
     -d "FASTQs and BAMs for Benchmark (CEPH/Utah DNA mixes), Chess lab" \
     -b
