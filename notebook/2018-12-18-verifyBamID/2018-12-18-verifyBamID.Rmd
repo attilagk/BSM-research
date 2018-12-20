@@ -1,0 +1,37 @@
+---
+layout: default
+#title: 
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
+featimg: "venn-common-sample-snvs-1.png"
+---
+
+Hello, World!
+
+## Preparation
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "600px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+## Results
+
+```{r}
+selfSM <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.selfSM")
+```
+
+```{r sequence-only}
+dotplot(sample ~ FREELK0 - FREELK1, data = selfSM)
+dotplot(sample ~ FREEMIX, data = selfSM)
+```
+
+```{r sequence-chip}
+dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM)
+dotplot(sample ~ CHIPMIX, data = selfSM)
+```
