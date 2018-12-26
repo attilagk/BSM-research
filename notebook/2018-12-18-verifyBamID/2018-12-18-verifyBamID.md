@@ -1,0 +1,92 @@
+---
+layout: default
+title: Swapped sample labels and contamination
+tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
+featimg: "sequence-only-2.png"
+---
+
+Swapped sample labels and contamination is tested for our sequencing data for the BSM project from CMC individuals.
+
+## Introduction
+
+Sample mislabeling (swaps) and contamination is examined using [verifyBamID](https://genome.sph.umich.edu/wiki/VerifyBamID).  Quote from the documentation:
+
+> verifyBamID is a software that verifies whether the reads in particular file match previously known genotypes for an individual (or group of individuals), and checks whether the reads are contaminated as a mixture of two samples. verifyBamID can detect sample contamination and swaps when external genotypes are available. When external genotypes are not available, verifyBamID still robustly detects sample swaps. 
+
+## Preparation
+
+Synapse's [command line client](https://python-docs.synapse.org/build/html/CommandLineClient.html) was used to download BED, BIM and FAM files for preimputed CMC genotype data.  [PLINK 1.9](https://www.cog-genomics.org/plink/1.9/) was used to recode these files to VCF.  Then the VCF was compared by `verifyBamID` to each of the BAM files of our BSM project that come from CMC individuals.
+
+
+```bash
+# to be run on Ada
+cd /home/attila/projects/bsm/notebook/2018-12-18-verifyBamID
+./getBED.sh # download CMC-preimputed.{bed,bim,fam}
+./recode2vcf # recode CMC-preimputed.bed to CMC-preimputed.vcf
+mkdir results && cd results # subdirectory for verifyBamID results
+./doCMCverifyBamID # run verifyBamID on all CMC bam files of the BSM project
+# ...wait several hours until all verifyBamID processes exit...
+./aggregate-selfSM
+# transfer results to local workstation for further analysis with R
+```
+
+On the configuration of `verifyBamID`
+
+1. the `--ignoreRG` flag was turned on so that no read group specific result was produced (no `XXX.selfRG` and `XXX.depthRG` files)
+1. by default the `--self` flag was on so that `verifyBamID` 
+   > does not try to compare the sequence reads to identify the best matching individual (which is possible with `--best` option). It only compares with the external genotypes from the same individual to the sequenced individual.---quoted from the [website](https://genome.sph.umich.edu/wiki/VerifyBamID)
+1. the VCF has sample names like *0_MSSM_106* while our BAM files have sample names like *MSSM106_NeuN_pl*. This difference is taken care of by the `CMCverifyBamID` script that is eventually called by `doCMCverifyBamID`.
+
+
+
+## Results
+
+For details see [Interpreting output files](https://genome.sph.umich.edu/wiki/VerifyBamID#Interpreting_output_files) in the `verifyBamID` website. In short, the concatenated `XXX.selfSM` files are inspected here, which describe how the reads of the sequenced sample (in the BAM file) matches the corresponding genotyped sample in the VCF
+
+
+```r
+# import concatenated selfSM files (the output file of aggregate-selfSM)
+selfSM <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.selfSM")
+```
+
+### Sequence-only model
+
+The sequence-only model infers contamination based solely on the BAM file without referring to the "external" genotype in the VCF file.  Minus the log of $$f(y \mid \hat{\theta}) / f(y \mid \theta_0)$$, which is the likelihood ratio of the maximum likelihood of the unconstrained model accounting for contamination and the constrained null model of no contamination.  The larger the that value is the more likely is that the sample has been contaminated.
+
+A strongly related quantity is *FREEMIX*, the "sequence-only estimate of contamination (0-1 scale)".  The section [A guideline to interpret output files](https://genome.sph.umich.edu/wiki/VerifyBamID#A_guideline_to_interpret_output_files) advices:
+
+> When [CHIPMIX] $$\gg$$ 0.02 and/or [FREEMIX] $$\gg$$ 0.02, meaning 2% or more of non-reference bases are observed in reference sites, we recommend to examine the data more carefully for the possibility of contamination.
+
+The plots below suggest that *MSSM_373_muscle* may contain contamination.
+
+
+```r
+dotplot(sample ~ FREELK0 - FREELK1, data = selfSM)
+```
+
+<img src="figure/sequence-only-1.png" title="plot of chunk sequence-only" alt="plot of chunk sequence-only" width="600px" />
+
+```r
+dotplot(sample ~ FREEMIX, data = selfSM)
+```
+
+<img src="figure/sequence-only-2.png" title="plot of chunk sequence-only" alt="plot of chunk sequence-only" width="600px" />
+
+### Sequence + array model
+
+This model is an extension of the sequence-only model in that external genotype is also taken into account.  The quantities plotted below are the minus log likelihood ratio of the "contaminated" and the "uncontaminated" model as well as *CHIPMIX*.  These are analogous to the quantities of the sequence-only model but in this case there relationship between the two quantities is less clear.  For instance, *CHIPMIX* suggests, similarly to *FREEMIX*, that *MSSM_373_muscle* is a sole outlier but the likelihood ratio suggests otherwise.
+
+More importantly, *CHIPMIX* is close to 1 for all samples, which indicates swapped sample label, which is very hard to imagine for all samples.  What is going on?  Did the sample names of the BAMs not match those in the VCF?
+
+
+```r
+dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM)
+```
+
+<img src="figure/sequence-chip-1.png" title="plot of chunk sequence-chip" alt="plot of chunk sequence-chip" width="600px" />
+
+```r
+dotplot(sample ~ CHIPMIX, data = selfSM)
+```
+
+<img src="figure/sequence-chip-2.png" title="plot of chunk sequence-chip" alt="plot of chunk sequence-chip" width="600px" />
