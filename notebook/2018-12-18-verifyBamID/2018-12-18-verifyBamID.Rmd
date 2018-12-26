@@ -47,7 +47,7 @@ lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
 ```
 
-## Results
+## Results: verifyBamID
 
 For details see [Interpreting output files](https://genome.sph.umich.edu/wiki/VerifyBamID#Interpreting_output_files) in the `verifyBamID` website. In short, the concatenated `XXX.selfSM` files are inspected here, which describe how the reads of the sequenced sample (in the BAM file) matches the corresponding genotyped sample in the VCF
 
@@ -80,4 +80,65 @@ More importantly, *CHIPMIX* is close to 1 for all samples, which indicates swapp
 ```{r sequence-chip}
 dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM)
 dotplot(sample ~ CHIPMIX, data = selfSM)
+```
+
+## Confirming results with nucleotide pileup
+
+### Preparation
+
+The results by `verifyBamID` suggest that all BAMs mismatch the corresponding external genotype in the VCF.  To confirm this I selected 19 SNPs (every 40,000th SNP in the VCF) and compared each BAM's [nucleotide pileup](https://en.wikipedia.org/wiki/Pileup_format) to the external genotype from the VCF.
+
+First prepare some input files:
+
+```{r engine="bash", eval=FALSE}
+# to be run on Ada
+cd /projects/bsm/attila/results/2018-12-18-verifyBamID
+mkdir sample.40000 && cd sample.40000
+# subsample every 40,000th SNP in VCF and keep only col 1-3 to produce regions file
+bcftools view -H ../CMC-preimputed.vcf.gz | sed -n '2~40000p' | cut -f1-3 > CMC-preimputed.sample.40000
+# keep only col 1-3 to produce regions file
+cut -f1-2 CMC-preimputed.sample.40000 > CMC-preimputed.sample.40000.col12
+# filter VCF for the selected SNPs
+bcftools view --regions-file CMC-preimputed.sample.40000 -O v -o CMC-preimputed.sample.40000.vcf ../CMC-preimputed.vcf.gz 
+```
+
+Then run `samtools mpileup` in the `pileup4sample` script
+
+```{r engine="bash", eval=FALSE}
+# creating the pileup (to be run on Ada still)
+# for all BAMs from MSSM CMC samples create pileup with samtools at the selected SNPs
+# recall that PITT_064 and PITT_118 samples are missing from the VCF
+./pileup4sample
+# ...wait almost a day for the run to complete...
+```
+
+### Results
+
+The columns of the pileup files are as follows (a genotype column has been added to the left w.r.t. the [standard pileup format](https://en.wikipedia.org/wiki/Pileup_format)
+1. External genotype (from VCF)
+1. Sequence identifier
+1. Position in sequence (starting from 1)
+1. Reference nucleotide at that position
+1. Number of aligned reads covering that position (depth of coverage)
+1. Bases at that position from aligned reads
+1. Phred Quality of those bases, represented in ASCII with -33 offset (OPTIONAL)
+
+Below are just 3 examples of the 22 pileup files under `/projects/bsm/attila/results/2018-12-18-verifyBamID/sample.40000/` on Ada.  For all three files the genotype does not match the pileup for all SNPs.
+
+```{r engine="bash", eval=TRUE}
+# run on attila-ThinkS
+cd ~/projects/bsm/results/2018-12-18-verifyBamID/sample.40000
+cat MSSM_179_muscle.pileup
+```
+
+```{r engine="bash", eval=TRUE}
+# run on attila-ThinkS
+cd ~/projects/bsm/results/2018-12-18-verifyBamID/sample.40000
+cat MSSM_295_muscle.pileup
+```
+
+```{r engine="bash", eval=TRUE}
+# run on attila-ThinkS
+cd ~/projects/bsm/results/2018-12-18-verifyBamID/sample.40000
+cat MSSM_215_NeuN_pl.pileup
 ```
