@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+
+wd="/projects/bsm/attila/results/2018-12-18-verifyBamID/sample.40000"
+vcf=$wd/CMC-preimputed.sample.40000.vcf
+poslist=$wd/CMC-preimputed.sample.40000.col12
+cd $wd
+
+do1bam () {
+    bam=$1
+    sample=`basename $bam .bam`
+    indiv=$(echo $sample | sed 's/_\(NeuN_pl\|NeuN_mn\|muscle\)//')
+    prefixed_indiv=0_$indiv
+    genotype=`mktemp`
+    pileup=`mktemp`
+    bcftools view -H -s $prefixed_indiv $vcf | cut -f 10 > $genotype
+    samtools mpileup -l $poslist -f $REFSEQ -o $pileup $bam
+    paste $genotype $pileup > $wd/$sample.pileup
+    rm $genotype $pileup
+}
+
+find /projects/bsm/alignments/MSSM* -name '*.bam' |
+    for BAM in `cat`; do
+        do1bam $BAM &
+    done
