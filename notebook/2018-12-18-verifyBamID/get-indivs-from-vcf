@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+wd=/projects/bsm/attila/results/2018-12-18-verifyBamID
+vcf=$wd/CMC-preimputed.vcf.gz
+csv=$wd/CMC-preimputed.vcf.indivs.csv
+bcftools view -h $vcf | tail -n1 | tr '\t' '\n' |
+    sed -n '/^0_/ { s/^0_//; p }' > $csv
