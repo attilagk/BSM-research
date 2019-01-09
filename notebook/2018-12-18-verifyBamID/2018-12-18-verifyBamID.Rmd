@@ -19,9 +19,10 @@ Synapse's [command line client](https://python-docs.synapse.org/build/html/Comma
 
 ```{r engine="bash", eval=FALSE}
 # to be run on Ada
-cd /home/attila/projects/bsm/notebook/2018-12-18-verifyBamID
+cd /projects/bsm/attila/results/2018-12-18-verifyBamID
 ./getBED.sh # download CMC-preimputed.{bed,bim,fam}
 ./recode2vcf # recode CMC-preimputed.bed to CMC-preimputed.vcf
+bcftools index --csi CMC-preimputed.vcf.gz # CSI index
 mkdir results && cd results # subdirectory for verifyBamID results
 ./doCMCverifyBamID # run verifyBamID on all CMC bam files of the BSM project
 # ...wait several hours until all verifyBamID processes exit...
@@ -141,4 +142,32 @@ cat MSSM_295_muscle.pileup
 # run on attila-ThinkS
 cd ~/projects/bsm/results/2018-12-18-verifyBamID/sample.40000
 cat MSSM_215_NeuN_pl.pileup
+```
+
+## Checking the VCF of external genotypes
+
+The results above suggest label swap; this has been corroborated by Chaggai using the same BAM files and the same VCF containing the external genotypes.  But besides label swap another explanation is that the VCF itself is incorrect either because
+
+1. the PLINK files on Synapse (`bed`, `bim` and `fam`; Synapse IDs: syn2507223, syn2507168, syn2507166) are incorrect
+1. the download from Synapse to Ada corrupted the files
+1. the recoding using PLINK introduced error
+
+The first explanation, incorrect files on Synapse, could be checked by someone who was involved in the CMC project; according to the Synapse file attributes it was Menachem Fromer who uploaded the files in 2014; recently, it was Gabriel Hoffman who referred us to the files as the resource that contains genotypes for CMC individuals.
+
+The third explanation, PLINK error would mean some kind of bug in PLINK because the command in the `recode2vcf.sh` script is as simple as `plink --bfile CMC-preimputed --recode vcf bgz --out CMC-preimputed` and it ran without reported error.  Note that a recent version of PLINK was used for this operation: PLINK v1.90b6.7 64-bit (2 Dec 2018).
+
+The second explanation, download error, was checked by comparing the VCFs that resulted from downloading the PLINK files with the Command line client *versus* the web client.  The comparison suggests that both method of downloading files leads to the same VCF.  Details below:
+
+```{r engine="bash", eval=FALSE}
+# rename files from 1st download (Command line client) from CMC-preimputed.* to CMC-preimputed-1.*
+# rename files from 2nd download (Command line client) from CMC-preimputed.* to CMC-preimputed-2.*
+# rename files from 3rd download (web client) from CMC-preimputed.* to CMC-preimputed-3.*
+# compare 2nd download to the 1st
+bcftools isec -p checkVCF/1vs2 CMC-preimputed-{1,2}.vcf.gz
+bcftools view -H checkVCF/1vs2/0000.vcf
+bcftools view -H checkVCF/1vs2/0001.vcf
+# compare 3rd download to the 1st
+bcftools isec -p checkVCF/1vs3 CMC-preimputed-{1,3}.vcf.gz
+bcftools view -H checkVCF/1vs3/0000.vcf
+bcftools view -H checkVCF/1vs3/0001.vcf
 ```
