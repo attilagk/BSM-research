@@ -1,0 +1,30 @@
+#! /usr/bin/env bash
+
+bam=`realpath $1`
+vcf=/projects/bsm/attila/results/2018-12-18-verifyBamID/CMC-preimputed.vcf.gz
+
+IndIDfromBAMname=`basename $bam .bam`
+
+IndIDfromBAMheader="$(samtools view -H $bam |
+    sed -n '/^@RG/ { s/^.*SM:\(\(MSSM\|PITT\)_\?\([[:digit:]]\+\)_\(NeuN_pl\|NeuN_mn\|muscle\)\).*$/\2_\3_\4/; p }' |
+    sort -u)"
+
+set "$IndIDfromBAMheader"
+if ! test $# -eq 1; then
+    echo "$bam contains multiple samples: $IndIDfromBAMheader. Exiting..."
+    exit 1
+fi
+
+if ! test $IndIDfromBAMname = $IndIDfromBAMheader; then
+    echo "Sample name from BAM file name $IndIDfromBAMname doesn't match with sample name from BAM header $IndIDfromBAMheader. Exiting..."
+    exit 1
+fi
+
+echo $IndIDfromBAMname; exit
+
+indivID=$(echo $IndIDfromBAMname | sed 's/_\(NeuN_pl\|NeuN_mn\|muscle\)//')
+prefixedID=0_$indivID
+echo $prefixedID
+
+verifyBamID --vcf $vcf --bam $bam --out $IndIDfromBAMname --ignoreRG \
+    --smID $prefixedID
