@@ -1,0 +1,12 @@
+---
+layout: default
+title: Swapped sample labels and contamination
+tags: [ pipeline, workflow, test, AWS]
+#featimg: "sequence-only-2.png"
+---
+
+The BSMN pipeline has been developed by Taejeong Bae.  We are testing it on our benchmark (mixin) data set.
+
+## General
+
+The [GitHub bsmn-pipeline project](https://github.com/bsmn/bsmn-pipeline) contains the code for the pipeline.  [This GitHub issue](https://github.com/bsmn/bsmn-pipeline/issues/19) has been created to record and discuss issues that arise during testing.
