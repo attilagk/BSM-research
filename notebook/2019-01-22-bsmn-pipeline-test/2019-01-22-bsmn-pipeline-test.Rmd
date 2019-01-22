@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Swapped sample labels and contamination
+#title: 
 tags: [ pipeline, workflow, test, AWS]
 #featimg: "sequence-only-2.png"
 ---
