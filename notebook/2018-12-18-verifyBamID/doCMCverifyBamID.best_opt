@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+cd /projects/bsm/attila/results/2018-12-18-verifyBamID/results.best_opt
+script=/home/attila/projects/bsm/notebook/2018-12-18-verifyBamID/CMCverifyBamID.2
+
+bam=/projects/bsm/alignments/MSSM_106/MSSM_106_muscle.bam
+( time -p $script $bam ) 1>& self.log &
+( time -p $script $bam --best ) 1>& best.log &

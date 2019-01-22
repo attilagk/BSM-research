@@ -1,7 +1,9 @@
 #! /usr/bin/env bash
 
 bam=`realpath $1`
+opts=$2
 vcf=/projects/bsm/attila/results/2018-12-18-verifyBamID/CMC-preimputed.vcf.gz
+metadata=/projects/bsm/attila/results/2018-12-18-verifyBamID/CMC_Human_SNP_mergedMetadata.csv
 
 IndIDfromBAMname=`basename $bam .bam`
 
@@ -20,11 +22,18 @@ if ! test $IndIDfromBAMname = $IndIDfromBAMheader; then
     exit 1
 fi
 
-echo $IndIDfromBAMname; exit
+IDmap=`tempfile`
+IndIDcol=$(head -n1 $metadata | tr ',' '\n' | sed '/Individual_ID/ q' | wc -l)
+#DissecID=$(head -n1 $metadata | tr ',' '\n' | sed '/Institution_Dissection_ID/ q' | wc -l)
+GTSMIDcol=$(head -n1 $metadata | tr ',' '\n' | sed '/SNP_report:Genotyping_Sample_ID/ q' | wc -l)
+cut -d, -f$IndIDcol,$GTSMIDcol $metadata |
+    tr -d '"' |
+    sed 's/^CMC_//; s/,/,0_/; /,0_NA/ s/0_NA/NA/' > $IDmap
 
 indivID=$(echo $IndIDfromBAMname | sed 's/_\(NeuN_pl\|NeuN_mn\|muscle\)//')
-prefixedID=0_$indivID
-echo $prefixedID
+GTSMID=$(sed -n "/^$indivID,/ { s///; p }" $IDmap)
+
+echo $GTSMID
 
 verifyBamID --vcf $vcf --bam $bam --out $IndIDfromBAMname --ignoreRG \
-    --smID $prefixedID
+    --smID $GTSMID $opts
