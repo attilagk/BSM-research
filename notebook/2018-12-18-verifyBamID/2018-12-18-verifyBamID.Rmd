@@ -5,7 +5,7 @@ tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
 featimg: "sequence-only-2.png"
 ---
 
-Swapped sample labels and contamination is tested for our sequencing data for the BSM project from CMC individuals.
+Swapped sample labels and contamination is tested for our sequencing data for the BSM project from CMC individuals.  This analysis was carried out first mistakenly using Individual_IDs instead of Genotyping_Sample_IDs as a basis of comparison between our BAMs and the CommonMind's previous genotyping results.  Later the mistake was discovered and the analysis was repeated with the correct Genotyping_Sample_IDs and even more BAMs.  These newer results are presented first followed by the older results from the first round of analysis.
 
 ## Introduction
 
@@ -20,6 +20,7 @@ Synapse's [command line client](https://python-docs.synapse.org/build/html/Comma
 ```{r engine="bash", eval=FALSE}
 # to be run on Ada
 cd /projects/bsm/attila/results/2018-12-18-verifyBamID
+synapse get syn16816490 # CMC_Human_SNP_mergedMetadata.csv
 ./getBED.sh # download CMC-preimputed.{bed,bim,fam}
 ./recode2vcf # recode CMC-preimputed.bed to CMC-preimputed.vcf
 bcftools index --csi CMC-preimputed.vcf.gz # CSI index
@@ -48,16 +49,34 @@ lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
 ```
 
-## Results: verifyBamID
+### Effect of the --best option on runtime
+
+The script below runs `verifyBamID` twice on the same input BAM: once with the `--best` option and once without it (i.e. with the `--self` option) and records runtime.
+
+```{r engine="bash", eval=FALSE}
+# to be run on Ada
+/projects/bsm/attila/results/2018-12-18-verifyBamID/results.best_opt/doCMCverifyBamID.best_opt
+```
+
+The runtime is nearly four times longer with the `--best` option.
+
+```{r engine="bash", eval=TRUE}
+cd /home/attila/projects/bsm/results/2018-12-18-verifyBamID/results.best_opt
+tail -n3 best.log self.log
+```
+
+Note that the input BAM is a relatively small BAM compared to others in this project so the runtime for those larger BAMs is typically longer, too.
+
+## Results: Second round of analysis
 
 For details see [Interpreting output files](https://genome.sph.umich.edu/wiki/VerifyBamID#Interpreting_output_files) in the `verifyBamID` website. In short, the concatenated `XXX.selfSM` files are inspected here, which describe how the reads of the sequenced sample (in the BAM file) matches the corresponding genotyped sample in the VCF
 
 ```{r}
 # import concatenated selfSM files (the output file of aggregate-selfSM)
-selfSM <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.selfSM")
+selfSM.2 <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.selfSM")
 ```
 
-### Sequence-only model
+### verifyBamID: Sequence-only model
 
 The sequence-only model infers contamination based solely on the BAM file without referring to the "external" genotype in the VCF file.  Minus the log of $$f(y \mid \hat{\theta}) / f(y \mid \theta_0)$$, which is the likelihood ratio of the maximum likelihood of the unconstrained model accounting for contamination and the constrained null model of no contamination.  The larger the that value is the more likely is that the sample has been contaminated.
 
@@ -68,17 +87,38 @@ A strongly related quantity is *FREEMIX*, the "sequence-only estimate of contami
 The plots below suggest that *MSSM_373_muscle* may contain contamination.
 
 ```{r sequence-only}
+dotplot(sample ~ FREELK0 - FREELK1, data = selfSM.2)
+dotplot(sample ~ FREEMIX, data = selfSM.2)
+```
+
+### verifyBamID: Sequence + array model
+
+This model is an extension of the sequence-only model in that external genotype is also taken into account.  The quantities plotted below are the minus log likelihood ratio of the "contaminated" and the "uncontaminated" model as well as *CHIPMIX*.  These are analogous to the quantities of the sequence-only model but in this case there relationship between the two quantities is less clear.  For instance, *CHIPMIX* suggests, similarly to *FREEMIX*, that *MSSM_373_muscle* is a sole outlier but the likelihood ratio suggests otherwise.
+
+```{r sequence-chip}
+dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM.2)
+dotplot(sample ~ CHIPMIX, data = selfSM.2)
+```
+
+## Results: First round of analysis
+
+```{r}
+# import concatenated selfSM files (the output file of aggregate-selfSM)
+selfSM <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.selfSM")
+```
+
+### verifyBamID: Sequence-only model
+
+```{r sequence-only-1}
 dotplot(sample ~ FREELK0 - FREELK1, data = selfSM)
 dotplot(sample ~ FREEMIX, data = selfSM)
 ```
 
-### Sequence + array model
+### verifyBamID: Sequence + array model
 
-This model is an extension of the sequence-only model in that external genotype is also taken into account.  The quantities plotted below are the minus log likelihood ratio of the "contaminated" and the "uncontaminated" model as well as *CHIPMIX*.  These are analogous to the quantities of the sequence-only model but in this case there relationship between the two quantities is less clear.  For instance, *CHIPMIX* suggests, similarly to *FREEMIX*, that *MSSM_373_muscle* is a sole outlier but the likelihood ratio suggests otherwise.
+*CHIPMIX* is close to 1 for all samples, which indicates swapped sample label, which is very hard to imagine for all samples.  What is going on?  Did the sample names of the BAMs not match those in the VCF?
 
-More importantly, *CHIPMIX* is close to 1 for all samples, which indicates swapped sample label, which is very hard to imagine for all samples.  What is going on?  Did the sample names of the BAMs not match those in the VCF?
-
-```{r sequence-chip}
+```{r sequence-chip-1}
 dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM)
 dotplot(sample ~ CHIPMIX, data = selfSM)
 ```
@@ -172,9 +212,3 @@ bcftools view -H checkVCF/1vs3/0000.vcf
 bcftools view -H checkVCF/1vs3/0001.vcf
 ```
 
-## Correction
-
-```{r engine="bash", eval=FALSE}
-# to be run on Ada
-synapse get syn16816490 # CMC_Human_SNP_mergedMetadata.csv
-```
