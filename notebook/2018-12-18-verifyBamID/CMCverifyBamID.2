@@ -1,8 +1,16 @@
 #! /usr/bin/env bash
 
+# Run verifyBamID on a BAM from a CMC individual.
+
+usage="usage: `realpath $0` input.bam [--best]"
+if test $# -eq 0; then
+    echo $usage; exit 1
+fi
+
 bam=`realpath $1`
 opts=$2
 vcf=/projects/bsm/attila/results/2018-12-18-verifyBamID/CMC-preimputed.vcf.gz
+# Synapse ID syn16816490
 metadata=/projects/bsm/attila/results/2018-12-18-verifyBamID/CMC_Human_SNP_mergedMetadata.csv
 
 IndIDfromBAMname=`basename $bam .bam`
@@ -11,17 +19,22 @@ IndIDfromBAMheader="$(samtools view -H $bam |
     sed -n '/^@RG/ { s/^.*SM:\(\(MSSM\|PITT\)_\?\([[:digit:]]\+\)_\(NeuN_pl\|NeuN_mn\|muscle\)\).*$/\2_\3_\4/; p }' |
     sort -u)"
 
+# Various tests to ensure BAM contains one and only one sample whose name
+# matches the BAM's file name.
 set "$IndIDfromBAMheader"
 if ! test $# -eq 1; then
     echo "$bam contains multiple samples: $IndIDfromBAMheader. Exiting..."
     exit 1
 fi
-
 if ! test $IndIDfromBAMname = $IndIDfromBAMheader; then
     echo "Sample name from BAM file name $IndIDfromBAMname doesn't match with sample name from BAM header $IndIDfromBAMheader. Exiting..."
     exit 1
 fi
 
+# Creating mapping from Individual_ID to Genotyping_Sample_ID.
+# It has been manually checked that the mapping in
+# CMC_Human_SNP_mergedMetadata.csv is one-to-one, which simplifies the
+# operations for creating the mapping (see code below).
 IDmap=`tempfile`
 IndIDcol=$(head -n1 $metadata | tr ',' '\n' | sed '/Individual_ID/ q' | wc -l)
 #DissecID=$(head -n1 $metadata | tr ',' '\n' | sed '/Institution_Dissection_ID/ q' | wc -l)
@@ -32,6 +45,7 @@ cut -d, -f$IndIDcol,$GTSMIDcol $metadata |
 
 indivID=$(echo $IndIDfromBAMname | sed 's/_\(NeuN_pl\|NeuN_mn\|muscle\)//')
 GTSMID=$(sed -n "/^$indivID,/ { s///; p }" $IDmap)
+rm $IDmap
 
 echo $GTSMID
 
