@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
-cd /projects/bsm/attila/results/2018-12-18-verifyBamID/results
-script=/home/attila/projects/bsm/notebook/2018-12-18-verifyBamID/CMCverifyBamID
+cd /projects/bsm/attila/results/2018-12-18-verifyBamID/results.2
+script=/home/attila/projects/bsm/notebook/2018-12-18-verifyBamID/CMCverifyBamID.2
 
 find /projects/bsm/alignments/ -name 'MSSM*.bam' -o -name 'PITT*.bam' > CMCbam-names
 for bam in `cat CMCbam-names`; do
