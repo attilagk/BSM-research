@@ -1,0 +1,7 @@
+presumed_sequence,directory,presumed_purpose
+1,Scripts,"Contains Script{1..5}.sh, ScriptR.R, which are also present in the OurData and Illumina directory"
+2,OurData,"Based on our own germline calls for CEPH grandparents Script{1..5}.sh, ScriptR.R create a truth table ChrZ.Final.output.txt for each chromosome Z"
+3,Illumina,"Based on Illumina’s germline calls for CEPH grandparents Script{1..5}.sh, ScriptR.R create a truth table ChrZ.Final.output.txt for each chromosome Z"
+4,Compare,"Get intersection and setdiffs between calls by us and by Illumina for Chr10 of “NO”, which refers to NA12891 in Script4.sh"
+5,Combined,CombinerScript.sh stores “variants called equally in both data sets” (Illumina’s and ours) in Final.ChrZ.txt for each chromosome Z
+6,Mix1Mix3,Somehow related to precision and recall for each caller including VMC
