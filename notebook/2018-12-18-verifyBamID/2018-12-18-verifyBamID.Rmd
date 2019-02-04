@@ -2,10 +2,10 @@
 layout: default
 title: Swapped sample labels and contamination
 tags: [ strelka2, mutect2, tnseq, lofreq, somaticsniper ]
-featimg: "sequence-only-2.png"
+featimg: "sequence-chip-2.png"
 ---
 
-Swapped sample labels and contamination is tested for our sequencing data for the BSM project from CMC individuals.  This analysis was carried out first mistakenly using Individual_IDs instead of Genotyping_Sample_IDs as a basis of comparison between our BAMs and the CommonMind's previous genotyping results.  Later the mistake was discovered and the analysis was repeated with the correct Genotyping_Sample_IDs and even more BAMs.  These newer results are presented first followed by the older results from the first round of analysis.
+Swapped sample labels and contamination is tested for our sequencing data for the BSM project from CMC individuals.  This analysis was carried out first mistakenly using Individual_IDs instead of Genotyping_Sample_IDs as a basis of comparison between our BAMs and the CommonMind's previous genotyping results.  Later the mistake was discovered and the analysis was repeated with the correct Genotyping_Sample_IDs and even more BAMs and suggested that three out of 40 samples had been mislabeled.  These newer results are presented first followed by the older results from the first round of analysis.
 
 ## Introduction
 
@@ -24,7 +24,7 @@ synapse get syn16816490 # CMC_Human_SNP_mergedMetadata.csv
 ./getBED.sh # download CMC-preimputed.{bed,bim,fam}
 ./recode2vcf # recode CMC-preimputed.bed to CMC-preimputed.vcf
 bcftools index --csi CMC-preimputed.vcf.gz # CSI index
-mkdir results && cd results # subdirectory for verifyBamID results
+mkdir results.2 && cd results.2 # subdirectory for verifyBamID results
 ./doCMCverifyBamID # run verifyBamID on all CMC bam files of the BSM project
 # ...wait several hours until all verifyBamID processes exit...
 ./aggregate-selfSM
@@ -73,7 +73,7 @@ For details see [Interpreting output files](https://genome.sph.umich.edu/wiki/Ve
 
 ```{r}
 # import concatenated selfSM files (the output file of aggregate-selfSM)
-selfSM.2 <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.selfSM")
+selfSM.2 <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results.2/all.selfSM")
 ```
 
 ### verifyBamID: Sequence-only model
@@ -84,7 +84,7 @@ A strongly related quantity is *FREEMIX*, the "sequence-only estimate of contami
 
 > When [CHIPMIX] $$\gg$$ 0.02 and/or [FREEMIX] $$\gg$$ 0.02, meaning 2% or more of non-reference bases are observed in reference sites, we recommend to examine the data more carefully for the possibility of contamination.
 
-The plots below suggest that *MSSM_373_muscle* may contain contamination.
+The plots below show that *MSSM_373_muscle* is that for all but two samples $$\mathrm{FREEMIX} < 0.025$$ suggesting that these samples are not contaminated.  FREEMIX is quite low even for the two outliers---MSSM_056_muscle and MSSM_373_muscle.
 
 ```{r sequence-only}
 dotplot(sample ~ FREELK0 - FREELK1, data = selfSM.2)
@@ -93,12 +93,16 @@ dotplot(sample ~ FREEMIX, data = selfSM.2)
 
 ### verifyBamID: Sequence + array model
 
-This model is an extension of the sequence-only model in that external genotype is also taken into account.  The quantities plotted below are the minus log likelihood ratio of the "contaminated" and the "uncontaminated" model as well as *CHIPMIX*.  These are analogous to the quantities of the sequence-only model but in this case there relationship between the two quantities is less clear.  For instance, *CHIPMIX* suggests, similarly to *FREEMIX*, that *MSSM_373_muscle* is a sole outlier but the likelihood ratio suggests otherwise.
+This model is an extension of the sequence-only model in that external genotype is also taken into account.  The quantities plotted below are the minus log likelihood ratio of the "contaminated" and the "uncontaminated" model as well as *CHIPMIX*.  These are analogous to the quantities of the sequence-only model but in this case there relationship between the two quantities is less straight forward.
+
+The plots below show a clear picture.  Of the 40 samples three---MSSM_175_muscle, MSSM_215_muscle and MSSM_373_muscle---have $$\mathrm{CHIPMIX} \approx 1$$ suggesting sample label swap.  For the remaining 37 samples $$\mathrm{CHIPMIX} \approx 0$$ suggesting no label swap nor contamination.
 
 ```{r sequence-chip}
 dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM.2)
 dotplot(sample ~ CHIPMIX, data = selfSM.2)
 ```
+
+Prompted by this result `verifyBamID` was rerun on the three mislabeled samples with the `--best` option to identify their true label.
 
 ## Results: First round of analysis
 
