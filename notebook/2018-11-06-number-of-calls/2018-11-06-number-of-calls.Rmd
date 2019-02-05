@@ -39,3 +39,7 @@ print(bc.log)
 print(bc[2:3, 1])
 print(bc.log[2:3, 1])
 ```
+
+```{r snvs-cs, fig.asp=1.2, fig.width=4}
+print(bc.log[2, 1])
+```

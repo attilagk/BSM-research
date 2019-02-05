@@ -1,15 +1,17 @@
 #! /usr/bin/env bash
 # aggregate .selfSM files of verifyBamID across multiple samples
 
+kind=${1:-self}
+
 fname_pattern='\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\([^.]\+\)\..*$'
 header=`mktemp`
 body=`mktemp`
 
-if test -f all.selfSM; then
-    rm all.selfSM
+if test -f all.${kind}SM; then
+    rm all.${kind}SM
 fi
 
-for fname in *.selfSM; do
+for fname in *.${kind}SM; do
     indivID=$(echo $fname | sed "s/$fname_pattern/\1/")
     tissue=$(echo $fname | sed "s/$fname_pattern/\3/")
     leftcols=$(echo -ne "${indivID}_$tissue\t$indivID\t$tissue\t")
@@ -20,6 +22,6 @@ done
 
 leftcols=$(echo -ne "sample\tindivID\ttissue\t")
 rightcols=$(sed -n 1p $header)
-echo "$leftcols$rightcols" > all.selfSM
-cat $body >> all.selfSM
+echo "$leftcols$rightcols" > all.${kind}SM
+cat $body >> all.${kind}SM
 rm $header $body
