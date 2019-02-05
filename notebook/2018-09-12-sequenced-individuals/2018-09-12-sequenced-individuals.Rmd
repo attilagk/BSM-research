@@ -17,6 +17,7 @@ opts_chunk$set(out.width = "600px")
 opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
+source("2018-09-12-sequenced-individuals.R")
 ```
 
 ```{r engine="bash"}
@@ -29,6 +30,19 @@ Thus the number of sequenced individuals is
 ```{r engine="bash", echo=FALSE}
 indivs=$HOME/projects/bsm/results/2018-09-12-sequenced-individuals/sequenced-individuals
 wc -w $indivs
+```
+
+Download and import `CMC_Human_clinical_metadata.csv` for later use.
+
+```{r engine="bash", echo=FALSE}
+cd $HOME/projects/bsm/results/2018-09-12-sequenced-individuals/
+synapse login
+synapse get syn2279441
+```
+
+```{r}
+clinical <- read.csv("~/projects/bsm/results/2018-09-12-sequenced-individuals/CMC_Human_clinical_metadata.csv")
+rownames(clinical) <- sub("CMC_", "", clinical$Individual.ID) # remove CMC_ prefix
 ```
 
 ## Extension: sequenced samples
@@ -80,13 +94,21 @@ summ
 summ.all <- do.call(cbind, summ)
 ```
 
+```{r}
+Dx <- c("Control", "SCZ")
+names(Dx) <- Dx
+cmc <- lapply(Dx, function(d) summ$cmc[ names(summ$cmc) %in% rownames(clinical[clinical$Dx == d, ]) ])
+cmc.long <- lapply(cmc, reshape.summ)
+cmc.all.long <- do.call(rbind, lapply(names(cmc.long), function(y) cbind(cmc.long[[y]], data.frame(Dx = y))))
+```
+
 The same information graphically
 
 ```{r summary}
-summ.all.long <- expand.grid(row.names(summ.all), names(summ.all))
-summ.all.long$done <- sapply(seq.int(dim(summ.all.long)[1]), function(y) summ.all[as.character(summ.all.long[y, 1]), as.character(summ.all.long[y, 2])])
+summ.all.long <- reshape.summ(summ.all)
 my.col <- c("white", "gray")
-levelplot(done ~ Var2 * Var1, data = summ.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
+levelplot(done ~ individuals * workflow, data = summ.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
+levelplot(done ~ individuals * workflow, data = cmc.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
 ```
 
 Write results to file

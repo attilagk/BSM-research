@@ -1,0 +1,48 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {1}{1}}}
+\@writefile{toc}{\beamer@sectionintoc {1}{Introduction}{2}{0}{1}}
+\@writefile{nav}{\headcommand {\sectionentry {1}{Introduction}{2}{Introduction}{0}}}
+\@writefile{nav}{\headcommand {\beamer@sectionpages {1}{1}}}
+\@writefile{nav}{\headcommand {\beamer@subsectionpages {1}{1}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{1}{2/3}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {2}{3}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{2}{4/7}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {4}{7}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{3}{8/9}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {8}{9}}}
+\newlabel{hardfilterlimit<1>}{{5}{10}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {hardfilterlimit<1>}{10}}
+\newlabel{hardfilterlimit}{{5}{10}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {hardfilterlimit}{10}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{4}{10/10}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {10}{10}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{5}{11/12}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {11}{12}}}
+\newlabel{hardfilterlimit<2>}{{7}{13}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {hardfilterlimit<2>}{13}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{6}{13/13}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {13}{13}}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{7}{14/16}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {14}{16}}}
+\newlabel{hardfilterlimit<4>}{{9}{17}{Introduction}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {hardfilterlimit<4>}{17}}
+\@writefile{nav}{\headcommand {\slideentry {1}{0}{8}{17/17}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {17}{17}}}

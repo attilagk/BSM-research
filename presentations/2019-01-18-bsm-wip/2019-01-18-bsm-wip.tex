@@ -82,28 +82,51 @@ Brain Somatic Mosaicism Network (BSMN)
 \includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig2.jpg}
 \end{frame}
 
-\begin{frame}{Discordance between approaches}
-
-\end{frame}
-
-\begin{frame}{Discordance between variant callers on the same dataset}
+\begin{frame}{Discordance between variant callers}
 
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 
-\includegraphics[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
+\includegraphics[width=1.0\columnwidth]{figures/2018-11-06-number-of-calls/snvs-cs-1.pdf}
 \end{column}
 
-\begin{column}{0.5\textwidth}
+\begin{column}{0.6\textwidth}
 
-\includegraphics[width=1.0\columnwidth]{figures/2018-11-06-number-of-calls/snvs-cs-1.pdf}
+\includegraphics<2>[width=1.0\columnwidth]{figures/2018-04-08-call-set-concordance/venn-common-sample-wgs-snvs-1.pdf}
 \end{column}
 \end{columns}
 \end{frame}
 
+\begin{frame}{Heuristic filtering and combination of call sets}
+\input{two-vcfs-callid.tex}
+
+\includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
+\end{frame}
+
+\begin{frame}{Discordance between research groups}
+\includegraphics[height=0.7\columnwidth]{figures/from-others/bsmn-cs-callset-concordance.png}
+\end{frame}
+
 \begin{frame}
+How to find the best calling approach?
 \begin{itemize}
-\item find best calling approach (given data set)
+\item consortium
+\begin{enumerate}
+\item real data set
+\item heuristic filtering and combination of call sets
+\item validate some calls with targeted resequencing 
+\item refine heuristics
+\item ...  
+\end{enumerate}
+\item<2> our group
+\begin{enumerate}
+\item benchmark data set with known variants
+\item select annotations in call sets
+\item input to machine learning\footnote{VariantMetaCaller}
+\item validate all calls
+\item re-select annotations 
+\item ...
+\end{enumerate}
 \end{itemize}
 \end{frame}
 
