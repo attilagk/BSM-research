@@ -25,7 +25,7 @@ synapse get syn16816490 # CMC_Human_SNP_mergedMetadata.csv
 ./recode2vcf # recode CMC-preimputed.bed to CMC-preimputed.vcf
 bcftools index --csi CMC-preimputed.vcf.gz # CSI index
 mkdir results.2 && cd results.2 # subdirectory for verifyBamID results
-./doCMCverifyBamID # run verifyBamID on all CMC bam files of the BSM project
+./doCMCverifyBamID.2 # run verifyBamID on all CMC bam files of the BSM project
 # ...wait several hours until all verifyBamID processes exit...
 ./aggregate-selfSM
 # transfer results to local workstation for further analysis with R
@@ -87,8 +87,9 @@ A strongly related quantity is *FREEMIX*, the "sequence-only estimate of contami
 The plots below show that *MSSM_373_muscle* is that for all but two samples $$\mathrm{FREEMIX} < 0.025$$ suggesting that these samples are not contaminated.  FREEMIX is quite low even for the two outliers---MSSM_056_muscle and MSSM_373_muscle.
 
 ```{r sequence-only}
-dotplot(sample ~ FREELK0 - FREELK1, data = selfSM.2)
-dotplot(sample ~ FREEMIX, data = selfSM.2)
+my.main <- "Original sample labels: IndivID + tissue"
+dotplot(sample ~ FREELK0 - FREELK1, data = selfSM.2, main = my.main)
+dotplot(sample ~ FREEMIX, data = selfSM.2, main = my.main)
 ```
 
 ### verifyBamID: Sequence + array model
@@ -98,11 +99,42 @@ This model is an extension of the sequence-only model in that external genotype 
 The plots below show a clear picture.  Of the 40 samples three---MSSM_175_muscle, MSSM_215_muscle and MSSM_373_muscle---have $$\mathrm{CHIPMIX} \approx 1$$ suggesting sample label swap.  For the remaining 37 samples $$\mathrm{CHIPMIX} \approx 0$$ suggesting no label swap nor contamination.
 
 ```{r sequence-chip}
-dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM.2)
-dotplot(sample ~ CHIPMIX, data = selfSM.2)
+dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM.2, main = my.main)
+dotplot(sample ~ CHIPMIX, data = selfSM.2, main = my.main)
 ```
 
 Prompted by this result `verifyBamID` was rerun on the three mislabeled samples with the `--best` option to identify their true label.
+
+### The best matching label for the mislabeled samples
+
+Outline for rerunning the mislabeled samples with the `--best` option:
+
+```{r engine="bash", eval=FALSE}
+# to be run on Ada
+cd /projects/bsm/attila/results/2018-12-18-verifyBamID
+mkdir results.2.best_opt && cd results.2.best_opt # subdirectory for verifyBamID results
+./doCMCverifyBamID.2.best_opt # run verifyBamID --best on all CMC bam files of the BSM project
+# ...wait several hours until all verifyBamID processes exit...
+./aggregate-selfSM best # aggregate *.bestSM instead of *.selfSM
+# transfer results to local workstation for further analysis with R
+```
+
+In the table *sample*, *indivID*, and *SEQ_ID* are the original, incorrect labels; these have been derived from our `BAM` files.  On the other hand, *CHIP_ID* is the best matching label found in the CMC's `VCF` file.  Without label swap *SEQ_ID* should be identical to *CHIP_ID*.
+
+```{r}
+# import concatenated bestSM files
+bestSM.2 <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results.2.best_opt/all.bestSM")
+bestSM.2[c("sample", "indivID", "SEQ_ID", "CHIP_ID")]
+```
+
+```{r sequence-only-2-best, fig.asp = 0.3}
+dotplot(CHIP_ID ~ FREEMIX, data = bestSM.2, xlim = 0:1, main = "The best matching CHIP_IDs for the mislabeled samples")
+```
+
+```{r sequence-chip-2-best, fig.asp = 0.3}
+dotplot(CHIP_ID ~ CHIPMIX, data = bestSM.2, xlim = 0:1, main = "The best matching CHIP_IDs for the mislabeled samples")
+```
+
 
 ## Results: First round of analysis
 
@@ -114,8 +146,8 @@ selfSM <- read.delim("~/projects/bsm/results/2018-12-18-verifyBamID/results/all.
 ### verifyBamID: Sequence-only model
 
 ```{r sequence-only-1}
-dotplot(sample ~ FREELK0 - FREELK1, data = selfSM)
-dotplot(sample ~ FREEMIX, data = selfSM)
+dotplot(sample ~ FREELK0 - FREELK1, data = selfSM, main = my.main)
+dotplot(sample ~ FREEMIX, data = selfSM, main = my.main)
 ```
 
 ### verifyBamID: Sequence + array model
@@ -123,8 +155,8 @@ dotplot(sample ~ FREEMIX, data = selfSM)
 *CHIPMIX* is close to 1 for all samples, which indicates swapped sample label, which is very hard to imagine for all samples.  What is going on?  Did the sample names of the BAMs not match those in the VCF?
 
 ```{r sequence-chip-1}
-dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM)
-dotplot(sample ~ CHIPMIX, data = selfSM)
+dotplot(sample ~ CHIPLK0 - CHIPLK1, data = selfSM, main = my.main)
+dotplot(sample ~ CHIPMIX, data = selfSM, main = my.main)
 ```
 
 ## Confirming results with nucleotide pileup
