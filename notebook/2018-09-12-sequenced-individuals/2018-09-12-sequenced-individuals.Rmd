@@ -87,7 +87,7 @@ Type of individuals
 
 ```{r}
 fl <- c(cmc = "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv",
-        CommonSample = "~/projects/bsm/tables/summary-common-sample.tsv",
+        CE = "~/projects/bsm/tables/summary-common-sample.tsv",
         Benchmark = "~/projects/bsm/tables/summary-benchmark.tsv")
 summ <- lapply(fl, read.delim, row.names = 1)
 ```
