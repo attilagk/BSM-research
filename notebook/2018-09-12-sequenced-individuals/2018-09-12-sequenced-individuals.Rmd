@@ -87,32 +87,31 @@ Type of individuals
 
 ```{r}
 fl <- c(cmc = "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv",
-        common.sample = "~/projects/bsm/tables/summary-common-sample.tsv",
-        benchmark = "~/projects/bsm/tables/summary-benchmark.tsv")
+        CommonSample = "~/projects/bsm/tables/summary-common-sample.tsv",
+        Benchmark = "~/projects/bsm/tables/summary-benchmark.tsv")
 summ <- lapply(fl, read.delim, row.names = 1)
-summ
-summ.all <- do.call(cbind, summ)
 ```
 
 ```{r}
 Dx <- c("Control", "SCZ")
 names(Dx) <- Dx
-cmc <- lapply(Dx, function(d) summ$cmc[ names(summ$cmc) %in% rownames(clinical[clinical$Dx == d, ]) ])
-cmc.long <- lapply(cmc, reshape.summ)
-cmc.all.long <- do.call(rbind, lapply(names(cmc.long), function(y) cbind(cmc.long[[y]], data.frame(Dx = y))))
+summ <- c(lapply(Dx, function(d) summ$cmc[ names(summ$cmc) %in% rownames(clinical[clinical$Dx == d, ]) ]),
+          summ[-1])
 ```
 
 The same information graphically
 
 ```{r summary}
-summ.all.long <- reshape.summ(summ.all)
-my.col <- c("white", "gray")
-levelplot(done ~ individuals * workflow, data = summ.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
-levelplot(done ~ individuals * workflow, data = cmc.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
+summ.l <- my.levelplot(summ)
+```
+
+```{r summary-cmc, fig.asp=0.7}
+invisible(my.levelplot(summ[1:3], indiv.as.columns=TRUE))
 ```
 
 Write results to file
 
 ```{r}
+summ.all <- do.call(cbind, summ)
 write.csv(summ.all, "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-all.csv")
 ```
