@@ -78,3 +78,7 @@ depth.plot(rd.genome, nonchromosomes, chromosomal = FALSE, scales = list(x = lis
 ```{r read-depth-nonchromosomal, echo=FALSE}
 depth.plot(rd.genome, nonchromosomes, chromosomal = FALSE, ylim = c(0, 1000), scales = list(x = list(rot = 90)))
 ```
+
+## Figures for presentations
+
+

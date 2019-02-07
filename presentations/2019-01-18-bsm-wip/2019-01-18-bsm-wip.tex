@@ -16,7 +16,7 @@
 
 % beamer styles
 \mode<presentation>{
-\usetheme{Warsaw}
+\usetheme{Frankfurt}
 %\usetheme{Antibes}
 \usecolortheme{beaver}
 %\usecolortheme{seahorse}
@@ -34,7 +34,7 @@
 % title, etc
 \title{Somatic Mutations in the Human Brain from NGS data}
 %\subtitle{A subtitle may be shorter and more technical}
-\author{Attila Gulyas-Kovacs}
+\author{Attila Guly\'{a}s-Kov\'{a}cs, Chaggai Rosenbluh, Andy Chess}
 \date{Chess Lab}
 
 \begin{document}
@@ -52,10 +52,24 @@
 \item cancer, aging
 \item V(D)J recombination
 \item dysplasias: hemimegencephaly, lissencephaly, pediatric epilepsy 
-\item<4-> \alert{psychiatric disorders?}\\
-Brain Somatic Mosaicism Network (BSMN)
+\item<4-> \alert{neurological and psychiatric disorders?}
 \end{itemize}
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig1.jpg}
+\end{frame}
+
+\begin{frame}[label=bsm-methods]{Sequencing approaches to detect somatic variants}
+\includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig2.jpg}
+\end{frame}
+
+\begin{frame}{Sequencing approaches to detect somatic variants}
+\end{frame}
+
+\begin{frame}{Proposed functional validation}
+\includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig4.jpg}
 \end{frame}
 
 \begin{frame}{Patterns of somatic mosaicism}
@@ -78,8 +92,14 @@ Brain Somatic Mosaicism Network (BSMN)
 \includegraphics[width=0.8\columnwidth]{figures/from-others/lynch-evolution-of-mutation-rate-fig3.jpg}
 \end{frame}
 
-\begin{frame}{Sequencing approaches to detect somatic variants}
-\includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig2.jpg}
+\againframe{bsm-methods}
+
+\begin{frame}[label=data-quantity]{Samples and NGS data}
+\includegraphics[width=0.7\columnwidth]{figures/2017-05-24-alignment-stats/depth-hist-1.pdf}
+\end{frame}
+
+\begin{frame}{Ongoing analyses}
+\includegraphics[width=1.0\columnwidth]{figures/2018-09-12-sequenced-individuals/summary-cmc-1.pdf}
 \end{frame}
 
 \begin{frame}{Discordance between variant callers}
@@ -103,22 +123,28 @@ Brain Somatic Mosaicism Network (BSMN)
 \includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
 \end{frame}
 
-\begin{frame}{Discordance between research groups}
+\begin{frame}{Discordance in Common Experiment}
 \includegraphics[height=0.7\columnwidth]{figures/from-others/bsmn-cs-callset-concordance.png}
+
+\tiny{Brain Somatic Mosaicism Network, unpublished}
 \end{frame}
 
-\begin{frame}
-How to find the best calling approach?
-\begin{itemize}
-\item consortium
+\begin{frame}{Optimizing calling approach}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+consortium
 \begin{enumerate}
 \item real data set
 \item heuristic filtering and combination of call sets
 \item validate some calls with targeted resequencing 
 \item refine heuristics
 \item ...  
+\item publish paper \& software
 \end{enumerate}
-\item<2> our group
+\end{column}
+
+\begin{column}{0.5\textwidth}
+our group
 \begin{enumerate}
 \item benchmark data set with known variants
 \item select annotations in call sets
@@ -127,9 +153,140 @@ How to find the best calling approach?
 \item re-select annotations 
 \item ...
 \end{enumerate}
-\end{itemize}
+\end{column}
+\end{columns}
 \end{frame}
 
+\begin{frame}[label=benchmark]{Mixed germline variants for benchmarking}
+\begin{center}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1\textwidth]{figures/from-others/ceph-utah-pedigree-1463.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\small
+{\onslide<1->
+\begin{tabular}{cccc}
+genome & mix1 & mix2 & mix3\\
+\hline
+NA12889 & 4 & 2 & 0\\
+NA12891 & 8 & 4 & 0\\
+NA12890 & 16 & 8 & 0\\
+NA12892 & 72 & 86 & 100\\
+\hline
+total & 100 & 100 & 100\\
+\end{tabular}
+}
+\end{column}
+\end{columns}
+\end{center}
+\end{frame}
+
+\begin{frame}{Controlling precision}
+\[\mathrm{precision} = 1 - \mathrm{FDR}\]
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{center}
+without control
+\end{center}
+\includegraphics<1-2>[width=1\columnwidth]{figures/by-me/precision-recall/pr-realistic.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{center}
+\only<2>{with control }
+\end{center}
+\includegraphics<2>[width=1\columnwidth]{figures/by-me/precision-recall/pr.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=precrecall]{Callers in precision-recall space}
+\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
+
+\tiny{Chaggai Rosenbluh}
+\end{frame}
+
+\begin{frame}{Impact of alternative allele frequency}
+\includegraphics[width=0.9\textwidth]{figures/from-others/chaggai-recall-aaf.png}
+
+\tiny{Chaggai Rosenbluh}
+\end{frame}
+
+\againframe{data-quantity}
+
+\begin{frame}{Summary}
+\begin{enumerate}
+\item \alert{somatic mutations} in neurological psychiatric disorders\\
+\emph{Brain Somatic Mosaicism Network}
+\item somatic mutations in \alert{schizoprhenic} and control brains\\
+\emph{our group}
+\item workflows for somatic variant calling: \alert{discordance}
+\item workflow characterization and \alert{optimization}
+\begin{itemize}
+\item heuristics---\emph{BSMN}
+\begin{itemize}
+\end{itemize}
+\end{itemize}
+\item probabilistic approach---\emph{our group}
+\begin{itemize}
+\item benchmark data \(\Rightarrow\) precision--recall
+\item \alert{machine learning}
+\item input: base/mapping/calling \alert{quality annotations}
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{BSMN consortium team}
+Brain Somatic Mosaicism Network
+\footnotesize
+\begin{tabular}{rl}
+\hline
+P.I. & institution \\
+\hline
+Akbarian & Icahn School of Medicine at Mount Sinai\\
+Chess & Icahn School of Medicine at Mount Sinai\\
+Gage & Salk Institute for Biological Studies\\
+Gleeson & University of California, San Diego\\
+Moran & University of Michigan\\
+Park & Harvard University\\
+Pevsner & Kennedy Krieger Institute\\
+Sestan & Yale University\\
+Vaccarino & Yale University\\
+Walsh & Boston Children's Hospital\\
+Weinberger & Lieber Institute for Brain Development\\
+\end{tabular}
+\vfill
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+\begin{center}
+
+\includegraphics[width=0.5\columnwidth]{figures/from-others/NIH_logo.png}
+\end{center}
+\end{column}
+
+\begin{column}{0.3\textwidth}
+\begin{center}
+
+\includegraphics[width=0.5\columnwidth]{figures/from-others/nda.pdf}
+
+NIMH Data Archive
+\end{center}
+\end{column}
+
+\begin{column}{0.3\textwidth}
+\begin{center}
+
+\includegraphics[width=0.5\columnwidth]{figures/from-others/synapse.pdf}
+
+Synapse
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
 \end{document}
 
 
