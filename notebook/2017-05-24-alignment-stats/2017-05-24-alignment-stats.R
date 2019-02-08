@@ -44,6 +44,17 @@ depth.plot <- function(x, sel.contigs, chromosomal = TRUE, ...) {
         update(tp, par.strip.text = list(cex = 0.7))
 }
 
+horiz.depth.plot <- function(x, y = depth.hist, sel.contigs = c("22", "X", "Y"), fi = fai, histo = NULL, ...) {
+    limits <- lapply(sel.contigs, function(x) c(0, subset(fi, subset = fi$contig %in% x, select = "length", drop = TRUE)))
+    lengths <- subset(fi, subset = fi$contig %in% sel.contigs, select = "length", drop = TRUE)
+    dp <- xyplot(depth ~ pos | contig, groups = tissue, data = x, subset = x$contig %in% sel.contigs,
+                 scales = list(x = list(tick.number = 2, relation = "free", limits = limits), y = list()),
+                 type = c("p", "spline"), lwd = 2, pch = ".", auto.key = list(column = 3),
+                 key = simpleKey(text = tissues, lines = TRUE, points = FALSE, lwd = 2),
+                 xlab = "base position", ylab = "read depth", between = list(x = 0.5, y = 0), ylim = c(0, 300), ...)
+    resizePanels(dp, w = lengths)
+}
+
 combined.depth.plot <- function(x, y = depth.hist, sel.contig.ix = c(22, 23, 24), fi = fai, histo = NULL, ...) {
     fi$length.Mb <- fi$length / 1e6
     limits <- lapply(sel.contig.ix, function(x) c(0, fi$length.Mb[x]))

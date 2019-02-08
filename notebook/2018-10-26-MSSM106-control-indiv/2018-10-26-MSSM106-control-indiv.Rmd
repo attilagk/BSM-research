@@ -28,19 +28,55 @@ source("../../src/vcf.R")
 Import VCF for each caller (separately for SNVs and indels) and store only the called variants' identity by position.
 
 ```{r cache=TRUE}
-results <- get.calls4indiv(indiv = "MSSM_106", callers = c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq"))
+callers <- c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq")
+unfiltered <- get.calls4indiv(indiv = "MSSM_106", callers = callers, PASS = FALSE)
+PASS <- get.calls4indiv(indiv = "MSSM_106", callers = callers, PASS = TRUE)
+```
+
+```{r cache=TRUE}
+unfiltered$vp <- lapply(unfiltered$vcf, get.venn.partitions)
+PASS$vp <- lapply(PASS$vcf, get.venn.partitions)
 ```
 
 ```{r call-set-size, fig.asp=0.7}
-barchart(caller ~ set.size | var.type, data = results$ssize, xlim = c(0, ceiling(max(ssize$set.size) / 1e6) * 1e6))
-barchart(caller ~ log10(set.size) | var.type, data = results$ssize, xlim = c(0, 7))
+ssize <- rbind(cbind(unfiltered$ssize, data.frame(filter = "unfiltered")),
+               cbind(PASS$ssize, data.frame(filter = "PASS")))
+my.barchart <- function(do.log = FALSE, do.groups = TRUE, ...) {
+    fm <- if(do.log)
+              formula(caller ~ log10(set.size) | var.type)
+          else
+              formula(caller ~ set.size | var.type)
+    bc <- if(do.groups)
+              barchart(fm, data = ssize, groups = filter)
+          else
+              barchart(fm, data = ssize, subset = ssize$filter == "unfiltered")
+    xright <- if(do.log) 7 else ceiling(max(unfiltered$ssize$set.size) / 1e6) * 1e6
+    update(bc, xlim = c(0, xright), ...)
+}
+my.barchart(do.log = FALSE, do.groups = TRUE, auto.key = list(points = FALSE, rectangles = TRUE))
+my.barchart(do.log = TRUE, do.groups = TRUE, auto.key = list(points = FALSE, rectangles = TRUE))
+#my.barchart(do.log = TRUE, do.groups = FALSE)
 ```
 
 ```{r call-set-size-snvs, fig.asp=1.2, fig.width=4}
-barchart(caller ~ log10(set.size) | var.type, data = results$ssize, xlim = c(0, 7))[1]
+my.barchart(do.log = TRUE, do.groups = FALSE, auto.key = list(points = FALSE, rectangles = TRUE))[1]
+my.barchart(do.log = TRUE, do.groups = TRUE, auto.key = list(points = FALSE, rectangles = TRUE))[1]
 ```
 
 ```{r venn-common-sample-snvs}
 my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray", cat.cex = 1.4)
-grid.draw(venn.diagram(results$vcf$snvs, NULL, main = "SNVs", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+grid.draw(venn.diagram(unfiltered$vcf$snvs, NULL, main = "SNVs", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
+```
+
+The intersection of all callers contains the following variant(s)
+
+```{r}
+unfiltered$vp$snvs[["..values.."]][1]
+```
+
+The Venn diagram for PASS filtered callsets:
+
+```{r venn-common-sample-snvs-PASS}
+my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray", cat.cex = 1.4)
+grid.draw(venn.diagram(PASS$vcf$snvs, NULL, main = "SNVs", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```

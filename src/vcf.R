@@ -13,9 +13,10 @@ partition.sizes <- function(vcfs = cs.vcf[["100MB"]]$snvs) {
 
 
 get.calls4indiv <-
-    function(indiv = "MSSM_106", callers = c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq")) {
+    function(indiv = "MSSM_106", callers = c("lofreqSomatic", "somaticSniper", "strelka2Germline2s", "strelka2Somatic", "TNseq", "JointSNVMix2"), PASS = FALSE) {
+        pass.str <- ifelse(PASS, "PASS/", "")
         import.vcfs <- function(vartype = "snvs") {
-            fl <- paste0("../../results/calls/", indiv, "/", vartype, "/", callers, ".vcf.gz")
+            fl <- paste0("../../results/calls/", indiv, "/", vartype, "/", pass.str, callers, ".vcf.gz")
             names(fl) <- names(callers)
             l <- lapply(fl, readVcf, "hg19")
             lapply(l, row.names)
