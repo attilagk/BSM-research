@@ -1,3 +1,5 @@
+library(latticeExtra)
+
 get.samstats <- function(statsfile, field = "COV") {
     read.delim(pipe(paste0("grep ^", field, " ", statsfile)), header = FALSE)
 }
@@ -40,4 +42,21 @@ depth.plot <- function(x, sel.contigs, chromosomal = TRUE, ...) {
                layout = c(1, length(sel.contigs)), xlab = "position (Mb)")
     else
         update(tp, par.strip.text = list(cex = 0.7))
+}
+
+combined.depth.plot <- function(x, y = depth.hist, sel.contig.ix = c(22, 23, 24), fi = fai, histo = NULL, ...) {
+    fi$length.Mb <- fi$length / 1e6
+    limits <- lapply(sel.contig.ix, function(x) c(0, fi$length.Mb[x]))
+    sel.contigs <- levels(x$contig)[sel.contig.ix]
+    histo.w <- sum(fi$length.Mb[sel.contig.ix]) / 4
+    dp <- xyplot(depth ~ pos / 1e6 | contig, groups = tissue, data = x, subset = x$contig %in% sel.contigs,
+                 scales = list(x = list(relation = "free", limits = limits), y = list()),
+                 type = c("p", "spline"), lwd = 2, pch = ".", auto.key = list(column = 3),
+                 key = simpleKey(text = tissues, lines = TRUE, points = FALSE, lwd = 2),
+                 xlab = "", between = list(x = 0.5, y = 0))
+    histo <- xyplot(depth ~ frequency, groups = tissue, data = y, type = "l", lwd = 2, ylim = c(-10, 300))
+    tp <- c(dp, histo, y.same = TRUE, layout = c(length(sel.contigs) + 1, 1))
+    tp <- resizePanels(tp, w = c(fi$length.Mb[sel.contig.ix], histo.w))
+    update(tp, ylim = c(0, 300), strip = strip.custom(factor.levels = c(sel.contigs, "histogram")),
+           scales = list(x = list(tick.number = 2)), ...)
 }
