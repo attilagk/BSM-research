@@ -1,0 +1,39 @@
+---
+layout: default
+#title: 
+tags: [ pileup, variant ]
+featimg: "allele-counts-1.png"
+---
+
+Variant allele frequencies are presented for a couple of somatic variant calls from MSSM_106.
+
+```{r echo=FALSE, warning=FALSE}
+library(lme4)
+library(lattice)
+library(latticeExtra)
+opts_chunk$set(dpi = 144)
+opts_chunk$set(out.width = "700px")
+opts_chunk$set(dev = c("png", "pdf"))
+lattice.options(default.args = list(as.table = TRUE))
+lattice.options(default.theme = "standard.theme")
+```
+
+```{r}
+df <- read.delim("~/projects/bsm/results/2019-02-08-somatic-calls-pileup/results.pileup", row.names = NULL)
+df$refcount <- gsub("[.,]", "R", df$bases)
+df$refcount <- gsub("[$*^]", "", df$refcount)
+df$refcount <- gsub("\\]", "", df$refcount)
+df$refcount <- gsub("[^R]", "", df$refcount)
+df$refcount <- nchar(df$refcount)
+df$altcount <- df$depth - df$refcount
+df$AAF <- df$altcount / df$depth
+df$variant <- paste(df$chromosome, df$position, sep = ":")
+```
+
+```{r allele-counts, fig.asp=0.7}
+barchart(tissue ~ refcount + altcount | variant, data = df, xlim = c(0, 1.1 * ceiling(max(df$depth))), auto.key = list(text = c("reference allele", "alternative allele")), xlab = "read count", stack = TRUE)
+```
+
+```{r allele-counts-X-1355567-CT, fig.asp=1.2, fig.width=4}
+barchart(tissue ~ refcount + altcount, data = df, auto.key = list(text = c("reference allele", "alternative allele")), xlab = "read count", subset = variant == "X:1355567", main = "X:1,355,567 C/T", xlim = c(0, 1.1 * ceiling(max(df$depth))), stack = TRUE)
+```
