@@ -49,9 +49,10 @@ horiz.depth.plot <- function(x, y = depth.hist, sel.contigs = c("22", "X", "Y"),
     lengths <- subset(fi, subset = fi$contig %in% sel.contigs, select = "length", drop = TRUE)
     dp <- xyplot(depth ~ pos | contig, groups = tissue, data = x, subset = x$contig %in% sel.contigs,
                  scales = list(x = list(tick.number = 2, relation = "free", limits = limits), y = list()),
-                 type = c("p", "spline"), lwd = 2, pch = ".", auto.key = list(column = 3),
+                 type = c("p"), lwd = 2, pch = ".", auto.key = list(column = 3),
                  key = simpleKey(text = tissues, lines = TRUE, points = FALSE, lwd = 2),
-                 xlab = "base position", ylab = "read depth", between = list(x = 0.5, y = 0), ylim = c(0, 300), ...)
+                 xlab = "base position", ylab = "read depth", between = list(x = 0.5, y = 0), ylim = c(0, 300),
+                 layout = c(length(sel.contigs), 1),...)
     resizePanels(dp, w = lengths)
 }
 
