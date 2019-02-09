@@ -35,11 +35,13 @@ print(bc)
 print(bc.log)
 ```
 
+### Figures for presentations
+
 ```{r snvs, fig.asp=0.7}
 print(bc[2:3, 1])
 print(bc.log[2:3, 1])
 ```
 
 ```{r snvs-cs, fig.asp=1.2, fig.width=4}
-print(bc.log[2, 1])
+barchart(caller ~ log10(numcalls), data = df, groups = filter, subset = ! caller %in% c("TNseq.Mutect2-v201711", "strelka2Germline2s") & vartype == "snvs" & sample == "commonsample" & filter == "unfiltered", xlab = "log10 number of calls", xlim = c(0, 7))
 ```

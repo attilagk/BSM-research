@@ -17,6 +17,7 @@ opts_chunk$set(out.width = "600px")
 opts_chunk$set(dev = c("png", "pdf"))
 lattice.options(default.args = list(as.table = TRUE))
 lattice.options(default.theme = "standard.theme")
+source("2018-09-12-sequenced-individuals.R")
 ```
 
 ```{r engine="bash"}
@@ -29,6 +30,19 @@ Thus the number of sequenced individuals is
 ```{r engine="bash", echo=FALSE}
 indivs=$HOME/projects/bsm/results/2018-09-12-sequenced-individuals/sequenced-individuals
 wc -w $indivs
+```
+
+Download and import `CMC_Human_clinical_metadata.csv` for later use.
+
+```{r engine="bash", echo=FALSE}
+cd $HOME/projects/bsm/results/2018-09-12-sequenced-individuals/
+synapse login
+synapse get syn2279441
+```
+
+```{r}
+clinical <- read.csv("~/projects/bsm/results/2018-09-12-sequenced-individuals/CMC_Human_clinical_metadata.csv")
+rownames(clinical) <- sub("CMC_", "", clinical$Individual.ID) # remove CMC_ prefix
 ```
 
 ## Extension: sequenced samples
@@ -73,24 +87,31 @@ Type of individuals
 
 ```{r}
 fl <- c(cmc = "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv",
-        common.sample = "~/projects/bsm/tables/summary-common-sample.tsv",
-        benchmark = "~/projects/bsm/tables/summary-benchmark.tsv")
+        CE = "~/projects/bsm/tables/summary-common-sample.tsv",
+        Benchmark = "~/projects/bsm/tables/summary-benchmark.tsv")
 summ <- lapply(fl, read.delim, row.names = 1)
-summ
-summ.all <- do.call(cbind, summ)
+```
+
+```{r}
+Dx <- c("Control", "SCZ")
+names(Dx) <- Dx
+summ <- c(lapply(Dx, function(d) summ$cmc[ names(summ$cmc) %in% rownames(clinical[clinical$Dx == d, ]) ]),
+          summ[-1])
 ```
 
 The same information graphically
 
 ```{r summary}
-summ.all.long <- expand.grid(row.names(summ.all), names(summ.all))
-summ.all.long$done <- sapply(seq.int(dim(summ.all.long)[1]), function(y) summ.all[as.character(summ.all.long[y, 1]), as.character(summ.all.long[y, 2])])
-my.col <- c("white", "gray")
-levelplot(done ~ Var2 * Var1, data = summ.all.long, col.regions = my.col, colorkey = FALSE, scales = list(x = list(rot = 90)), xlab = "", ylab = "")
+summ.l <- my.levelplot(summ)
+```
+
+```{r summary-cmc, fig.asp=0.7}
+invisible(my.levelplot(summ[1:3], indiv.as.columns=TRUE))
 ```
 
 Write results to file
 
 ```{r}
+summ.all <- do.call(cbind, summ)
 write.csv(summ.all, "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-all.csv")
 ```
