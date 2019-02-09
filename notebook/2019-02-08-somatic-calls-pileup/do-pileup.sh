@@ -9,7 +9,7 @@ poslist=$wd/position-list
 bamdir=/projects/bsm/alignments/MSSM_106
 bams=$bamdir/MSSM_106_*.bam
 
-echo "bam	tissue	chromosome	position	reference	depth	bases base_qual" > $out
+echo "bam	tissue	chromosome	position	reference	depth	bases	base_qual" > $out
 
 for bam in $bams; do
     tissue=$(echo $bam | sed 's/^.*MSSM_106_\(NeuN_mn\|NeuN_pl\|muscle\)\.bam/\1/')
