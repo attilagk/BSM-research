@@ -2,7 +2,7 @@
 layout: default
 #title: 
 tags: [ alignment, depth, coverage ]
-#featimg: "sequence-only-2.png"
+featimg: "depth-plot-1.png"
 ---
 
 Read depth is presented for the three samples from control individual MSSM_106.
@@ -32,4 +32,8 @@ rd <- get.read.depths(fai = fai, tissues = tissues, prefix = "~/projects/bsm/res
 
 ```{r depth-plot, fig.asp=0.7}
 horiz.depth.plot(rd, sel.contigs=c("22", "X", "Y"))
+```
+
+```{r depth-plot-X, fig.asp=1.2, fig.width=4}
+horiz.depth.plot(rd, sel.contigs=c("X"))
 ```

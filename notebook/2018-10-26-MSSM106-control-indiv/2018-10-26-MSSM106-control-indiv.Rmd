@@ -80,3 +80,10 @@ The Venn diagram for PASS filtered callsets:
 my.par <- list(main.cex = 1.8, fill = trellis.par.get("superpose.line")$col[seq_along(callers)], col = "gray", cat.cex = 1.4)
 grid.draw(venn.diagram(PASS$vcf$snvs, NULL, main = "SNVs", main.cex = my.par$main.cex, fill = my.par$fill, col = my.par$col, cat.cex = my.par$cat.cex))
 ```
+
+The intersection of four callers (excluding strelka2Germline2s)
+
+```{r}
+PASS$vp$snvs[["..values.."]][5]
+```
+

@@ -92,7 +92,15 @@
 \againframe{bsm-methods}
 
 \begin{frame}[label=data-quantity]{Samples and NGS data}
-\includegraphics[height=0.85\textheight]{figures/2017-05-24-alignment-stats/combined-depth-plot-1.png}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\includegraphics[width=1.0\columnwidth]{figures/2019-02-08-MSSM_106-depth/depth-plot-X-1.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\includegraphics<2>[width=1.0\columnwidth]{figures/2019-02-08-somatic-calls-pileup/allele-counts-X-1355567-CT-1.pdf}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}{Ongoing analyses}
@@ -215,8 +223,6 @@ without control
 \tiny{Chaggai Rosenbluh}
 \end{frame}
 
-\againframe{data-quantity}
-
 \begin{frame}{Summary}
 \begin{enumerate}
 \item \alert{somatic mutations} in neurological psychiatric disorders\\
@@ -227,8 +233,6 @@ without control
 \item workflow characterization and \alert{optimization}
 \begin{itemize}
 \item heuristics---\emph{BSMN}
-\begin{itemize}
-\end{itemize}
 \end{itemize}
 \item probabilistic approach---\emph{our group}
 \begin{itemize}
