@@ -33,7 +33,6 @@
 
 % title, etc
 \title[Somatic Mutations in the Brain]{Somatic Mutations in the Human Brain from NGS data}
-\subtitle{A subtitle may be shorter and more technical}
 \author{Attila Guly\'{a}s-Kov\'{a}cs/Jones}
 \date{C.~Rosenbluh, A.~Chess}
 
@@ -41,9 +40,16 @@
 
 \maketitle
 
+%Neurological and especially psychiatric disorders in general have a complex
+%environmental and genetic background.  Besides germline variants de novo
+%variants have also been shown to carry risk.  But there are other possible
+%carriers of risk: gene-gene and gene-environment interactions as well as
+%somatic variants.  Somatic variants have been well characterized in cancer,
+%aging and immunity.  They have been shown to play role in some neurological
+%disorders.  So what roles if any do they play in psychiatric disorders?
 \begin{frame}{Genetics of psychiatric disorders}
 \begin{itemize}
-\item germline variants
+\item risk---environment + thousands of germline variants
 \item \textit{de novo} variants
 \item<2-> gene-gene and gene-environment interactions  
 \item<3-> somatic variants
@@ -52,27 +58,53 @@
 \item cancer, aging
 \item V(D)J recombination
 \item dysplasias: hemimegencephaly, lissencephaly, pediatric epilepsy 
-\item<4-> \alert{neurological and psychiatric disorders?}
+\item<4-> \alert{psychiatric disorders?}
 \end{itemize}
 \end{itemize}
 \end{frame}
 
+%We are addressing this question as part of the Brain Somatic Mosaicism
+%Network, an NIH funded research consortium.  Somatic mosaicism is the pattern
+%of occurrence of a somatic variant in an individual's body.  Our group has
+%been focussing on somatic SNVs and indels in schizophrenia.
 \begin{frame}
 \includegraphics[height=0.8\textheight]{figures/from-others/bsm-science-fig1.jpg}
+\vfill
+\tiny{McConnell et al Science 2017}
 \end{frame}
 
+%The consortium is using bulk and single cell NGS techniques to identify somatic variants in the
+%brain.
 \begin{frame}[label=bsm-methods]{Sequencing approaches to detect somatic variants}
 \includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig2.jpg}
+\vfill
+\tiny{McConnell et al Science 2017}
 \end{frame}
 
-\begin{frame}{Proposed functional validation}
+%The most interesting somatic variants will be characterized functionally in rhodents.
+\begin{frame}{Proposed functional characterization}
 \includegraphics[width=1.0\textwidth]{figures/from-others/bsm-science-fig4.jpg}
+\vfill
+\tiny{McConnell et al Science 2017}
 \end{frame}
 
+%Work before the BSMN consortium already described some somatic variants in a
+%normal individual by sequencing or genotyping single cells shown as dots.
+%Some somatic variants like C1 and C2 were found in all those cells suggesting
+%they are spread throughout the entire brain (but were absent from other body
+%parts).  Other somatic variants like C6, C7, C8 and C10 were confined to 
+%smaller regions.
 \begin{frame}{Patterns of somatic mosaicism}
-\includegraphics[width=1.0\textwidth]{figures/from-others/lodato2015science-fig3ab.png}
+\includegraphics[height=0.7\textheight]{figures/from-others/lodato2015science-fig3b.png}
+\vfill
+\tiny{Lodato et al Science 2015}
 \end{frame}
 
+%To interpret the various patterns of somatic mosaicism we must consider
+%embryonic development.  When a mutation occurs early, say, in the ectoderm
+%around gastrulation then later on the somatic variant has a chance to spread out to
+%much of the brain (which emerges from the neuroectoderm) but not to muscle
+%and other mesodermal organs.
 \begin{frame}{Embryonic development}
 %gastrulation video
 %https://www.youtube.com/watch?v=3AOoikTEfeo
@@ -81,17 +113,61 @@
 \includegraphics[height=0.8\textheight]{figures/from-others/HumanEmbryogenesis.png}
 \end{frame}
 
+%But when a mutation occurs much later for instance in radial glia or an
+%intermediate progenitor cell, then the somatic variant will be confined to
+%its relatively few daughter cells of that cell, which are mostly neurons
+%and marked by the expression of NeuN.
 \begin{frame}{Neocortical development}
 \includegraphics[height=0.8\textheight]{figures/from-others/doi_10_1016-j_cell_2011_06_030-fig4b-neocortical-development.jpg}
+\vfill
+\tiny{review: Cell.~2011;146(2):332}
 \end{frame}
 
+%Another question is the number of somatic mutations in the brain, brain
+%region, or in a particular neuron. This meta analysis suggests the mutation
+%rate in the brain is low, comparable to that in the germline.  But while
+%germline variants are hereditary, somatic variants aren't.  Therefore
+%germline variants accumulate throughout generations and expected to outnumber
+%somatic variants in neurons in any given set of neurons.
 \begin{frame}{Mutation rate}
 \includegraphics[width=0.8\columnwidth]{figures/from-others/lynch-evolution-of-mutation-rate-fig3.jpg}
+\vfill
+\tiny{Lynch Trends Genet.~2010}
 \end{frame}
 
+%Therefore one of the challenges in discovering somatic variants is to
+%distinguish them from the much more common germline variants.  For example,
+%our group uses bulk sequencing of neuronal nuclei that have been sorted out
+%using NeuN, the marker mentioned before. For simplicity suppose that a
+%variant is heterozygous. If the variant is germline then then the variant's
+%allele frequency is 1/2 in our sample so we expect to see the variant in
+%exactly half of the sequencing reads that map to its position in the
+%reference genome.  But if the variant is somatic then its allele frequency in
+%the sample is typically less then half so that we expect to see it in less than
+%half of the reads, too.
+%But due to sampling error at limited read depth we may easily mistake a high frequency somatic
+%variant with a germline variant and we may easily miss a low frequency
+%somatic variant.  Low read depth also makes sequencing errors appear as a low
+%frequency somatic variants.  Therefore it is beneficial to
+%sequence as deeply as our budget allows.
 \againframe{bsm-methods}
 
-\begin{frame}[label=data-quantity]{Samples and NGS data}
+%We sequenced the whole genome of our NeuN plus samples at nearly 200x overall coverage.
+%In blue you see how the read depth varies across the sex chromosomes in a
+%control (not schizophrenic) individual.  The depth tends to be low on the Y
+%chromosome confirming that the individual is female but the depth is not
+%zero indicating mapping errors.  To help distinguish high frequency somatic
+%variants from heterozygous germline variants we also sequenced a muscle
+%sample and a sample of NeuN- brain cells from the same
+%individual.
+%The bar chart presents read counts of the reference allele C and an
+%alternative allele (T) at this position (near the start of the X; show
+%location on the left).  There are two pieces of evidence for this being a
+%true somatic variant: first the allele is present less than half of reads in
+%the NeuN+ sample and second it is completely absent from the muscle sample.  Moreover, the
+%fact that it's also present in the NeuN- brain sample suggests that the mutation
+%occurred relatively early in development, perhaps during neurulation.
+\begin{frame}[label=data-quantity]{Mapped reads from a control individual}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 \includegraphics[width=1.0\columnwidth]{figures/2019-02-08-MSSM_106-depth/depth-plot-X-1.png}
@@ -103,11 +179,31 @@
 \end{columns}
 \end{frame}
 
+%Besides that control individual (MSSM_106) our group in the consortium analyzed samples from several
+%control and SCZ brains from Sinai and U Pitt.
+%Of course we did not attempt to find somatic variants by manual inspection
+%of our mapped reads.  The genome is too large and the expected number of
+%somatic variants is too little for that.  After mapping our reads we let
+%several variant callers do this job.  Variant callers are statistical
+%software tools that not only search for reads with some Alt allele (relative
+%to the reference genome) and not only look at Ref and Alt read counts but
+%also take additional evidence for or against a somatic variant such as base
+%quality and mapping quality.  Additionally, most of our callers can jointly
+%analyze a NeuN+ sample together with either a muscle or NeuN- sample (but not
+%both).  So what are the called variants and why were we not content with just one caller?
 \begin{frame}{Ongoing analyses}
 \includegraphics[width=1.0\columnwidth]{figures/2018-09-12-sequenced-individuals/summary-cmc-1.pdf}
 \end{frame}
 
-\begin{frame}{Discordance between variant callers}
+%This is because callers are largely discordant.  Some of them called
+%10 thousand(!) times more variants than others.  You might say that's OK if
+%callers differ only in their specificity and sensitivity.  In that case their
+%call sets should be nested in each other.  But this is not what we found
+%suggesting that callers differ also in their biases: one tends to make one kind of mistake
+%while another another kind of mistake.  In other words callers are
+%largely complimentary to each other and would benefit from some kind of
+%combination.
+\begin{frame}<1-2>[label=discordance]{Discordance between variant callers}
 
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -124,47 +220,58 @@
 \end{columns}
 \end{frame}
 
+%A popular way of combining callers is to take the intersection of call sets.
+%But if callers differ in their precision (a measure of specificity) this is
+%not optimal because the bias of the least precise caller will dominate the
+%combined call set.  Precision may be controlled by filtering the call sets based on
+%the quality annotations for each call in the set.  But in general the precision
+%is unknown so filtering is done heuristically, which means it is guided by
+%subjective factors like expert knowledge, faith and misconception.
+%Nonetheless some callers offer a default filtering option and mark calls that
+%PASS the filter.
 \begin{frame}{Heuristic filtering and combination of call sets}
 \input{two-vcfs-callid.tex}
 
 \includegraphics[height=0.6\textheight]{figures/Tnseq-4-strelka2Somatic-4-venn.png}
 \end{frame}
 
+%When we used the default filters the callers remained largely different both
+%in the size and concordance of the call sets.
+\againframe<3>{discordance}
+
+%An equally disappointing result came from the so called common experiment within
+%the consortium.  In this experiment each of 5 groups sequenced the same
+%sample and produced a call set by their favorite callers, heuristic filtering
+%and combination.
 \begin{frame}{Discordance in Common Experiment}
-\includegraphics[height=0.7\columnwidth]{figures/from-others/bsmn-cs-callset-concordance.png}
-
-\tiny{Brain Somatic Mosaicism Network, unpublished}
+\includegraphics[height=0.65\columnwidth]{figures/from-others/bsmn-cs-callset-concordance.png}
+\tiny{BSMN, unpublished}
 \end{frame}
 
-\begin{frame}{Optimizing calling approach}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-consortium
-\begin{enumerate}
-\item real data set
-\item heuristic filtering and combination of call sets
-\item validate some calls with targeted resequencing 
-\item refine heuristics
-\item ...  
-\item publish paper \& software
-\end{enumerate}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-our group
-\begin{enumerate}
-\item benchmark data set with known variants
-\item select annotations in call sets
-\item input to machine learning\footnote{VariantMetaCaller}
-\item validate all calls
-\item re-select annotations 
-\item ...
-\end{enumerate}
-\end{column}
-\end{columns}
+%This lead the consortium to standardize and optimize somatic variant
+%calling.  This methodological study is on its way and is planned to be published.
+%The main approach of the consortium is to use the common sample and refine heuristic filtering
+%by the validation of a limited number of calls.
+%A complementary approach is taken by our group.  We use instead of a brain
+%sample with real but unknown somatic variants an artificial sample with
+%modeled and therefore known somatic variants.  This lets us quantify calling
+%accuracy, which is essential for optimization.  Besides this we use a
+%published machine learning technique that probabilistically and
+%semi-automatically filters and combines call sets.
+\begin{frame}{Optimization of variant calling}
+\small
+\begin{tabular}{r|cc}
+& consortium & our group \\
+\hline
+somatic variants in sample & real, unknown & modeled, known \\
+validation & targeted resequencing & not needed \\
+reported accuracy & qualitative & quantitative \\
+variable selection (filtering) & heuristic & probabilistic, manual \\
+filter setting & heuristic & probabilistic, automated \\
+\end{tabular}
 \end{frame}
 
-\begin{frame}[label=benchmark]{Mixed germline variants for benchmarking}
+\begin{frame}[label=benchmark]{Modeling somatic variants}
 \begin{center}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -192,7 +299,13 @@ total & 100 & 100 & 100\\
 \end{center}
 \end{frame}
 
-\begin{frame}{Controlling precision}
+\begin{frame}[label=precrecall]{Callers in precision-recall space}
+\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
+
+\tiny{Chaggai Rosenbluh}
+\end{frame}
+
+\begin{frame}{Precision/FDR control}
 \[\mathrm{precision} = 1 - \mathrm{FDR}\]
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -211,10 +324,8 @@ without control
 \end{columns}
 \end{frame}
 
-\begin{frame}[label=precrecall]{Callers in precision-recall space}
-\includegraphics[width=1\textwidth]{figures/from-others/chaggai-precision-recall.png}
+\begin{frame}{Precision control with machine learning}
 
-\tiny{Chaggai Rosenbluh}
 \end{frame}
 
 \begin{frame}{Impact of alternative allele frequency}
@@ -250,7 +361,6 @@ Brain Somatic Mosaicism Network
 \hline
 P.I. & institution \\
 \hline
-Akbarian & Icahn School of Medicine at Mount Sinai\\
 Chess & Icahn School of Medicine at Mount Sinai\\
 Gage & Salk Institute for Biological Studies\\
 Gleeson & University of California, San Diego\\

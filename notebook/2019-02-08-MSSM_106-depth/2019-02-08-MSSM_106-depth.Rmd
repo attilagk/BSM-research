@@ -35,5 +35,5 @@ horiz.depth.plot(rd, sel.contigs=c("22", "X", "Y"))
 ```
 
 ```{r depth-plot-X, fig.asp=1.2, fig.width=4}
-horiz.depth.plot(rd, sel.contigs=c("X"))
+horiz.depth.plot(rd, sel.contigs=c("X", "Y"))
 ```
