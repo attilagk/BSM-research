@@ -323,7 +323,7 @@ perfect filtering
 \hline
 somatic variants in sample & real, unknown & modeled, known \\
 validation & targeted resequencing & not needed \\
-reported accuracy & qualitative & quantitative \\
+reported accuracy & qualitative & precision--recall \\
 variable selection (filtering) & heuristic & probabilistic, manual \\
 filter setting & heuristic & probabilistic, automated \\
 \end{tabular}
@@ -438,7 +438,11 @@ total & 100 & 100 & 100\\
 %give us the corresponding callset.
 \againframe{precrecall}
 
-\begin{frame}{Impact of alternative allele frequency}
+\begin{frame}{Precision based \emph{a posteriori} filtering}
+\includegraphics[width=0.9\textwidth]{figures/2018-09-25-variantmetacaller-output-scores/prec-rank-3.pdf}
+\end{frame}
+
+\begin{frame}
 \includegraphics[width=0.9\textwidth]{figures/from-others/chaggai-recall-aaf.png}
 
 \tiny{Chaggai Rosenbluh}
@@ -446,25 +450,22 @@ total & 100 & 100 & 100\\
 
 \begin{frame}{Summary}
 \begin{enumerate}
-\item \alert{somatic mutations} in neurological psychiatric disorders\\
-\emph{Brain Somatic Mosaicism Network}
-\item somatic mutations in \alert{schizoprhenic} and control brains\\
-\emph{our group}
-\item workflows for somatic variant calling: \alert{discordance}
-\item workflow characterization and \alert{optimization}
+\item
+\emph{Brain Somatic Mosaicism Network}:
+\alert{somatic mutations} in neurological psychiatric disorders\\
 \begin{itemize}
-\item heuristics---\emph{BSMN}
+\item \emph{our group}: schizophrenia
 \end{itemize}
-\item probabilistic approach---\emph{our group}
+\item somatic \alert{variant calling} from NGS is problematic
+\item characterization and \alert{optimization}
 \begin{itemize}
-\item benchmark data \(\Rightarrow\) precision--recall
-\item \alert{machine learning}
-\item input: base/mapping/calling \alert{quality annotations}
+\item \emph{BSMN}: real somatic variants \& heuristics
+\item \emph{our group}: precision--recall \& probabilistic approach
 \end{itemize}
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{BSMN consortium team}
+\begin{frame}{Team}
 Brain Somatic Mosaicism Network
 \footnotesize
 \begin{tabular}{rl}

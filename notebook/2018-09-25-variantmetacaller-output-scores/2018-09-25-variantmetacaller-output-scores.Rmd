@@ -66,7 +66,14 @@ sapply(vmc.test, function(test) sum(test$svmprob))
 
 ### Precision given the k highest probability calls
 
-```{r prec-rank}
+```{r}
+df <- data.frame(precision = vmc.precision(vmc.test$test09$svmprob))
+df$rank <- seq_along(df$precision)
+```
+
+```{r prec-rank, fig.asp = 0.7}
 plot(vmc.precision(vmc.test$test09$svmprob), main = paste(testruns[testrun], regions[testrun], ": precision"), xlab = "k: # of highest probability calls called true", ylab = "E[prec_k]", pch = ".")
 plot(vmc.precision(vmc.test$test09$svmprob)[1:100], main = paste(testruns[testrun], regions[testrun], ": precision"), xlab = "k: # of highest probability calls called true", ylab = "E[prec_k]")
+#Plotting with the lattice package
+xyplot(precision ~ rank, data = df, subset = rank <= 100, pch = 21, fill = "cyan", xlab = "call's rank", ylab = "precision | cutoff below rank", main = "100 top ranking somatic variant calls", grid = TRUE)
 ```
