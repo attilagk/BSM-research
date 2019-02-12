@@ -29,7 +29,7 @@ get.read.depths <- function(fai, tissues = c("NeuN_pl", "NeuN_mn", "muscle"), su
 }
 
 
-depth.plot <- function(x, sel.contigs, chromosomal = TRUE, ...) {
+depth.plot <- function(x, sel.contigs, chromosomal = TRUE, tissues = c("NeuN+", "NeuN-", "muscle"), ...) {
     tp <- xyplot(depth ~ pos / ifelse(chromosomal, 1e6, 1e3) | contig, groups = tissue, data = x,
                  subset = x$contig %in% sel.contigs & x$tissue != "muscle",
                  type = "p", pch = ".", auto.key = list(column = 3),
@@ -44,7 +44,7 @@ depth.plot <- function(x, sel.contigs, chromosomal = TRUE, ...) {
         update(tp, par.strip.text = list(cex = 0.7))
 }
 
-horiz.depth.plot <- function(x, y = depth.hist, sel.contigs = c("22", "X", "Y"), fi = fai, histo = NULL, ...) {
+horiz.depth.plot <- function(x, y = depth.hist, sel.contigs = c("22", "X", "Y"), fi = fai, histo = NULL, tissues = c("NeuN+", "NeuN-", "muscle"), ...) {
     limits <- lapply(sel.contigs, function(x) c(0, subset(fi, subset = fi$contig %in% x, select = "length", drop = TRUE)))
     lengths <- subset(fi, subset = fi$contig %in% sel.contigs, select = "length", drop = TRUE)
     dp <- xyplot(depth ~ pos | contig, groups = tissue, data = x, subset = x$contig %in% sel.contigs,

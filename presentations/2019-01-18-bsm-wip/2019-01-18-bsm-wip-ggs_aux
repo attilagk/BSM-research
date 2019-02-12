@@ -1,0 +1,95 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {1}{1}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{2}{2/2}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {2}{2}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{3}{3/3}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {3}{3}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{4}{4/4}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {4}{4}}}
+\newlabel{bsm-methods<1>}{{5}{5}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {bsm-methods<1>}{5}}
+\newlabel{bsm-methods}{{5}{5}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {bsm-methods}{5}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{5}{5/5}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {5}{5}}}
+\newlabel{data-quantity<1>}{{6}{6}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {data-quantity<1>}{6}}
+\newlabel{data-quantity}{{6}{6}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {data-quantity}{6}}
+\newlabel{data-quantity<2>}{{6}{7}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {data-quantity<2>}{7}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{6}{6/7}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {6}{7}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{7}{8/8}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {8}{8}}}
+\newlabel{discordance<1>}{{8}{9}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {discordance<1>}{9}}
+\newlabel{discordance}{{8}{9}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {discordance}{9}}
+\newlabel{discordance<2>}{{8}{10}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {discordance<2>}{10}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{8}{9/10}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {9}{10}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{9}{11/12}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {11}{12}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{10}{13/14}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {13}{14}}}
+\newlabel{discordance<3>}{{11}{15}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {discordance<3>}{15}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{11}{15/15}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {15}{15}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{12}{16/16}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {16}{16}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{13}{17/17}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {17}{17}}}
+\newlabel{benchmark<1>}{{14}{18}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {benchmark<1>}{18}}
+\newlabel{benchmark}{{14}{18}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {benchmark}{18}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{14}{18/18}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {18}{18}}}
+\newlabel{precrecall<1>}{{15}{19}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall<1>}{19}}
+\newlabel{precrecall}{{15}{19}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall}{19}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{15}{19/19}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {19}{19}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{16}{20/20}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {20}{20}}}
+\newlabel{precrecall<1>}{{17}{21}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall<1>}{21}}
+\newlabel{precrecall}{{17}{21}{}{Doc-Start}{}}
+\@writefile{snm}{\beamer@slide {precrecall}{21}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{17}{21/21}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {21}{21}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{18}{22/22}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {22}{22}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{19}{23/23}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {23}{23}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{20}{24/24}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {24}{24}}}
+\@writefile{nav}{\headcommand {\slideentry {0}{0}{21}{25/25}{}{0}}}
+\@writefile{nav}{\headcommand {\beamer@framepages {25}{25}}}
+\@writefile{nav}{\headcommand {\beamer@partpages {1}{25}}}
+\@writefile{nav}{\headcommand {\beamer@subsectionpages {1}{25}}}
+\@writefile{nav}{\headcommand {\beamer@sectionpages {1}{25}}}
+\@writefile{nav}{\headcommand {\beamer@documentpages {25}}}
+\@writefile{nav}{\headcommand {\def \inserttotalframenumber {21}}}
