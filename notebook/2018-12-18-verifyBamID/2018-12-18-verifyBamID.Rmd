@@ -135,6 +135,10 @@ dotplot(CHIP_ID ~ FREEMIX, data = bestSM.2, xlim = 0:1, main = "The best matchin
 dotplot(CHIP_ID ~ CHIPMIX, data = bestSM.2, xlim = 0:1, main = "The best matching CHIP_IDs for the mislabeled samples")
 ```
 
+## Intermezzo: Chaggai's analysis
+
+Chaggai's summary is in [this PDF]({{ site.baseurl }}/assets/projects/bsm/chaggai-sample-swap.pdf).  See also his email of Dec 31, 2018, 5:51 PM.
+
 
 ## Results: First round of analysis
 
