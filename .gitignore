@@ -60,3 +60,6 @@ vignettes/*.pdf
 bsm-network
 **/.ipynb_checkpoints/
 **/__pycache__/
+
+# lock files made by Libre Office
+*.~lock.*
