@@ -42,6 +42,8 @@ On the configuration of `verifyBamID`
 library(lme4)
 library(lattice)
 library(latticeExtra)
+library(synapser)
+synLogin()
 opts_chunk$set(dpi = 144)
 opts_chunk$set(out.width = "600px")
 opts_chunk$set(dev = c("png", "pdf"))
@@ -133,6 +135,23 @@ dotplot(CHIP_ID ~ FREEMIX, data = bestSM.2, xlim = 0:1, main = "The best matchin
 
 ```{r sequence-chip-2-best, fig.asp = 0.3}
 dotplot(CHIP_ID ~ CHIPMIX, data = bestSM.2, xlim = 0:1, main = "The best matching CHIP_IDs for the mislabeled samples")
+```
+
+### The correct Individual_ID for mislabeled samples
+
+To make things clearer here is the correct *Genotyping_Sample_ID*, and the wrong as well as the correct *Individual_ID* for these three samples:
+
+```{r}
+f <- synGet("syn16816490", downloadFile = TRUE, downloadLocation = "/tmp")
+cmc.snps <- read.csv(paste0("/tmp/", f$properties$name))
+bestSM.2$Genotyping_Sample_ID.correct <- sub("0_", "", bestSM.2$CHIP_ID)
+bestSM.2$Individual_ID.wrong <- bestSM.2$indivID
+bestSM.2$Individual_ID.correct <-
+    subset(cmc.snps, select = "Individual_ID", drop = TRUE,
+           subset = SNP_report.Genotyping_Sample_ID %in% bestSM.2$Genotyping_Sample_ID.correct)
+# remove uninformative CMC_ prefix
+bestSM.2$Individual_ID.correct <- sub("CMC_", "", bestSM.2$Individual_ID.correct)
+bestSM.2[c("Genotyping_Sample_ID.correct", "Individual_ID.wrong", "Individual_ID.correct")]
 ```
 
 ## Intermezzo: Chaggai's analysis
