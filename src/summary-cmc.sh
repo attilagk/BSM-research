@@ -48,20 +48,23 @@ do1indiv () {
         fi
     done
     # VCFs
-    vcfdir=/projects/bsm/calls/$indiv/snvs
-    for caller in $(sed -n "/vcf/ { s/.vcf//; p }" $rownames); do
-        vcf=$vcfdir/$caller.vcf.gz
-        if test -f $vcf; then
-            echo 1
-        else
-            echo 0
-        fi
+    for spair in $samplepairs; do
+        vcfdir=/projects/bsm/calls/$indiv/$spair/snvs
+        for caller in $(sed -n "/^mu.*vcf/ { s/^\(mu\|ne\)_\(.\+\).vcf/\2/; p }" $rownames); do
+            vcf=$vcfdir/$caller.vcf.gz
+            if test -f $vcf; then
+                echo 1
+            else
+                echo 0
+            fi
+        done
     done
 }
 
 # do all individuals
 cp $rownames $summaryfile
 indivs="$(cut -f1 $seqind | sed 's/CMC_//')"
+samplepairs="NeuN_pl-muscle NeuN_pl-NeuN_mn"
 for ind in $indivs; do
     do1indiv $ind > $summarydir/$ind
 done
