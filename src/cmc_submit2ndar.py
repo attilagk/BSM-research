@@ -80,5 +80,14 @@ def make_manifests(subject, syn, target_dir="."):
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
     cmc_subject = "CMC_" + subject # add CMC_ prefix
     download_dir = target_dir
-    #download_dir = "/tmp/"
     return((btb_or_gsubj("syn12154562"), btb_or_gsubj("syn12128754")))
+
+def make_g_sample(gsam_temp, gsubj):
+    # obtain shared columns
+    is_shared = [y in gsubj.columns for y in gsam_temp.columns]
+    shared = gsam_temp.loc[:, is_shared].columns
+    # creating genomics sample
+    gsam = gsam_temp.reindex(index=list(range(gsubj.shape[0])))
+    for col in shared:
+        gsam.at[gsam.index[0], col] = gsubj.at[gsubj.index[0], col]
+    return(gsam)
