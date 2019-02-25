@@ -73,17 +73,29 @@ Note that the location of `summary-cmc.tsv` is not the `tables/` directory but u
 
 The table below summarizes progress in the analytic workflow across experiments on various individuals (i.e. real or modeled subjects/individuals).
 
-Object types of workflow:
+Major file types of workflow:
 
 1. FASTQs
 1. BAMs
-1. VCFs---note that the table presents only the VCFs filtered for SNVs
+1. VCFs
+   1. *mu*: NeuN_pl--muscle sample
+   1. *ne*: NeuN_pl--NeuN_mn
+
+Note that the table presents only the VCFs filtered for SNVs. Also, there are several callers and for each somatic (paired sample) caller one or more sample pairs.
+
+All possible file types are listed below
+
+```{r engine="bash"}
+sed -n '2,$ p' ~/projects/bsm/tables/summary-rownames.csv
+```
 
 Type of individuals
 
 1. CommonMind
 1. common sample (BSMN)
 1. benchmark (modeled individual)---note that for this individual type the tissue sample types (NeuN+, NeuN-, muscle) are not applicable
+
+## Results
 
 ```{r}
 fl <- c(cmc = "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-cmc.tsv",
@@ -106,12 +118,12 @@ summ.l <- my.levelplot(summ)
 ```
 
 ```{r summary-cmc, fig.asp=0.7}
-invisible(my.levelplot(summ[1:3], indiv.as.columns=TRUE))
+invisible(my.levelplot(summ[1:2], indiv.as.columns=TRUE))
 ```
 
 Write results to file
 
 ```{r}
-summ.all <- do.call(cbind, summ)
-write.csv(summ.all, "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-all.csv")
+summ.cmc <- do.call(cbind, summ[1:2])
+write.csv(summ.cmc, "~/projects/bsm/results/2018-09-12-sequenced-individuals/summary-all.csv")
 ```
