@@ -80,14 +80,50 @@ def make_manifests(subject, syn, target_dir="."):
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
     cmc_subject = "CMC_" + subject # add CMC_ prefix
     download_dir = target_dir
-    return((btb_or_gsubj("syn12154562"), btb_or_gsubj("syn12128754")))
+    btb = btb_or_gsubj("syn12154562")
+    gsubj = btb_or_gsubj("syn12128754")
+    # genomics samples
+    gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=download_dir)
+    gsam = make_g_sample(gsam_temp, gsubj)
+    temp_p = download_dir + os.sep + gsam_syn.properties.name
+    targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
+    write_manifest(gsam, temp_p, targ_p)
+    return((btb, gsubj, gsam))
 
 def make_g_sample(gsam_temp, gsubj):
     # obtain shared columns
     is_shared = [y in gsubj.columns for y in gsam_temp.columns]
     shared = gsam_temp.loc[:, is_shared].columns
-    # creating genomics sample
-    gsam = gsam_temp.reindex(index=list(range(gsubj.shape[0])))
+    # creating genomics sample with missing values
+    gsam = gsam_temp.reindex(index=list(range(len(gsubj))))
+    # copying values from genomics subject
     for col in shared:
         gsam.at[gsam.index[0], col] = gsubj.at[gsubj.index[0], col]
+    # remaining columns
+    experiment_id = 1111
+    organism = 'human'
+    sample_amount = 1 # made up
+    sample_unit = 'NA' # made up
+    data_file1_type = 'FASTQ'
+    data_file1 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_1.fq.g'
+    data_file2_type = 'FASTQ'
+    data_file2 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_2.fq.g'
+    storage_protocol = 'NA' # made up
+    data_file_location = 'NDAR'
+    patient_id_biorepository = gsam.at[gsam.index[0], 'src_subject_id']
+    sample_id_biorepository = 'MSSM_DNA_TMPR_69087' # from syn17021773 CMC_Human_WGS_metadata_working.csv
+    gsam['experiment_id'] = experiment_id
+    gsam['organism'] = organism
+    gsam['sample_amount'] = sample_amount
+    gsam['sample_unit'] = sample_unit
+    gsam['data_file1_type'] = data_file1_type
+    gsam['data_file1'] = data_file1
+    gsam['data_file2_type'] = data_file2_type
+    gsam['data_file2'] = data_file2
+    gsam['storage_protocol'] = storage_protocol
+    gsam['data_file_location'] = data_file_location
+    gsam['patient_id_biorepository'] = patient_id_biorepository
+    gsam['sample_id_biorepository'] = sample_id_biorepository
+    # path argument for vtcmd -l option
+    l = ['/projects/bsm/reads/', '/projects/bsm/alignments/']
     return(gsam)
