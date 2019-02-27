@@ -81,7 +81,7 @@ def make_manifests(subject, syn, target_dir="."):
 
     def g_sample(gsubj):
         gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=target_dir)
-        gsam = make_g_sample(gsam_temp, gsubj)
+        gsam = make_g_sample(gsam_temp, btb, gsubj, syn)
         gsam = correct_manifest(gsam)
         temp_p = target_dir + os.sep + gsam_syn.properties.name
         targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
@@ -126,47 +126,102 @@ def correct_manifest(df):
     res['interview_date'] = pd.to_datetime(df['interview_date'])
     if manifest_type(res) == 'gsubj':
         res['family_study'] = 'No'
-        res['sample_description'] = 'brain'
+        #res['sample_description'] = 'brain'
         res['patient_id_biorepository'] = res['src_subject_id']
         res['sample_id_biorepository'] = res['src_subject_id']
     if manifest_type(res) == 'gsam':
         res['patient_id_biorepository'] = res['src_subject_id']
-        res['sample_description'] = 'brain'
+        #res['sample_description'] = 'brain'
     return(res)
 
-def make_g_sample(gsam_temp, gsubj):
+def get_sample_id_original(tissue, btb):
+    tissue_id = {'NeuN_pl': 'np1', 'NeuN_mn': 'nn1', 'muscle': 'mu1'}
+    suffix = tissue_id[tissue]
+    ids = list(btb['sample_id_original'])
+    res = [s for s in ids if suffix in s]
+    return(res[0])
+
+def extract_cmc_wgs(btb, syn):
+    '''
+    Extract rows from CMC_Human_WGS_metadata_working.csv based on btb
+
+    syn17021773 CMC_Human_WGS_metadata_working.csv 
+    '''
+    wgs, wgs_syn = get_manifest('syn17021773', syn, skiprows=0)
+    ids = list(btb['sample_id_original'])
+    wgs = wgs[wgs['Library ID'].isin(ids)]
+    return(wgs)
+
+def make_g_sample(gsam_temp, btb, gsubj, syn):
+    def do_tissue(tissue):
+        def do_file(fl):
+            df = gsam.copy(deep=True) # deep copy
+            # copying values from genomics subject
+            for col in shared:
+                df.at[df.index[0], col] = gsubj.at[gsubj.index[0], col]
+            df['sample_description'] = sample_description
+            wgs_lib = wgs[wgs['Library ID'] == lib_id]
+            df['sample_id_biorepository'] = wgs_lib['Sample DNA ID']
+            df['sample_amount'] = wgs_lib['DNA Amount(ng)']
+            df['sample_unit'] = 'ng'
+            return(df)
+
+        fq_names = fastq_names[tissue]
+        with open(fq_names) as fqs:
+            fastqs = fqs.readlines()
+        fastqs_1 = sorted([s.replace('\n', '') for s in fastqs if '_1.fq.gz' in s])
+        fastqs_2 = sorted([s.replace('\n', '') for s in fastqs if '_2.fq.gz' in s])
+        data_files = list(zip(fastqs_1, fastqs_2)) + [(bams[tissue], )]
+        sample_description = 'brain'
+        if tissue == 'muscle':
+            sample_description = 'muscle'
+        lib_id = get_sample_id_original(tissue, btb)
+        res0 = do_file(data_files[0])
+        return(res0)
+
+    # from syn17021773 CMC_Human_WGS_metadata_working.csv 
+    wgs = extract_cmc_wgs(btb, syn)
+    # ensure that gsubj has one and only one row
+    if len(gsubj) != 1:
+        raise Exception('genomics subjects manifest must have one and only one row')
+    # get paths of BAMs and of the fastq-names files
+    src_subject_id = gsubj.at[gsubj.index[0], 'src_subject_id']
+    simple_id = src_subject_id.replace('CMC_', '')
+    aln_p = '/projects/bsm/alignments/' + simple_id + os.sep
+    bams = glob.glob(aln_p + simple_id + '*.bam')
+    fastq_names = [s.replace('.bam', '-fastq-names') for s in bams]
+    tissues = [s.replace(aln_p + simple_id + '_', '').replace('.bam', '') for s in bams]
+    # these variables are referred to in inside functions
+    bams = dict(zip(tissues, bams))
+    fastq_names = dict(zip(tissues, fastq_names))
     # obtain shared columns
     is_shared = [y in gsubj.columns for y in gsam_temp.columns]
     shared = gsam_temp.loc[:, is_shared].columns
     # creating genomics sample with missing values
     gsam = gsam_temp.reindex(index=list(range(len(gsubj))))
+    # filling out values shared for all tissues
+    gsam['experiment_id'] = 33
+    gsam['organism'] = 'human'
+    gsam['data_file_location'] = 'NDAR'
+    #gsam['sample_amount'] = 1 # made up
+    #gsam['sample_unit'] = 'NA' # made up
+    gsam['storage_protocol'] = 'NA' # made up
+    gsam['patient_id_biorepository'] = src_subject_id
+    return(do_tissue(tissues[0]))
+
     # copying values from genomics subject
     for col in shared:
         gsam.at[gsam.index[0], col] = gsubj.at[gsubj.index[0], col]
     # remaining columns
-    experiment_id = 1111
-    organism = 'human'
-    sample_amount = 1 # made up
-    sample_unit = 'NA' # made up
     data_file1_type = 'FASTQ'
     data_file1 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_1.fq.g'
     data_file2_type = 'FASTQ'
     data_file2 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_2.fq.g'
-    storage_protocol = 'NA' # made up
-    data_file_location = 'NDAR'
-    patient_id_biorepository = gsam.at[gsam.index[0], 'src_subject_id']
     sample_id_biorepository = 'MSSM_DNA_TMPR_69087' # from syn17021773 CMC_Human_WGS_metadata_working.csv
-    gsam['experiment_id'] = experiment_id
-    gsam['organism'] = organism
-    gsam['sample_amount'] = sample_amount
-    gsam['sample_unit'] = sample_unit
     gsam['data_file1_type'] = data_file1_type
     gsam['data_file1'] = data_file1
     gsam['data_file2_type'] = data_file2_type
     gsam['data_file2'] = data_file2
-    gsam['storage_protocol'] = storage_protocol
-    gsam['data_file_location'] = data_file_location
-    gsam['patient_id_biorepository'] = patient_id_biorepository
     gsam['sample_id_biorepository'] = sample_id_biorepository
     # path argument for vtcmd -l option
     l = ['/projects/bsm/reads/', '/projects/bsm/alignments/']
