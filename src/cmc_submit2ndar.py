@@ -4,6 +4,7 @@ import synapseclient
 import pandas as pd
 import os
 import sys
+import glob
 
 #syn = synapseclient.login()
 
@@ -42,7 +43,7 @@ def write_manifest(df, template_path, target_path):
     "nichd_btb","02"
     '''
     body_path = target_path + "~"
-    df.to_csv(body_path, index=False)
+    df.to_csv(body_path, index=False, date_format='%m/%d/%Y')
     # get first header row from template manifest
     with open(template_path, "r") as f:
         btb_head = f.readline()
@@ -70,25 +71,68 @@ def make_manifests(subject, syn, target_dir="."):
     target_dir: directory for the manifest files created
     '''
     def btb_or_gsubj(template_syn_id):
-        manif_temp, manif_syn = get_manifest(template_syn_id, syn, download_dir=download_dir)
+        manif_temp, manif_syn = get_manifest(template_syn_id, syn, download_dir=target_dir)
         manif = extract_subject(manif_temp, cmc_subject)
-        temp_p = download_dir + os.sep + manif_syn.properties.name # template path
+        manif = correct_manifest(manif)
+        temp_p = target_dir + os.sep + manif_syn.properties.name # template path
         targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
         write_manifest(manif, temp_p, targ_p)
         return(manif)
 
+    def g_sample(gsubj):
+        gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=target_dir)
+        gsam = make_g_sample(gsam_temp, gsubj)
+        gsam = correct_manifest(gsam)
+        temp_p = target_dir + os.sep + gsam_syn.properties.name
+        targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
+        write_manifest(gsam, temp_p, targ_p)
+        pass
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
     cmc_subject = "CMC_" + subject # add CMC_ prefix
-    download_dir = target_dir
     btb = btb_or_gsubj("syn12154562")
     gsubj = btb_or_gsubj("syn12128754")
-    # genomics samples
-    gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=download_dir)
-    gsam = make_g_sample(gsam_temp, gsubj)
-    temp_p = download_dir + os.sep + gsam_syn.properties.name
-    targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
-    write_manifest(gsam, temp_p, targ_p)
+    gsam = g_sample(gsubj)
     return((btb, gsubj, gsam))
+
+def manifest_type(df):
+    '''
+    Returns the type of manifest.
+
+    Parameter
+    df: the manifest (a pandoc data frame)
+
+    Values
+    btb: brain and tissue bank
+    gsubj: genomics subjects
+    gsam: genomics samples
+    None: undetermined
+    '''
+    if df.columns[1] == 'experiment_id':
+        return('gsam') # genomics samples
+    else:
+        if 'disorder' in df.columns:
+            return('btb') # brain and tissue bank
+        elif 'phenotype' in df.columns:
+            return('gsubj') # genomics subjects
+
+def correct_manifest(df):
+    '''
+    Corrects manifest of any type
+
+    Corrections are based on the validation results file below
+    /projects/bsm/attila/results/2019-02-19-upload-to-ndar/validation_results_20190226T163227.csv
+    '''
+    res = df.copy()
+    res['interview_date'] = pd.to_datetime(df['interview_date'])
+    if manifest_type(res) == 'gsubj':
+        res['family_study'] = 'No'
+        res['sample_description'] = 'brain'
+        res['patient_id_biorepository'] = res['src_subject_id']
+        res['sample_id_biorepository'] = res['src_subject_id']
+    if manifest_type(res) == 'gsam':
+        res['patient_id_biorepository'] = res['src_subject_id']
+        res['sample_description'] = 'brain'
+    return(res)
 
 def make_g_sample(gsam_temp, gsubj):
     # obtain shared columns
