@@ -7,6 +7,7 @@ import sys
 import glob
 
 #syn = synapseclient.login()
+experiment_id = 1223
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
@@ -86,7 +87,7 @@ def make_manifests(subject, syn, target_dir="."):
         temp_p = target_dir + os.sep + gsam_syn.properties.name
         targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
         write_manifest(gsam, temp_p, targ_p)
-        pass
+        return(gsam)
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
     cmc_subject = "CMC_" + subject # add CMC_ prefix
     btb = btb_or_gsubj("syn12154562")
@@ -126,12 +127,9 @@ def correct_manifest(df):
     res['interview_date'] = pd.to_datetime(df['interview_date'])
     if manifest_type(res) == 'gsubj':
         res['family_study'] = 'No'
-        #res['sample_description'] = 'brain'
+        res['sample_description'] = 'brain'
         res['patient_id_biorepository'] = res['src_subject_id']
         res['sample_id_biorepository'] = res['src_subject_id']
-    if manifest_type(res) == 'gsam':
-        res['patient_id_biorepository'] = res['src_subject_id']
-        #res['sample_description'] = 'brain'
     return(res)
 
 def get_sample_id_original(tissue, btb):
@@ -160,10 +158,18 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
             for col in shared:
                 df.at[df.index[0], col] = gsubj.at[gsubj.index[0], col]
             df['sample_description'] = sample_description
+            df['sample_id_original'] = lib_id
             wgs_lib = wgs[wgs['Library ID'] == lib_id]
             df['sample_id_biorepository'] = wgs_lib.at[wgs_lib.index[0], 'Sample DNA ID']
             df['sample_amount'] = wgs_lib.at[wgs_lib.index[0], 'DNA Amount(ng)']
             df['sample_unit'] = 'ng'
+            df['data_file1'] = fl[0]
+            if '.fq.gz' in fl[0]:
+                df['data_file1_type'] = 'FASTQ'
+                df['data_file2_type'] = 'FASTQ'
+                df['data_file2'] = fl[1]
+            elif '.bam' in fl[0]:
+                df['data_file1_type'] = 'BAM'
             return(df)
 
         fq_names = fastq_names[tissue]
@@ -174,10 +180,11 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
         data_files = list(zip(fastqs_1, fastqs_2)) + [(bams[tissue], )]
         sample_description = 'brain'
         if tissue == 'muscle':
-            sample_description = 'muscle'
+            sample_description = 'unknown'
+            #sample_description = 'muscle'
         lib_id = get_sample_id_original(tissue, btb)
-        res0 = do_file(data_files[0])
-        return(res0)
+        val = pd.concat([do_file(f) for f in data_files])
+        return(val)
 
     # from syn17021773 CMC_Human_WGS_metadata_working.csv 
     wgs = extract_cmc_wgs(btb, syn)
@@ -200,25 +207,10 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
     # creating genomics sample with missing values
     gsam = gsam_temp.reindex(index=list(range(len(gsubj))))
     # filling out values shared for all tissues
-    gsam['experiment_id'] = 33
+    gsam['experiment_id'] = experiment_id
     gsam['organism'] = 'human'
     gsam['data_file_location'] = 'NDAR'
     gsam['storage_protocol'] = 'NA' # made up
     gsam['patient_id_biorepository'] = src_subject_id
-    return(do_tissue(tissues[0]))
-
-    # copying values from genomics subject
-    for col in shared:
-        gsam.at[gsam.index[0], col] = gsubj.at[gsubj.index[0], col]
-    # remaining columns
-    data_file1_type = 'FASTQ'
-    data_file1 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_1.fq.g'
-    data_file2_type = 'FASTQ'
-    data_file2 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_2.fq.g'
-    gsam['data_file1_type'] = data_file1_type
-    gsam['data_file1'] = data_file1
-    gsam['data_file2_type'] = data_file2_type
-    gsam['data_file2'] = data_file2
-    # path argument for vtcmd -l option
-    l = ['/projects/bsm/reads/', '/projects/bsm/alignments/']
-    return(gsam)
+    val = pd.concat([do_tissue(t) for t in tissues])
+    return(val)
