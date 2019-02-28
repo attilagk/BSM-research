@@ -165,6 +165,17 @@ def correct_manifest(df):
     return(res)
 
 def get_sample_id_original(tissue, btb):
+    '''
+    Returns sample_id_original for a "tissue" and a brain and tissue bank
+    manifest
+
+    Parameters
+    tissue: one of NeuN_pl, NeuN_mn or muscle
+    btb: a pandas data frame, a brain and tissue bank manifest
+
+    Value
+    sample_id_original, a string
+    '''
     tissue_id = {'NeuN_pl': 'np1', 'NeuN_mn': 'nn1', 'muscle': 'mu1'}
     suffix = tissue_id[tissue]
     ids = list(btb['sample_id_original'])
@@ -183,8 +194,22 @@ def extract_cmc_wgs(btb, syn):
     return(wgs)
 
 def make_g_sample(gsam_temp, btb, gsubj, syn):
+    '''
+    Creates a genomics sample manifest based on a genomics sample template and
+    two other manifests
+
+    Parameters
+    gsam_temp: the genomics sample template, a pandas data frame
+    btb: brain and tissue bank manifest, a pandas data frame
+    gsubj: genomics subject manifest, a pandas data frame
+    syn: a synapse object returned by synapseclient.login()
+
+    Value: genomics sample manifest, a pandas data frame
+    '''
     def do_tissue(tissue):
+        '''Creates a tissue-specific genomics sample'''
         def do_file(fl):
+            '''Creates a file-specific genomics sample'''
             df = gsam.copy(deep=True) # deep copy
             # copying values from genomics subject
             for col in shared:
