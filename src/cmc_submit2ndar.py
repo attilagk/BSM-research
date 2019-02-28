@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import synapseclient
+import numpy as np
 import pandas as pd
 import os
 import sys
@@ -85,7 +86,7 @@ def make_manifests(subject, syn, target_dir="."):
         gsam = make_g_sample(gsam_temp, btb, gsubj, syn)
         gsam = correct_manifest(gsam)
         temp_p = target_dir + os.sep + gsam_syn.properties.name
-        targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
+        targ_p = target_dir + os.sep + cmc_subject + "-" + 'genomics_sample03_U01MH106891_Chess.csv'
         write_manifest(gsam, temp_p, targ_p)
         return(gsam)
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
@@ -116,6 +117,28 @@ def manifest_type(df):
         elif 'phenotype' in df.columns:
             return('gsubj') # genomics subjects
 
+def sample_specifics(sample_id_original):
+    '''
+    Sample specifics (celltype and br_reg) based on sample_id_original
+
+    Parameter(s)
+    sample_id_original: a string like MSSM_106.DLPFC_1399.np1
+
+    Value: a dictionary with keys celltype and br_reg (brain region)
+    '''
+    sid = sample_id_original
+    if '.np1' in sid or '.np2' in sid:
+        celltype = 'NeuN+'
+        br_reg = 'prefrontal cortex'
+    if '.nn1' in sid or '.nn2' in sid:
+        celltype = 'NeuN-'
+        br_reg = 'prefrontal cortex'
+    if '.mu1' in sid or '.mu2' in sid:
+        celltype = 'muscle'
+        br_reg = np.nan
+    val = {'celltype': celltype, 'br_reg': br_reg}
+    return(val)
+
 def correct_manifest(df):
     '''
     Corrects manifest of any type
@@ -123,8 +146,17 @@ def correct_manifest(df):
     Corrections are based on the validation results file below
     /projects/bsm/attila/results/2019-02-19-upload-to-ndar/validation_results_20190226T163227.csv
     '''
+    def btb_sample_specs(element):
+        '''Return a list of sample specifics based on the sample_id_original
+        column of df'''
+        val = [sample_specifics(y)[element] for y in df['sample_id_original']]
+        return(val)
+
     res = df.copy()
     res['interview_date'] = pd.to_datetime(df['interview_date'])
+    if manifest_type(res) == 'btb':
+        res['celltype'] = btb_sample_specs('celltype')
+        res['br_reg'] = btb_sample_specs('br_reg')
     if manifest_type(res) == 'gsubj':
         res['family_study'] = 'No'
         res['sample_description'] = 'brain'
@@ -180,7 +212,8 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
         data_files = list(zip(fastqs_1, fastqs_2)) + [(bams[tissue], )]
         sample_description = 'brain'
         if tissue == 'muscle':
-            sample_description = 'unknown'
+            # 'muscle' isn't a valid value in the def; see syn7896813
+            sample_description = 'unknown' 
             #sample_description = 'muscle'
         lib_id = get_sample_id_original(tissue, btb)
         val = pd.concat([do_file(f) for f in data_files])
