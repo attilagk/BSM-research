@@ -161,8 +161,8 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
                 df.at[df.index[0], col] = gsubj.at[gsubj.index[0], col]
             df['sample_description'] = sample_description
             wgs_lib = wgs[wgs['Library ID'] == lib_id]
-            df['sample_id_biorepository'] = wgs_lib['Sample DNA ID']
-            df['sample_amount'] = wgs_lib['DNA Amount(ng)']
+            df['sample_id_biorepository'] = wgs_lib.at[wgs_lib.index[0], 'Sample DNA ID']
+            df['sample_amount'] = wgs_lib.at[wgs_lib.index[0], 'DNA Amount(ng)']
             df['sample_unit'] = 'ng'
             return(df)
 
@@ -203,8 +203,6 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
     gsam['experiment_id'] = 33
     gsam['organism'] = 'human'
     gsam['data_file_location'] = 'NDAR'
-    #gsam['sample_amount'] = 1 # made up
-    #gsam['sample_unit'] = 'NA' # made up
     gsam['storage_protocol'] = 'NA' # made up
     gsam['patient_id_biorepository'] = src_subject_id
     return(do_tissue(tissues[0]))
@@ -217,12 +215,10 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
     data_file1 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_1.fq.g'
     data_file2_type = 'FASTQ'
     data_file2 = '2016-12-15-DV-X10/MSSM106_muscle/MSSM106_muscle_USPD16080279-D702_H7YNMALXX_L6_2.fq.g'
-    sample_id_biorepository = 'MSSM_DNA_TMPR_69087' # from syn17021773 CMC_Human_WGS_metadata_working.csv
     gsam['data_file1_type'] = data_file1_type
     gsam['data_file1'] = data_file1
     gsam['data_file2_type'] = data_file2_type
     gsam['data_file2'] = data_file2
-    gsam['sample_id_biorepository'] = sample_id_biorepository
     # path argument for vtcmd -l option
     l = ['/projects/bsm/reads/', '/projects/bsm/alignments/']
     return(gsam)
