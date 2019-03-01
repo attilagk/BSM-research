@@ -235,11 +235,9 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
         fastqs_1 = sorted([s.replace('\n', '') for s in fastqs if '_1.fq.gz' in s])
         fastqs_2 = sorted([s.replace('\n', '') for s in fastqs if '_2.fq.gz' in s])
         data_files = list(zip(fastqs_1, fastqs_2)) + [(bams[tissue], )]
-        sample_description = 'brain'
+        sample_description = 'frontal cortex'
         if tissue == 'muscle':
-            # 'muscle' isn't a valid value in the def; see syn7896813
-            sample_description = 'unknown' 
-            #sample_description = 'muscle'
+            sample_description = 'muscle'
         lib_id = get_sample_id_original(tissue, btb)
         val = pd.concat([do_file(f) for f in data_files])
         return(val)

@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-subject=CMC_MSSM_118
+subject=CMC_MSSM_106
 d=/projects/bsm/attila/results/2019-02-19-upload-to-ndar/
 f1=$d/$subject-nichd_btb02_U01MH106891_Chess.csv
 f2=$d/$subject-genomics_subject02_U01MH106891_Chess.csv
