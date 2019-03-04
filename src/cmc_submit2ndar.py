@@ -205,6 +205,9 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
     syn: a synapse object returned by synapseclient.login()
 
     Value: genomics sample manifest, a pandas data frame
+
+    Details: The script deduces the sample types ("tissues") based on the BAMs
+    found
     '''
     def do_tissue(tissue):
         '''Creates a tissue-specific genomics sample'''
