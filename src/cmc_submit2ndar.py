@@ -154,6 +154,8 @@ def correct_manifest(df):
 
     res = df.copy()
     res['interview_date'] = pd.to_datetime(df['interview_date'])
+    if manifest_type(res) in ('btb', 'gsubj'):
+        res.loc[res['race'] == 'African American', 'race'] = 'Black or African American'
     if manifest_type(res) == 'btb':
         res['celltype'] = btb_sample_specs('celltype')
         res['br_reg'] = btb_sample_specs('br_reg')
@@ -162,6 +164,9 @@ def correct_manifest(df):
         res['sample_description'] = 'brain'
         res['patient_id_biorepository'] = res['src_subject_id']
         res['sample_id_biorepository'] = res['src_subject_id']
+    if manifest_type(res) == 'gsam':
+        if any([pd.isna(y) for y in res['sample_amount']]):
+            res['sample_amount'] = 'NaN'
     return(res)
 
 def get_sample_id_original(tissue, btb):
