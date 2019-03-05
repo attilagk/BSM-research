@@ -152,6 +152,12 @@ def correct_manifest(df):
         val = [sample_specifics(y)[element] for y in df['sample_id_original']]
         return(val)
 
+    def safely_remove_prefix(s, prefix='/projects/bsm/'):
+        if pd.isna(s):
+            return(s)
+        else:
+            return(s.replace(prefix, ''))
+
     res = df.copy()
     res['interview_date'] = pd.to_datetime(df['interview_date'])
     if manifest_type(res) in ('btb', 'gsubj'):
@@ -165,6 +171,8 @@ def correct_manifest(df):
         res['patient_id_biorepository'] = res['src_subject_id']
         res['sample_id_biorepository'] = res['src_subject_id']
     if manifest_type(res) == 'gsam':
+        res['data_file1'] = [safely_remove_prefix(s) for s in res['data_file1']]
+        res['data_file2'] = [safely_remove_prefix(s) for s in res['data_file2']]
         if any([pd.isna(y) for y in res['sample_amount']]):
             res['sample_amount'] = 'NaN'
     return(res)

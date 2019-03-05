@@ -24,9 +24,9 @@ f3=$d/$subject-genomics_sample03_${grant}_Chess.csv
 
 vtcmd \
 $f1 $f2 $f3 \
--u attilagk \
--p Chesslab13 \
--l '/projects/bsm/reads/', '/projects/bsm/alignments/' \
+-u andrewchess \
+-p Bern1e2017 \
+-l '/projects/bsm/' \
 -c $collection \
 -t "$title" \
 -d "$description" $buildstr
