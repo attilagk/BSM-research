@@ -17,8 +17,14 @@ Within the BSMN this research project is specific in that it investigates the ro
 
 ```
 ndar/           # for data sharing at https://ndar.nih.gov/
-notebook/       # the main matter: platform and chronicle of my research
+notebook/       # the main matter: my lab notebook
 presentations/  # LaTeX/Beamer slides
 src/            # scripts for project-wide use
 tables/         # small data sets compiled by hand
 ```
+
+As noted above the main matter of this repository is the lab notebook, a chronological sequence of articles in the `notebook/` directory.  Technically these articles are R Markdown documents or iPython notebooks, which means that they contain code chunks to be executed by interpreters such as `R`, `python` or `bash`.  Longer, more complex code chunks have been moved to scripts located either in `notebook/` (these are associated to some article) or in `src/` (these are shared by multiple articles).  Finally, the most general-purpose code is part of [research-tools](https://github.com/attilagk/research-tools), a separate repository.
+
+## The data
+
+Of course, the data---Terabytes of DNA sequences---are not contained in this repository but they do exist on our computational server and at the [NIMH Data Archive](https://ndar.nih.gov/) (NDA), which will release them for public use.
