@@ -58,6 +58,7 @@ vignettes/*.pdf
 .httr-oauth
 
 bsm-network
+ndar/account-info
 **/.ipynb_checkpoints/
 **/__pycache__/
 
