@@ -16,7 +16,8 @@ Within the BSMN this research project is specific in that it investigates the ro
 ## Structure and content
 
 ```
-notebook/       # platform and chronicle of my research
+ndar/           # for data sharing at https://ndar.nih.gov/
+notebook/       # the main matter: platform and chronicle of my research
 presentations/  # LaTeX/Beamer slides
 src/            # scripts for project-wide use
 tables/         # small data sets compiled by hand
