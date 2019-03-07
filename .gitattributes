@@ -1,3 +1,2 @@
-*.R linguist-language=R
-*.Rmd linguist-language=RMarkdown
-*.Rmd linguist-documentation=false
+*.tex linguist-documentation=true
+*.ipynb linguist-documentation=true
