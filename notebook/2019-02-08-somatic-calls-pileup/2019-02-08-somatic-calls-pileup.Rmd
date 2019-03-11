@@ -5,7 +5,7 @@ tags: [ pileup, variant ]
 featimg: "allele-counts-1.png"
 ---
 
-Variant allele frequencies are presented for a couple of somatic variant calls from MSSM_106.
+Variant allele frequencies are presented for a couple of somatic variant calls from CMC subject MSSM_106.
 
 ```{r echo=FALSE, warning=FALSE}
 library(lme4)
