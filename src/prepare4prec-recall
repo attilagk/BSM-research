@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+vartype=snp
+numproc=`nproc`
+regions=$(echo {21..22} | tr ' ' ',')
+outformat=v
+filterstr=''
+helpfile=`mktemp`
+cat >> $helpfile <<EOF
+
+Prepare in.vcf for precision-recall calculations:
+* spit multiallelic into biallelic records
+* filter for genomic regions (default: all autosomes)
+* filter for "PASS" (default: don't filter)
+* filter for snp|indel (default: $vartype)
+
+Usage:
+`basename $0` [-v vartype] [-p numproc] [-r regions] [-O outformat] [-p] in.vcf > out.vcf
+
+Options:
+    v) vartype ($vartype): snp|indel
+    p) numproc ($numproc): number of processors
+    r) regions ($regions): genomic regions
+    O) outformat ($outformat): v|u|z
+    P) turn on PASS filter (flag)
+    h) displayHelp (flag): display this help page
+EOF
+# display help if zero options and arguments are given
+if test $# -eq 0; then
+    cat $helpfile; rm $helpfile; exit
+fi
+
+# process options
+while getopts 'v:p:r:O:Ph' myopt; do
+    case $myopt in
+        v) vartype=$OPTARG;;
+        p) numproc=$OPTARG;;
+        r) regions=$OPTARG;;
+        O) outformat=$OPTARG;;
+        P) filterstr='-f .,PASS';;
+        h) displayHelp=true;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+invcf=$1
+nthread="$(($numproc - 1))" # number of ADDITIONAL threads
+# display help if -h is given
+if $displayHelp; then
+    cat $helpfile; rm $helpfile; exit
+fi
+rm $helpfile
+
+# perform operations
+bcftools norm --thread $nthread -r"$regions" -m- -Ou $invcf |
+bcftools view --thread $nthread -iTYPE=\"$vartype\" $filterstr -O $outformat

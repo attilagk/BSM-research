@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+case `hostname` in
+    attila-ThinkS)
+        main_in="$HOME/projects/bsm/results/calls/ceph-utah/"
+        main_out="$HOME/projects/bsm/results/2019-03-18-truth-sets";;
+    ada)
+        main_in="/projects/bsm/calls/ceph-utah/"
+        main_out="/projects/bsm/attila/results/2019-03-18-truth-sets";;
+esac
+
+sub1_out=$main_out/PASSed-biallelic/
+preparer=$HOME/projects/bsm/src/prepare4prec-recall
+
+
+function pass_split () {
+    invcf=$1
+    outvcf=$2
+    echo $outvcf
+    #bcftools view -h $vcf
+}
+
+for gp in NA128{89,90,91,92}; do
+    for dataset in chesslab illumina; do
+        outdir=$sub1_out/$gp/
+        if test ! -d $outdir; then mkdir -p $outdir; fi
+        in=$main_in/$dataset/$gp.vcf.gz
+        out=$outdir/$dataset.vcf.gz
+        $preparer -O z -p $in > $out
+    done
+done
