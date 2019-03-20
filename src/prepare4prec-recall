@@ -5,6 +5,7 @@ numproc=`nproc`
 regions=$(echo {21..22} | tr ' ' ',')
 outformat=v
 filterstr=''
+displayHelp=false
 helpfile=`mktemp`
 cat >> $helpfile <<EOF
 
@@ -25,11 +26,6 @@ Options:
     P) turn on PASS filter (flag)
     h) displayHelp (flag): display this help page
 EOF
-# display help if zero options and arguments are given
-if test $# -eq 0; then
-    cat $helpfile; rm $helpfile; exit
-fi
-
 # process options
 while getopts 'v:p:r:O:Ph' myopt; do
     case $myopt in
@@ -42,6 +38,11 @@ while getopts 'v:p:r:O:Ph' myopt; do
     esac
 done
 shift $(($OPTIND - 1))
+
+# display help if zero options and arguments are given
+if test $# -eq 0; then
+    cat $helpfile; rm $helpfile; exit
+fi
 
 invcf=$1
 nthread="$(($numproc - 1))" # number of ADDITIONAL threads

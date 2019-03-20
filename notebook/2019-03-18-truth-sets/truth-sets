@@ -9,23 +9,23 @@ case `hostname` in
         main_out="/projects/bsm/attila/results/2019-03-18-truth-sets";;
 esac
 
-sub1_out=$main_out/PASSed-biallelic/
+nthread="$((`nproc` - 1))"
 preparer=$HOME/projects/bsm/src/prepare4prec-recall
 
-
-function pass_split () {
-    invcf=$1
-    outvcf=$2
-    echo $outvcf
-    #bcftools view -h $vcf
-}
-
-for gp in NA128{89,90,91,92}; do
-    for dataset in chesslab illumina; do
-        outdir=$sub1_out/$gp/
-        if test ! -d $outdir; then mkdir -p $outdir; fi
-        in=$main_in/$dataset/$gp.vcf.gz
-        out=$outdir/$dataset.vcf.gz
-        $preparer -O z -p $in > $out
+for vartype in snp indel; do
+    for gp in NA128{89,90,91,92}; do
+        outdir=$main_out/$vartype/individuals/$gp/
+        for dataset in chesslab illumina; do
+            if test ! -d $outdir; then mkdir -p $outdir; fi
+            in=$main_in/$dataset/$gp.vcf.gz
+            out=$outdir/$dataset.vcf.gz
+            $preparer -O z -P -v $vartype $in > $out
+            bcftools index -t $out
+        done
+        combined=$outdir/combined.vcf.gz
+        chessvcf=$outdir/chesslab.vcf.gz
+        illumvcf=$outdir/illumina.vcf.gz
+        bcftools concat --threads $nthread -a -d all $chessvcf $illumvcf -o $combined -O z 
+        bcftools index -t $combined
     done
 done

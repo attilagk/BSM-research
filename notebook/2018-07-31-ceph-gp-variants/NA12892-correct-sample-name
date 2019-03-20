@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+invcf=$HOME/projects/bsm/results/2018-05-21-NA12892-variants/wgs/strelka2Germline/results/variants/variants.vcf.gz
+outvcf=$HOME/projects/bsm/results/calls/ceph-utah/chesslab/NA12892.vcf.gz
+
+samples=`tempfile`
+cat > $samples <<EOF
+Mix3A NA12892
+EOF
+
+bcftools reheader --samples $samples $invcf > $outvcf
+bcftools index -t $outvcf
+rm $samples
