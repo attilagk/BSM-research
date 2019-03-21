@@ -2,7 +2,7 @@
 
 vartype=snp
 numproc=`nproc`
-regions=$(echo {21..22} | tr ' ' ',')
+regions=$(echo {1..22} | tr ' ' ',')
 outformat=v
 filterstr=''
 displayHelp=false

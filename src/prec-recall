@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+truthset=/big/results/bsm/2019-03-18-truth-sets/chr22/snp/truthset/complete/truthset.vcf.gz
+numproc=`nproc`
+displayHelp=false
+helpfile=`mktemp`
+cat >> $helpfile <<EOF
+
+Set sizes for precison--recall calculation
+
+Usage:
+`basename $0` [-t truthset] callset.vcf.gz
+
+Argument:
+callset.vcf.gz is a bgzipped, indexed callset cleaned by prepare4prec-recall
+
+Options:
+    t) truthset ($truthset)
+    t) numproc ($numproc)
+    h) displayHelp (flag): display this help page
+EOF
+# process options
+while getopts 't:h' myopt; do
+    case $myopt in
+        t) truthset=$OPTARG;;
+        p) numproc=$OPTARG;;
+        h) displayHelp=true;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+# display help if zero options and arguments are given
+if test $# -eq 0; then
+    cat $helpfile; rm $helpfile; exit
+fi
+
+callset=$1
+nthread="$(($numproc - 1))" # number of ADDITIONAL threads
+# display help if -h is given
+if $displayHelp; then
+    cat $helpfile; rm $helpfile; exit
+fi
+rm $helpfile
+
+C=$(bcftools view --threads $nthread -H $callset | wc -l)
+V=$(bcftools view --threads $nthread -H $truthset | wc -l)
+CV=$(bcftools isec -n~11 $callset $truthset | wc -l)
+
+cat <<EOF
+C	V	CV
+$C	$V	$CV
+EOF
