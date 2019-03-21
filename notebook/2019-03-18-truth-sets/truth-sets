@@ -1,5 +1,55 @@
 #!/usr/bin/env bash
 
+combinationIsUnion=true
+numproc=`nproc`
+allautosomes=false
+displayHelp=false
+helpfile=`mktemp`
+
+cat >> $helpfile <<EOF
+
+Create truth a set for snps and indels
+
+Usage:
+`basename $0` [-v combinationIsUnion] [-p numproc] -a allautosomes
+
+Options:
+    c) combinationIsUnion ($combinationIsUnion): true|false; Combine Chesslab and Illumina callsets with union? (Otherwise intersection)
+    p) numproc ($numproc): number of processors
+    a) allautosomes ($allautosomes): true|false; Include all autosomes in truth set?  (Otherwise only chr22)
+    h) displayHelp (flag): display this help page
+EOF
+# process options
+while getopts 'c:p:a:h' myopt; do
+    case $myopt in
+        c) combinationIsUnion=$OPTARG;;
+        p) numproc=$OPTARG;;
+        a) allautosomes=$OPTARG;;
+        h) displayHelp=true;;
+    esac
+done
+# display help if zero options and arguments are given
+# this forces at least one option to be specified
+if test $# -eq 0; then
+    cat $helpfile; rm $helpfile; exit
+fi
+shift $(($OPTIND - 1))
+
+if $displayHelp; then
+    cat $helpfile; rm $helpfile; exit
+fi
+rm $helpfile
+
+nthread="$(($numproc - 1))"
+
+if $allautosomes; then
+    regions=$(echo {1..22} | tr ' ' ',')
+    sub_out=all-autosomes
+else
+    regions=22
+    sub_out=chr22
+fi
+
 case `hostname` in
     attila-ThinkS)
         main_in="$HOME/projects/bsm/results/calls/ceph-utah/"
@@ -8,24 +58,56 @@ case `hostname` in
         main_in="/projects/bsm/calls/ceph-utah/"
         main_out="/projects/bsm/attila/results/2019-03-18-truth-sets";;
 esac
+main_out="$main_out/$sub_out/"
 
-nthread="$((`nproc` - 1))"
 preparer=$HOME/projects/bsm/src/prepare4prec-recall
 
+anonymousSample=NA128xx
+samples=`tempfile`
+cat > $samples <<EOF
+NA12889	$anonymousSample
+NA12890	$anonymousSample
+NA12891	$anonymousSample
+NA12892	$anonymousSample
+EOF
+
 for vartype in snp indel; do
+    unisamplevcflist=''
     for gp in NA128{89,90,91,92}; do
         outdir=$main_out/$vartype/individuals/$gp/
         for dataset in chesslab illumina; do
             if test ! -d $outdir; then mkdir -p $outdir; fi
             in=$main_in/$dataset/$gp.vcf.gz
             out=$outdir/$dataset.vcf.gz
-            $preparer -O z -P -v $vartype $in > $out
+            $preparer -r $regions -O u -P -v $vartype $in |
+            bcftools view --thread $nthread -i'GT="AA" || GT="RA"' -O z -o $out
             bcftools index -t $out
         done
-        combined=$outdir/combined.vcf.gz
         chessvcf=$outdir/chesslab.vcf.gz
         illumvcf=$outdir/illumina.vcf.gz
-        bcftools concat --threads $nthread -a -d all $chessvcf $illumvcf -o $combined -O z 
-        bcftools index -t $combined
+        # combination of chesslab and illumina callset
+        combinedvcf=$outdir/combined.vcf.gz
+        if $combinationIsUnion; then
+            bcftools concat --threads $nthread -a -d all $chessvcf $illumvcf -o $combinedvcf -O z 
+            bcftools index -t $combinedvcf
+        else # combination is intersection
+            tdir=`mktemp -d`
+            bcftools isec -p $tdir -O z $chessvcf $illumvcf
+            mv $tdir/0002.vcf.gz $combinedvcf
+            mv $tdir/0002.vcf.gz.tbi $combinedvcf.tbi
+            rm -r $tdir
+        fi
+        # change individual's sample name to anonymous name so VCFs can be concatenated
+        uniformsamplevcf=$outdir/$gp.vcf.gz
+        bcftools reheader -s $samples -o $uniformsamplevcf $combinedvcf
+        bcftools index -t $uniformsamplevcf
+        unisamplevcflist="$unisamplevcflist $uniformsamplevcf"
     done
+    truthsetdir=$main_out/$vartype/truthset/complete
+    if test ! -d $truthsetdir; then mkdir -p $truthsetdir; fi
+    truthset=$truthsetdir/truthset.vcf.gz
+    bcftools concat --threads $nthread -a -d all $unisamplevcflist -o $truthset -O z 
+    bcftools index -t $truthset
 done
+
+rm $samples
