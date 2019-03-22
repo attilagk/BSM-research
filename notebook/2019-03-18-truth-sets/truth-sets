@@ -60,8 +60,6 @@ case `hostname` in
 esac
 main_out="$main_out/$sub_out/"
 
-preparer=$HOME/projects/bsm/src/prepare4prec-recall
-
 anonymousSample=NA128xx
 samples=`tempfile`
 cat > $samples <<EOF
@@ -79,7 +77,7 @@ for vartype in snp indel; do
             if test ! -d $outdir; then mkdir -p $outdir; fi
             in=$main_in/$dataset/$gp.vcf.gz
             out=$outdir/$dataset.vcf.gz
-            $preparer -r $regions -O u -P -v $vartype $in |
+            prepare4prec-recall -r $regions -O u -P -v $vartype $in |
             bcftools view --thread $nthread -i'GT="AA" || GT="RA"' -O z -o $out
             bcftools index -t $out
         done

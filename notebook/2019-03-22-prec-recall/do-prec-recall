@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+indir_main=$HOME/projects/bsm/results/calls/benchmark-mix1-mix3/
+outdir_main=$HOME/projects/bsm/results/2019-03-22-prec-recall
+regions=22
+sub_out=chr22
+
+for vartype in snp indel; do
+    case $vartype in
+        snp)
+            indir_sub=snvs
+            caller_list="lofreqSomatic somaticSniper strelka2Germline2s strelka2Somatic Tnseq"
+            ;;
+        indel)
+            indir_sub=indels
+            caller_list="strelka2Germline2s strelka2Somatic Tnseq"
+            ;;
+    esac
+    indir=$indir_main/$indir_sub
+    outdir=$outdir_main/$sub_out/$vartype
+    if test ! -d $outdir; then mkdir -p $outdir; fi
+    for caller in $caller_list; do
+        invcf=$indir/$caller.vcf.gz
+        outvcf=$outdir/$caller.vcf.gz
+        prepare4prec-recall -v$vartype -r$regions -Oz -P $invcf > $outvcf
+        bcftools index -t $outvcf
+    done
+    truthsetvcf=/big/results/bsm/2019-03-18-truth-sets/$sub_out/$vartype/truthset/complete/truthset.vcf.gz
+    prec-recall-vcf -t $truthsetvcf $outdir/*.vcf.gz > $outdir/prec-recall.csv
+done
