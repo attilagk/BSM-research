@@ -38,3 +38,17 @@ def get_aaf_of_gt(gt=make_genotypes(), mr=get_mixing_ratios()):
 def get_gt_of_aaf(aaf, mix='mix1', aaf_of_gt=get_aaf_of_gt()):
     res = list(aaf_of_gt[aaf_of_gt[mix] == aaf].index)
     return(res)
+
+if __name__ == "__main__":
+    import sys
+    aaf_of_gt = get_aaf_of_gt()
+    aaf_of_gt.to_csv('/home/attila/projects/bsm/results/2019-03-12-prec-recall-design/aaf_of_gt.csv')
+    aaf_values = {m: sorted(list(set(aaf_of_gt[m]))) for m in aaf_of_gt.columns}
+    gt_of_aaf = {m: [{f: get_gt_of_aaf(f, m)} for f in aaf_values[m]] for m in ['mix1', 'mix2', 'mix3']}
+    for entry in gt_of_aaf[sys.argv[1]]:
+        for k in entry.keys():
+            v = entry[k]
+            print(k, end='\t')
+            for gt in v:
+                print(gt, end='\t')
+            print('')
