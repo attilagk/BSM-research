@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=1 # JointSNVMix2 is single-threaded
+
+outdir=$length/${nproc}proc
+
+if test -d $outdir; then
+    :
+else
+    mkdir $outdir
+fi
+
+( time multiCaller -p ${nproc} -r $REFSEQ \
+    -t Somatic \
+    -1 $length/Mix1A-$length.bam \
+    -2 $length/Mix3A-$length.bam \
+    -a Mix1A \
+    -b Mix3A \
+    -o $outdir ) 1>&$outdir/JointSNVMix2-run.time &
