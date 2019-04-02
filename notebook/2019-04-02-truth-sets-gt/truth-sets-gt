@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+nthread=15
+
+wd=$HOME/projects/bsm/results/2019-03-18-truth-sets/chr22/
+
+
+marginal_gt() {
+    gpv=$1
+    out=$outdir/$AA.vcf.gz
+    bcftools view --thread $nthread -i'GT="AA"' -O z -o $out $gpv
+    bcftools index -t $out
+    out=$outdir/$RA.vcf.gz
+    bcftools view --thread $nthread -i'GT="RA"' -O z -o $out $gpv
+    bcftools index -t $out
+}
+
+for vartype in snp indel; do
+    for indiv in NA128{89,90,91,92}; do
+        case $indiv in
+            NA12889) AA=2xxx; RA=1xxx;;
+            NA12890) AA=x2xx; RA=x1xx;;
+            NA12891) AA=xx2x; RA=xx1x;;
+            NA12892) AA=xxx2; RA=xxx1;;
+        esac
+        invcf=$wd/$vartype/individuals/$indiv/combined.vcf.gz
+        outdir=$wd/$vartype/truthset/individuals/
+        if test ! -d $outdir; then mkdir $outdir; fi
+        if test ! -f $outdir/$AA.vcf.gz || test ! -f $outdir/$RA.vcf.gz; then
+            marginal_gt $invcf
+        fi
+    done
+done
