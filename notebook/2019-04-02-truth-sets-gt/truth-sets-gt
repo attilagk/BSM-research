@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 nthread=15
 
+
 wd=$HOME/projects/bsm/results/2019-03-18-truth-sets/chr22/
+aaf_of_gt=/home/attila/projects/bsm/results/2019-03-12-prec-recall-design/aaf_of_gt.csv
+ts_gt_script=$HOME/projects/bsm/notebook/2019-04-02-truth-sets-gt/truth_sets_gt.py
 
 
 marginal_gt() {
     gpv=$1
-    out=$outdir/$AA.vcf.gz
+    out=$ts_indiv_dir/$AA.vcf.gz
     bcftools view --thread $nthread -i'GT="AA"' -O z -o $out $gpv
     bcftools index -t $out
-    out=$outdir/$RA.vcf.gz
+    out=$ts_indiv_dir/$RA.vcf.gz
     bcftools view --thread $nthread -i'GT="RA"' -O z -o $out $gpv
     bcftools index -t $out
 }
@@ -23,10 +26,16 @@ for vartype in snp indel; do
             NA12892) AA=xxx2; RA=xxx1;;
         esac
         invcf=$wd/$vartype/individuals/$indiv/combined.vcf.gz
-        outdir=$wd/$vartype/truthset/individuals/
-        if test ! -d $outdir; then mkdir $outdir; fi
-        if test ! -f $outdir/$AA.vcf.gz || test ! -f $outdir/$RA.vcf.gz; then
+        ts_indiv_dir=$wd/$vartype/truthset/individuals/
+        if test ! -d $ts_indiv_dir; then mkdir $ts_indiv_dir; fi
+        if test ! -f $ts_indiv_dir/$AA.vcf.gz || test ! -f $ts_indiv_dir/$RA.vcf.gz; then
             marginal_gt $invcf
         fi
+    done
+    ts_gt_dir=$wd/$vartype/truthset/genotypes
+    if test ! -d $ts_gt_dir; then mkdir $ts_gt_dir; fi
+    for gt in `cut -d, -f1 $aaf_of_gt`; do
+        echo "Creating truth set for genotype ${gt}..."
+        $ts_gt_script $gt $ts_indiv_dir $ts_gt_dir
     done
 done
