@@ -1,12 +1,53 @@
 #!/usr/bin/env bash
-nthread=15
 
+# Create truth subsets for each joint genotype and each mix and allele frequency
 
 wd=$HOME/projects/bsm/results/2019-03-18-truth-sets/chr22/
 aaf_of_gt=/home/attila/projects/bsm/results/2019-03-12-prec-recall-design/aaf_of_gt.csv
 ts_gt_script=$HOME/projects/bsm/notebook/2019-04-02-truth-sets-gt/truth_sets_gt.py
+displayHelp=false
 
+helpfile=`mktemp`
 
+cat >> $helpfile <<EOF
+
+Description
+
+Usage:
+`basename $0` [-w wd] [-a aaf_of_gt] [-s ts_gt_script] [-h] wdir
+
+Argument(s)
+    wdir ($wd): working directory (tree); output of 2019-03-18-truth-sets/truth-sets
+
+Options:
+    a) aaf_of_gt ($aaf_of_gt): CSV file; output of joint_gt_ceph.get_aaf_of_gt; see 2019-03-12-prec-recall-design
+    s) ts_gt_script ($ts_gt_script): script that creates truth subsets for all joint genotypes
+    h) displayHelp (flag): display this help page
+EOF
+# process options
+while getopts 'w:a:s:h' myopt; do
+    case $myopt in
+        a) aaf_of_gt=$OPTARG;;
+        s) ts_gt_script=$OPTARG;;
+        h) displayHelp=true;;
+    esac
+done
+# display help if zero options and arguments are given
+# this forces at least one option to be specified
+if test $# -eq 0; then
+    cat $helpfile; rm $helpfile; exit
+fi
+shift $(($OPTIND - 1))
+
+if $displayHelp; then
+    cat $helpfile; rm $helpfile; exit
+fi
+rm $helpfile
+
+wd=$1
+nthread=$((`nproc` - 1))
+
+# function to separate AA and RA variants in each gradparent callset
 marginal_gt() {
     gpv=$1
     out=$ts_indiv_dir/$AA.vcf.gz
@@ -17,7 +58,19 @@ marginal_gt() {
     bcftools index -t $out
 }
 
+anonymousSample=NA128xx
+samples=`tempfile`
+cat > $samples <<EOF
+NA12889	$anonymousSample
+NA12890	$anonymousSample
+NA12891	$anonymousSample
+NA12892	$anonymousSample
+EOF
+
 for vartype in snp indel; do
+    # separate homozyg (AA) and heterozyg (RA) variants
+    ts_indiv_dir=$wd/$vartype/truthset/individuals/
+    if test ! -d $ts_indiv_dir; then mkdir -p $ts_indiv_dir; fi
     for indiv in NA128{89,90,91,92}; do
         case $indiv in
             NA12889) AA=2xxx; RA=1xxx;;
@@ -26,16 +79,29 @@ for vartype in snp indel; do
             NA12892) AA=xxx2; RA=xxx1;;
         esac
         invcf=$wd/$vartype/individuals/$indiv/combined.vcf.gz
-        ts_indiv_dir=$wd/$vartype/truthset/individuals/
-        if test ! -d $ts_indiv_dir; then mkdir $ts_indiv_dir; fi
         if test ! -f $ts_indiv_dir/$AA.vcf.gz || test ! -f $ts_indiv_dir/$RA.vcf.gz; then
             marginal_gt $invcf
         fi
     done
+    # truth subsets for genotypes
     ts_gt_dir=$wd/$vartype/truthset/genotypes
     if test ! -d $ts_gt_dir; then mkdir $ts_gt_dir; fi
     for gt in `cut -d, -f1 $aaf_of_gt`; do
-        echo "Creating truth set for genotype ${gt}..."
-        $ts_gt_script $gt $ts_indiv_dir $ts_gt_dir
+        ts_gt_vcf=$ts_gt_dir/$gt.vcf.gz
+        if test ! -f $ts_gt_vcf; then
+            echo "Creating truth set for genotype ${gt}..."
+            $ts_gt_script $gt $ts_indiv_dir $ts_gt_dir
+            tmpvcf=`mktemp`
+            mv $ts_gt_vcf $tmpvcf
+            bcftools reheader -s $samples -o $ts_gt_vcf $tmpvcf
+            bcftools index -t $ts_gt_vcf && rm $tmpvcf
+        fi
+    done
+    # truth subsets for alternative allele frequencies
+    ts_aaf_dir=$wd/$vartype/truthset/aaf
+    if test ! -d $ts_aaf_dir; then mkdir $ts_aaf_dir; fi
+    for mix in mix{1..3}; do
+        ts_mix_dir="$ts_aaf_dir/$mix/complete"
+        if test ! -d $ts_mix_dir; then mkdir -p $ts_mix_dir; fi
     done
 done

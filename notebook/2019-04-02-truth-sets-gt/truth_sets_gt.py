@@ -45,7 +45,7 @@ def bcftools_isec_gt(gt,
     # execute
     subprocess.run(args0)
     subprocess.run(args1)
-    subprocess.run(args2)
+    #subprocess.run(args2)
     shutil.rmtree(pdirpath)
     return((args0, args1, args2))
 
