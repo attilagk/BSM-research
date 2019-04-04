@@ -67,7 +67,8 @@ def get_gt_of_aaf(aaf_of_gt=get_aaf_of_gt()):
         res = list(aaf_of_gt[aaf_of_gt[mix] == aaf].index)
         return(res)
     aaf_values = {m: sorted(list(set(aaf_of_gt[m]))) for m in aaf_of_gt.columns}
-    gt_of_aaf = {m: [{f: helper(f, m)} for f in aaf_values[m]] for m in aaf_of_gt.columns}
+    gt_of_aaf = {m: {f: helper(f, m) for f in aaf_values[m]} for m in aaf_of_gt.columns}
+    #gt_of_aaf = {m: [{f: helper(f, m)} for f in aaf_values[m]] for m in aaf_of_gt.columns}
     return(gt_of_aaf)
 
 def write_gt_of_aaf(mix='mix1',

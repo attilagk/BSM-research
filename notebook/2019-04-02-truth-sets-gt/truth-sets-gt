@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Create truth subsets for each joint genotype and each mix and allele frequency
+# Create truth subsets for each joint genotype and each mix
 
 wd=$HOME/projects/bsm/results/2019-03-18-truth-sets/chr22/
 aaf_of_gt=/home/attila/projects/bsm/results/2019-03-12-prec-recall-design/aaf_of_gt.csv
@@ -14,7 +14,7 @@ cat >> $helpfile <<EOF
 Description
 
 Usage:
-`basename $0` [-w wd] [-a aaf_of_gt] [-s ts_gt_script] [-h] wdir
+`basename $0` [-a aaf_of_gt] [-s ts_gt_script] [-h] wdir
 
 Argument(s)
     wdir ($wd): working directory (tree); output of 2019-03-18-truth-sets/truth-sets
@@ -96,12 +96,5 @@ for vartype in snp indel; do
             bcftools reheader -s $samples -o $ts_gt_vcf $tmpvcf
             bcftools index -t $ts_gt_vcf && rm $tmpvcf
         fi
-    done
-    # truth subsets for alternative allele frequencies
-    ts_aaf_dir=$wd/$vartype/truthset/aaf
-    if test ! -d $ts_aaf_dir; then mkdir $ts_aaf_dir; fi
-    for mix in mix{1..3}; do
-        ts_mix_dir="$ts_aaf_dir/$mix/complete"
-        if test ! -d $ts_mix_dir; then mkdir -p $ts_mix_dir; fi
     done
 done

@@ -15,6 +15,18 @@ def read_aaf_of_gt(csvpath='/home/attila/projects/bsm/results/2019-03-12-prec-re
 def bcftools_isec_gt(gt,
         indir='/home/attila/projects/bsm/results/2019-03-18-truth-sets/chr22/snp/truthset/individuals',
         outdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets/chr22/snp/truthset/genotypes'):
+    '''
+    Create a VCF for joint genotype gt based on input VCFs corresponding to all 8 combinations
+    of 4 grandparent and 2 individual genotypes (AA and RA)
+
+    Parameters:
+    gt: joint genotype (string of length 4) such as "0102"
+    indir: directory containing the 8 input VCFs
+    outdir: directory to write VCFs such as "0102.vcf.gz"
+
+    Returns:
+    arguments that have been passed to subprocess.run
+    '''
     def make_flist():
         vcfbns = [('1xxx', '1xxx', '2xxx'),
                 ('x1xx', 'x1xx', 'x2xx'),
@@ -45,7 +57,7 @@ def bcftools_isec_gt(gt,
     # execute
     subprocess.run(args0)
     subprocess.run(args1)
-    #subprocess.run(args2)
+    #subprocess.run(args2) # indexing is now done in the main shell script
     shutil.rmtree(pdirpath)
     return((args0, args1, args2))
 
