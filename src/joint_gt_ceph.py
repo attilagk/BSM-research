@@ -87,13 +87,13 @@ def write_gt_of_aaf(mix='mix1',
     the path of the file created
     '''
     with open (filepath, 'w') as f:
-        for entry in gt_of_aaf[mix]:
-            for k in entry.keys():
-                v = entry[k]
-                print(k, end='\t', file=f)
-                for gt in v:
-                    print(gt, end='\t', file=f)
-                print('', file=f)
+        #for entry in gt_of_aaf[mix]:
+        for k in gt_of_aaf[mix].keys():
+            v = gt_of_aaf[mix][k]
+            print(k, end='\t', file=f)
+            for gt in v:
+                print(gt, end='\t', file=f)
+            print('', file=f)
     readmepath = dirpath + os.sep + 'gt_of_aaf.info'
     with open (readmepath, 'w') as f:
         readmestr='Mapping from aaf to genotypes'
