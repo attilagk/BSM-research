@@ -2,8 +2,10 @@
 
 indir_main=$HOME/projects/bsm/results/calls/benchmark-mix1-mix3/
 outdir_main=$HOME/projects/bsm/results/2019-03-22-prec-recall
-regions=22
-sub_out=chr22
+#regions=22
+regions=$(echo {1..22} | tr ' ' ',')
+#sub_out=chr22
+sub_out=autosomes
 
 for vartype in snp indel; do
     case $vartype in

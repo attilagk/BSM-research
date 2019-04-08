@@ -11,7 +11,7 @@ cat >> $helpfile <<EOF
 Create truth a set for snps and indels
 
 Usage:
-`basename $0` [-v combinationIsUnion] [-p numproc] -a allautosomes
+`basename $0` [-v combinationIsUnion] [-p numproc] -a true|false
 
 Options:
     c) combinationIsUnion ($combinationIsUnion): true|false; Combine Chesslab and Illumina callsets with union? (Otherwise intersection)
@@ -44,7 +44,7 @@ nthread="$(($numproc - 1))"
 
 if $allautosomes; then
     regions=$(echo {1..22} | tr ' ' ',')
-    sub_out=all-autosomes
+    sub_out=autosomes
 else
     regions=22
     sub_out=chr22
