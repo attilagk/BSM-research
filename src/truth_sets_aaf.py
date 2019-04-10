@@ -4,7 +4,7 @@ import subprocess
 import os
 import joint_gt_ceph as jgc
 
-def make_ts_aaf(mix='mix1', vartype='snp',
+def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
         tsdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets/chr22/snp/truthset'):
         def helper(aaf):
             genotypes = gt_of_aaf[mix][aaf]
@@ -41,7 +41,7 @@ def make_ts_aaf(mix='mix1', vartype='snp',
             os.mkdir(mixdir)
         aafs = gt_of_aaf[mix].keys()
         nrec = [helper(f) for f in aafs]
-        res = pd.DataFrame({'vartype': vartype, 'sample': mix, 'aaf': list(aafs),
+        res = pd.DataFrame({'region': region, 'vartype': vartype, 'sample': mix, 'aaf': list(aafs),
                 'nvariants': nrec})
-        res = res.astype({'vartype': 'category', 'sample': 'category'})
+        res = res.astype({'region': 'category', 'vartype': 'category', 'sample': 'category'})
         return(res)
