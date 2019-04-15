@@ -1,0 +1,95 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, hyperref, color, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{The Main Title Naming Key Concepts}
+\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}[plain]
+\includegraphics[scale=0.3]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_7_1.pdf}
+\end{frame}
+
+\begin{frame}{Small region for test runs}
+\includegraphics[scale=0.35]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_10_1.pdf}
+\end{frame}
+
+\begin{frame}[label=chaggais_model]{Initial ``models''}
+\includegraphics[scale=0.35]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_24_1.pdf}
+\end{frame}
+
+\begin{frame}{Model: M\_Chaggai\)}
+\includegraphics[height=0.8\textheight]{/home/attila/figures/from-others/chaggai-pr-recall-aaf.png}
+\end{frame}
+
+\begin{frame}{Model: M\_Chaggai\)}
+\includegraphics[height=0.7\textheight]{/home/attila/figures/from-others/chaggai-pr-prec-recall.png}
+\end{frame}
+
+\againframe{chaggais_model}
+
+\begin{frame}{Model: mix}
+\includegraphics[scale=0.35]{../../notebook/2019-03-22-prec-recall/figure/2019-03-22-prec-recall_5_0.pdf}
+\end{frame}
+
+\begin{frame}{How to model number of somatic variants?}
+key properties
+\begin{itemize}
+\item total number of somatic variants
+\item ``shape'': dependence on AAF 
+\end{itemize}
+\vfill
+knowledge
+\begin{itemize}
+\item single cell sequencing
+\end{itemize} 
+\end{frame}
+
+\end{document}
+
+
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
