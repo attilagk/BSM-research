@@ -60,12 +60,14 @@ r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
 \end{equation}
 \end{frame}
 
-\begin{frame}{The Chess lab's approach to truth set}
+\begin{frame}<1>[label=ourapproach]{The Chess lab's approach to truth set}
 \begin{enumerate}
-\item accept germline call sets as germline truth sets
+\item<1> accept germline call sets as germline truth sets
 \item<2> mix genomes in different proportions 
 \item<3> map joint genotypes to alternative allele frequencies (AAF) 
 \item<3> partition variants according to AAF 
+\item<4-> set \# of variants for each AAF (modeling)
+\only<5>{\huge \alert{How?}}
 \end{enumerate}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -110,6 +112,17 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \end{columns}
 \end{frame}
 
+\begin{frame}{Size of germline callset looks OK}
+\begin{center}
+{\large all autosomes}
+\vfill
+
+\includegraphics[scale=0.6]{../../notebook/2019-03-18-truth-sets/figure/2019-03-18-truth-sets_14_0.pdf}
+\end{center}
+\end{frame}
+
+\againframe<2-3>{ourapproach}
+
 \begin{frame}[plain]
 \includegraphics[scale=0.3]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_7_1.pdf}
 \end{frame}
@@ -118,45 +131,22 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \includegraphics[scale=0.35]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_10_1.pdf}
 \end{frame}
 
+\againframe<4>{ourapproach}
+
 \begin{frame}[label=chaggais_model]{Initial ``models''}
 \includegraphics[scale=0.35]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_24_1.pdf}
-\end{frame}
-
-\begin{frame}{Model: M\_Chaggai}
-\includegraphics[height=0.8\textheight]{/home/attila/figures/from-others/chaggai-pr-recall-aaf.png}
 \end{frame}
 
 \begin{frame}{Model: M\_Chaggai}
 \includegraphics[height=0.7\textheight]{/home/attila/figures/from-others/chaggai-pr-prec-recall.png}
 \end{frame}
 
-\againframe{chaggais_model}
-
-\begin{frame}{Model: mix}
-\includegraphics[scale=0.35]{../../notebook/2019-03-22-prec-recall/figure/2019-03-22-prec-recall_5_0.pdf}
-\end{frame}
-
-\begin{frame}{How to model number of somatic variants?}
-key properties
-\begin{itemize}
-\item total number of somatic variants
-\item ``shape'': dependence on AAF 
-\end{itemize}
-\vfill
-knowledge
-\begin{itemize}
-\item single cell sequencing
-\item validation by BSMN? 
-\item other studies? 
-\end{itemize} 
-\end{frame}
+\againframe<5>{ourapproach}
 
 \begin{frame}[plain]
-%{Four possible models}
 Four simple models
-\includegraphics[scale=0.30]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_21_1.pdf}
+\includegraphics[scale=0.3]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_21_1.pdf}
 \end{frame}
-
 
 \end{document}
 
