@@ -32,14 +32,83 @@
 %\useoutertheme[]{tree}
 
 % title, etc
-\title{The Main Title Naming Key Concepts}
-\subtitle{A subtitle may be shorter and more technical}
-\author{Attila Jones}
-\date{Mount Sinai School of Medicine}
+\title{Truth sets of somatic variants}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
+\date{Chess Lab, Mount Sinai School of Medicine}
 
 \begin{document}
 
 \maketitle
+
+\begin{frame}{Measuring performance of somatic variant calling}
+%{Compare call set \(C\) to truth set \(V\)}
+\begin{description}
+\item [\(C\)] some call set of somatic variants
+\item [\(V\)] the truth set of somatic variants
+\end{description}
+\vfill
+\alert{Precision}\\
+the fraction of calls that are true
+\begin{equation}
+p(C) = \frac{|C \cap V|}{|C|} = \frac{\#\text{true calls}}{\#\mathrm{calls}}
+\end{equation}
+\alert{Recall}\\
+the fraction of variants that are called
+\begin{equation}
+r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
+\end{equation}
+\end{frame}
+
+\begin{frame}{The Chess lab's approach to truth set}
+\begin{enumerate}
+\item accept germline call sets as germline truth sets
+\item<2> mix genomes in different proportions 
+\item<3> map joint genotypes to alternative allele frequencies (AAF) 
+\item<3> partition variants according to AAF 
+\end{enumerate}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.3]{../../notebook/2018-05-01-ceph-vars-greally/figure/venn-S1-1.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+{\tiny
+\only<2>{
+\begin{tabular}{r|ccc}
+genome & mix1 & mix2 & mix3 \\
+\hline
+NA12889 & 4 & 2 & 0 \\
+NA12891 & 8 & 4 & 0 \\
+NA12890 & 16 & 8 & 0 \\
+NA12892 & 72 & 86 & 100 \\
+\end{tabular}
+}
+\vfill
+\only<3>{
+\begin{tabular}{c|ccc}
+genotype & \multicolumn{3}{c}{AAF (\%)} \\
+& mix1 &  mix2 & mix3 \\
+\hline
+0001 & 36 & 43 & 50\\
+0010 & 8 & 4 & 0\\
+0100 & 4 & 2 & 0\\
+1000 & 2 & 1 & 0\\
+0002 & 72 & 86 & 100\\
+... & ... & ... & ...\\
+1222 & 98 & 99 & 100\\
+2122 & 96 & 98 & 100\\
+2212 & 92 & 96 & 100\\
+2221 & 64 & 57 & 50\\
+2222 & 100 & 100 & 100\\
+\end{tabular}
+}
+}
+\end{column}
+\end{columns}
+\end{frame}
 
 \begin{frame}[plain]
 \includegraphics[scale=0.3]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_7_1.pdf}
@@ -53,11 +122,11 @@
 \includegraphics[scale=0.35]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_24_1.pdf}
 \end{frame}
 
-\begin{frame}{Model: M\_Chaggai\)}
+\begin{frame}{Model: M\_Chaggai}
 \includegraphics[height=0.8\textheight]{/home/attila/figures/from-others/chaggai-pr-recall-aaf.png}
 \end{frame}
 
-\begin{frame}{Model: M\_Chaggai\)}
+\begin{frame}{Model: M\_Chaggai}
 \includegraphics[height=0.7\textheight]{/home/attila/figures/from-others/chaggai-pr-prec-recall.png}
 \end{frame}
 
@@ -77,8 +146,17 @@ key properties
 knowledge
 \begin{itemize}
 \item single cell sequencing
+\item validation by BSMN? 
+\item other studies? 
 \end{itemize} 
 \end{frame}
+
+\begin{frame}[plain]
+%{Four possible models}
+Four simple models
+\includegraphics[scale=0.30]{../../notebook/2019-04-04-truth-sets-aaf/figure/2019-04-04-truth-sets-aaf_21_1.pdf}
+\end{frame}
+
 
 \end{document}
 
