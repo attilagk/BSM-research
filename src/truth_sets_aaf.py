@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import shutil
 import subprocess
 import os
@@ -180,3 +181,27 @@ def evalmodel2df_all(nvariants, germ_vars=combine_regions_germ_vars()):
             for s in samples for v in vartypes for r in regions for m in
             models for s2g in p_som2germ]
     return(pd.concat(l))
+
+def get_taejeongs_vaf(sample='S316', removenans=True):
+    csv = '/big/data/bsm/Bae-2018-science/aan8690_TableS1/' + sample + '.csv'
+    fr_cx = pd.read_csv(csv)['FR-CX']
+    z = fr_cx[0]
+    def helper(y):
+        if not isinstance(y, str):
+            return(np.nan)
+        def helper2(ix):
+            return(np.int64(str(y).split(sep=':')[ix]))
+        alt = helper2(-1)
+        ref = helper2(-2)
+        total = alt + ref
+        if total == 0 or alt == 0:
+            return(np.nan)
+        else:
+            return(alt / total)
+    vaf = [helper(y) for y in fr_cx]
+    if removenans:
+        vaf = [y for y in vaf if not np.isnan(y)]
+    return(vaf)
+
+def lambda_hat(vaf):
+    return(sum(vaf) / len(vaf))
