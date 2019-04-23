@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import os
 import joint_gt_ceph as jgc
+import seaborn as sns
 
 def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
         tsdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets/chr22/snp/truthset'):
@@ -182,10 +183,23 @@ def evalmodel2df_all(nvariants, germ_vars=combine_regions_germ_vars()):
             models for s2g in p_som2germ]
     return(pd.concat(l))
 
-def get_taejeongs_vaf(sample='S316', removenans=True):
+def get_taejeongs_vaf_sample(sample='S316', removenans=True, scale2pct=True):
+    '''
+    Import Taejeong's VAF for each variant from his Science article
+
+    See
+    https://science.sciencemag.org/highwire/filestream/703017/field_highwire_adjunct_files/1/aan8690_TableS1.xlsx
+
+    Parameters:
+    sample: either S316 or S320 (S275 fails to import)
+    removenans: True if variants with zero read counts or missing VAF should be removed
+    scale2pct: True if VAF should be in percent
+
+    Returns:
+    a list of VAF values
+    '''
     csv = '/big/data/bsm/Bae-2018-science/aan8690_TableS1/' + sample + '.csv'
     fr_cx = pd.read_csv(csv)['FR-CX']
-    z = fr_cx[0]
     def helper(y):
         if not isinstance(y, str):
             return(np.nan)
@@ -201,7 +215,22 @@ def get_taejeongs_vaf(sample='S316', removenans=True):
     vaf = [helper(y) for y in fr_cx]
     if removenans:
         vaf = [y for y in vaf if not np.isnan(y)]
-    return(vaf)
+    if scale2pct:
+        vaf = [100 * y for y in vaf]
+    df = pd.DataFrame({'VAF': vaf, 'sample': sample})
+    df = df.astype({'sample': 'category'})
+    return(df)
+
+def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
+    l = [get_taejeongs_vaf_sample(s, removenans=True, scale2pct=scale2pct) for s in samples]
+    res = pd.concat(l)
+    if len(samples) > 1:
+        pooled = pd.DataFrame({'VAF': res['VAF'], 'sample': 'pooled'})
+        res = pd.concat([res, pooled])
+        res = res.astype({'sample': 'category'})
+    #res = sum(l, [])
+    return(res)
 
 def lambda_hat(vaf):
-    return(sum(vaf) / len(vaf))
+    lhat = len(vaf) / sum(vaf)
+    return(lhat)
