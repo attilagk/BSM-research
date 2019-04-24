@@ -3,8 +3,10 @@ import numpy as np
 import shutil
 import subprocess
 import os
+import re
 import joint_gt_ceph as jgc
 import seaborn as sns
+from scipy import stats
 
 def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
         tsdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets/chr22/snp/truthset'):
@@ -201,17 +203,15 @@ def get_taejeongs_vaf_sample(sample='S316', removenans=True, scale2pct=True):
     csv = '/big/data/bsm/Bae-2018-science/aan8690_TableS1/' + sample + '.csv'
     fr_cx = pd.read_csv(csv)['FR-CX']
     def helper(y):
-        if not isinstance(y, str):
-            return(np.nan)
-        def helper2(ix):
-            return(np.int64(str(y).split(sep=':')[ix]))
-        alt = helper2(-1)
-        ref = helper2(-2)
-        total = alt + ref
-        if total == 0 or alt == 0:
-            return(np.nan)
-        else:
+        if isinstance(y, str) and re.search('somatic', y):
+            def splitter(ix):
+                return(np.int64(str(y).split(sep=':')[ix]))
+            alt = splitter(-1)
+            ref = splitter(-2)
+            total = alt + ref
             return(alt / total)
+        else:
+            return(np.nan)
     vaf = [helper(y) for y in fr_cx]
     if removenans:
         vaf = [y for y in vaf if not np.isnan(y)]
@@ -234,3 +234,12 @@ def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
 def lambda_hat(vaf):
     lhat = len(vaf) / sum(vaf)
     return(lhat)
+
+def my_distplot(df, sample, fit=None):
+    ax = sns.distplot(df[df['sample'] == sample]['VAF'], hist=True, rug=False,
+            kde=False, fit=fit)
+    if fit is None:
+        ax.set_ylabel('count')
+    else:
+        ax.set_ylabel('density')
+    return(ax)
