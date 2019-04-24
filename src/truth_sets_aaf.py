@@ -6,6 +6,7 @@ import os
 import re
 import joint_gt_ceph as jgc
 import seaborn as sns
+import matplotlib.pyplot as plt
 from scipy import stats
 
 def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
@@ -235,11 +236,27 @@ def lambda_hat(vaf):
     lhat = len(vaf) / sum(vaf)
     return(lhat)
 
-def my_distplot(df, sample, fit=None):
-    ax = sns.distplot(df[df['sample'] == sample]['VAF'], hist=True, rug=False,
-            kde=False, fit=fit)
-    if fit is None:
-        ax.set_ylabel('count')
-    else:
-        ax.set_ylabel('density')
-    return(ax)
+
+def vaf_distplot(vafdf, fit=None):
+    sns.set()
+    sns.set_context('talk')
+    g =  sns.FacetGrid(vafdf, row='sample', aspect=2.5, height=4)
+    g.map(sns.distplot, 'VAF', hist=True, rug=True, kde=False,
+            fit=fit)
+
+def vaf_distplot1(vafdf):
+    samples = vafdf['sample'].cat.categories
+    nsamples = len(samples)
+    fig, ax = plt.subplots(nsamples, 1)
+    def plot_sample(sample):
+        ix = samples.searchsorted(sample)
+        n, bins, patches = ax[ix].hist(vafdf[vafdf['sample'] == sample]['VAF'])
+        res = pd.DataFrame({'count': list(n) + [list(n)[-1]], 'bins': bins,
+            'sample': sample})
+        ax[ix].set_title(sample)
+        return(res)
+    histo = [plot_sample(s) for s in samples]
+    histo = pd.concat(histo)
+    g = sns.FacetGrid(histo, row='sample')
+    g.map(plt.step, 'bins', 'count', where='post')
+    return(histo)
