@@ -186,20 +186,9 @@ def evalmodel2df_all(nvariants, germ_vars=combine_regions_germ_vars()):
             models for s2g in p_som2germ]
     return(pd.concat(l))
 
-def get_taejeongs_vaf_sample(sample='S316', removenans=True, scale2pct=True):
+def get_taejeongs_vaf_sample(sample='S316', scale2pct=True):
     '''
-    Import Taejeong's VAF for each variant from his Science article
-
-    See
-    https://science.sciencemag.org/highwire/filestream/703017/field_highwire_adjunct_files/1/aan8690_TableS1.xlsx
-
-    Parameters:
-    sample: either S316 or S320 (S275 fails to import)
-    removenans: True if variants with zero read counts or missing VAF should be removed
-    scale2pct: True if VAF should be in percent
-
-    Returns:
-    a list of VAF values
+    A single sample version of get_taejeongs_vaf; see details therein
     '''
     csv = '/big/data/bsm/Bae-2018-science/aan8690_TableS1/' + sample + '.csv'
     fr_cx = pd.read_csv(csv)['FR-CX']
@@ -214,16 +203,30 @@ def get_taejeongs_vaf_sample(sample='S316', removenans=True, scale2pct=True):
         else:
             return(np.nan)
     vaf = [helper(y) for y in fr_cx]
-    if removenans:
-        vaf = [y for y in vaf if not np.isnan(y)]
+    vaf = [y for y in vaf if not np.isnan(y)]
     if scale2pct:
         vaf = [100 * y for y in vaf]
     df = pd.DataFrame({'VAF': vaf, 'sample': sample})
     df = df.astype({'sample': 'category'})
     return(df)
 
+
 def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
-    l = [get_taejeongs_vaf_sample(s, removenans=True, scale2pct=scale2pct) for s in samples]
+    '''
+    Import Taejeong's VAF for all variants in a list of samples from his Science article
+
+    See
+    https://science.sciencemag.org/highwire/filestream/703017/field_highwire_adjunct_files/1/aan8690_TableS1.xlsx
+    If multiple samples are given, a "pooled" sample is created from them.
+
+    Parameters:
+    samples: a list of samples (note that S275 fails to import)
+    scale2pct: True if VAF should be in percent
+
+    Returns:
+    a pandas DataFrame with a column of VAF values and a sample column
+    '''
+    l = [get_taejeongs_vaf_sample(s, scale2pct=scale2pct) for s in samples]
     res = pd.concat(l)
     if len(samples) > 1:
         pooled = pd.DataFrame({'VAF': res['VAF'], 'sample': 'pooled'})
@@ -232,12 +235,31 @@ def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
     #res = sum(l, [])
     return(res)
 
+
 def lambda_hat(vaf):
+    '''
+    MLE of the rate parameter lambda from a sample of VAF
+
+    Parameters:
+    vaf: a list of VAF values
+
+    Returns:
+    MLE of lambda
+    '''
     lhat = len(vaf) / sum(vaf)
     return(lhat)
 
 
-def vaf_distplot(vafdf, fit=None):
+def vaf_distplot(vafdf=get_taejeongs_vaf(), fit=None):
+    '''
+    Plot the distribution of VAF values 
+
+    If the input vafdf contains multiple samples then a multi-plot grid is
+    created.
+
+    Parameters:
+    vafdf: the pandas DataFrame output of get_taejeongs_vaf
+    '''
     sns.set()
     sns.set_context('talk')
     g =  sns.FacetGrid(vafdf, row='sample', aspect=2.5, height=4)
