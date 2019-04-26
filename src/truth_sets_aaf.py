@@ -250,7 +250,7 @@ def lambda_hat(vaf):
     return(lhat)
 
 
-def vaf_distplot(vafdf=get_taejeongs_vaf(), fit=None):
+def vaf_distplot(vafdf=get_taejeongs_vaf(), fit=stats.expon):
     '''
     Plot the distribution of VAF values 
 
@@ -259,12 +259,21 @@ def vaf_distplot(vafdf=get_taejeongs_vaf(), fit=None):
 
     Parameters:
     vafdf: the pandas DataFrame output of get_taejeongs_vaf
+    fit: None or a scipy.stats distribution
+
+    Returns: a seaborn FacetGrid object
     '''
     sns.set()
     sns.set_context('talk')
     g =  sns.FacetGrid(vafdf, row='sample', aspect=2.5, height=4)
     g.map(sns.distplot, 'VAF', hist=True, rug=True, kde=False,
             fit=fit)
+    if fit is None:
+        pass
+    else:
+        pass
+    return(g)
+
 
 def vaf_distplot1(vafdf):
     samples = vafdf['sample'].cat.categories
