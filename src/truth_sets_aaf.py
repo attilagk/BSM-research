@@ -80,6 +80,7 @@ def make_ts_aaf_get_nvariants():
     samples = ['mix1', 'mix2', 'mix3']
     nvariants = pd.concat([tsaaf(mix=m, vartype=v, region=r) for r in regions
         for v in vartypes for m in samples])
+    nvariants = nvariants.astype({'region': 'category', 'vartype': 'category', 'sample': 'category'})
     return(nvariants)
 
 def evaluate_model(Y, xset, model, only_params):
@@ -89,35 +90,35 @@ def evaluate_model(Y, xset, model, only_params):
     Parameters:
     Y: total number of somatic variants
     xset: the set of x values (AAF values) at which somatic variants exist in the truth set
-    model: M1, M2,...
+    model: L1, L2,...
     only_params: return only model parameters a and b
 
     Returns
     if only_params=False: the set of y values (number of modeled somatic variants)
     if only_params=True: the model parameters a (intercept) and b (slope)
     '''
-    if model == 'M1':
+    if model == 'L1':
         x_max = 50
-    elif model == 'M2':
+    elif model == 'L2':
         x_max = 100
-    elif model == 'M3':
+    elif model == 'L3':
         x_max = 50
-    elif model == 'M4':
+    elif model == 'L4':
         x_max = 100
     xsubset = [z for z in xset if z <= x_max]
     n = len(xsubset)
     xsum = sum(xsubset)
     a = Y / (n - xsum / x_max)
     b = - a / x_max
-    if model in ['M3', 'M4']:
+    if model in ['L3', 'L4']:
         a = Y / n
         b = 0
     if only_params:
         return({'a': a, 'b': b})
-    def M_function(x):
+    def L_function(x):
         y = a + b * x
         return(y)
-    yset = [M_function(z) for z in xsubset] + [0] * (len(xset) - n)
+    yset = [L_function(z) for z in xsubset] + [0] * (len(xset) - n)
     return(yset)
 
 
@@ -132,7 +133,7 @@ def evalmodel2df(nvariants, sample, vartype, region, model, Y, p_som2germ=None):
     sample: mix1, mix2 or mix3
     vartype: snp or indel
     region: chr22 or autosomes
-    model: M1, M2,...
+    model: L1, L2,...
     p_som2germ: -log_10 of the ratio of the number of somatic to germline variants
 
     Returns:
@@ -178,7 +179,7 @@ def evalmodel2df_all(nvariants, germ_vars=combine_regions_germ_vars()):
     regions = ['chr22', 'autosomes']
     vartypes = ['snp', 'indel']
     samples = ['mix1', 'mix2', 'mix3']
-    models = ['M1', 'M2', 'M3', 'M4']
+    models = ['L1', 'L2', 'L3', 'L4']
     p_som2germ = [2, 3, 4]
     l = [evalmodel2df(nvariants, sample=s, vartype=v, region=r, model=m,
         Y=germ_vars.at[r, v] * 10 ** (- s2g), p_som2germ=s2g)
@@ -186,9 +187,9 @@ def evalmodel2df_all(nvariants, germ_vars=combine_regions_germ_vars()):
             models for s2g in p_som2germ]
     return(pd.concat(l))
 
-def get_taejeongs_vaf_sample(sample='S316', scale2pct=True):
+def get_taejeongs_aaf_sample(sample='S316', scale2pct=True):
     '''
-    A single sample version of get_taejeongs_vaf; see details therein
+    A single sample version of get_taejeongs_aaf; see details therein
     '''
     csv = '/big/data/bsm/Bae-2018-science/aan8690_TableS1/' + sample + '.csv'
     fr_cx = pd.read_csv(csv)['FR-CX']
@@ -202,16 +203,16 @@ def get_taejeongs_vaf_sample(sample='S316', scale2pct=True):
             return(alt / total)
         else:
             return(np.nan)
-    vaf = [helper(y) for y in fr_cx]
-    vaf = [y for y in vaf if not np.isnan(y)]
+    aaf = [helper(y) for y in fr_cx]
+    aaf = [y for y in aaf if not np.isnan(y)]
     if scale2pct:
-        vaf = [100 * y for y in vaf]
-    df = pd.DataFrame({'VAF': vaf, 'sample': sample})
+        aaf = [100 * y for y in aaf]
+    df = pd.DataFrame({'VAF': aaf, 'sample': sample})
     df = df.astype({'sample': 'category'})
     return(df)
 
 
-def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
+def get_taejeongs_aaf(samples=['S316', 'S320'], scale2pct=True):
     '''
     Import Taejeong's VAF for all variants in a list of samples from his Science article
 
@@ -226,7 +227,7 @@ def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
     Returns:
     a pandas DataFrame with a column of VAF values and a sample column
     '''
-    l = [get_taejeongs_vaf_sample(s, scale2pct=scale2pct) for s in samples]
+    l = [get_taejeongs_aaf_sample(s, scale2pct=scale2pct) for s in samples]
     res = pd.concat(l)
     if len(samples) > 1:
         pooled = pd.DataFrame({'VAF': res['VAF'], 'sample': 'pooled'})
@@ -236,36 +237,61 @@ def get_taejeongs_vaf(samples=['S316', 'S320'], scale2pct=True):
     return(res)
 
 
-def lambda_hat(vaf):
+def lambda_hat(aaf):
     '''
     MLE of the rate parameter lambda from a sample of VAF
 
     Parameters:
-    vaf: a list of VAF values
+    aaf: a list of VAF values
 
     Returns:
     MLE of lambda
     '''
-    lhat = len(vaf) / sum(vaf)
+    lhat = len(aaf) / sum(aaf)
     return(lhat)
 
+def scaled_exponential1(lam, ntot):
+    def expfun(aaf):
+        aaf = np.array(aaf)
+        y = lam * ntot * np.exp(- lam * aaf)
+        return(y)
+    return(expfun)
 
-def vaf_distplot(vafdf=get_taejeongs_vaf(), fit=stats.expon):
+def scaled_exponential(lam, ntot, aafs):
+    aafs = np.array(aafs) # ensure that aafs is a numpy array
+    unscaled = lam * np.exp(- lam * aafs)
+    scaled = ntot / sum(unscaled) * unscaled
+    return(scaled)
+
+def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
+    germ_vars = combine_regions_germ_vars()
+    ntot = germ_vars[vartype][region] * 10 ** log10s2g
+    sel_rows = (nvariants['region'] == region) & (nvariants['sample'] ==
+            sample) & (nvariants['vartype'] == vartype)
+    aafs = nvariants.loc[sel_rows, 'aaf']
+    nvar = nvariants.loc[sel_rows, 'nvariants']
+    scaled = scaled_exponential(lam, ntot, aafs)
+    d = {'aaf': aafs, 'nvariants': nvar, 'region': region, 'sample': sample,
+            'vartype': vartype, 'log10som2germ': log10s2g, 'ntot': ntot, 'lambda': lam}
+    df = pd.DataFrame(d)
+    return(df)
+
+def aaf_distplot(aafdf=get_taejeongs_aaf(), fit=stats.expon):
     '''
     Plot the distribution of VAF values 
 
-    If the input vafdf contains multiple samples then a multi-plot grid is
+    If the input aafdf contains multiple samples then a multi-plot grid is
     created.
 
     Parameters:
-    vafdf: the pandas DataFrame output of get_taejeongs_vaf
+    aafdf: the pandas DataFrame output of get_taejeongs_aaf
     fit: None or a scipy.stats distribution
 
     Returns: a seaborn FacetGrid object
     '''
     sns.set()
     sns.set_context('talk')
-    g =  sns.FacetGrid(vafdf, row='sample', aspect=2.5, height=4)
+    g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5, height=4)
     g.map(sns.distplot, 'VAF', hist=True, rug=True, kde=False,
             fit=fit)
     if fit is None:
@@ -275,13 +301,13 @@ def vaf_distplot(vafdf=get_taejeongs_vaf(), fit=stats.expon):
     return(g)
 
 
-def vaf_distplot1(vafdf):
-    samples = vafdf['sample'].cat.categories
+def aaf_distplot1(aafdf):
+    samples = aafdf['sample'].cat.categories
     nsamples = len(samples)
     fig, ax = plt.subplots(nsamples, 1)
     def plot_sample(sample):
         ix = samples.searchsorted(sample)
-        n, bins, patches = ax[ix].hist(vafdf[vafdf['sample'] == sample]['VAF'])
+        n, bins, patches = ax[ix].hist(aafdf[aafdf['sample'] == sample]['VAF'])
         res = pd.DataFrame({'count': list(n) + [list(n)[-1]], 'bins': bins,
             'sample': sample})
         ax[ix].set_title(sample)
