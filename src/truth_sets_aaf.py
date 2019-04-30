@@ -7,6 +7,7 @@ import re
 import joint_gt_ceph as jgc
 import seaborn as sns
 import matplotlib.pyplot as plt
+import itertools
 from scipy import stats
 
 def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
@@ -266,15 +267,42 @@ def scaled_exponential(lam, ntot, aafs):
 def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
     germ_vars = combine_regions_germ_vars()
     ntot = germ_vars[vartype][region] * 10 ** log10s2g
+    ntot = np.int64(ntot)
     sel_rows = (nvariants['region'] == region) & (nvariants['sample'] ==
             sample) & (nvariants['vartype'] == vartype)
     aafs = nvariants.loc[sel_rows, 'aaf']
     nvar = nvariants.loc[sel_rows, 'nvariants']
-    scaled = scaled_exponential(lam, ntot, aafs)
-    d = {'aaf': aafs, 'nvariants': nvar, 'region': region, 'sample': sample,
-            'vartype': vartype, 'log10som2germ': log10s2g, 'ntot': ntot, 'lambda': lam}
+    exp_model = scaled_exponential(lam, ntot, aafs)
+    exp_model = np.int64(exp_model)
+    d = {'aaf': aafs, 'exp_model': exp_model, 'nvariants': nvar, 'region': region, 'sample': sample,
+            'vartype': vartype, 'log10s2g': log10s2g, 'ntot': ntot, 'lambda': lam}
     df = pd.DataFrame(d)
+    df = df.astype({'region': 'category', 'sample': 'category', 'vartype': 'category'})
     return(df)
+
+
+def exp_model_iter(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.22, 0.022]):
+    categcols = ['region', 'sample', 'vartype']
+    l = [nvariants[c].cat.categories for c in categcols]
+    #l = [(lambda y: nvariants[y].cat.categories)(c) for c in categcols]
+    l = l + [log10s2gs] + [lambdas]
+    it = itertools.product(*l)
+    return(list(it))
+
+
+def exp_model_df_concat(nvariants):
+    it = exp_model_iter(nvariants)
+    df = pd.concat([exp_model_df(nvariants, *y) for y in it])
+    return(df)
+
+def exp_model_plot0(expm, log10s2g=-4, region='autosomes', sample='mix1', vartype='snp'):
+    sel_rows = (expm['log10s2g'] == log10s2g) & (expm['region'] == region)
+    df = expm.loc[sel_rows, :]
+    g = sns.FacetGrid(df, row='sample', col='lambda', hue='vartype',
+            sharey=False, aspect=2)
+    g.map(plt.plot, 'aaf', 'exp_model', marker='o', linestyle='dotted', markeredgecolor='white')
+    g = g.add_legend()
+    return(g)
 
 def aaf_distplot(aafdf=get_taejeongs_aaf(), fit=stats.expon):
     '''
