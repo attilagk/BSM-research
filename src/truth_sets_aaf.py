@@ -60,8 +60,8 @@ def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
         os.mkdir(mixdir)
     aafs = gt_of_aaf[mix].keys()
     nrec = [helper(f) for f in aafs]
-    res = pd.DataFrame({'region': region, 'vartype': vartype, 'sample': mix, 'aaf': list(aafs),
-        'nvariants': nrec})
+    res = pd.DataFrame({'region': region, 'vartype': vartype, 'sample': mix, 'AAF': list(aafs),
+        'count': nrec})
     res = res.astype({'region': 'category', 'vartype': 'category', 'sample': 'category'})
     return(res)
 
@@ -142,7 +142,7 @@ def evalmodel2df(nvariants, sample, vartype, region, model, Y, p_som2germ=None):
     '''
     xset = nvariants.loc[(nvariants['region'] == region) &
             (nvariants['sample'] == sample) &
-            (nvariants['vartype'] == vartype), 'aaf']
+            (nvariants['vartype'] == vartype), 'AAF']
     y = evaluate_model(Y=Y, xset=xset, model=model, only_params=False)
     df = pd.DataFrame({'y': y, 'x': xset, 'model': model, 'Y': int(Y),
         'p_som2germ': p_som2germ, 'sample': sample, 'vartype': vartype, 'region': region})
@@ -251,6 +251,7 @@ def lambda_hat(aaf):
     lhat = len(aaf) / sum(aaf)
     return(lhat)
 
+
 def scaled_exponential1(lam, ntot):
     def expfun(aaf):
         aaf = np.array(aaf)
@@ -258,49 +259,97 @@ def scaled_exponential1(lam, ntot):
         return(y)
     return(expfun)
 
+
 def scaled_exponential(lam, ntot, aafs):
     aafs = np.array(aafs) # ensure that aafs is a numpy array
     unscaled = lam * np.exp(- lam * aafs)
     scaled = ntot / sum(unscaled) * unscaled
     return(scaled)
 
+
 def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
+    '''
+    Create a histogram of AAF according to an exponential model
+
+    Parameters:
+    nvariants: the output of make_ts_aaf_get_nvariants, a pandas DataFrame
+    region: 'autosomes' or 'chr22'
+    sample: 'mix1', 'mix2', or 'mix3'
+    vartype: 'snp' or 'indel'
+    log10s2g: log base 10 of the odds of somatic : germline variants
+    lam: rate lambda of the exponential
+
+    Returns:
+    a pandas DataFrame with AAF + count (i.e. histogram) and input parameters
+    '''
     germ_vars = combine_regions_germ_vars()
     ntot = germ_vars[vartype][region] * 10 ** log10s2g
     ntot = np.int64(ntot)
     sel_rows = (nvariants['region'] == region) & (nvariants['sample'] ==
             sample) & (nvariants['vartype'] == vartype)
-    aafs = nvariants.loc[sel_rows, 'aaf']
-    nvar = nvariants.loc[sel_rows, 'nvariants']
-    exp_model = scaled_exponential(lam, ntot, aafs)
-    exp_model = np.int64(exp_model)
-    d = {'aaf': aafs, 'exp_model': exp_model, 'nvariants': nvar, 'region': region, 'sample': sample,
+    aafs = nvariants.loc[sel_rows, 'AAF']
+    count = scaled_exponential(lam, ntot, aafs)
+    count = np.int64(count)
+    d = {'AAF': aafs, 'count': count, 'region': region, 'sample': sample,
             'vartype': vartype, 'log10s2g': log10s2g, 'ntot': ntot, 'lambda': lam}
     df = pd.DataFrame(d)
     df = df.astype({'region': 'category', 'sample': 'category', 'vartype': 'category'})
     return(df)
 
 
-def exp_model_iter(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.22, 0.022]):
+def exp_model_iter(nvariants, log10s2gs, lambdas):
+    '''
+    Create an iterator of exponential model based histograms with all
+    combinations of multilevel parameters
+
+    Parameters:
+    log10s2gs: a list of multiple levels of log10s2g (see the log10s2g parameter of exp_model_df)
+    lambdas: a list multiple levels of lambda (see the lam parameter of exp_model_df)
+
+    Returns:
+    an iterator of pandas DataFrames
+    '''
     categcols = ['region', 'sample', 'vartype']
     l = [nvariants[c].cat.categories for c in categcols]
-    #l = [(lambda y: nvariants[y].cat.categories)(c) for c in categcols]
     l = l + [log10s2gs] + [lambdas]
     it = itertools.product(*l)
     return(list(it))
 
 
-def exp_model_df_concat(nvariants):
-    it = exp_model_iter(nvariants)
+def exp_model_df_concat(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
+    '''
+    Concatenate into a DataFrame the iterator created by exp_model_iter
+
+    Parameters:
+    it: the iterator created by exp_model_iter
+    log10s2gs: a list of multiple levels of log10s2g (see the log10s2g parameter of exp_model_df)
+    lambdas: a list multiple levels of lambda (see the lam parameter of exp_model_df)
+
+    Returns:
+    a pandas DataFrame similar to the value of exp_model_df
+    '''
+    it = exp_model_iter(nvariants, log10s2gs=log10s2gs,  lambdas=lambdas)
     df = pd.concat([exp_model_df(nvariants, *y) for y in it])
     return(df)
 
-def exp_model_plot0(expm, log10s2g=-4, region='autosomes', sample='mix1', vartype='snp'):
+
+def exp_model_plot0(expm, log10s2g=-4, region='autosomes'):
+    '''
+    Plots a grid of histograms of AAF corresponding to a set of exponential models
+
+    Parameters:
+    expm: the value of exp_model_df_concat
+    log10s2g: log base 10 of the odds of somatic : germline variants
+    region: 'autosomes' or 'chr22'
+
+    Returns:
+    a seaborn FacetGrid object
+    '''
     sel_rows = (expm['log10s2g'] == log10s2g) & (expm['region'] == region)
     df = expm.loc[sel_rows, :]
     g = sns.FacetGrid(df, row='sample', col='lambda', hue='vartype',
             sharey=False, aspect=2)
-    g.map(plt.plot, 'aaf', 'exp_model', marker='o', linestyle='dotted', markeredgecolor='white')
+    g.map(plt.plot, 'AAF', 'count', marker='o', linestyle='dotted', markeredgecolor='white')
     g = g.add_legend()
     return(g)
 
