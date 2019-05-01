@@ -297,25 +297,6 @@ def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
     return(df)
 
 
-def exp_model_iter(nvariants, log10s2gs, lambdas):
-    '''
-    Create an iterator of exponential model based histograms with all
-    combinations of multilevel parameters
-
-    Parameters:
-    log10s2gs: a list of multiple levels of log10s2g (see the log10s2g parameter of exp_model_df)
-    lambdas: a list multiple levels of lambda (see the lam parameter of exp_model_df)
-
-    Returns:
-    an iterator of pandas DataFrames
-    '''
-    categcols = ['region', 'sample', 'vartype']
-    l = [nvariants[c].cat.categories for c in categcols]
-    l = l + [log10s2gs] + [lambdas]
-    it = itertools.product(*l)
-    return(list(it))
-
-
 def exp_model_df_concat(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
     '''
     Concatenate into a DataFrame the iterator created by exp_model_iter
@@ -328,12 +309,16 @@ def exp_model_df_concat(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
     Returns:
     a pandas DataFrame similar to the value of exp_model_df
     '''
-    it = exp_model_iter(nvariants, log10s2gs=log10s2gs,  lambdas=lambdas)
+    categcols = ['region', 'sample', 'vartype']
+    l = [nvariants[c].cat.categories for c in categcols]
+    l = l + [log10s2gs] + [lambdas]
+    it = itertools.product(*l)
     df = pd.concat([exp_model_df(nvariants, *y) for y in it])
+    df = df.astype({'lambda': 'category', 'log10s2g': 'category', 'region': 'category', 'sample': 'category', 'vartype': 'category'})
     return(df)
 
 
-def exp_model_plot0(expm, log10s2g=-4, region='autosomes'):
+def exp_model_plot0(expm, log10s2g=-3, region='autosomes'):
     '''
     Plots a grid of histograms of AAF corresponding to a set of exponential models
 
