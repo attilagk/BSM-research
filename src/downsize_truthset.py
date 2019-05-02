@@ -4,7 +4,7 @@ import subprocess
 import pandas as pd
 import numpy as np
 
-def sample_positions(invcfpath, outvcfpath, ssize, seed=19760415):
+def sample_positions(ssize, invcfpath, outvcfpath, seed=19760415):
     args0 = ['bcftools', 'view', '-H', invcfpath]
     args1 = ['cut', '-f1,2']
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
