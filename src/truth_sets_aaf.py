@@ -379,3 +379,75 @@ def aaf_distplot1(aafdf):
     g = sns.FacetGrid(histo, row='sample')
     g.map(plt.step, 'bins', 'count', where='post')
     return(histo)
+
+
+
+def sample_positions(ssize, invcfpath, outvcfpath, seed=19760415):
+    args0 = ['bcftools', 'view', '-H', invcfpath]
+    args1 = ['cut', '-f1,2']
+    proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE,
+            stdin=proc0.stdout)
+    regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'],
+            dtype={'CHROM': 'category', 'POS': np.int64})
+    # downsampling regions
+    regions = regions.sample(n=ssize, replace=False, axis=0, random_state=seed)
+    regions = regions.sort_index()
+    # output: regions file
+    outdirpath = os.path.dirname(outvcfpath)
+    if not os.path.exists(outdirpath):
+        os.makedirs(outdirpath)
+    regionspath = outvcfpath + '.regions'
+    regions.to_csv(regionspath, sep='\t', header=False, index=False)
+    # output: VCF
+    args2 = ['bcftools', 'view', '-R', regionspath, '-Oz', '-o', outvcfpath,
+            invcfpath]
+    subprocess.run(args2)# and os.unlink(regionspath)
+    return(regions)
+
+
+def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
+    args0 = ['bcftools', 'view', '-H', invcfpath]
+    args1 = ['cut', '-f1,2']
+    proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE,
+            stdin=proc0.stdout)
+    regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'],
+            dtype={'CHROM': 'category', 'POS': np.int64})
+    # downsampling regions
+    regions = regions.sample(n=ssize, replace=False, axis=0, random_state=seed)
+    regions = regions.sort_index()
+    # output: regions file
+    outdirpath = os.path.dirname(outvcfpath)
+    if not os.path.exists(outdirpath):
+        os.makedirs(outdirpath)
+    regionspath = outvcfpath + '.regions'
+    regions.to_csv(regionspath, sep='\t', header=False, index=False)
+    # output: VCF
+    args2 = ['bcftools', 'view', '-R', regionspath, '-Oz', '-o', outvcfpath,
+            invcfpath]
+    subprocess.run(args2)# and os.unlink(regionspath)
+    return(regions)
+
+
+def downsample_all_aaf_vcfs(expm, topdir='~/projects/bsm/results/2019-03-18-truth-sets', seed=19760415):
+    ix0 = expm.index[0]
+    region = expm.at[ix0, 'region']
+    vartype = expm.at[ix0, 'vartype']
+    lam = expm.at[ix0, 'lambda']
+    log10s2g = expm.at[ix0, 'log10s2g']
+    sample = expm.at[ix0, 'sample']
+    basedir = topdir + os.path.sep + region + os.path.sep + vartype + os.path.sep + 'truthset/aaf/'
+    indir = basedir + 'unfiltered/' + sample + os.path.sep
+    outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + \
+            os.path.sep + sample + os.path.sep
+    def helper(ix):
+        aaf = expm.at[ix, 'AAF']
+        ssize = expm.at[ix, 'count']
+        invcfpath = indir + str(aaf) + '.vcf.gz'
+        outvcfpath = outdir + str(aaf) + '.vcf.gz'
+        if ssize > 0:
+            downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=seed)
+            return(outvcfpath)
+    val = [helper(ix) for ix in expm.index]
+    return(val)
