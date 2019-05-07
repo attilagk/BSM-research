@@ -441,6 +441,7 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
     indir = basedir + 'unfiltered/' + sample + os.path.sep
     outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + \
             os.path.sep + sample + os.path.sep
+    outvcf = outdir + 'all-aaf.vcf.gz'
     def helper(ix):
         '''
         Downsample a single VCF identified by ix of the pandas Data Frame expm
@@ -450,8 +451,29 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
         invcfpath = indir + str(aaf) + '.vcf.gz'
         outvcfpath = outdir + str(aaf) + '.vcf.gz'
         if ssize > 0:
-            res = downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=seed)
-            return(res)
-    val = {expm.at[ix, 'AAF']: helper(ix) for ix in expm.index
-            if expm.at[ix, 'count'] > 0}
-    return(val)
+            df = downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=seed)
+            return(outvcfpath)
+    vcflist = [helper(ix) for ix in expm.index if expm.at[ix, 'count'] > 0]
+    concat_vcfs(outvcf=outvcf, invcfs=vcflist)
+    return(outvcf)
+
+
+def concat_vcfs(outvcf, invcfs):
+    '''
+    Concatenate a list of VCFs into outvcf then sort and index that
+
+    Parameters:
+    outvcf: path to the output VCF
+    invcfs: list of paths to the input VCFs
+
+    Returns: None
+    '''
+    # concatenate input VCFs and sort
+    args0 = ['bcftools', 'concat'] + invcfs
+    args1 = ['bcftools', 'sort', '-Oz', '-o', outvcf]
+    proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE,
+            stdin=proc0.stdout)
+    # make index
+    args2 = ['bcftools', 'index', '-t', outvcf]
+    subprocess.run(args2)
