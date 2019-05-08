@@ -8,6 +8,7 @@ import joint_gt_ceph as jgc
 import seaborn as sns
 import matplotlib.pyplot as plt
 import itertools
+import functools
 from scipy import stats
 
 def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
@@ -441,7 +442,7 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
     indir = basedir + 'unfiltered/' + sample + os.path.sep
     outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + \
             os.path.sep + sample + os.path.sep
-    outvcf = outdir + 'all-aaf.vcf.gz'
+    outvcf = outdir + 'complete.vcf.gz'
     def helper(ix):
         '''
         Downsample a single VCF identified by ix of the pandas Data Frame expm
@@ -477,3 +478,46 @@ def concat_vcfs(outvcf, invcfs):
     # make index
     args2 = ['bcftools', 'index', '-t', outvcf]
     subprocess.run(args2)
+    return(None)
+
+
+def split_up_expm(expm):
+    '''
+    Splits up expm according to the combination of the levels of categorical
+    columns
+
+    Parameters:
+    expm: the output of make_ts_aaf_get_nvariants or exp_model_df
+
+    Returns:
+    the content of expm split into a list of DataFrames
+    '''
+    categcols = [c for c in expm.columns if expm[c].dtype.name == 'category']
+    def helper(t):
+        zip_l = list(zip(categcols, t))
+        bool_l = [expm[y[0]] == y[1] for y in zip_l]
+        sel_rows = functools.reduce(lambda a, b: a & b, bool_l)
+        #sel_rows = bool_accumulate(bool_l)
+        df = expm.loc[sel_rows, :]
+        return(df)
+    l = list(itertools.product(*[expm[c].cat.categories for c in categcols]))
+    res = [helper(y) for y in l]
+    return(res)
+
+
+def downsample_absolutely_all_vcfs(expm):
+    l = split_up_expm(expm)
+    outvcfs = [downsample_all_aaf_vcfs(df) for df in l]
+    return(outvcfs)
+
+def bool_accumulate(bool_l):
+    '''
+    Currently this function has a semantic bug.
+    '''
+    end = bool_l.pop()
+    front = bool_l.copy()
+    if len(front) == 1:
+        val = front[0] & end
+        return(val)
+    else:
+        return(bool_accumulate(front))
