@@ -418,6 +418,18 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     subprocess.run(args2)# and os.unlink(regionspath)
     return(regions)
 
+def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets'):
+    ix0 = expm.index[0]
+    region = expm.at[ix0, 'region']
+    vartype = expm.at[ix0, 'vartype']
+    lam = expm.at[ix0, 'lambda']
+    log10s2g = expm.at[ix0, 'log10s2g']
+    sample = expm.at[ix0, 'sample']
+    basedir = topdir + os.path.sep + region + os.path.sep + vartype + os.path.sep + 'truthset/aaf/'
+    indir = basedir + 'unfiltered/' + sample + os.path.sep
+    outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + os.path.sep + sample + os.path.sep
+    d = {'indir': indir, 'outdir': outdir}
+    return(d)
 
 def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets', seed=19760415):
     '''
@@ -432,16 +444,9 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
     the regions (positions) of the sampled calls in a dictionary of pandas
     DataFrames, where each key is an AAF
     '''
-    ix0 = expm.index[0]
-    region = expm.at[ix0, 'region']
-    vartype = expm.at[ix0, 'vartype']
-    lam = expm.at[ix0, 'lambda']
-    log10s2g = expm.at[ix0, 'log10s2g']
-    sample = expm.at[ix0, 'sample']
-    basedir = topdir + os.path.sep + region + os.path.sep + vartype + os.path.sep + 'truthset/aaf/'
-    indir = basedir + 'unfiltered/' + sample + os.path.sep
-    outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + \
-            os.path.sep + sample + os.path.sep
+    d = deduce_pathname(expm=expm, topdir=topdir)
+    indir = d['indir']
+    outdir = d['outdir']
     outvcf = outdir + 'complete.vcf.gz'
     def helper(ix):
         '''
@@ -505,10 +510,37 @@ def split_up_expm(expm):
     return(res)
 
 
-def downsample_absolutely_all_vcfs(expm):
+def downsample_absolutely_all_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets', seed=19760415):
+    '''
+    Create truthset VCFs for all combinations of parameters respecting the directory tree created by make_ts_aaf
+
+    Parameters:
+    expm: a pandas DataFrame
+    topdir: new directories and VCFs will be created under it
+    seed: for sampling
+
+    Returns:
+    the pathnames of output VCFs
+    '''
     l = split_up_expm(expm)
-    outvcfs = [downsample_all_aaf_vcfs(df) for df in l]
+    outvcfs = [downsample_all_aaf_vcfs(df, topdir=topdir, seed=seed) for df in l]
     return(outvcfs)
+
+
+def prec_recall_absolutely_all_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets', seed=19760415):
+    '''
+    TODO
+    '''
+    l = split_up_expm(expm)
+    l = l[0:2]
+    outdirs = [deduce_pathname(expm=y, topdir=topdir) for y in l]
+    return(outdirs)
+    #prec-recall-vcf -t $truthsetvcf $outdir/*.vcf.gz > $prdir/prec-recall.csv
+    truthsetvcf
+    args = ['prec-recall-vcf', '-t', outvcf]
+    subprocess.run(args)
+    pass
+
 
 def bool_accumulate(bool_l):
     '''
