@@ -532,7 +532,7 @@ def prec_recall_absolutely_all_vcfs(expm, topdir='/home/attila/projects/bsm/resu
     TODO
     '''
     l = split_up_expm(expm)
-    l = l[0:2]
+    l = l[0:2] # for testing
     outdirs = [deduce_pathname(expm=y, topdir=topdir) for y in l]
     return(outdirs)
     #prec-recall-vcf -t $truthsetvcf $outdir/*.vcf.gz > $prdir/prec-recall.csv
