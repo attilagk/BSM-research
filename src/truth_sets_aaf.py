@@ -404,19 +404,29 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'],
             dtype={'CHROM': 'category', 'POS': np.int64})
     # downsampling regions
-    regions = regions.sample(n=ssize, replace=False, axis=0, random_state=seed)
-    regions = regions.sort_index()
+    sample = regions.sample(n=ssize, replace=False, axis=0, random_state=seed)
+    sample = sample.sort_index()
+    discarded_ix = set(regions.index) - set(sample.index)
+    discarded = regions.loc[discarded_ix, :]
+    discarded = discarded.sort_index()
     # output: regions file
     outdirpath = os.path.dirname(outvcfpath)
+    outbname = os.path.basename(outvcfpath)
+    discarded_vcfpath = outdirpath + os.sep + 'discarded-' + outbname
     if not os.path.exists(outdirpath):
         os.makedirs(outdirpath)
     regionspath = outvcfpath + '.regions'
-    regions.to_csv(regionspath, sep='\t', header=False, index=False)
+    discarded_regionspath = discarded_vcfpath + '.regions'
+    sample.to_csv(regionspath, sep='\t', header=False, index=False)
+    discarded.to_csv(discarded_regionspath, sep='\t', header=False, index=False)
     # output: VCF
     args2 = ['bcftools', 'view', '-R', regionspath, '-Oz', '-o', outvcfpath,
             invcfpath]
-    subprocess.run(args2)# and os.unlink(regionspath)
-    return(regions)
+    args3 = ['bcftools', 'view', '-R', discarded_regionspath, '-Oz', '-o',
+            discarded_vcfpath, invcfpath]
+    subprocess.run(args2)
+    subprocess.run(args3)
+    return(sample)
 
 def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets'):
     ix0 = expm.index[0]
@@ -430,6 +440,7 @@ def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-t
     outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + os.path.sep + sample + os.path.sep
     d = {'indir': indir, 'outdir': outdir}
     return(d)
+
 
 def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets', seed=19760415):
     '''
@@ -448,6 +459,7 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
     indir = d['indir']
     outdir = d['outdir']
     outvcf = outdir + 'complete.vcf.gz'
+    discarded_vcf = outdir + 'discarded-complete.vcf.gz'
     def helper(ix):
         '''
         Downsample a single VCF identified by ix of the pandas Data Frame expm
@@ -456,11 +468,15 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
         ssize = expm.at[ix, 'count']
         invcfpath = indir + str(aaf) + '.vcf.gz'
         outvcfpath = outdir + str(aaf) + '.vcf.gz'
+        discarded_vcfpath = outdir + 'discarded-' + str(aaf) + '.vcf.gz'
         if ssize > 0:
             df = downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=seed)
-            return(outvcfpath)
-    vcflist = [helper(ix) for ix in expm.index if expm.at[ix, 'count'] > 0]
+            outpath = {'outvcfpath': outvcfpath, 'discarded_vcfpath': discarded_vcfpath}
+            return(outpath)
+    vcflist = [helper(ix)['outvcfpath'] for ix in expm.index if expm.at[ix, 'count'] > 0]
     concat_vcfs(outvcf=outvcf, invcfs=vcflist)
+    discarded_vcflist = [helper(ix)['discarded_vcfpath'] for ix in expm.index if expm.at[ix, 'count'] > 0]
+    concat_vcfs(outvcf=discarded_vcf, invcfs=discarded_vcflist)
     return(outvcf)
 
 
