@@ -40,11 +40,11 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     reduced_truthset: the truthset according to the exp_model with parameters
     lam, log10s2g, sample
     
-    discarded_truthset: the complementer set of reduced_truthset relative to
+    discarded_from_truthset: the complementer set of reduced_truthset relative to
     the original truthset based on the original mixes
 
     reduced_callset: created from reduced_truthset by removing the
-    "nonvariants" of discarded_truthset
+    "nonvariants" of discarded_from_truthset
 
     Details:
 
@@ -64,27 +64,27 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     truthsetdir = __truthsetmaindir__ + subdir1 + __expmsubdir__ + subdir2
     callsetdir = __callsetmaindir__ + alt_vartype + os.path.sep
     prepared_callset_dir = __outmaindir__ + subdir1
-    reducedcsetdir = __outmaindir__ + subdir1 + __expmsubdir__ + subdir2
+    reduced_callset_dir = __outmaindir__ + subdir1 + __expmsubdir__ + subdir2
     # filepaths
     reduced_truthset =  truthsetdir + 'complete.vcf.gz'
     discarded_from_truthset =  truthsetdir + 'discarded-complete.vcf.gz'
     if callsetbn is None:
         callset = glob.glob(callsetdir + '*.vcf.gz')
         prepared_callset = [prepared_callset_dir + os.path.basename(y) for y in callset]
-        reduced_callset = [reducedcsetdir + os.path.basename(y) for y in callset]
+        reduced_callset = [reduced_callset_dir + os.path.basename(y) for y in callset]
     elif isinstance(callsetbn, list):
         callset = [callsetdir + y for y in callsetbn]
         prepared_callset = [prepared_callset_dir + y for y in callsetbn]
-        reduced_callset = [reducedcsetdir + y for y in callsetbn]
+        reduced_callset = [reduced_callset_dir + y for y in callsetbn]
     else:
         callset = callsetdir + callsetbn
         prepared_callset = prepared_callset_dir + callsetbn
-        reduced_callset = reducedcsetdir + callsetbn
+        reduced_callset = reduced_callset_dir + callsetbn
     VCFpaths = {'reduced_truthset': reduced_truthset,
             'discarded_from_truthset': discarded_from_truthset, 'callset':
             callset, 'prepared_callset_dir': prepared_callset_dir,
-            'prepared_callset': prepared_callset, 'reduced_callset':
-            reduced_callset}
+            'prepared_callset': prepared_callset, 'reduced_callset_dir':
+            reduced_callset_dir, 'reduced_callset': reduced_callset}
     return(VCFpaths)
 
 
@@ -125,26 +125,45 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
     return(val)
 
 
-def reduce_prepared_truthset(region='chr22', vartype='snp', lam='0.04',
+def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
         log10s2g='-2', sample='mix1'):
-    maindir = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
-    csetVCF = maindir + region + os.path.sep + vartype + os.path.sep + 'strelka2Somatic.vcf.gz'
-    discardedVCF = __truthsetmaindir__ + region + os.path.sep + vartype + \
-            __expmsubdir__ + \
-            lam + '/log10s2g_' + log10s2g + os.path.sep + sample + '/discarded-complete.vcf.gz'
-    tempdir = tempfile.TemporaryDirectory()
-    tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
-    tempVCFtbi = tempVCF + '.tbi'
-    outdir = '/home/attila/Desktop/'
-    outVCF = outdir + os.path.sep + os.path.basename(csetVCF)
-    outVCFtbi = outVCF + '.tbi'
-    args1 = ['bcftools', 'index', '--tbi', discardedVCF]
-    subprocess.run(args1)
-    args2 = ['bcftools', 'isec', '-C', '-Oz', '-p', tempdir.name, csetVCF, discardedVCF]
-    subprocess.run(args2)
-    shutil.move(tempVCF, outVCF)
-    shutil.move(tempVCFtbi, outVCFtbi)
-    return(args2)
+    '''
+    Reduces (discards nonvariants from) the prepared callsets for a given region, vartype and exp_model
+
+    Parameters:
+    region: chr22 or autosomes
+    vartype: snp or indel
+    lam: '0.04' or '0.2'
+    log10s2g: '-2', '-3' or '-4'
+    sample: 'mix1', 'mix2' or 'mix3'
+
+    Returns: a list of pathnames of the reduced callsets
+    '''
+    VCFpaths = getVCFpaths(region=region, vartype=vartype)
+    callsetbn = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
+    callsetbn = [os.path.basename(y) for y in callsetbn]
+    VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
+            vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
+    def helper(prepared_cset):
+        discarded_tset = VCFpaths['discarded_from_truthset']
+        red_cset_dir = VCFpaths['reduced_callset_dir']
+        if not os.path.isdir(red_cset_dir):
+            os.makedirs(red_cset_dir)
+        reduced_callset = red_cset_dir + os.path.basename(prepared_cset)
+        reduced_callset_tbi = reduced_callset + '.tbi'
+        tempdir = tempfile.TemporaryDirectory()
+        tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
+        tempVCFtbi = tempVCF + '.tbi'
+        args1 = ['bcftools', 'index', '--tbi', discarded_tset]
+        subprocess.run(args1)
+        args2 = ['bcftools', 'isec', '-C', '-Oz', '-p', tempdir.name,
+                prepared_cset, discarded_tset]
+        subprocess.run(args2)
+        shutil.move(tempVCF, reduced_callset)
+        shutil.move(tempVCFtbi, reduced_callset_tbi)
+        return(reduced_callset)
+    val = [helper(y) for y in VCFpaths['prepared_callset']]
+    return(val)
 
 
 def prec_recall_one_truthset(truthsetVCF, callsetVCFdir='/big/results/bsm/2019-03-22-prec-recall/chr22/snp/'):
