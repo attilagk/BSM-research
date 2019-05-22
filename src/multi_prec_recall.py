@@ -5,6 +5,8 @@ import shutil
 import subprocess
 import glob
 import truth_sets_aaf as tsa
+import seaborn
+import matplotlib.pyplot as plt
 
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
@@ -116,6 +118,8 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
         elif region == 'chr22':
             args1 = ['prepare4prec-recall', '-r22', '-v', vartype, '-Oz', '-P', csetVCF]
         outVCF = outdir + os.path.basename(csetVCF)
+        if os.path.isfile(outVCF):
+            return(outVCF)
         args2 = ['bcftools', 'view', '-Oz', '-o', outVCF]
         proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
         proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
@@ -147,9 +151,11 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
     def helper(prepared_cset):
         discarded_tset = VCFpaths['discarded_from_truthset']
         red_cset_dir = VCFpaths['reduced_callset_dir']
+        reduced_callset = red_cset_dir + os.path.basename(prepared_cset)
+        if os.path.isfile(reduced_callset):
+            return(reduced_callset)
         if not os.path.isdir(red_cset_dir):
             os.makedirs(red_cset_dir)
-        reduced_callset = red_cset_dir + os.path.basename(prepared_cset)
         reduced_callset_tbi = reduced_callset + '.tbi'
         tempdir = tempfile.TemporaryDirectory()
         tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
@@ -162,30 +168,64 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
         shutil.move(tempVCF, reduced_callset)
         shutil.move(tempVCFtbi, reduced_callset_tbi)
         return(reduced_callset)
-    val = [helper(y) for y in VCFpaths['prepared_callset']]
-    return(val)
+    red_callsets = [helper(y) for y in VCFpaths['prepared_callset']]
+    return(VCFpaths)
 
 
-def prec_recall_one_truthset(truthsetVCF, callsetVCFdir='/big/results/bsm/2019-03-22-prec-recall/chr22/snp/'):
-    csetVCFs = glob.glob(callsetVCFdir + os.path.sep + '*.vcf.gz')
-    #tsetdir = os.path.dirname(truthsetVCF)
-    args = ['prec-recall-vcf', '-t', truthsetVCF] + csetVCFs
+def prec_recall_one_truthset(truthset, callsets):
+    #callsets = glob.glob(callsetVCFdir + os.path.sep + '*.vcf.gz')
+    #tsetdir = os.path.dirname(truthset)
+    args = ['prec-recall-vcf', '-t', truthset] + callsets
     proc1 = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE)
     prcsv = pd.read_csv(proc1.stdout)
     return(prcsv)
 
-def prec_recall_all_truthsets(expm, callsetVCFdir='/big/results/bsm/2019-03-22-prec-recall/chr22/snp/'):
-    def helper(expm1):
-        pathname = tsa.deduce_pathname(expm1)['outdir'] + os.path.sep + 'complete.vcf.gz'
-        prcsv = prec_recall_one_truthset(pathname, callsetVCFdir=callsetVCFdir)
-        return(prcsv)
-    l = tsa.split_up_expm(expm)
-    l = [y for y in l if len(y) > 0]
-    l = l[0:4] # for testing
-    df = [helper(y) for y in l if len(y) > 0]
-    return(df)
-    pathnames = [tsa.deduce_pathname(y)['outdir'] for y in l if len(y) > 0]
-    pathnames = [y + os.path.sep + 'complete.vcf.gz' for y in pathnames]
-    y = pathnames[1]
-    prcsv = prec_recall_one_truthset(y, callsetVCFdir=callsetVCFdir)
-    return(y)
+
+def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
+        log10s2g='-2', sample='mix1'):
+    VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype, lam=lam,
+            log10s2g=log10s2g, sample=sample)
+    truthset = VCFpaths['reduced_truthset']
+    callsets = VCFpaths['reduced_callset']
+    pr = prec_recall_one_truthset(truthset=truthset, callsets=callsets)
+    pr['region'] = region
+    pr['vartype'] = vartype
+    pr['lam'] = lam
+    pr['log10s2g'] = log10s2g
+    pr['sample'] = sample
+    return(pr)
+
+
+def prepare_reduce_precrecall(region='chr22', vartype='snp'):
+    val = prepare4prec_recall(region=region, vartype=vartype)
+    def process1exp_model(lam, log10s2g, sample):
+        pr = reduce_precrecall(region=region, vartype=vartype, lam=lam,
+                log10s2g=log10s2g, sample=sample)
+        return(pr)
+    lams = ['0.04', '0.2']
+    log10s2gs = ['-2', '-3']
+    #log10s2gs = ['-2', '-3', '-4']
+    samples = ['mix1', 'mix2', 'mix3']
+    l = [process1exp_model(lam=l, log10s2g=g, sample=s) for l in lams for g in
+            log10s2gs for s in samples]
+    pr = pd.concat(l)
+    return(pr)
+
+
+def run_all():
+    regions = ['chr22']
+    #regions = ['chr22', 'autosomes']
+    vartypes = ['snp']
+    #vartypes = ['snp', 'indel']
+    l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
+            in vartypes]
+    pr = pd.concat(l)
+    return(pr)
+
+
+def plotter1(df):
+    fg = seaborn.FacetGrid(data=df.loc[df['sample'] == 'mix1', :],
+            row='log10s2g', col='lam', hue='callset')
+    fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
+    fg = fg.add_legend()
+    return(fg)
