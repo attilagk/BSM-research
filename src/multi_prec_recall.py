@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import os.path
 import tempfile
 import shutil
@@ -112,20 +113,21 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
         os.makedirs(outdir)
     csetVCFs = VCFpaths['callset']
     # helper function
-    def helper(csetVCF):
+    def preparer(csetVCF):
         if region == 'autosomes':
             args1 = ['prepare4prec-recall', '-v', vartype, '-Oz', '-P', csetVCF]
         elif region == 'chr22':
             args1 = ['prepare4prec-recall', '-r22', '-v', vartype, '-Oz', '-P', csetVCF]
         outVCF = outdir + os.path.basename(csetVCF)
+        args2 = ['bcftools', 'view', '-Oz', '-o', outVCF]
         if os.path.isfile(outVCF):
             return(outVCF)
-        args2 = ['bcftools', 'view', '-Oz', '-o', outVCF]
         proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
-        proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
-        proc3 = subprocess.run(['bcftools', 'index', '-t', outVCF])
+        proc2 = subprocess.run(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
+        args3 = ['bcftools', 'index', '--tbi', outVCF]
+        proc3 = subprocess.run(args3)
         return(outVCF)
-    val = [helper(y) for y in csetVCFs]
+    val = [preparer(y) for y in csetVCFs]
     return(val)
 
 
@@ -173,8 +175,6 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
 
 
 def prec_recall_one_truthset(truthset, callsets):
-    #callsets = glob.glob(callsetVCFdir + os.path.sep + '*.vcf.gz')
-    #tsetdir = os.path.dirname(truthset)
     args = ['prec-recall-vcf', '-t', truthset] + callsets
     proc1 = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE)
     prcsv = pd.read_csv(proc1.stdout)
@@ -197,6 +197,10 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
 
 
 def prepare_reduce_precrecall(region='chr22', vartype='snp'):
+    '''
+    Prepare and reduce callset and calculate precision and recall for a given
+    region and variant type
+    '''
     val = prepare4prec_recall(region=region, vartype=vartype)
     def process1exp_model(lam, log10s2g, sample):
         pr = reduce_precrecall(region=region, vartype=vartype, lam=lam,
@@ -213,10 +217,14 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
 
 
 def run_all():
-    regions = ['chr22']
-    #regions = ['chr22', 'autosomes']
-    vartypes = ['snp']
-    #vartypes = ['snp', 'indel']
+    '''
+    Prepare and reduce callset and calculate precision and recall for all
+    regions and variant types
+    '''
+    #regions = ['chr22']
+    regions = ['chr22', 'autosomes']
+    #vartypes = ['snp']
+    vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
     pr = pd.concat(l)
@@ -224,6 +232,9 @@ def run_all():
 
 
 def plotter1(df):
+    '''
+    Precision-recall plot; rows by log10s2g and columns by lambda
+    '''
     fg = seaborn.FacetGrid(data=df.loc[df['sample'] == 'mix1', :],
             row='log10s2g', col='lam', hue='callset')
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
