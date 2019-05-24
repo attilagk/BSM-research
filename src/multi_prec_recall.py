@@ -193,6 +193,7 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
     pr['lam'] = lam
     pr['log10s2g'] = log10s2g
     pr['sample'] = sample
+    pr = pr_astype(pr)
     return(pr)
 
 
@@ -213,6 +214,7 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
     l = [process1exp_model(lam=l, log10s2g=g, sample=s) for l in lams for g in
             log10s2gs for s in samples]
     pr = pd.concat(l)
+    pr = pr_astype(pr)
     return(pr)
 
 
@@ -228,6 +230,31 @@ def run_all():
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
     pr = pd.concat(l)
+    pr = pr_astype(pr)
+    return(pr)
+
+
+def pr_astype(pr):
+    '''
+    Set data types for a precision recall data frame
+
+    Parameters:
+    pr: a precision recall data frame
+
+    Returns: the data frame with the same data but corrected data types
+    '''
+    keys = ['callset', 'region', 'vartype', 'lam', 'log10s2g', 'sample']
+    d = {k: 'category' for k in keys}
+    pr = pr.astype(d)
+    return(pr)
+
+
+def read_pr_csv(csvpath):
+    '''
+    Read precision recall data from a CSV into a data frame and set data types
+    '''
+    pr = pd.read_csv(csvpath)
+    pr = pr_astype(pr)
     return(pr)
 
 
