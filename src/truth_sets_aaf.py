@@ -399,7 +399,7 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     args0 = ['bcftools', 'view', '-H', invcfpath]
     args1 = ['cut', '-f1,2']
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
-    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE,
+    proc1 = subprocess.run(args1, shell=False, stdout=subprocess.PIPE,
             stdin=proc0.stdout)
     regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'],
             dtype={'CHROM': 'category', 'POS': np.int64})
@@ -494,7 +494,7 @@ def concat_vcfs(outvcf, invcfs):
     args0 = ['bcftools', 'concat'] + invcfs
     args1 = ['bcftools', 'sort', '-Oz', '-o', outvcf]
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
-    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE,
+    proc1 = subprocess.run(args1, shell=False, stdout=subprocess.PIPE,
             stdin=proc0.stdout)
     # make index
     args2 = ['bcftools', 'index', '-t', outvcf]
