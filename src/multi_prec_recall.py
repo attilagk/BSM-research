@@ -13,6 +13,8 @@ __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
+#__addthreads__ = str(os.cpu_count() - 3)
+__addthreads__ = '0'
 
 
 def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',

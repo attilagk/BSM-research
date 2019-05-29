@@ -11,7 +11,12 @@ import itertools
 import functools
 from scipy import stats
 
-def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
+# number of additional threads to bcftools; greater than 0 slowed down
+# ThinkStation so much that the Debian desktop became unresponsive
+#__addthreads__ = str(os.cpu_count() - 3)
+__addthreads__ = '0'
+
+def make_ts_aaf(mix='mix1', vartype='snp', region='chr22', overwrite=True,
         tsdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets/chr22/snp/truthset'):
     '''
     Create AAF-based truth set partitions given genotype-based partitions and
@@ -21,6 +26,8 @@ def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
     mix: mix1, mix2 or mix3
     vartype: snp or indel
     region: chr22 or autosomes
+    overwrite: True or False depending on wheter to force overwriting existing files
+    tsdir: the path to the main directory in the hierarchy
 
     Returns:
     a pandas data frame whose rows are truth subsets at various AAFs and whose
@@ -31,16 +38,19 @@ def make_ts_aaf(mix='mix1', vartype='snp', region='chr22',
         invcfs = [indir + os.sep + g + '.vcf.gz' for g in genotypes]
         outvcf = mixdir + os.sep + str(aaf) + '.vcf.gz'
         unsorted_outvcf = mixdir + os.sep + str(aaf) + '-unsorted.vcf.gz'
-        args0 = ['bcftools', 'concat', '-o', unsorted_outvcf, '-Oz'] + invcfs
+        args0 = ['bcftools', 'concat', '--threads', __addthreads__, '-o', unsorted_outvcf, '-Oz'] + invcfs
         args1 = ['bcftools', 'sort', '-o', outvcf, '-Oz', unsorted_outvcf]
-        args2 = ['bcftools', 'index', '-t', outvcf]
-        if not os.path.isfile(outvcf):
+        args2 = ['bcftools', 'index', '--threads', __addthreads__, '-t', outvcf]
+        if overwrite or not os.path.isfile(outvcf):
+            return('yes')
             subprocess.run(args0)
             subprocess.run(args1)
             os.remove(unsorted_outvcf)
             subprocess.run(args2)
+        else:
+            return('no')
         # count records
-        args3 = ['bcftools', 'view', '-H', outvcf]
+        args3 = ['bcftools', 'view', '--threads', __addthreads__, '-H', outvcf]
         args4 = ['wc', '-l']
         proc1 = subprocess.Popen(args3, shell=False, stdout=subprocess.PIPE)
         proc2 = subprocess.Popen(args4, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
@@ -396,13 +406,13 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     Returns:
     the regions (positions) of the sampled calls in a pandas DataFrame
     '''
-    args0 = ['bcftools', 'view', '-H', invcfpath]
+    args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', invcfpath]
     args1 = ['cut', '-f1,2']
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
-    proc1 = subprocess.run(args1, shell=False, stdout=subprocess.PIPE,
-            stdin=proc0.stdout)
-    regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'],
-            dtype={'CHROM': 'category', 'POS': np.int64})
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE, stdin=proc0.stdout)
+    regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'], dtype={'CHROM': 'category', 'POS': np.int64})
+    #proc0.stdout.close()
+    outs, errs = proc1.communicate()
     # downsampling regions
     sample = regions.sample(n=ssize, replace=False, axis=0, random_state=seed)
     sample = sample.sort_index()
@@ -420,9 +430,9 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     sample.to_csv(regionspath, sep='\t', header=False, index=False)
     discarded.to_csv(discarded_regionspath, sep='\t', header=False, index=False)
     # output: VCF
-    args2 = ['bcftools', 'view', '-R', regionspath, '-Oz', '-o', outvcfpath,
+    args2 = ['bcftools', 'view', '--threads', __addthreads__, '-R', regionspath, '-Oz', '-o', outvcfpath,
             invcfpath]
-    args3 = ['bcftools', 'view', '-R', discarded_regionspath, '-Oz', '-o',
+    args3 = ['bcftools', 'view', '--threads', __addthreads__, '-R', discarded_regionspath, '-Oz', '-o',
             discarded_vcfpath, invcfpath]
     subprocess.run(args2)
     subprocess.run(args3)
@@ -491,13 +501,13 @@ def concat_vcfs(outvcf, invcfs):
     Returns: None
     '''
     # concatenate input VCFs and sort
-    args0 = ['bcftools', 'concat'] + invcfs
+    args0 = ['bcftools', 'concat', '--threads', __addthreads__] + invcfs
     args1 = ['bcftools', 'sort', '-Oz', '-o', outvcf]
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
     proc1 = subprocess.run(args1, shell=False, stdout=subprocess.PIPE,
             stdin=proc0.stdout)
     # make index
-    args2 = ['bcftools', 'index', '-t', outvcf]
+    args2 = ['bcftools', 'index', '--threads', __addthreads__, '-t', outvcf]
     subprocess.run(args2)
     return(None)
 
