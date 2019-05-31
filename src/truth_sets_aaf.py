@@ -479,13 +479,14 @@ def downsample_all_aaf_vcfs(expm, topdir='/home/attila/projects/bsm/results/2019
         invcfpath = indir + str(aaf) + '.vcf.gz'
         outvcfpath = outdir + str(aaf) + '.vcf.gz'
         discarded_vcfpath = outdir + 'discarded-' + str(aaf) + '.vcf.gz'
-        if ssize > 0:
-            df = downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=seed)
-            outpath = {'outvcfpath': outvcfpath, 'discarded_vcfpath': discarded_vcfpath}
-            return(outpath)
-    vcflist = [helper(ix)['outvcfpath'] for ix in expm.index if expm.at[ix, 'count'] > 0]
-    concat_vcfs(outvcf=outvcf, invcfs=vcflist)
-    discarded_vcflist = [helper(ix)['discarded_vcfpath'] for ix in expm.index if expm.at[ix, 'count'] > 0]
+        df = downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=seed)
+        outpath = {'outvcfpath': outvcfpath, 'discarded_vcfpath': discarded_vcfpath}
+        return(outpath)
+    vcflist = [helper(ix) for ix in expm.index]
+    outvcflist = [y['outvcfpath'] for y in vcflist if
+            os.path.isfile(y['outvcfpath'])]
+    discarded_vcflist = [y['discarded_vcfpath'] for y in vcflist]
+    concat_vcfs(outvcf=outvcf, invcfs=outvcflist)
     concat_vcfs(outvcf=discarded_vcf, invcfs=discarded_vcflist)
     return(outvcf)
 
@@ -500,6 +501,8 @@ def concat_vcfs(outvcf, invcfs):
 
     Returns: None
     '''
+    if os.path.exists(outvcf):
+        os.remove(outvcf)
     # concatenate input VCFs and sort
     args0 = ['bcftools', 'concat', '--threads', __addthreads__] + invcfs
     args1 = ['bcftools', 'sort', '-Oz', '-o', outvcf]
@@ -507,7 +510,7 @@ def concat_vcfs(outvcf, invcfs):
     proc1 = subprocess.run(args1, shell=False, stdout=subprocess.PIPE,
             stdin=proc0.stdout)
     # make index
-    args2 = ['bcftools', 'index', '--threads', __addthreads__, '-t', outvcf]
+    args2 = ['bcftools', 'index', '-f', '--threads', __addthreads__, '-t', outvcf]
     subprocess.run(args2)
     return(None)
 
