@@ -423,26 +423,29 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     outdirpath = os.path.dirname(outvcfpath)
     outbname = os.path.basename(outvcfpath)
     discarded_vcfpath = outdirpath + os.sep + 'discarded-' + outbname
-    dedupped_vcfpath = outdirpath + os.sep + 'dedupped-' + outbname
     if not os.path.exists(outdirpath):
         os.makedirs(outdirpath)
-    regionspath = outvcfpath + '.regions'
-    sample.to_csv(regionspath, sep='\t', header=False, index=False)
-    # create reduced VCF
-    args2 = ['bcftools', 'view', '--threads', __addthreads__, '-R', regionspath, '-Oz', invcfpath]
-    args3 = ['bcftools', 'norm', '--rm-dup', 'both', '-Oz', '-o', outvcfpath]
-    proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE)
-    proc3 = subprocess.run(args3, shell=False, stdout=subprocess.PIPE, stdin=proc2.stdout)
-    args4 = ['bcftools', 'index', '--tbi', outvcfpath]
-    subprocess.run(args4)
-    os.remove(regionspath)
-    # create VCF from discarded records
-    tempdir = tempfile.TemporaryDirectory()
-    tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
-    args5 = ['bcftools', 'isec', '-C', '-Oz', '-p', tempdir.name, invcfpath, outvcfpath]
-    subprocess.run(args5)
-    shutil.move(tempVCF, discarded_vcfpath)
-    shutil.move(tempVCF + '.tbi', discarded_vcfpath + '.tbi')
+    if ssize == 0:
+        shutil.copyfile(invcfpath, discarded_vcfpath)
+        subprocess.run(['bcftools', 'index', '--tbi', discarded_vcfpath])
+    else:
+        regionspath = outvcfpath + '.regions'
+        sample.to_csv(regionspath, sep='\t', header=False, index=False)
+        # create reduced VCF
+        args2 = ['bcftools', 'view', '--threads', __addthreads__, '-R', regionspath, '-Oz', invcfpath]
+        args3 = ['bcftools', 'norm', '--rm-dup', 'both', '-Oz', '-o', outvcfpath]
+        proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE)
+        proc3 = subprocess.run(args3, shell=False, stdout=subprocess.PIPE, stdin=proc2.stdout)
+        args4 = ['bcftools', 'index', '--tbi', outvcfpath]
+        subprocess.run(args4)
+        os.remove(regionspath)
+        # create VCF from discarded records
+        tempdir = tempfile.TemporaryDirectory()
+        tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
+        args5 = ['bcftools', 'isec', '-C', '-Oz', '-p', tempdir.name, invcfpath, outvcfpath]
+        subprocess.run(args5)
+        shutil.move(tempVCF, discarded_vcfpath)
+        shutil.move(tempVCF + '.tbi', discarded_vcfpath + '.tbi')
     return(sample)
 
 def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets'):
