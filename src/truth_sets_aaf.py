@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import tempfile
 import shutil
 import subprocess
 import os
@@ -426,18 +427,22 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     if not os.path.exists(outdirpath):
         os.makedirs(outdirpath)
     regionspath = outvcfpath + '.regions'
-    discarded_regionspath = discarded_vcfpath + '.regions'
     sample.to_csv(regionspath, sep='\t', header=False, index=False)
-    discarded.to_csv(discarded_regionspath, sep='\t', header=False, index=False)
-    # output: VCF
+    # create reduced VCF
     args2 = ['bcftools', 'view', '--threads', __addthreads__, '-R', regionspath, '-Oz', invcfpath]
-    args4 = ['bcftools', 'view', '--threads', __addthreads__, '-R', discarded_regionspath, '-Oz', '-o',
-            discarded_vcfpath, invcfpath]
     args3 = ['bcftools', 'norm', '--rm-dup', 'both', '-Oz', '-o', outvcfpath]
     proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE)
     proc3 = subprocess.run(args3, shell=False, stdout=subprocess.PIPE, stdin=proc2.stdout)
+    args4 = ['bcftools', 'index', '--tbi', outvcfpath]
     subprocess.run(args4)
-    return({'regions': regions, 'sample': sample, 'discarded': discarded})
+    os.remove(regionspath)
+    # create VCF from discarded records
+    tempdir = tempfile.TemporaryDirectory()
+    tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
+    args5 = ['bcftools', 'isec', '-C', '-Oz', '-p', tempdir.name, invcfpath, outvcfpath]
+    subprocess.run(args5)
+    shutil.move(tempVCF, discarded_vcfpath)
+    shutil.move(tempVCF + '.tbi', discarded_vcfpath + '.tbi')
     return(sample)
 
 def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets'):
