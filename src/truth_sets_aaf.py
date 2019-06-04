@@ -411,7 +411,6 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
     proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE, stdin=proc0.stdout)
     regions = pd.read_csv(proc1.stdout, sep='\t', names=['CHROM', 'POS'], dtype={'CHROM': 'category', 'POS': np.int64})
-    #proc0.stdout.close()
     outs, errs = proc1.communicate()
     # downsampling regions
     sample = regions.sample(n=ssize, replace=False, axis=0, random_state=seed)
@@ -423,6 +422,7 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     outdirpath = os.path.dirname(outvcfpath)
     outbname = os.path.basename(outvcfpath)
     discarded_vcfpath = outdirpath + os.sep + 'discarded-' + outbname
+    dedupped_vcfpath = outdirpath + os.sep + 'dedupped-' + outbname
     if not os.path.exists(outdirpath):
         os.makedirs(outdirpath)
     regionspath = outvcfpath + '.regions'
@@ -430,12 +430,14 @@ def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):
     sample.to_csv(regionspath, sep='\t', header=False, index=False)
     discarded.to_csv(discarded_regionspath, sep='\t', header=False, index=False)
     # output: VCF
-    args2 = ['bcftools', 'view', '--threads', __addthreads__, '-R', regionspath, '-Oz', '-o', outvcfpath,
-            invcfpath]
-    args3 = ['bcftools', 'view', '--threads', __addthreads__, '-R', discarded_regionspath, '-Oz', '-o',
+    args2 = ['bcftools', 'view', '--threads', __addthreads__, '-R', regionspath, '-Oz', invcfpath]
+    args4 = ['bcftools', 'view', '--threads', __addthreads__, '-R', discarded_regionspath, '-Oz', '-o',
             discarded_vcfpath, invcfpath]
-    subprocess.run(args2)
-    subprocess.run(args3)
+    args3 = ['bcftools', 'norm', '--rm-dup', 'both', '-Oz', '-o', outvcfpath]
+    proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE)
+    proc3 = subprocess.run(args3, shell=False, stdout=subprocess.PIPE, stdin=proc2.stdout)
+    subprocess.run(args4)
+    return({'regions': regions, 'sample': sample, 'discarded': discarded})
     return(sample)
 
 def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-truth-sets'):
