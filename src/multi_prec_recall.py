@@ -152,14 +152,13 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
     callsetbn = [os.path.basename(y) for y in callsetbn]
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
-    return(VCFpaths)
+    #return(VCFpaths)
     def helper(prepared_cset):
         discarded_tset = VCFpaths['discarded_from_truthset']
         red_cset_dir = VCFpaths['reduced_callset_dir']
         reduced_callset = red_cset_dir + os.path.basename(prepared_cset)
         if os.path.isfile(reduced_callset):
-            pass
-            #return(reduced_callset)
+            return(reduced_callset)
         if not os.path.isdir(red_cset_dir):
             os.makedirs(red_cset_dir)
         reduced_callset_tbi = reduced_callset + '.tbi'

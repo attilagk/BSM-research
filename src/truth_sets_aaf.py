@@ -514,7 +514,7 @@ def concat_vcfs(outvcf, invcfs):
     if os.path.exists(outvcf):
         os.remove(outvcf)
     # concatenate input VCFs and sort
-    args0 = ['bcftools', 'concat', '--threads', __addthreads__] + invcfs
+    args0 = ['bcftools', 'concat', '-a', '--threads', __addthreads__] + invcfs
     args1 = ['bcftools', 'sort', '-Oz', '-o', outvcf]
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
     proc1 = subprocess.run(args1, shell=False, stdout=subprocess.PIPE,
