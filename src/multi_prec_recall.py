@@ -265,6 +265,8 @@ def plotter1(df):
     '''
     Precision-recall plot; rows by log10s2g and columns by lambda
     '''
+    seaborn.set()
+    #seaborn.set_context('talk')
     fg = seaborn.FacetGrid(data=df.loc[df['sample'] == 'mix1', :],
             row='log10s2g', col='lam', hue='callset')
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')

@@ -39,17 +39,14 @@ def make_ts_aaf(mix='mix1', vartype='snp', region='chr22', overwrite=True,
         invcfs = [indir + os.sep + g + '.vcf.gz' for g in genotypes]
         outvcf = mixdir + os.sep + str(aaf) + '.vcf.gz'
         unsorted_outvcf = mixdir + os.sep + str(aaf) + '-unsorted.vcf.gz'
-        args0 = ['bcftools', 'concat', '--threads', __addthreads__, '-o', unsorted_outvcf, '-Oz'] + invcfs
+        args0 = ['bcftools', 'concat', '-a', '--threads', __addthreads__, '-o', unsorted_outvcf, '-Oz'] + invcfs
         args1 = ['bcftools', 'sort', '-o', outvcf, '-Oz', unsorted_outvcf]
         args2 = ['bcftools', 'index', '--threads', __addthreads__, '-t', outvcf]
         if overwrite or not os.path.isfile(outvcf):
-            return('yes')
             subprocess.run(args0)
             subprocess.run(args1)
             os.remove(unsorted_outvcf)
             subprocess.run(args2)
-        else:
-            return('no')
         # count records
         args3 = ['bcftools', 'view', '--threads', __addthreads__, '-H', outvcf]
         args4 = ['wc', '-l']
