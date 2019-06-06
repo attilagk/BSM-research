@@ -177,7 +177,7 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
 
 
 def prec_recall_one_truthset(truthset, callsets):
-    args = ['prec-recall-vcf', '-t', truthset] + callsets
+    args = ['prec-recall-vcf', '-p', '1', '-t', truthset] + callsets
     proc1 = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE)
     prcsv = pd.read_csv(proc1.stdout)
     return(prcsv)
@@ -187,6 +187,7 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
         log10s2g='-2', sample='mix1'):
     VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype, lam=lam,
             log10s2g=log10s2g, sample=sample)
+    #return(VCFpaths)
     truthset = VCFpaths['reduced_truthset']
     callsets = VCFpaths['reduced_callset']
     pr = prec_recall_one_truthset(truthset=truthset, callsets=callsets)
