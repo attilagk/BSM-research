@@ -134,7 +134,7 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
 
 
 def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1'):
+        log10s2g='-2', sample='mix1', overwrite=False):
     '''
     Reduces (discards nonvariants from) the prepared callsets for a given region, vartype and exp_model
 
@@ -144,6 +144,7 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
     lam: '0.04' or '0.2'
     log10s2g: '-2', '-3' or '-4'
     sample: 'mix1', 'mix2' or 'mix3'
+    overwrite: whether to overwrite existing reduced callsets
 
     Returns: a list of pathnames of the reduced callsets
     '''
@@ -156,7 +157,7 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
         discarded_tset = VCFpaths['discarded_from_truthset']
         red_cset_dir = VCFpaths['reduced_callset_dir']
         reduced_callset = red_cset_dir + os.path.basename(prepared_cset)
-        if os.path.isfile(reduced_callset):
+        if not overwrite and os.path.isfile(reduced_callset):
             return(reduced_callset)
         if not os.path.isdir(red_cset_dir):
             os.makedirs(red_cset_dir)
@@ -211,8 +212,7 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
                 log10s2g=log10s2g, sample=sample)
         return(pr)
     lams = ['0.04', '0.2']
-    log10s2gs = ['-2', '-3']
-    #log10s2gs = ['-2', '-3', '-4']
+    log10s2gs = ['-2', '-3', '-4']
     samples = ['mix1', 'mix2', 'mix3']
     l = [process1exp_model(lam=l, log10s2g=g, sample=s) for l in lams for g in
             log10s2gs for s in samples]
@@ -259,14 +259,15 @@ def read_pr_csv(csvpath):
     return(pr)
 
 
-def plotter1(df):
+def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
     '''
     Precision-recall plot; rows by log10s2g and columns by lambda
     '''
     seaborn.set()
-    #seaborn.set_context('talk')
-    fg = seaborn.FacetGrid(data=df.loc[df['sample'] == 'mix1', :],
-            row='log10s2g', col='lam', hue='callset')
+    sel_rows = (df['sample'] == sample) & (df['log10s2g'] == log10s2g) & (df['vartype'] == vartype)
+    df_sset = df.loc[sel_rows, :]
+    fg = seaborn.FacetGrid(data=df_sset,
+            row='region', col='lam', hue='callset', sharey=True)
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
     fg = fg.add_legend()
     return(fg)
