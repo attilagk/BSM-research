@@ -152,7 +152,6 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
     callsetbn = [os.path.basename(y) for y in callsetbn]
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
-    #return(VCFpaths)
     def helper(prepared_cset):
         discarded_tset = VCFpaths['discarded_from_truthset']
         red_cset_dir = VCFpaths['reduced_callset_dir']
@@ -226,9 +225,7 @@ def run_all():
     Prepare and reduce callset and calculate precision and recall for all
     regions and variant types
     '''
-    #regions = ['chr22']
     regions = ['chr22', 'autosomes']
-    #vartypes = ['snp']
     vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
