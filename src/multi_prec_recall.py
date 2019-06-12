@@ -14,11 +14,12 @@ __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
 #__addthreads__ = str(os.cpu_count() - 3)
-__addthreads__ = '0'
+__addthreads__ = '7'
+__allthreads__ = str(int(__addthreads__) + 1)
 
 
 def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1'):
+        log10s2g='-2', sample='mix1', callsetdir=None):
     '''
     Create pathname for various input, output, intermediate VCF files.
 
@@ -67,7 +68,8 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
         alt_vartype = 'indels'
     # directories
     truthsetdir = __truthsetmaindir__ + subdir1 + __expmsubdir__ + subdir2
-    callsetdir = __callsetmaindir__ + alt_vartype + os.path.sep
+    if callsetdir is None:
+        callsetdir = __callsetmaindir__ + alt_vartype + os.path.sep
     prepared_callset_dir = __outmaindir__ + subdir1
     reduced_callset_dir = __outmaindir__ + subdir1 + __expmsubdir__ + subdir2
     # filepaths
@@ -114,27 +116,42 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
     csetVCFs = VCFpaths['callset']
-    # helper function
-    def preparer(csetVCF):
-        if region == 'autosomes':
-            args1 = ['prepare4prec-recall', '-v', vartype, '-Oz', '-P', csetVCF]
-        elif region == 'chr22':
-            args1 = ['prepare4prec-recall', '-r22', '-v', vartype, '-Oz', '-P', csetVCF]
-        outVCF = outdir + os.path.basename(csetVCF)
-        args2 = ['bcftools', 'view', '-Oz', '-o', outVCF]
-        if os.path.isfile(outVCF):
-            return(outVCF)
-        proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
-        proc2 = subprocess.run(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
-        args3 = ['bcftools', 'index', '--tbi', outVCF]
-        proc3 = subprocess.run(args3)
-        return(outVCF)
+    # wrapper to the helper function
+    def preparer(y):
+        val = do_prepare4prec_recall(csetVCF=y, outdir=outdir, region=region, vartype=vartype)
+        return(val)
     val = [preparer(y) for y in csetVCFs]
     return(val)
 
 
+def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp', normalize=True, PASS=True):
+    if normalize:
+        normalize_opt = []
+    else:
+        normalize_opt = ['-n']
+    if PASS:
+        PASS_opt = ['-P']
+    else:
+        PASS_opt = []
+    if region == 'autosomes':
+        r_opt = []
+    elif region == 'chr22':
+        r_opt = ['-r22']
+    args1 = ['prepare4prec-recall', '-p', __allthreads__, '-r22', '-v',
+            vartype, '-Oz'] + normalize_opt + PASS_opt + r_opt + [csetVCF]
+    outVCF = outdir + os.path.basename(csetVCF)
+    args2 = ['bcftools', 'view', '--threads', __addthreads__, '-Oz', '-o', outVCF]
+    if False and os.path.isfile(outVCF):
+        return(outVCF)
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
+    proc2 = subprocess.run(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
+    args3 = ['bcftools', 'index', '--threads', __addthreads__, '--tbi', outVCF]
+    proc3 = subprocess.run(args3)
+    return(outVCF)
+
+
 def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1', overwrite=False):
+        log10s2g='-2', sample='mix1', overwrite=True):
     '''
     Reduces (discards nonvariants from) the prepared callsets for a given region, vartype and exp_model
 
@@ -165,7 +182,7 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
         tempdir = tempfile.TemporaryDirectory()
         tempVCF = tempdir.name + os.path.sep + '0000.vcf.gz'
         tempVCFtbi = tempVCF + '.tbi'
-        args1 = ['bcftools', 'index', '--tbi', discarded_tset]
+        args1 = ['bcftools', 'index', '--threads', __addthreads__, '--tbi', discarded_tset]
         subprocess.run(args1)
         args2 = ['bcftools', 'isec', '-C', '-Oz', '-p', tempdir.name,
                 prepared_cset, discarded_tset]
@@ -178,7 +195,8 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
 
 
 def prec_recall_one_truthset(truthset, callsets):
-    args = ['prec-recall-vcf', '-p', '1', '-t', truthset] + callsets
+    args = ['prec-recall-vcf', '-p', __allthreads__, '-t', truthset] + callsets
+    #args = ['prec-recall-vcf', '-p', '1', '-t', truthset] + callsets
     proc1 = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE)
     prcsv = pd.read_csv(proc1.stdout)
     return(prcsv)
@@ -271,3 +289,18 @@ def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
     fg = fg.add_legend()
     return(fg)
+
+
+def vmc_partition_records(invcfpath, outdirpath='/home/attila/Desktop/'):
+    #args0 = ['bcftools', 'query', '-f',
+    #        '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n', '-o',
+    #        '/home/attila/Desktop/out', invcfpath]
+    args0 = ['bcftools', 'query', '-f',
+            '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n', invcfpath]
+    args1 = ['sed', 's/,\S\+//g']
+    #args0 = ['bcftools', 'view', '-H', '--threads', __addthreads__, invcfpath]
+    p0 = subprocess.Popen(args0, stdout=subprocess.PIPE)
+    #p1 = subprocess.Popen(args1, stdout=subprocess.PIPE, stdin=p0.stdout)
+    #p1.communicate()
+    df = pd.read_csv(p0.stdout, sep='\t')
+    return(df)
