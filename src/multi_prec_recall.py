@@ -118,13 +118,28 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
     csetVCFs = VCFpaths['callset']
     # wrapper to the helper function
     def preparer(y):
-        val = do_prepare4prec_recall(csetVCF=y, outdir=outdir, region=region, vartype=vartype)
+        val = do_prepare4prec_recall(csetVCF=y, outdir=outdir, region=region,
+                vartype=vartype, normalize=True, PASS=True)
         return(val)
     val = [preparer(y) for y in csetVCFs]
     return(val)
 
 
-def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp', normalize=True, PASS=True):
+def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp',
+        normalize=True, PASS=True, overwrite=False):
+    '''
+    Run prepare4prec-recall shell script on initial callset VCF for a given
+    region and variant type with or without normalization and PASS filtering
+
+    Parameter(s):
+    csetVCF: path to the input callset
+    region: chr22 or autosomes
+    vartype: snp or indel
+    normalize: (True|False) whether to perform normalizaton
+    PASS: (True|False) whether to PASS filter
+
+    Returns: the pathname of output VCF
+    '''
     if normalize:
         normalize_opt = []
     else:
@@ -141,7 +156,7 @@ def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp', normalize=Tru
             vartype, '-Oz'] + normalize_opt + PASS_opt + r_opt + [csetVCF]
     outVCF = outdir + os.path.basename(csetVCF)
     args2 = ['bcftools', 'view', '--threads', __addthreads__, '-Oz', '-o', outVCF]
-    if False and os.path.isfile(outVCF):
+    if os.path.isfile(outVCF) and not overwrite:
         return(outVCF)
     proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
     proc2 = subprocess.run(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
@@ -150,12 +165,13 @@ def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp', normalize=Tru
     return(outVCF)
 
 
-def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1', overwrite=True):
+def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
+        log10s2g='-2', sample='mix1', overwrite=False):
     '''
     Reduces (discards nonvariants from) the prepared callsets for a given region, vartype and exp_model
 
     Parameters:
+    callsetbn: None or a list of callset VCF basenames like ['Tnseq.vcf.gz',...]
     region: chr22 or autosomes
     vartype: snp or indel
     lam: '0.04' or '0.2'
@@ -166,8 +182,10 @@ def reduce_prepared_callsets(region='chr22', vartype='snp', lam='0.04',
     Returns: a list of pathnames of the reduced callsets
     '''
     VCFpaths = getVCFpaths(region=region, vartype=vartype)
-    callsetbn = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
-    callsetbn = [os.path.basename(y) for y in callsetbn]
+    if callsetbn is None:
+        callsetbn = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
+        callsetbn = [os.path.basename(y) for y in callsetbn]
+        return(callsetbn)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
     def helper(prepared_cset):
@@ -237,6 +255,23 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
     pr = pd.concat(l)
     pr = pr_astype(pr)
     return(pr)
+
+
+def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
+    callsetbn = [os.path.basename(csetVCF)]
+    VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region, vartype=vartype)
+    outdir = VCFpaths['prepared_callset_dir']
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+    outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
+            region=region, vartype=vartype, normalize=False, PASS=False, overwrite=True)
+    # model specific operations
+    lam = '0.04'
+    log10s2g = '-2'
+    sample = 'mix1'
+    VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
+            log10s2g=log10s2g, sample=sample, overwrite=True)
+    return(VCFpaths)
 
 
 def run_all():
