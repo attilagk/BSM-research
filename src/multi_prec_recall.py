@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import os.path
 import tempfile
@@ -326,16 +327,45 @@ def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
     return(fg)
 
 
-def vmc_partition_records(invcfpath, outdirpath='/home/attila/Desktop/'):
-    #args0 = ['bcftools', 'query', '-f',
-    #        '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n', '-o',
-    #        '/home/attila/Desktop/out', invcfpath]
+def vmc_read_svmprob(vmcVCF):
     args0 = ['bcftools', 'query', '-f',
-            '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n', invcfpath]
+            '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n', vmcVCF]
     args1 = ['sed', 's/,\S\+//g']
-    #args0 = ['bcftools', 'view', '-H', '--threads', __addthreads__, invcfpath]
     p0 = subprocess.Popen(args0, stdout=subprocess.PIPE)
-    #p1 = subprocess.Popen(args1, stdout=subprocess.PIPE, stdin=p0.stdout)
-    #p1.communicate()
-    df = pd.read_csv(p0.stdout, sep='\t')
+    p1 = subprocess.Popen(args1, stdout=subprocess.PIPE, stdin=p0.stdout)
+    cnames = ['chrom', 'pos', 'ref', 'alt', 'svmprob']
+    df = pd.read_csv(p1.stdout, sep='\t', header=None, names=cnames)
     return(df)
+
+
+def nrecords_in_vcf(vcf):
+    args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', vcf]
+    args1 = ['wc', '-l']
+    proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE, stdin=proc0.stdout)
+    proc0.stdout.close()
+    nrec = proc1.communicate()[0]
+    nrec = int(nrec) # turn bytesliteral (e.g. b'5226\n') to integer
+    return(nrec)
+
+
+def vmc_precrecall(csetVCF, tsetVCF):
+    tempdir = tempfile.TemporaryDirectory()
+    dname = tempdir.name
+    falseposVCF = dname + os.path.sep + '0000.vcf.gz'
+    falsenegVCF = dname + os.path.sep + '0001.vcf.gz'
+    trueposVCF = dname + os.path.sep + '0002.vcf.gz'
+    args0 = ['bcftools', 'isec', '-Oz', '-p', dname, csetVCF, tsetVCF]
+    subprocess.run(args0)
+    # read the positives into two DataFrames
+    falsepos = vmc_read_svmprob(falseposVCF)
+    truepos = vmc_read_svmprob(trueposVCF)
+    falsepos['istrue'] = False
+    truepos['istrue'] = True
+    pos = pd.concat([falsepos, truepos])
+    pos = pos.sort_values(by='svmprob', ascending=False)
+    pos['TPsize'] = np.cumsum(pos['istrue'])
+    pos['Psize'] = np.array(range(len(pos))) + 1
+    pos['precision'] = pos['TPsize'] / pos['Psize'] 
+    pos['recall'] = pos['TPsize'] / nrecords_in_vcf(tsetVCF)
+    return(pos)
