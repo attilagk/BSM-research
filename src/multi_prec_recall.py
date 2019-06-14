@@ -344,6 +344,21 @@ def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
     return(fg)
 
 
+def plotter2(df, sample='mix1'):
+    '''
+    Precision-recall plot; rows by log10s2g and columns by lambda
+    '''
+    seaborn.set()
+    sel_rows = (df['sample'] == sample)
+    df_sset = df.loc[sel_rows, :]
+    fg = seaborn.FacetGrid(data=df_sset,
+            row='log10s2g', col='lam')
+    fg = fg.map(plt.plot, 'recall', 'precision')
+    #fg = fg.map(plt.plot, 'recall', 'precision_estim')
+    fg = fg.add_legend()
+    return(fg)
+
+
 def vmc_read_svmprob(vmcVCF):
     '''
     Read SVMPROB and other fields from a VCF produced by VMC.
@@ -418,4 +433,5 @@ def vmc_precrecall(csetVCF, tsetVCF):
     pr['Psize'] = np.array(range(len(pr))) + 1
     pr['precision'] = pr['TPsize'] / pr['Psize'] 
     pr['recall'] = pr['TPsize'] / nrecords_in_vcf(tsetVCF)
+    pr['precision_estim'] = np.cumsum(pr['svmprob']) / pr['Psize']
     return(pr)
