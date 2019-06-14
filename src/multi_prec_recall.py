@@ -14,7 +14,6 @@ __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
-#__addthreads__ = str(os.cpu_count() - 3)
 __addthreads__ = '7'
 __allthreads__ = str(int(__addthreads__) + 1)
 
@@ -259,6 +258,10 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
 
 
 def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
+    '''
+    Performs all three major steps: prepares the VCF, reduces it, and uses it
+    for precision--recall calculations.
+    '''
     callsetbn = [os.path.basename(csetVCF)]
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region, vartype=vartype)
     outdir = VCFpaths['prepared_callset_dir']
@@ -267,12 +270,26 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
     outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
             region=region, vartype=vartype, normalize=False, PASS=False, overwrite=True)
     # model specific operations
-    lam = '0.04'
-    log10s2g = '-2'
-    sample = 'mix1'
-    VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
-            log10s2g=log10s2g, sample=sample, overwrite=True)
-    return(VCFpaths)
+    def helper(lam, log10s2g, sample):
+        VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
+                log10s2g=log10s2g, sample=sample, overwrite=True)
+        csetVCF = VCFpaths['reduced_callset'][0]
+        tsetVCF = VCFpaths['reduced_truthset']
+        pr = vmc_precrecall(csetVCF=csetVCF, tsetVCF=tsetVCF)
+        pr['region'] = region
+        pr['vartype'] = vartype
+        pr['lam'] = lam
+        pr['log10s2g'] = log10s2g
+        pr['sample'] = sample
+        return(pr)
+    #pr = helper(lam='0.04', log10s2g='-2', sample='mix1')
+    lams = ['0.04', '0.2']
+    log10s2gs = ['-2', '-3', '-4']
+    samples = ['mix1', 'mix2', 'mix3']
+    l = [helper(lam=l, log10s2g=g, sample=s) for l in lams for g in
+            log10s2gs for s in samples]
+    pr = pd.concat(l)
+    return(pr)
 
 
 def run_all():
@@ -328,6 +345,20 @@ def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
 
 
 def vmc_read_svmprob(vmcVCF):
+    '''
+    Read SVMPROB and other fields from a VCF produced by VMC.
+
+    Unfortunately for some reason "bcftools normalize -m-" yields an error and
+    truncates the VCF therefore multiallelic records cannot be split into
+    multiple biallelic records.  The awkward workaround is to remove all but
+    the first variant from the record with a sed command.
+
+    Parameter:
+    vmcVCF: path to the VCF
+
+    Returns:
+    a DataFrame whose columns correspond to VCF fields
+    '''
     args0 = ['bcftools', 'query', '-f',
             '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVMPROB\n', vmcVCF]
     args1 = ['sed', 's/,\S\+//g']
@@ -339,6 +370,15 @@ def vmc_read_svmprob(vmcVCF):
 
 
 def nrecords_in_vcf(vcf):
+    '''
+    Count records in VCF
+
+    Parameters:
+    vcf: the path to the VCF
+
+    Returns:
+    the number of records
+    '''
     args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', vcf]
     args1 = ['wc', '-l']
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
@@ -350,6 +390,16 @@ def nrecords_in_vcf(vcf):
 
 
 def vmc_precrecall(csetVCF, tsetVCF):
+    '''
+    Sort callset for svmprob and get precision-recall based on a truth set
+
+    Parameters:
+    csetVCF: path to the callset VCF
+    tsetVCF: path to the truthset VCF
+
+    Returns
+    pr: a pandas DataFrame with precision and recall for sorted positions
+    '''
     tempdir = tempfile.TemporaryDirectory()
     dname = tempdir.name
     falseposVCF = dname + os.path.sep + '0000.vcf.gz'
@@ -362,10 +412,10 @@ def vmc_precrecall(csetVCF, tsetVCF):
     truepos = vmc_read_svmprob(trueposVCF)
     falsepos['istrue'] = False
     truepos['istrue'] = True
-    pos = pd.concat([falsepos, truepos])
-    pos = pos.sort_values(by='svmprob', ascending=False)
-    pos['TPsize'] = np.cumsum(pos['istrue'])
-    pos['Psize'] = np.array(range(len(pos))) + 1
-    pos['precision'] = pos['TPsize'] / pos['Psize'] 
-    pos['recall'] = pos['TPsize'] / nrecords_in_vcf(tsetVCF)
-    return(pos)
+    pr = pd.concat([falsepos, truepos])
+    pr = pr.sort_values(by='svmprob', ascending=False)
+    pr['TPsize'] = np.cumsum(pr['istrue'])
+    pr['Psize'] = np.array(range(len(pr))) + 1
+    pr['precision'] = pr['TPsize'] / pr['Psize'] 
+    pr['recall'] = pr['TPsize'] / nrecords_in_vcf(tsetVCF)
+    return(pr)
