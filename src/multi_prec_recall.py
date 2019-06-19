@@ -344,7 +344,7 @@ def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
     return(fg)
 
 
-def plotter2(df, sample='mix1'):
+def plotter2(df, hue='machine', sample='mix1'):
     '''
     Precision-recall plot; rows by log10s2g and columns by lambda
     '''
@@ -352,7 +352,7 @@ def plotter2(df, sample='mix1'):
     sel_rows = (df['sample'] == sample)
     df_sset = df.loc[sel_rows, :]
     fg = seaborn.FacetGrid(data=df_sset,
-            row='log10s2g', col='lam')
+            row='log10s2g', col='lam', hue=hue)
     fg = fg.map(plt.plot, 'recall', 'precision')
     #fg = fg.map(plt.plot, 'recall', 'precision_estim')
     fg = fg.add_legend()
