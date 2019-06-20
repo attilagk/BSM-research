@@ -289,6 +289,7 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
     l = [helper(lam=l, log10s2g=g, sample=s) for l in lams for g in
             log10s2gs for s in samples]
     pr = pd.concat(l)
+    pr = pr_astype(pr, vmc_pr=True)
     return(pr)
 
 
@@ -306,7 +307,7 @@ def run_all():
     return(pr)
 
 
-def pr_astype(pr):
+def pr_astype(pr, vmc_pr=False):
     '''
     Set data types for a precision recall data frame
 
@@ -315,7 +316,12 @@ def pr_astype(pr):
 
     Returns: the data frame with the same data but corrected data types
     '''
-    keys = ['callset', 'region', 'vartype', 'lam', 'log10s2g', 'sample']
+    keys = ['region', 'vartype', 'lam', 'log10s2g', 'sample']
+    if vmc_pr:
+        pr['log10s2g'] = np.int64(pr['log10s2g']) # crucial for consistency
+        keys = keys + ['machine', 'chrom', 'ref', 'alt']
+    else:
+        keys.append('callset')
     d = {k: 'category' for k in keys}
     pr = pr.astype(d)
     return(pr)
@@ -330,15 +336,32 @@ def read_pr_csv(csvpath):
     return(pr)
 
 
-def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
+def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
     '''
     Precision-recall plot; rows by log10s2g and columns by lambda
     '''
     seaborn.set()
-    sel_rows = (df['sample'] == sample) & (df['log10s2g'] == log10s2g) & (df['vartype'] == vartype)
-    df_sset = df.loc[sel_rows, :]
+    sel_rows = (pr['sample'] == sample) & (pr['log10s2g'] == log10s2g) & (pr['vartype'] == vartype)
+    df_sset = pr.loc[sel_rows, :]
     fg = seaborn.FacetGrid(data=df_sset,
             row='region', col='lam', hue='callset', sharey=True)
+    if vmc_pr is not None:
+        lams = vmc_pr['lam'].cat.categories
+        def helper(lamix):
+            lam = lams[lamix]
+            sel_rows = (vmc_pr['machine'] == 'Ada') \
+                    & (vmc_pr['log10s2g'] == log10s2g) \
+                    & (vmc_pr['sample'] == sample) \
+                    & (vmc_pr['vartype'] == vartype) \
+                    & (vmc_pr['lam'] == lam)
+            df = vmc_pr.loc[sel_rows, :].copy()
+            def curveplotter(y='precision', linestyle='-'):
+                fg.axes[1][lamix].plot(df['recall'], df[y],
+                        color='black', linestyle=linestyle)
+                return(None)
+            curveplotter('precision', '-')
+            curveplotter('precision_estim', ':')
+        [helper(ix) for ix in range(len(lams))]
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
     fg = fg.add_legend()
     return(fg)
