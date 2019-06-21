@@ -63,7 +63,7 @@ def extract_subject(template, subject):
     df = template.loc[template["src_subject_id"] == subject, :]
     return(df)
 
-def make_manifests(subject, syn, target_dir="."):
+def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True):
     '''
     Makes all manifest files for a given CMC subject
 
@@ -83,10 +83,11 @@ def make_manifests(subject, syn, target_dir="."):
 
     def g_sample(gsubj):
         gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=target_dir)
-        gsam = make_g_sample(gsam_temp, btb, gsubj, syn)
+        gsam = make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=matching_sample_ids)
         gsam = correct_manifest(gsam)
         temp_p = target_dir + os.sep + gsam_syn.properties.name
         targ_p = target_dir + os.sep + cmc_subject + "-" + 'genomics_sample03_U01MH106891_Chess.csv'
+        gsam['site'] = 'U01MH106891'
         write_manifest(gsam, temp_p, targ_p)
         return(gsam)
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
@@ -206,7 +207,7 @@ def extract_cmc_wgs(btb, syn):
     wgs = wgs[wgs['Library ID'].isin(ids)]
     return(wgs)
 
-def make_g_sample(gsam_temp, btb, gsubj, syn):
+def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True):
     '''
     Creates a genomics sample manifest based on a genomics sample template and
     two other manifests
@@ -216,6 +217,7 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
     btb: brain and tissue bank manifest, a pandas data frame
     gsubj: genomics subject manifest, a pandas data frame
     syn: a synapse object returned by synapseclient.login()
+    matching_sample_ids: whether sample_id_biorepository should match sample_id_original
 
     Value: genomics sample manifest, a pandas data frame
 
@@ -233,7 +235,10 @@ def make_g_sample(gsam_temp, btb, gsubj, syn):
             df['sample_description'] = sample_description
             df['sample_id_original'] = lib_id
             wgs_lib = wgs[wgs['Library ID'] == lib_id]
-            df['sample_id_biorepository'] = wgs_lib.at[wgs_lib.index[0], 'Sample DNA ID']
+            if matching_sample_ids:
+                df['sample_id_biorepository'] = lib_id
+            else:
+                df['sample_id_biorepository'] = wgs_lib.at[wgs_lib.index[0], 'Sample DNA ID']
             df['sample_amount'] = wgs_lib.at[wgs_lib.index[0], 'DNA Amount(ng)']
             df['sample_unit'] = 'ng'
             df['data_file1'] = fl[0]
