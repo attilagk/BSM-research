@@ -10,6 +10,8 @@ import truth_sets_aaf as tsa
 import seaborn
 import matplotlib.pyplot as plt
 
+__snpcallers__ = ['Tnseq', 'lofreqSomatic', 'strelka2Germline2s', 'strelka2Somatic', 'somaticSniper']
+__indelcallers__ = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
@@ -95,6 +97,15 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     return(VCFpaths)
 
 
+def get_callsetbn(vartype):
+    if vartype == 'snp':
+        callers = __snpcallers__
+    elif vartype == 'indel':
+        callers = __indelcallers__
+    callsetbn = [c + '.vcf.gz' for c in callers]
+    return(callsetbn)
+
+
 def prepare4prec_recall(region='chr22', vartype='snp'):
     '''
     Run prepare4prec-recall shell script on initial callset VCFs for a given
@@ -106,11 +117,7 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
 
     Returns: a list of the pathname of output VCFs
     '''
-    if vartype == 'snp':
-        callers = ['lofreqSomatic', 'somaticSniper', 'strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
-    elif vartype == 'indel':
-        callers = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
-    callsetbn = [c + '.vcf.gz' for c in callers]
+    callsetbn = get_callsetbn(vartype)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region, vartype=vartype)
     outdir = VCFpaths['prepared_callset_dir']
     if not os.path.isdir(outdir):
@@ -185,9 +192,7 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     '''
     VCFpaths = getVCFpaths(region=region, vartype=vartype)
     if callsetbn is None:
-        callsetbn = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
-        callsetbn = [os.path.basename(y) for y in callsetbn]
-        return(callsetbn)
+        callsetbn = get_callsetbn(vartype)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
     def helper(prepared_cset):
@@ -226,7 +231,6 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
         log10s2g='-2', sample='mix1'):
     VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype, lam=lam,
             log10s2g=log10s2g, sample=sample)
-    #return(VCFpaths)
     truthset = VCFpaths['reduced_truthset']
     callsets = VCFpaths['reduced_callset']
     pr = prec_recall_one_truthset(truthset=truthset, callsets=callsets)
@@ -259,7 +263,8 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
     return(pr)
 
 
-def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
+def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
+        machine='Ada'):
     '''
     Performs all three major steps: prepares the VCF, reduces it, and uses it
     for precision--recall calculations.
@@ -270,11 +275,11 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
     outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
-            region=region, vartype=vartype, normalize=False, PASS=False, overwrite=True)
+            region=region, vartype=vartype, normalize=False, PASS=False, overwrite=False)
     # model specific operations
     def helper(lam, log10s2g, sample):
         VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
-                log10s2g=log10s2g, sample=sample, overwrite=True)
+                log10s2g=log10s2g, sample=sample, overwrite=False)
         csetVCF = VCFpaths['reduced_callset'][0]
         tsetVCF = VCFpaths['reduced_truthset']
         pr = vmc_precrecall(csetVCF=csetVCF, tsetVCF=tsetVCF)
@@ -283,8 +288,8 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
         pr['lam'] = lam
         pr['log10s2g'] = log10s2g
         pr['sample'] = sample
+        pr['machine'] = machine
         return(pr)
-    #pr = helper(lam='0.04', log10s2g='-2', sample='mix1')
     lams = ['0.04', '0.2']
     log10s2gs = ['-2', '-3', '-4']
     samples = ['mix1', 'mix2', 'mix3']
@@ -300,8 +305,7 @@ def run_all():
     Prepare and reduce callset and calculate precision and recall for all
     regions and variant types
     '''
-    regions = ['chr1_2']
-    #regions = ['chr22', 'chr1_2', 'autosomes']
+    regions = ['chr22', 'chr1_2', 'autosomes']
     vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
@@ -357,13 +361,20 @@ def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
                     & (vmc_pr['sample'] == sample) \
                     & (vmc_pr['vartype'] == vartype) \
                     & (vmc_pr['lam'] == lam)
-            df = vmc_pr.loc[sel_rows, :].copy()
-            def curveplotter(y='precision', linestyle='-'):
-                fg.axes[1][lamix].plot(df['recall'], df[y],
+            #df = vmc_pr.loc[sel_rows, :].copy()
+            def curveplotter(y='precision', linestyle='-', region='chr22'):
+                df = vmc_pr.loc[sel_rows & (vmc_pr['region'] == region), :].copy()
+                if region == 'chr22':
+                    row = 2
+                elif region == 'chr1_2':
+                    row = 1
+                fg.axes[row][lamix].plot(df['recall'], df[y],
                         color='black', linestyle=linestyle)
                 return(None)
-            curveplotter('precision', '-')
-            curveplotter('precision_estim', ':')
+            curveplotter('precision', '-', region='chr22')
+            curveplotter('precision_estim', ':', region='chr22')
+            curveplotter('precision', '-', region='chr1_2')
+            curveplotter('precision_estim', ':', region='chr1_2')
         [helper(ix) for ix in range(len(lams))]
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
     fg = fg.add_legend()
