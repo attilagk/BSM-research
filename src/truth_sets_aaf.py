@@ -74,9 +74,12 @@ def make_ts_aaf(mix='mix1', vartype='snp', region='chr22', overwrite=True,
     res = res.astype({'region': 'category', 'vartype': 'category', 'sample': 'category'})
     return(res)
 
-def make_ts_aaf_get_nvariants():
+def make_ts_aaf_get_nvariants(regions=['chr22', 'chr1_2', 'autosomes']):
     '''
     Calls make_ts_aaf for all combination of regions, vartypes and samples
+
+    Parameters:
+    regions: a list of genomic regions like chr22 or chr1_2
 
     Returns:
     a pandoc data frame with the number of variants at all those combinations and AAFs
@@ -85,7 +88,7 @@ def make_ts_aaf_get_nvariants():
         bdir = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
         res = make_ts_aaf(mix=mix, vartype=vartype, region=region, tsdir=bdir + os.sep + region + os.sep + vartype + '/truthset')
         return(res)
-    regions = ['chr22', 'autosomes']
+    #regions = ['chr22','chr1_2', 'autosomes']
     vartypes = ['snp', 'indel']
     samples = ['mix1', 'mix2', 'mix3']
     nvariants = pd.concat([tsaaf(mix=m, vartype=v, region=r) for r in regions
@@ -158,7 +161,7 @@ def evalmodel2df(nvariants, sample, vartype, region, model, Y, p_som2germ=None):
     return(df)
 
 
-def combine_regions_germ_vars(regions={'autosomes': 2929051733, 'chr22': 51304566},
+def combine_regions_germ_vars(regions={'autosomes': 2929051733, 'chr1_2': 249250621 + 243199373, 'chr22': 51304566},
         germ_vars = {'snp': 4e6, 'indel': 0.8e6}):
     '''
     Scales the number of germline variants according to the length of genomic
@@ -559,6 +562,7 @@ def downsample_absolutely_all_vcfs(expm, topdir='/home/attila/projects/bsm/resul
     the pathnames of output VCFs
     '''
     l = split_up_expm(expm)
+    l = [y for y in l if len(y) > 0]
     outvcfs = [downsample_all_aaf_vcfs(df, topdir=topdir, seed=seed) for df in l]
     return(outvcfs)
 

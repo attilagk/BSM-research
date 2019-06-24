@@ -25,7 +25,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
 
     Parameters:
     callsetbn: None, 'Tnseq.vcf.gz' or ['lofreqSomatic.vcf.gz', 'Tnseq.vcf.gz']
-    region: chr22 or autosomes
+    region: chr22, chr1_2 or autosomes
     vartype: snp or indel
     lam: '0.04' or '0.2'
     log10s2g: '-2', '-3' or '-4'
@@ -150,9 +150,11 @@ def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp',
         PASS_opt = []
     if region == 'autosomes':
         r_opt = []
+    elif region == 'chr1_2':
+        r_opt = ['-r1,2']
     elif region == 'chr22':
         r_opt = ['-r22']
-    args1 = ['prepare4prec-recall', '-p', __allthreads__, '-r22', '-v',
+    args1 = ['prepare4prec-recall', '-p', __allthreads__, '-v',
             vartype, '-Oz'] + normalize_opt + PASS_opt + r_opt + [csetVCF]
     outVCF = outdir + os.path.basename(csetVCF)
     args2 = ['bcftools', 'view', '--threads', __addthreads__, '-Oz', '-o', outVCF]
@@ -298,7 +300,8 @@ def run_all():
     Prepare and reduce callset and calculate precision and recall for all
     regions and variant types
     '''
-    regions = ['chr22', 'autosomes']
+    regions = ['chr1_2']
+    #regions = ['chr22', 'chr1_2', 'autosomes']
     vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
