@@ -314,6 +314,27 @@ def run_all():
     return(pr)
 
 
+def read_runtime(fpath, region, machine):
+    '''
+    Read POSIX formatted runtimes into a pandas DataFrame
+    '''
+    rt = pd.read_csv(fpath, delim_whitespace=True, names=['type', 'runtime'])
+    rt['region'] = region
+    rt['machine'] = machine
+    if region == 'chr1_2':
+        length = 249250621 + 243199373
+    if region == 'chr22':
+        length = 51304566
+    rt['region_length'] = length
+    return(rt)
+
+
+def correct_vmc_pr(pr, corr_f = (249250621 + 243199373) / 86682278 ):
+    corr_pr = pr.copy()
+    corr_pr['recall'] = pr['recall'] * corr_f
+    return(corr_pr)
+
+
 def pr_astype(pr, vmc_pr=False):
     '''
     Set data types for a precision recall data frame
