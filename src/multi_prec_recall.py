@@ -442,7 +442,7 @@ def vmc_read_svmprob(vmcVCF):
     return(df)
 
 
-def nrecords_in_vcf(vcf):
+def nrecords_in_vcf(vcf, PASS=False):
     '''
     Count records in VCF
 
@@ -452,7 +452,10 @@ def nrecords_in_vcf(vcf):
     Returns:
     the number of records
     '''
-    args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', vcf]
+    if PASS:
+        args0 = ['bcftools', 'view', '-f .,PASS', '--threads', __addthreads__, '-H', vcf]
+    else:
+        args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', vcf]
     args1 = ['wc', '-l']
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
     proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE, stdin=proc0.stdout)
