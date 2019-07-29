@@ -20,6 +20,15 @@ def process_yifans_table(validation_path='/home/attila/projects/bsm/bsm-network/
 def region_filter_callset(callset_vcfpath, var_tsvpath=None, var_df=None, PASS=True):
     '''
     Filters callset given the "regions" contained in var_df or var_tsvpath
+
+    Parameters:
+    callset_vcfpath: path to the callset in VCF
+    var_tsvpath: path to the variants in TSV
+    var_df: pandas DataFrame containing the (real) variants
+    PASS: whether to PASS-filter calls
+
+    Returns:
+    a pandas DataFrame of the callset filtered for the regions
     '''
     if var_df is None:
         var_df = pd.read_csv(var_tsvpath, delimiter='\t')
@@ -39,6 +48,9 @@ def region_filter_callset(callset_vcfpath, var_tsvpath=None, var_df=None, PASS=T
 
 
 def generate_record_id(var_df):
+    '''
+    Create ID for VCF record (call) from the position and mutant genotype
+    '''
     row = var_df.iloc[0, :]
     ID = ':'.join([str(z) for z in row])
     ID = var_df.apply(lambda row: ':'.join([str(z) for z in row]), axis=1)
@@ -48,25 +60,54 @@ def generate_record_id(var_df):
 def prec_recall(callset_vcfpath,
         var_tsvpath='/big/results/bsm/2019-07-23-commonsample-precrecall/somvar.tsv',
         PASS=True):
+    '''
+    Evaluate precision and recall for a callset
+
+    Parameters:
+    callset_vcfpath: path to the callset's VCF
+    var_tsvpath: path to the TSV containing the (real) variants
+    PASS: whether to PASS-filter callset
+
+    Returns:
+    a pandas DataFrame of a single row with columns: precision, recall, etc
+    '''
     n_calls = multi_prec_recall.nrecords_in_vcf(callset_vcfpath, PASS=PASS)
     truecalls = region_filter_callset(callset_vcfpath=callset_vcfpath,
             var_tsvpath=var_tsvpath, PASS=PASS)
-    caller = os.path.basename(callset_vcfpath)
+    caller = os.path.basename(callset_vcfpath).replace('.vcf.gz', '')
     n_truecalls = len(truecalls)
     var_df = pd.read_csv(var_tsvpath, delimiter='\t')
     n_variants = len(var_df)
-    #precision = n_truecalls / n_calls
-    #recall = n_truecalls / n_variants
-    #d = {'caller': caller, 'PASS': PASS, 'n_variants': n_variants, 'n_calls': n_calls, 'n_truecalls':n_truecalls, 'precision': precision, 'recall': recall}
-    d = {'caller': caller, 'PASS': PASS, 'n_variants': n_variants, 'n_calls': n_calls, 'n_truecalls':n_truecalls}
+    if n_calls > 0:
+        precision = n_truecalls / n_calls
+    else:
+        precision = None
+    if n_variants > 0: # practically impossible case
+        recall = n_truecalls / n_variants
+    else:
+        recall = None
+    # package results in a data frame of a single row
+    d = {'caller': caller, 'PASS_filter': PASS, 'n_variants': n_variants, 'n_calls':
+            n_calls, 'n_truecalls':n_truecalls, 'precision': precision,
+            'recall': recall}
     df = pd.DataFrame(d, index=[0])
     return(df)
 
 
-#callers=['lofreqSomatic', 'somaticSniper', 'strelka2Germline', 'strelka2Somatic', 'Tnseq']
 def prec_recall_all(callers=['lofreqSomatic', 'somaticSniper', 'strelka2Germline', 'strelka2Somatic', 'Tnseq'],
         callsetdir='/big/results/bsm/2018-02-22-ref-tissue-proj-testdata/wgs/vcf/snvs/',
         var_tsvpath='/big/results/bsm/2019-07-23-commonsample-precrecall/somvar.tsv'):
+    '''
+    Evaluate precision and recall for several callers
+
+    Parameters:
+    callers: list of callers matching VCF file basenames
+    callsetdir: the directory of the callset VCFs
+    var_tsvpath: path to the TSV containing the (real) variants
+
+    Returns:
+    a pandas DataFrame with rows representing callsets and with columns: precision, recall, etc
+    '''
     callset_vcfpaths = [callsetdir + os.path.sep + c + '.vcf.gz' for c in callers]
     l_True = [prec_recall(callset_vcfpath=c, var_tsvpath=var_tsvpath,
         PASS=True) for c in callset_vcfpaths]
