@@ -3,6 +3,7 @@
 combinationIsUnion=true
 numproc=`nproc`
 allautosomes=false
+regions=22
 displayHelp=false
 helpfile=`mktemp`
 
@@ -11,20 +12,22 @@ cat >> $helpfile <<EOF
 Create truth a set for snps and indels
 
 Usage:
-`basename $0` [-v combinationIsUnion] [-p numproc] -a true|false
+`basename $0` [-v combinationIsUnion] [-p numproc] -a true|false -r regions
 
 Options:
     c) combinationIsUnion ($combinationIsUnion): true|false; Combine Chesslab and Illumina callsets with union? (Otherwise intersection)
     p) numproc ($numproc): number of processors
-    a) allautosomes ($allautosomes): true|false; Include all autosomes in truth set?  (Otherwise only chr22)
+    r) regions ($regions): genomic regions e.g. 1,2
+    a) allautosomes ($allautosomes): true|false; Include all autosomes in truth set?  (Otherwise only 'regions')
     h) displayHelp (flag): display this help page
 EOF
 # process options
-while getopts 'c:p:a:h' myopt; do
+while getopts 'c:p:a:r:h' myopt; do
     case $myopt in
         c) combinationIsUnion=$OPTARG;;
         p) numproc=$OPTARG;;
         a) allautosomes=$OPTARG;;
+        r) regions=$OPTARG;;
         h) displayHelp=true;;
     esac
 done
@@ -46,8 +49,7 @@ if $allautosomes; then
     regions=$(echo {1..22} | tr ' ' ',')
     sub_out=autosomes
 else
-    regions=22
-    sub_out=chr22
+    sub_out=chr$(echo $regions | tr ',-' '__')
 fi
 
 case `hostname` in

@@ -10,6 +10,8 @@ import truth_sets_aaf as tsa
 import seaborn
 import matplotlib.pyplot as plt
 
+__snpcallers__ = ['Tnseq', 'lofreqSomatic', 'strelka2Germline2s', 'strelka2Somatic', 'somaticSniper']
+__indelcallers__ = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
@@ -25,7 +27,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
 
     Parameters:
     callsetbn: None, 'Tnseq.vcf.gz' or ['lofreqSomatic.vcf.gz', 'Tnseq.vcf.gz']
-    region: chr22 or autosomes
+    region: chr22, chr1_2 or autosomes
     vartype: snp or indel
     lam: '0.04' or '0.2'
     log10s2g: '-2', '-3' or '-4'
@@ -95,6 +97,15 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     return(VCFpaths)
 
 
+def get_callsetbn(vartype):
+    if vartype == 'snp':
+        callers = __snpcallers__
+    elif vartype == 'indel':
+        callers = __indelcallers__
+    callsetbn = [c + '.vcf.gz' for c in callers]
+    return(callsetbn)
+
+
 def prepare4prec_recall(region='chr22', vartype='snp'):
     '''
     Run prepare4prec-recall shell script on initial callset VCFs for a given
@@ -106,11 +117,7 @@ def prepare4prec_recall(region='chr22', vartype='snp'):
 
     Returns: a list of the pathname of output VCFs
     '''
-    if vartype == 'snp':
-        callers = ['lofreqSomatic', 'somaticSniper', 'strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
-    elif vartype == 'indel':
-        callers = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
-    callsetbn = [c + '.vcf.gz' for c in callers]
+    callsetbn = get_callsetbn(vartype)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region, vartype=vartype)
     outdir = VCFpaths['prepared_callset_dir']
     if not os.path.isdir(outdir):
@@ -150,9 +157,11 @@ def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp',
         PASS_opt = []
     if region == 'autosomes':
         r_opt = []
+    elif region == 'chr1_2':
+        r_opt = ['-r1,2']
     elif region == 'chr22':
         r_opt = ['-r22']
-    args1 = ['prepare4prec-recall', '-p', __allthreads__, '-r22', '-v',
+    args1 = ['prepare4prec-recall', '-p', __allthreads__, '-v',
             vartype, '-Oz'] + normalize_opt + PASS_opt + r_opt + [csetVCF]
     outVCF = outdir + os.path.basename(csetVCF)
     args2 = ['bcftools', 'view', '--threads', __addthreads__, '-Oz', '-o', outVCF]
@@ -183,9 +192,7 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     '''
     VCFpaths = getVCFpaths(region=region, vartype=vartype)
     if callsetbn is None:
-        callsetbn = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
-        callsetbn = [os.path.basename(y) for y in callsetbn]
-        return(callsetbn)
+        callsetbn = get_callsetbn(vartype)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
     def helper(prepared_cset):
@@ -224,7 +231,6 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
         log10s2g='-2', sample='mix1'):
     VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype, lam=lam,
             log10s2g=log10s2g, sample=sample)
-    #return(VCFpaths)
     truthset = VCFpaths['reduced_truthset']
     callsets = VCFpaths['reduced_callset']
     pr = prec_recall_one_truthset(truthset=truthset, callsets=callsets)
@@ -257,7 +263,8 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
     return(pr)
 
 
-def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
+def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
+        machine='Ada'):
     '''
     Performs all three major steps: prepares the VCF, reduces it, and uses it
     for precision--recall calculations.
@@ -268,11 +275,11 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
     outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
-            region=region, vartype=vartype, normalize=False, PASS=False, overwrite=True)
+            region=region, vartype=vartype, normalize=False, PASS=False, overwrite=False)
     # model specific operations
     def helper(lam, log10s2g, sample):
         VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
-                log10s2g=log10s2g, sample=sample, overwrite=True)
+                log10s2g=log10s2g, sample=sample, overwrite=False)
         csetVCF = VCFpaths['reduced_callset'][0]
         tsetVCF = VCFpaths['reduced_truthset']
         pr = vmc_precrecall(csetVCF=csetVCF, tsetVCF=tsetVCF)
@@ -281,14 +288,15 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp'):
         pr['lam'] = lam
         pr['log10s2g'] = log10s2g
         pr['sample'] = sample
+        pr['machine'] = machine
         return(pr)
-    #pr = helper(lam='0.04', log10s2g='-2', sample='mix1')
     lams = ['0.04', '0.2']
     log10s2gs = ['-2', '-3', '-4']
     samples = ['mix1', 'mix2', 'mix3']
     l = [helper(lam=l, log10s2g=g, sample=s) for l in lams for g in
             log10s2gs for s in samples]
     pr = pd.concat(l)
+    pr = pr_astype(pr, vmc_pr=True)
     return(pr)
 
 
@@ -297,7 +305,7 @@ def run_all():
     Prepare and reduce callset and calculate precision and recall for all
     regions and variant types
     '''
-    regions = ['chr22', 'autosomes']
+    regions = ['chr22', 'chr1_2', 'autosomes']
     vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
@@ -306,7 +314,28 @@ def run_all():
     return(pr)
 
 
-def pr_astype(pr):
+def read_runtime(fpath, region, machine):
+    '''
+    Read POSIX formatted runtimes into a pandas DataFrame
+    '''
+    rt = pd.read_csv(fpath, delim_whitespace=True, names=['type', 'runtime'])
+    rt['region'] = region
+    rt['machine'] = machine
+    if region == 'chr1_2':
+        length = 249250621 + 243199373
+    if region == 'chr22':
+        length = 51304566
+    rt['region_length'] = length
+    return(rt)
+
+
+def correct_vmc_pr(pr, corr_f = (249250621 + 243199373) / 86682278 ):
+    corr_pr = pr.copy()
+    corr_pr['recall'] = pr['recall'] * corr_f
+    return(corr_pr)
+
+
+def pr_astype(pr, vmc_pr=False):
     '''
     Set data types for a precision recall data frame
 
@@ -315,7 +344,12 @@ def pr_astype(pr):
 
     Returns: the data frame with the same data but corrected data types
     '''
-    keys = ['callset', 'region', 'vartype', 'lam', 'log10s2g', 'sample']
+    keys = ['region', 'vartype', 'lam', 'log10s2g', 'sample']
+    if vmc_pr:
+        pr['log10s2g'] = np.int64(pr['log10s2g']) # crucial for consistency
+        keys = keys + ['machine', 'chrom', 'ref', 'alt']
+    else:
+        keys.append('callset')
     d = {k: 'category' for k in keys}
     pr = pr.astype(d)
     return(pr)
@@ -330,15 +364,39 @@ def read_pr_csv(csvpath):
     return(pr)
 
 
-def plotter1(df, sample='mix1', log10s2g=-2, vartype='snp'):
+def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
     '''
     Precision-recall plot; rows by log10s2g and columns by lambda
     '''
     seaborn.set()
-    sel_rows = (df['sample'] == sample) & (df['log10s2g'] == log10s2g) & (df['vartype'] == vartype)
-    df_sset = df.loc[sel_rows, :]
+    sel_rows = (pr['sample'] == sample) & (pr['log10s2g'] == log10s2g) & (pr['vartype'] == vartype)
+    df_sset = pr.loc[sel_rows, :]
     fg = seaborn.FacetGrid(data=df_sset,
             row='region', col='lam', hue='callset', sharey=True)
+    if vmc_pr is not None:
+        lams = vmc_pr['lam'].cat.categories
+        def helper(lamix):
+            lam = lams[lamix]
+            sel_rows = (vmc_pr['machine'] == 'Ada') \
+                    & (vmc_pr['log10s2g'] == log10s2g) \
+                    & (vmc_pr['sample'] == sample) \
+                    & (vmc_pr['vartype'] == vartype) \
+                    & (vmc_pr['lam'] == lam)
+            #df = vmc_pr.loc[sel_rows, :].copy()
+            def curveplotter(y='precision', linestyle='-', region='chr22'):
+                df = vmc_pr.loc[sel_rows & (vmc_pr['region'] == region), :].copy()
+                if region == 'chr22':
+                    row = 2
+                elif region == 'chr1_2':
+                    row = 1
+                fg.axes[row][lamix].plot(df['recall'], df[y],
+                        color='black', linestyle=linestyle)
+                return(None)
+            curveplotter('precision', '-', region='chr22')
+            curveplotter('precision_estim', ':', region='chr22')
+            curveplotter('precision', '-', region='chr1_2')
+            curveplotter('precision_estim', ':', region='chr1_2')
+        [helper(ix) for ix in range(len(lams))]
     fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
     fg = fg.add_legend()
     return(fg)
@@ -384,7 +442,7 @@ def vmc_read_svmprob(vmcVCF):
     return(df)
 
 
-def nrecords_in_vcf(vcf):
+def nrecords_in_vcf(vcf, PASS=False):
     '''
     Count records in VCF
 
@@ -394,7 +452,10 @@ def nrecords_in_vcf(vcf):
     Returns:
     the number of records
     '''
-    args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', vcf]
+    if PASS:
+        args0 = ['bcftools', 'view', '-f .,PASS', '--threads', __addthreads__, '-H', vcf]
+    else:
+        args0 = ['bcftools', 'view', '--threads', __addthreads__, '-H', vcf]
     args1 = ['wc', '-l']
     proc0 = subprocess.Popen(args0, shell=False, stdout=subprocess.PIPE)
     proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE, stdin=proc0.stdout)
