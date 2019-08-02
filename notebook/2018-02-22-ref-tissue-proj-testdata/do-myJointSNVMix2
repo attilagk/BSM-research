@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=${2:-1}
+init_cfg=/projects/bsm/calls/MSSM_179/NeuN_pl-muscle/JointSNVMix2/MSSM_179-NeuN_pl-muscle.cfg
+
+( time multiCaller -p ${nproc} \
+    -1 $length/Common_7_NeuN_DO16090243-final-all-$length.bam \
+    -2 $length/Fibro_Common_7_DO16090243-final-all-$length.bam \
+    -a Common_7_NeuN \
+    -b Fibro_Common_7 \
+    -i $init_cfg \
+    -o $length/${nproc}proc/ JointSNVMix2 ) 1>&$length/${nproc}proc/JointSNVMix2-run.time &

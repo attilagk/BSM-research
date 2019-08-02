@@ -2,6 +2,7 @@
 
 length=${1:-1MB}
 nproc=1 # JointSNVMix2 is single-threaded
+init_cfg=/projects/bsm/calls/MSSM_179/NeuN_pl-muscle/JointSNVMix2/MSSM_179-NeuN_pl-muscle.cfg
 
 outdir=$length/${nproc}proc
 
@@ -17,4 +18,5 @@ fi
     -2 $length/Mix3A-$length.bam \
     -a Mix1A \
     -b Mix3A \
-    -o $outdir ) 1>&$outdir/JointSNVMix2-run.time &
+    -i $init_cfg \
+    -o $outdir JointSNVMix2 ) 1>&$outdir/JointSNVMix2-run.time &
