@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+nproc=1
+outdir=/projects/bsm/attila/results/2019-08-02-common-sample-new-alignment
+
+( time multiCaller -p ${nproc} \
+    -1 Common_7_NeuN.bam \
+    -2 Fibro_Common_7.bam \
+    -a Common_7_NeuN \
+    -b Fibro_Common_7 \
+    -o $outdir somaticSniper ) 1>& somaticSniper-run.time &

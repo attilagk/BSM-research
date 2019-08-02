@@ -4,8 +4,8 @@ length=${1:-1MB}
 nproc=1
 
 ( time multiCaller -p ${nproc} \
-    -1 $length/Common_7_NeuNg-$length.bam \
-    -2 $length/Fibro_Common_7g-$length.bam \
+    -1 $length/Common_7_NeuN-$length.bam \
+    -2 $length/Fibro_Common_7-$length.bam \
     -a Common_7_NeuN \
     -b Fibro_Common_7 \
     -o $length/${nproc}proc/ somaticSniper ) 1>&$length/${nproc}proc/somaticSniper-run.time &

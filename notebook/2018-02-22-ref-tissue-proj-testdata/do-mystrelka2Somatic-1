@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+length=${1:-1MB}
+nproc=${2:-16}
+
+( time multiCaller -p ${nproc} \
+    -1 Common_7_NeuN.bam \
+    -2 Fibro_Common_7.bam \
+    -a Common_7_NeuN \
+    -b Fibro_Common_7 \
+    -o $PWD strelka2Somatic ) 1>&$length/${nproc}proc/strelka2Somatic-run.time &
