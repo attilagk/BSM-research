@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+BAMsdir=/projects/bsm/attila/results/2018-02-22-ref-tissue-proj-testdata/wgs
+BAMs="Common_7_NeuN_DO16090243-final-all-wgs.bam Common_7_NeuN.bam"
+for BAM in $BAMs; do
+    echo $BAM
+    samtools view $BAMsdir/$BAM 1:1000,000 | head -n1 | tr -s ' \t' '\n'
+    echo -e '\n'
+done
