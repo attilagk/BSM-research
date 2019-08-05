@@ -1,0 +1,10 @@
+[E::hts_open_format] Failed to open file /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/lofreqSomatic/out-somatic_final.snvs.vcf.gz
+Failed to open /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/lofreqSomatic/out-somatic_final.snvs.vcf.gz: No such file or directory
+[E::hts_open_format] Failed to open file /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/lofreqSomatic/out-somatic_final.indels.vcf.gz
+Failed to open /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/lofreqSomatic/out-somatic_final.indels.vcf.gz: No such file or directory
+tbx_index_build failed: /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/snvs/lofreqSomatic.vcf.gz
+tbx_index_build failed: /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/indels/lofreqSomatic.vcf.gz
+
+real	0m0.398s
+user	0m0.092s
+sys	0m0.062s

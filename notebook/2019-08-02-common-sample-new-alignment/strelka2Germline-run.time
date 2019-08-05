@@ -1,0 +1,9 @@
+/home/attila/bin/multiCaller: line 328: strelka2GermlinePostproc: command not found
+Failed to open -: unknown file type
+Failed to open -: unknown file type
+tbx_index_build failed: /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/snvs/strelka2Germline.vcf.gz
+tbx_index_build failed: /projects/bsm/attila/results/2019-08-02-common-sample-new-alignment/indels/strelka2Germline.vcf.gz
+
+real	0m0.050s
+user	0m0.023s
+sys	0m0.013s
