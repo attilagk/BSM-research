@@ -141,6 +141,7 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 
 \begin{frame}{What's realistic?}
 \includegraphics[scale=0.25]{../../notebook/2019-04-24-vaf-model-taejeong/named-figure/tj-vaf-hist-expon.pdf}
+\tiny Bae et al 2018 (Science 359 (6375), 550-555)
 \end{frame}
 
 \begin{frame}{A family of new truth sets}
@@ -148,39 +149,16 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \end{frame}
 
 
-\begin{frame}{Performance}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-SNVs
-
-\includegraphics<1->[height=0.8\textheight]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-log10s2g-2.pdf}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-\only<2>{indels}
-
-\includegraphics<2>[height=0.8\textheight]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-indel-log10s2g-2.pdf}
-\end{column}
-\end{columns}
+\begin{frame}{Performance: indels}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-indel-region-autosomes.pdf}
 \end{frame}
 
 \begin{frame}{Performance: SNVs}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-\(\log \mathrm{s2g} = -2\)
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-region-autosomes.pdf}
+\end{frame}
 
-\includegraphics<1->[height=0.8\textheight]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-log10s2g-2.pdf}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-\only<2>{\(\log \mathrm{s2g} = -3\)}
-\only<3>{\(\log \mathrm{s2g} = -4\)}
-
-\includegraphics<2>[height=0.8\textheight]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-log10s2g-3.pdf}
-
-\includegraphics<3>[height=0.8\textheight]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-log10s2g-4.pdf}
-\end{column}
-\end{columns}
+\begin{frame}[plain]{VariantMetaCaller}
+\includegraphics[width=0.9\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-lambda-02.pdf}
 \end{frame}
 
 \againframe{precrecall}
