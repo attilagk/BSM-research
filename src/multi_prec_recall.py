@@ -18,6 +18,7 @@ __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
 __addthreads__ = '7'
 __allthreads__ = str(int(__addthreads__) + 1)
+__markers__ = ['o', 'X', 's', 'P', 'd', '^', 'v']
 
 
 def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
@@ -364,12 +365,14 @@ def read_pr_csv(csvpath):
 
 
 def replace_categ(df, column='callset', old='Tnseq', new='MuTect2'):
+    df = df.copy()
     l = list(df['callset'].cat.categories)
     l = [x.replace('Tnseq', 'MuTect2') for x in l]
     df['callset'].cat.categories = l
     return(df)
 
 def replace_colname(df, old='log10s2g', new='s2g'):
+    df = df.copy()
     l = [x.replace(old, new) for x in df.columns]
     df.columns = l
     return(df)
@@ -388,8 +391,8 @@ def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
     seaborn.set()
     sel_rows = (pr['sample'] == sample) & (pr['log10s2g'] == log10s2g) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
-    fg = seaborn.FacetGrid(data=df_sset,
-            row='region', col='lam', hue='callset', sharey=True)
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+            row='region', col='lam', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
     if vmc_pr is not None:
         lams = vmc_pr['lam'].cat.categories
         def helper(lamix):
@@ -413,7 +416,7 @@ def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
             curveplotter('precision', '-', region='chr1_2')
             curveplotter('precision_estim', ':', region='chr1_2')
         [helper(ix) for ix in range(len(lams))]
-    fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
+    fg = fg.map(plt.plot, 'recall', 'precision')
     fg = fg.add_legend()
     return(fg)
 
@@ -440,9 +443,10 @@ def plotter3(pr, vmc_pr=None, sample='mix1', region='autosomes', vartype='snp'):
     seaborn.set()
     sel_rows = (pr['sample'] == sample) & (pr['region'] == region) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
-    fg = seaborn.FacetGrid(data=df_sset,
-            row='lam', col='s2g', hue='callset', sharey=True)
-    fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+            row='lam', col='s2g', hue='callset', sharey=True,
+            hue_kws=dict(marker=__markers__))
+    fg = fg.map(plt.plot, 'recall', 'precision')
     fg = fg.add_legend()
     return(fg)
 
@@ -451,17 +455,26 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     '''
     '''
     seaborn.set()
+    # filter pr and vmc_pr
     pr = pr_astype(pr, False)
     vmc_pr = pr_astype(vmc_pr, True)
     sel_rows = (pr['sample'] == sample) & (pr['lam'] == lam) & (pr['vartype'] == vartype)
     df_sset = pr.loc[sel_rows, :]
     df_sset = pr_astype(df_sset, False)
     df_sset = fix_names(pr.loc[sel_rows, :])
+    # all levels of regions in either pr or vmc_pr
     regions = vmc_pr['region'].cat.categories
     allregions = list(pr['region'].cat.categories)
-    fg = seaborn.FacetGrid(data=df_sset,
-            row='region', col='s2g', hue='callset', sharey=True)
+    # create FacetGrid object without plotting
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+            row='region', col='s2g', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
     def helper(reg):
+        '''
+        Make all plots for a given region (a row of the plot matrix)
+        Parameter:
+        reg: the region such as autosomes, chr1_2, chr22
+        '''
+        # get index for reg
         regix = allregions.index(reg)
         sel_rows = (vmc_pr['machine'] == 'Ada') \
                 & (vmc_pr['sample'] == sample) \
@@ -469,14 +482,17 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
                 & (vmc_pr['region'] == reg) \
                 & (vmc_pr['lam'] == '0.2')
         def curveplotter(y='precision', linestyle='-', log10s2g=-3):
+            # filter df
             df = vmc_pr.loc[sel_rows & (vmc_pr['log10s2g'] == log10s2g), :].copy()
             df = pr_astype(df, True)
+            # determine column index based on log10s2g
             if log10s2g == -2:
                 column = 2
             elif log10s2g == -3:
                 column = 1
             elif log10s2g == -4:
                 column = 0
+            # plot on the axes object for row 'regix' and column 'column'
             fg.axes[regix][column].plot(df['recall'], df[y],
                     color='black', linestyle=linestyle)
             return(None)
@@ -488,7 +504,7 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
         curveplotter('precision_estim', ':', log10s2g=-4)
         return(None)
     r = [helper(x) for x in regions]
-    fg = fg.map(plt.plot, 'recall', 'precision', marker='o')
+    fg = fg.map(plt.plot, 'recall', 'precision')
     fg = fg.add_legend()
     return(fg)
 

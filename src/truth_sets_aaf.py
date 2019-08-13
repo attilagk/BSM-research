@@ -345,7 +345,17 @@ def exp_model_plot0(expm, log10s2g=-3, region='autosomes'):
     sel_rows = (expm['log10s2g'] == log10s2g) & (expm['region'] == region)
     df = expm.loc[sel_rows, :]
     g = sns.FacetGrid(df, row='sample', col='lambda', hue='vartype',
-            sharey=False, aspect=2)
+            sharey=False, aspect=2, margin_titles=True)
+    g.map(plt.plot, 'AAF', 'count', marker='o', linestyle='dotted', markeredgecolor='white')
+    g = g.add_legend()
+    return(g)
+
+
+def exp_model_plot1(expm, sample='mix1', region='autosomes'):
+    sel_rows = (expm['sample'] == sample) & (expm['region'] == region)
+    df = expm.loc[sel_rows, :]
+    g = sns.FacetGrid(df, row='lambda', col='log10s2g', hue='vartype',
+            sharey=False, margin_titles=True)
     g.map(plt.plot, 'AAF', 'count', marker='o', linestyle='dotted', markeredgecolor='white')
     g = g.add_legend()
     return(g)
