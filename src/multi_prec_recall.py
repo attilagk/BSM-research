@@ -22,7 +22,7 @@ __markers__ = ['o', 'X', 's', 'P', 'd', '^', 'v']
 
 
 def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1', callsetdir=None):
+        s2g='-2', sample='mix1', callsetdir=None):
     '''
     Create pathname for various input, output, intermediate VCF files.
 
@@ -31,7 +31,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     region: chr22, chr1_2 or autosomes
     vartype: snp or indel
     lam: '0.04' or '0.2'
-    log10s2g: '-2', '-3' or '-4'
+    s2g: '-2', '-3' or '-4'
     sample: 'mix1', 'mix2' or 'mix3'
 
     Returns:
@@ -47,7 +47,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     prepared_callset: filtered for region and vartype
     
     reduced_truthset: the truthset according to the exp_model with parameters
-    lam, log10s2g, sample
+    lam, s2g, sample
     
     discarded_from_truthset: the complementer set of reduced_truthset relative to
     the original truthset based on the original mixes
@@ -64,7 +64,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     '''
     # some pieces of pathnames
     subdir1 = region + os.path.sep + vartype + os.path.sep
-    subdir2 = lam + '/log10s2g_' + log10s2g + os.path.sep + sample + os.path.sep
+    subdir2 = lam + '/s2g_' + s2g + os.path.sep + sample + os.path.sep
     if vartype == 'snp':
         alt_vartype = 'snvs'
     elif vartype == 'indel':
@@ -176,7 +176,7 @@ def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp',
 
 
 def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1', overwrite=False):
+        s2g='-2', sample='mix1', overwrite=False):
     '''
     Reduces (discards nonvariants from) the prepared callsets for a given region, vartype and exp_model
 
@@ -185,7 +185,7 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     region: chr22 or autosomes
     vartype: snp or indel
     lam: '0.04' or '0.2'
-    log10s2g: '-2', '-3' or '-4'
+    s2g: '-2', '-3' or '-4'
     sample: 'mix1', 'mix2' or 'mix3'
     overwrite: whether to overwrite existing reduced callsets
 
@@ -195,7 +195,7 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     if callsetbn is None:
         callsetbn = get_callsetbn(vartype)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
-            vartype=vartype, lam=lam, log10s2g=log10s2g, sample=sample)
+            vartype=vartype, lam=lam, s2g=s2g, sample=sample)
     def helper(prepared_cset):
         discarded_tset = VCFpaths['discarded_from_truthset']
         red_cset_dir = VCFpaths['reduced_callset_dir']
@@ -228,16 +228,16 @@ def prec_recall_one_truthset(truthset, callsets):
 
 
 def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
-        log10s2g='-2', sample='mix1'):
+        s2g='-2', sample='mix1'):
     VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype, lam=lam,
-            log10s2g=log10s2g, sample=sample)
+            s2g=s2g, sample=sample)
     truthset = VCFpaths['reduced_truthset']
     callsets = VCFpaths['reduced_callset']
     pr = prec_recall_one_truthset(truthset=truthset, callsets=callsets)
     pr['region'] = region
     pr['vartype'] = vartype
     pr['lam'] = lam
-    pr['log10s2g'] = log10s2g
+    pr['s2g'] = s2g
     pr['sample'] = sample
     pr = pr_astype(pr)
     return(pr)
@@ -249,15 +249,15 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp'):
     region and variant type
     '''
     val = prepare4prec_recall(region=region, vartype=vartype)
-    def process1exp_model(lam, log10s2g, sample):
+    def process1exp_model(lam, s2g, sample):
         pr = reduce_precrecall(region=region, vartype=vartype, lam=lam,
-                log10s2g=log10s2g, sample=sample)
+                s2g=s2g, sample=sample)
         return(pr)
     lams = ['0.04', '0.2']
-    log10s2gs = ['-2', '-3', '-4']
+    s2gs = ['-2', '-3', '-4']
     samples = ['mix1', 'mix2', 'mix3']
-    l = [process1exp_model(lam=l, log10s2g=g, sample=s) for l in lams for g in
-            log10s2gs for s in samples]
+    l = [process1exp_model(lam=l, s2g=g, sample=s) for l in lams for g in
+            s2gs for s in samples]
     pr = pd.concat(l)
     pr = pr_astype(pr)
     return(pr)
@@ -277,24 +277,24 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
     outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
             region=region, vartype=vartype, normalize=False, PASS=False, overwrite=False)
     # model specific operations
-    def helper(lam, log10s2g, sample):
+    def helper(lam, s2g, sample):
         VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
-                log10s2g=log10s2g, sample=sample, overwrite=False)
+                s2g=s2g, sample=sample, overwrite=False)
         csetVCF = VCFpaths['reduced_callset'][0]
         tsetVCF = VCFpaths['reduced_truthset']
         pr = vmc_precrecall(csetVCF=csetVCF, tsetVCF=tsetVCF)
         pr['region'] = region
         pr['vartype'] = vartype
         pr['lam'] = lam
-        pr['log10s2g'] = log10s2g
+        pr['s2g'] = s2g
         pr['sample'] = sample
         pr['machine'] = machine
         return(pr)
     lams = ['0.04', '0.2']
-    log10s2gs = ['-2', '-3', '-4']
+    s2gs = ['-2', '-3', '-4']
     samples = ['mix1', 'mix2', 'mix3']
-    l = [helper(lam=l, log10s2g=g, sample=s) for l in lams for g in
-            log10s2gs for s in samples]
+    l = [helper(lam=l, s2g=g, sample=s) for l in lams for g in
+            s2gs for s in samples]
     pr = pd.concat(l)
     pr = pr_astype(pr, vmc_pr=True)
     return(pr)
@@ -344,9 +344,9 @@ def pr_astype(pr, vmc_pr=False):
 
     Returns: the data frame with the same data but corrected data types
     '''
-    keys = ['region', 'vartype', 'lam', 'log10s2g', 'sample']
+    keys = ['region', 'vartype', 'lam', 's2g', 'sample']
     if vmc_pr:
-        pr['log10s2g'] = np.int64(pr['log10s2g']) # crucial for consistency
+        pr['s2g'] = np.int64(pr['s2g']) # crucial for consistency
         keys = keys + ['machine', 'chrom', 'ref', 'alt']
     else:
         keys.append('callset')
@@ -371,7 +371,7 @@ def replace_categ(df, column='callset', old='Tnseq', new='MuTect2'):
     df['callset'].cat.categories = l
     return(df)
 
-def replace_colname(df, old='log10s2g', new='s2g'):
+def replace_colname(df, old='s2g', new='s2g'):
     df = df.copy()
     l = [x.replace(old, new) for x in df.columns]
     df.columns = l
@@ -380,16 +380,17 @@ def replace_colname(df, old='log10s2g', new='s2g'):
 
 def fix_names(df):
     df = replace_categ(df, column='callset', old='Tnseq', new='MuTect2')
-    df = replace_colname(df, old='log10s2g', new='s2g')
+    df = replace_colname(df, old='s2g', new='s2g')
     return(df)
 
 
-def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
+def plotter1(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
     '''
-    Precision-recall plot; rows by log10s2g and columns by lambda
+    Precision-recall plot; rows by s2g and columns by lambda
     '''
     seaborn.set()
-    sel_rows = (pr['sample'] == sample) & (pr['log10s2g'] == log10s2g) & (pr['vartype'] == vartype)
+    seaborn.set_context('talk')
+    sel_rows = (pr['sample'] == sample) & (pr['s2g'] == s2g) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
     fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
             row='region', col='lam', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
@@ -398,7 +399,7 @@ def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
         def helper(lamix):
             lam = lams[lamix]
             sel_rows = (vmc_pr['machine'] == 'Ada') \
-                    & (vmc_pr['log10s2g'] == log10s2g) \
+                    & (vmc_pr['s2g'] == s2g) \
                     & (vmc_pr['sample'] == sample) \
                     & (vmc_pr['vartype'] == vartype) \
                     & (vmc_pr['lam'] == lam)
@@ -423,13 +424,14 @@ def plotter1(pr, vmc_pr=None, sample='mix1', log10s2g=-2, vartype='snp'):
 
 def plotter2(df, hue='machine', sample='mix1'):
     '''
-    Precision-recall plot; rows by log10s2g and columns by lambda
+    Precision-recall plot; rows by s2g and columns by lambda
     '''
     seaborn.set()
+    seaborn.set_context('talk')
     sel_rows = (df['sample'] == sample)
     df_sset = df.loc[sel_rows, :]
     fg = seaborn.FacetGrid(data=df_sset,
-            row='log10s2g', col='lam', hue=hue)
+            row='s2g', col='lam', hue=hue)
     fg = fg.map(plt.plot, 'recall', 'precision')
     #fg = fg.map(plt.plot, 'recall', 'precision_estim')
     fg = fg.add_legend()
@@ -438,9 +440,10 @@ def plotter2(df, hue='machine', sample='mix1'):
 
 def plotter3(pr, vmc_pr=None, sample='mix1', region='autosomes', vartype='snp'):
     '''
-    Precision-recall plot; rows by lambda and columns by log10s2g
+    Precision-recall plot; rows by lambda and columns by s2g
     '''
     seaborn.set()
+    seaborn.set_context('talk')
     sel_rows = (pr['sample'] == sample) & (pr['region'] == region) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
     fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
@@ -455,6 +458,7 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     '''
     '''
     seaborn.set()
+    seaborn.set_context('talk')
     # filter pr and vmc_pr
     pr = pr_astype(pr, False)
     vmc_pr = pr_astype(vmc_pr, True)
@@ -481,27 +485,27 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
                 & (vmc_pr['vartype'] == vartype) \
                 & (vmc_pr['region'] == reg) \
                 & (vmc_pr['lam'] == '0.2')
-        def curveplotter(y='precision', linestyle='-', log10s2g=-3):
+        def curveplotter(y='precision', linestyle='-', s2g=-3):
             # filter df
-            df = vmc_pr.loc[sel_rows & (vmc_pr['log10s2g'] == log10s2g), :].copy()
+            df = vmc_pr.loc[sel_rows & (vmc_pr['s2g'] == s2g), :].copy()
             df = pr_astype(df, True)
-            # determine column index based on log10s2g
-            if log10s2g == -2:
+            # determine column index based on s2g
+            if s2g == -2:
                 column = 2
-            elif log10s2g == -3:
+            elif s2g == -3:
                 column = 1
-            elif log10s2g == -4:
+            elif s2g == -4:
                 column = 0
             # plot on the axes object for row 'regix' and column 'column'
             fg.axes[regix][column].plot(df['recall'], df[y],
                     color='black', linestyle=linestyle)
             return(None)
-        curveplotter('precision', '-', log10s2g=-2)
-        curveplotter('precision_estim', ':', log10s2g=-2)
-        curveplotter('precision', '-', log10s2g=-3)
-        curveplotter('precision_estim', ':', log10s2g=-3)
-        curveplotter('precision', '-', log10s2g=-4)
-        curveplotter('precision_estim', ':', log10s2g=-4)
+        curveplotter('precision', '-', s2g=-2)
+        curveplotter('precision_estim', ':', s2g=-2)
+        curveplotter('precision', '-', s2g=-3)
+        curveplotter('precision_estim', ':', s2g=-3)
+        curveplotter('precision', '-', s2g=-4)
+        curveplotter('precision_estim', ':', s2g=-4)
         return(None)
     r = [helper(x) for x in regions]
     fg = fg.map(plt.plot, 'recall', 'precision')

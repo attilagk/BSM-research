@@ -279,7 +279,7 @@ def scaled_exponential(lam, ntot, aafs):
     return(scaled)
 
 
-def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
+def exp_model_df(nvariants, region, sample, vartype, s2g, lam):
     '''
     Create a histogram of AAF according to an exponential model
 
@@ -288,14 +288,14 @@ def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
     region: 'autosomes' or 'chr22'
     sample: 'mix1', 'mix2', or 'mix3'
     vartype: 'snp' or 'indel'
-    log10s2g: log base 10 of the odds of somatic : germline variants
+    s2g: log base 10 of the odds of somatic : germline variants
     lam: rate lambda of the exponential
 
     Returns:
     a pandas DataFrame with AAF + count (i.e. histogram) and input parameters
     '''
     germ_vars = combine_regions_germ_vars()
-    ntot = germ_vars[vartype][region] * 10 ** log10s2g
+    ntot = germ_vars[vartype][region] * 10 ** s2g
     ntot = np.int64(ntot)
     sel_rows = (nvariants['region'] == region) & (nvariants['sample'] ==
             sample) & (nvariants['vartype'] == vartype)
@@ -303,19 +303,19 @@ def exp_model_df(nvariants, region, sample, vartype, log10s2g, lam):
     count = scaled_exponential(lam, ntot, aafs)
     count = np.int64(count)
     d = {'AAF': aafs, 'count': count, 'region': region, 'sample': sample,
-            'vartype': vartype, 'log10s2g': log10s2g, 'ntot': ntot, 'lambda': lam}
+            'vartype': vartype, 's2g': s2g, 'ntot': ntot, 'lambda': lam}
     df = pd.DataFrame(d)
     df = df.astype({'region': 'category', 'sample': 'category', 'vartype': 'category'})
     return(df)
 
 
-def exp_model_df_concat(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
+def exp_model_df_concat(nvariants, s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
     '''
     Concatenate into a DataFrame the iterator created by exp_model_iter
 
     Parameters:
     it: the iterator created by exp_model_iter
-    log10s2gs: a list of multiple levels of log10s2g (see the log10s2g parameter of exp_model_df)
+    s2gs: a list of multiple levels of s2g (see the s2g parameter of exp_model_df)
     lambdas: a list multiple levels of lambda (see the lam parameter of exp_model_df)
 
     Returns:
@@ -323,26 +323,26 @@ def exp_model_df_concat(nvariants, log10s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
     '''
     categcols = ['region', 'sample', 'vartype']
     l = [nvariants[c].cat.categories for c in categcols]
-    l = l + [log10s2gs] + [lambdas]
+    l = l + [s2gs] + [lambdas]
     it = itertools.product(*l)
     df = pd.concat([exp_model_df(nvariants, *y) for y in it])
-    df = df.astype({'lambda': 'category', 'log10s2g': 'category', 'region': 'category', 'sample': 'category', 'vartype': 'category'})
+    df = df.astype({'lambda': 'category', 's2g': 'category', 'region': 'category', 'sample': 'category', 'vartype': 'category'})
     return(df)
 
 
-def exp_model_plot0(expm, log10s2g=-3, region='autosomes'):
+def exp_model_plot0(expm, s2g=-3, region='autosomes'):
     '''
     Plots a grid of histograms of AAF corresponding to a set of exponential models
 
     Parameters:
     expm: the value of exp_model_df_concat
-    log10s2g: log base 10 of the odds of somatic : germline variants
+    s2g: log base 10 of the odds of somatic : germline variants
     region: 'autosomes' or 'chr22'
 
     Returns:
     a seaborn FacetGrid object
     '''
-    sel_rows = (expm['log10s2g'] == log10s2g) & (expm['region'] == region)
+    sel_rows = (expm['s2g'] == s2g) & (expm['region'] == region)
     df = expm.loc[sel_rows, :]
     g = sns.FacetGrid(df, row='sample', col='lambda', hue='vartype',
             sharey=False, aspect=2, margin_titles=True)
@@ -354,7 +354,7 @@ def exp_model_plot0(expm, log10s2g=-3, region='autosomes'):
 def exp_model_plot1(expm, sample='mix1', region='autosomes'):
     sel_rows = (expm['sample'] == sample) & (expm['region'] == region)
     df = expm.loc[sel_rows, :]
-    g = sns.FacetGrid(df, row='lambda', col='log10s2g', hue='vartype',
+    g = sns.FacetGrid(df, row='lambda', col='s2g', hue='vartype',
             sharey=False, margin_titles=True)
     g.map(plt.plot, 'AAF', 'count', marker='o', linestyle='dotted', markeredgecolor='white')
     g = g.add_legend()
@@ -375,7 +375,8 @@ def aaf_distplot(aafdf=get_taejeongs_aaf(), fit=stats.expon):
     '''
     sns.set()
     sns.set_context('talk')
-    g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5, height=4)
+    g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5)
+    #g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5, height=4)
     g.map(sns.distplot, 'VAF', hist=True, rug=True, kde=False,
             fit=fit)
     if fit is None:
@@ -463,11 +464,11 @@ def deduce_pathname(expm, topdir='/home/attila/projects/bsm/results/2019-03-18-t
     region = expm.at[ix0, 'region']
     vartype = expm.at[ix0, 'vartype']
     lam = expm.at[ix0, 'lambda']
-    log10s2g = expm.at[ix0, 'log10s2g']
+    s2g = expm.at[ix0, 's2g']
     sample = expm.at[ix0, 'sample']
     basedir = topdir + os.path.sep + region + os.path.sep + vartype + os.path.sep + 'truthset/aaf/'
     indir = basedir + 'unfiltered/' + sample + os.path.sep
-    outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 'log10s2g_' + str(log10s2g) + os.path.sep + sample + os.path.sep
+    outdir = basedir + 'exp_model/lambda_' + str(lam) + os.path.sep + 's2g_' + str(s2g) + os.path.sep + sample + os.path.sep
     d = {'indir': indir, 'outdir': outdir}
     return(d)
 
