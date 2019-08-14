@@ -430,7 +430,7 @@ def plotter2(df, hue='machine', sample='mix1'):
     seaborn.set_context('talk')
     sel_rows = (df['sample'] == sample)
     df_sset = df.loc[sel_rows, :]
-    fg = seaborn.FacetGrid(data=df_sset,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
             row='s2g', col='lam', hue=hue)
     fg = fg.map(plt.plot, 'recall', 'precision')
     #fg = fg.map(plt.plot, 'recall', 'precision_estim')
