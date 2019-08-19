@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 
 __snpcallers__ = ['Tnseq', 'lofreqSomatic', 'strelka2Germline2s', 'strelka2Somatic', 'somaticSniper']
 __indelcallers__ = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
-__callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
+__callsetmaindir__ = '/home/attila/projects/bsm/results/calls/mixing-experiment/'
+#__callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
