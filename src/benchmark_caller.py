@@ -8,6 +8,7 @@ import shutil
 __maindir__ = '/projects/bsm/calls/mixing-experiment'
 __BAMdir__ = '/projects/bsm/alignments/ceph-benchmark/'
 __init_cfg__ = '/projects/bsm/calls/MSSM_179/NeuN_pl-muscle/JointSNVMix2/MSSM_179-NeuN_pl-muscle.cfg'
+__REFSEQ__ = '/projects/shared/refgenome/GRCh37/dna/hs37d5.fa'
 
 
 def call(caller='somaticSniper', case='Mix1', control='Mix2', nproc=1, overwrite=False):
@@ -41,7 +42,7 @@ def call(caller='somaticSniper', case='Mix1', control='Mix2', nproc=1, overwrite
         os.makedirs(outdir, exist_ok=False)
     caseBAM = __BAMdir__ + os.path.sep + case + 'A.bam'
     controlBAM = __BAMdir__ + os.path.sep + control + 'A.bam'
-    args = ['multiCaller', '-p', nproc, '-r', '$REFSEQ', '-1', caseBAM, '-2', controlBAM,
+    args = ['multiCaller', '-p', nproc, '-r', __REFSEQ__, '-1', caseBAM, '-2', controlBAM,
             '-t', t_opt, '-i', __init_cfg__, '-a', case, '-b', control, '-o', outdir, caller]
     subprocess.run(args=args)
     return(sdir)
