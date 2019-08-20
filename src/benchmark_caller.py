@@ -43,7 +43,8 @@ def call(caller='somaticSniper', case='Mix1', control='Mix2', nproc=1, overwrite
     caseBAM = __BAMdir__ + os.path.sep + case + 'A.bam'
     controlBAM = __BAMdir__ + os.path.sep + control + 'A.bam'
     args = ['multiCaller', '-p', nproc, '-r', __REFSEQ__, '-1', caseBAM, '-2', controlBAM,
-            '-t', t_opt, '-i', __init_cfg__, '-a', case, '-b', control, '-o', outdir, caller]
+            '-t', t_opt, '-i', __init_cfg__, '-a', case + 'A', '-b', control +
+            'A', '-o', outdir, caller]
     subprocess.run(args=args)
     return(sdir)
 
