@@ -10,8 +10,6 @@ import truth_sets_aaf as tsa
 import seaborn
 import matplotlib.pyplot as plt
 
-__snpcallers__ = ['Tnseq', 'lofreqSomatic', 'strelka2Germline2s', 'strelka2Somatic', 'somaticSniper']
-__indelcallers__ = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/mixing-experiment/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-08-15-benchmark-calls/'
@@ -34,6 +32,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     lam: '0.04' or '0.2'
     s2g: '-2', '-3' or '-4'
     case_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2' or 'mix3'
 
     Returns:
     
@@ -103,17 +102,35 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
 
 
 def count_vcf_records(VCFpath):
-        args1 = ['bcftools', 'view', '--threads', __addthreads__, '-H', VCFpath]
-        args2 = ['wc', '-l']
-        proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
-        proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
-        proc1.stdout.close()
-        nrec = proc2.communicate()[0]
-        nrec = int(nrec) # turn bytesliteral (e.g. b'5226\n') to integer
-        return(nrec)
+    '''
+    Counts records in VCF
+
+    Parameter:
+    VCFpath: the path to the VCF
+
+    Returns: the count (integer)
+    '''
+    args1 = ['bcftools', 'view', '--threads', __addthreads__, '-H', VCFpath]
+    args2 = ['wc', '-l']
+    proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
+    proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
+    proc1.stdout.close()
+    nrec = proc2.communicate()[0]
+    nrec = int(nrec) # turn bytesliteral (e.g. b'5226\n') to integer
+    return(nrec)
 
 
 def get_callsetbn(vartype='snp', case_sample='mix1', control_sample='mix2', from_prepared_callset_dir=False):
+    '''
+    Gets callsetbn (see getVCFpaths) for available callsets for vartype, case_sample and control_sample
+
+    Parameters:
+    vartype: snp or indel
+    case_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2' or 'mix3'
+
+    Returns: the callsetbn (list)
+    '''
     VCFpaths = getVCFpaths(vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     if not from_prepared_callset_dir:
         callsets = VCFpaths['callset']
@@ -121,13 +138,6 @@ def get_callsetbn(vartype='snp', case_sample='mix1', control_sample='mix2', from
     else:
         callsets = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
         callsetbn = [os.path.basename(y) for y in callsets]
-    return(callsetbn)
-    callset = glob.glob(callsetdir + '*.vcf.gz')
-    if vartype == 'snp':
-        callers = __snpcallers__
-    elif vartype == 'indel':
-        callers = __indelcallers__
-    callsetbn = [c + '.vcf.gz' for c in callers]
     return(callsetbn)
 
 
@@ -140,10 +150,13 @@ def prepare4prec_recall(region='chr22', vartype='snp', case_sample='mix1',
     Parameter(s):
     region: chr22, chr1_2 or autosomes
     vartype: snp or indel
+    case_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2' or 'mix3'
 
     Returns: a list of the pathname of output VCFs
     '''
-    callsetbn = get_callsetbn(vartype, from_prepared_callset_dir=False)
+    callsetbn = get_callsetbn(vartype, case_sample=case_sample,
+            control_sample=control_sample, from_prepared_callset_dir=False)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     outdir = VCFpaths['prepared_callset_dir']
@@ -220,7 +233,8 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     '''
     VCFpaths = getVCFpaths(region=region, vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     if callsetbn is None:
-        callsetbn = get_callsetbn(vartype, from_prepared_callset_dir=True)
+        callsetbn = get_callsetbn(vartype, case_sample=case_sample,
+                control_sample=control_sample, from_prepared_callset_dir=True)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, s2g=s2g, case_sample=case_sample, control_sample=control_sample)
     def helper(prepared_cset):
@@ -276,7 +290,6 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1')
     Prepare and reduce callset and calculate precision and recall for a given
     region and variant type
     '''
-    #val = prepare4prec_recall(region=region, vartype=vartype)
     def process1exp_model(lam, s2g, control_sample):
         val = prepare4prec_recall(region=region, vartype=vartype,
                 case_sample=case_sample, control_sample=control_sample)
@@ -331,7 +344,8 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
     return(pr)
 
 
-def run_all():
+#def run_all():
+def prepare_reduce_precrecall_all():
     '''
     Prepare and reduce callset and calculate precision and recall for all
     regions and variant types
