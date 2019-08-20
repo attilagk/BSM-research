@@ -13,11 +13,10 @@ import matplotlib.pyplot as plt
 __snpcallers__ = ['Tnseq', 'lofreqSomatic', 'strelka2Germline2s', 'strelka2Somatic', 'somaticSniper']
 __indelcallers__ = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/mixing-experiment/'
-#__callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-08-15-benchmark-calls/'
-#__outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
+__expmsubdir1__ = 'filtered4exp_model/lambda_'
 __addthreads__ = '7'
 __allthreads__ = str(int(__addthreads__) + 1)
 __markers__ = ['o', 'X', 's', 'P', 'd', '^', 'v']
@@ -66,18 +65,20 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     '''
     # some pieces of pathnames
     sample_pair = case_sample + '-' + control_sample
+    subdir0 = region + os.path.sep + vartype + os.path.sep
     subdir1 = sample_pair + os.path.sep + region + os.path.sep + vartype + os.path.sep
-    subdir2 = lam + '/s2g_' + s2g + os.path.sep + case_sample + os.path.sep
+    subdir2 = lam + '/s2g_' + s2g + os.path.sep
+    subdir3 = subdir2 + case_sample + os.path.sep
     if vartype == 'snp':
         alt_vartype = 'snvs'
     elif vartype == 'indel':
         alt_vartype = 'indels'
     # directories
-    truthsetdir = __truthsetmaindir__ + subdir1 + __expmsubdir__ + subdir2
+    truthsetdir = __truthsetmaindir__ + subdir0 + __expmsubdir__ + subdir3
     if callsetdir is None:
         callsetdir = __callsetmaindir__ + sample_pair + os.path.sep + alt_vartype + os.path.sep
     prepared_callset_dir = __outmaindir__ + subdir1
-    reduced_callset_dir = __outmaindir__ + subdir1 + __expmsubdir__ + subdir2
+    reduced_callset_dir = __outmaindir__ + subdir1 + __expmsubdir1__ + subdir2
     # filepaths
     reduced_truthset =  truthsetdir + 'complete.vcf.gz'
     discarded_from_truthset =  truthsetdir + 'discarded-complete.vcf.gz'
@@ -101,7 +102,27 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     return(VCFpaths)
 
 
-def get_callsetbn(vartype):
+def count_vcf_records(VCFpath):
+        args1 = ['bcftools', 'view', '--threads', __addthreads__, '-H', VCFpath]
+        args2 = ['wc', '-l']
+        proc1 = subprocess.Popen(args1, shell=False, stdout=subprocess.PIPE)
+        proc2 = subprocess.Popen(args2, shell=False, stdout=subprocess.PIPE, stdin=proc1.stdout)
+        proc1.stdout.close()
+        nrec = proc2.communicate()[0]
+        nrec = int(nrec) # turn bytesliteral (e.g. b'5226\n') to integer
+        return(nrec)
+
+
+def get_callsetbn(vartype='snp', case_sample='mix1', control_sample='mix2', from_prepared_callset_dir=False):
+    VCFpaths = getVCFpaths(vartype=vartype, case_sample=case_sample, control_sample=control_sample)
+    if not from_prepared_callset_dir:
+        callsets = VCFpaths['callset']
+        callsetbn = [os.path.basename(y) for y in callsets if count_vcf_records(y) > 0]
+    else:
+        callsets = glob.glob(VCFpaths['prepared_callset_dir'] + '*.vcf.gz')
+        callsetbn = [os.path.basename(y) for y in callsets]
+    return(callsetbn)
+    callset = glob.glob(callsetdir + '*.vcf.gz')
     if vartype == 'snp':
         callers = __snpcallers__
     elif vartype == 'indel':
@@ -111,7 +132,7 @@ def get_callsetbn(vartype):
 
 
 def prepare4prec_recall(region='chr22', vartype='snp', case_sample='mix1',
-        control_sample='mix3'):
+        control_sample='mix2'):
     '''
     Run prepare4prec-recall shell script on initial callset VCFs for a given
     region and variant type
@@ -122,7 +143,7 @@ def prepare4prec_recall(region='chr22', vartype='snp', case_sample='mix1',
 
     Returns: a list of the pathname of output VCFs
     '''
-    callsetbn = get_callsetbn(vartype)
+    callsetbn = get_callsetbn(vartype, from_prepared_callset_dir=False)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     outdir = VCFpaths['prepared_callset_dir']
@@ -197,9 +218,9 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
 
     Returns: a list of pathnames of the reduced callsets
     '''
-    VCFpaths = getVCFpaths(region=region, vartype=vartype)
+    VCFpaths = getVCFpaths(region=region, vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     if callsetbn is None:
-        callsetbn = get_callsetbn(vartype)
+        callsetbn = get_callsetbn(vartype, from_prepared_callset_dir=True)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, s2g=s2g, case_sample=case_sample, control_sample=control_sample)
     def helper(prepared_cset):
@@ -234,9 +255,9 @@ def prec_recall_one_truthset(truthset, callsets):
 
 
 def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
-        s2g='-2', sample='mix1'):
-    VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype, lam=lam,
-            s2g=s2g, sample=sample)
+        s2g='-2', case_sample='mix1', control_sample='mix2'):
+    VCFpaths = reduce_prepared_callsets(region=region, vartype=vartype,
+            lam=lam, s2g=s2g, case_sample=case_sample, control_sample=control_sample, overwrite=False)
     truthset = VCFpaths['reduced_truthset']
     callsets = VCFpaths['reduced_callset']
     pr = prec_recall_one_truthset(truthset=truthset, callsets=callsets)
@@ -244,26 +265,30 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
     pr['vartype'] = vartype
     pr['lam'] = lam
     pr['s2g'] = s2g
-    pr['sample'] = sample
+    pr['case_sample'] = case_sample
+    pr['control_sample'] = control_sample
     pr = pr_astype(pr)
     return(pr)
 
 
-def prepare_reduce_precrecall(region='chr22', vartype='snp'):
+def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1'):
     '''
     Prepare and reduce callset and calculate precision and recall for a given
     region and variant type
     '''
-    val = prepare4prec_recall(region=region, vartype=vartype)
-    def process1exp_model(lam, s2g, sample):
+    #val = prepare4prec_recall(region=region, vartype=vartype)
+    def process1exp_model(lam, s2g, control_sample):
+        val = prepare4prec_recall(region=region, vartype=vartype,
+                case_sample=case_sample, control_sample=control_sample)
         pr = reduce_precrecall(region=region, vartype=vartype, lam=lam,
-                s2g=s2g, sample=sample)
+                s2g=s2g, case_sample=case_sample, control_sample=control_sample)
         return(pr)
     lams = ['0.04', '0.2']
     s2gs = ['-2', '-3', '-4']
-    samples = ['mix1', 'mix2', 'mix3']
-    l = [process1exp_model(lam=l, s2g=g, sample=s) for l in lams for g in
-            s2gs for s in samples]
+    control_samples = ['mix2', 'mix3']
+    #control_samples = ['mix1', 'mix2', 'mix3']
+    l = [process1exp_model(lam=l, s2g=g, control_sample=s) for l in lams for g in
+            s2gs for s in control_samples]
     pr = pd.concat(l)
     pr = pr_astype(pr)
     return(pr)
@@ -350,7 +375,7 @@ def pr_astype(pr, vmc_pr=False):
 
     Returns: the data frame with the same data but corrected data types
     '''
-    keys = ['region', 'vartype', 'lam', 's2g', 'sample']
+    keys = ['region', 'vartype', 'lam', 's2g', 'case_sample', 'control_sample']
     if vmc_pr:
         pr['s2g'] = np.int64(pr['s2g']) # crucial for consistency
         keys = keys + ['machine', 'chrom', 'ref', 'alt']
