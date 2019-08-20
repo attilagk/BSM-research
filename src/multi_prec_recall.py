@@ -15,7 +15,8 @@ __indelcallers__ = ['strelka2Germline2s', 'strelka2Somatic', 'Tnseq']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/mixing-experiment/'
 #__callsetmaindir__ = '/home/attila/projects/bsm/results/calls/benchmark-mix1-mix3/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
-__outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
+__outmaindir__ = '/home/attila/projects/bsm/results/2019-08-15-benchmark-calls/'
+#__outmaindir__ = '/home/attila/projects/bsm/results/2019-05-02-make-truth-sets/'
 __expmsubdir__ = 'truthset/aaf/exp_model/lambda_'
 __addthreads__ = '7'
 __allthreads__ = str(int(__addthreads__) + 1)
@@ -23,7 +24,7 @@ __markers__ = ['o', 'X', 's', 'P', 'd', '^', 'v']
 
 
 def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
-        s2g='-2', sample='mix1', callsetdir=None):
+        s2g='-2', case_sample='mix1', control_sample='mix3', callsetdir=None):
     '''
     Create pathname for various input, output, intermediate VCF files.
 
@@ -33,7 +34,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     vartype: snp or indel
     lam: '0.04' or '0.2'
     s2g: '-2', '-3' or '-4'
-    sample: 'mix1', 'mix2' or 'mix3'
+    case_sample: 'mix1', 'mix2' or 'mix3'
 
     Returns:
     
@@ -48,7 +49,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     prepared_callset: filtered for region and vartype
     
     reduced_truthset: the truthset according to the exp_model with parameters
-    lam, s2g, sample
+    lam, s2g, case_sample
     
     discarded_from_truthset: the complementer set of reduced_truthset relative to
     the original truthset based on the original mixes
@@ -64,8 +65,9 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     basename then that will be extended into a single pathname.
     '''
     # some pieces of pathnames
-    subdir1 = region + os.path.sep + vartype + os.path.sep
-    subdir2 = lam + '/s2g_' + s2g + os.path.sep + sample + os.path.sep
+    sample_pair = case_sample + '-' + control_sample
+    subdir1 = sample_pair + os.path.sep + region + os.path.sep + vartype + os.path.sep
+    subdir2 = lam + '/s2g_' + s2g + os.path.sep + case_sample + os.path.sep
     if vartype == 'snp':
         alt_vartype = 'snvs'
     elif vartype == 'indel':
@@ -73,7 +75,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     # directories
     truthsetdir = __truthsetmaindir__ + subdir1 + __expmsubdir__ + subdir2
     if callsetdir is None:
-        callsetdir = __callsetmaindir__ + alt_vartype + os.path.sep
+        callsetdir = __callsetmaindir__ + sample_pair + os.path.sep + alt_vartype + os.path.sep
     prepared_callset_dir = __outmaindir__ + subdir1
     reduced_callset_dir = __outmaindir__ + subdir1 + __expmsubdir__ + subdir2
     # filepaths
@@ -108,19 +110,21 @@ def get_callsetbn(vartype):
     return(callsetbn)
 
 
-def prepare4prec_recall(region='chr22', vartype='snp'):
+def prepare4prec_recall(region='chr22', vartype='snp', case_sample='mix1',
+        control_sample='mix3'):
     '''
     Run prepare4prec-recall shell script on initial callset VCFs for a given
     region and variant type
 
     Parameter(s):
-    region: chr22 or autosomes
+    region: chr22, chr1_2 or autosomes
     vartype: snp or indel
 
     Returns: a list of the pathname of output VCFs
     '''
     callsetbn = get_callsetbn(vartype)
-    VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region, vartype=vartype)
+    VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
+            vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     outdir = VCFpaths['prepared_callset_dir']
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
@@ -177,7 +181,7 @@ def do_prepare4prec_recall(csetVCF, outdir, region, vartype='snp',
 
 
 def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
-        s2g='-2', sample='mix1', overwrite=False):
+        s2g='-2', case_sample='mix1', control_sample='mix3', overwrite=False):
     '''
     Reduces (discards nonvariants from) the prepared callsets for a given region, vartype and exp_model
 
@@ -187,7 +191,8 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     vartype: snp or indel
     lam: '0.04' or '0.2'
     s2g: '-2', '-3' or '-4'
-    sample: 'mix1', 'mix2' or 'mix3'
+    case_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2' or 'mix3'
     overwrite: whether to overwrite existing reduced callsets
 
     Returns: a list of pathnames of the reduced callsets
@@ -196,7 +201,7 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     if callsetbn is None:
         callsetbn = get_callsetbn(vartype)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
-            vartype=vartype, lam=lam, s2g=s2g, sample=sample)
+            vartype=vartype, lam=lam, s2g=s2g, case_sample=case_sample, control_sample=control_sample)
     def helper(prepared_cset):
         discarded_tset = VCFpaths['discarded_from_truthset']
         red_cset_dir = VCFpaths['reduced_callset_dir']
