@@ -32,7 +32,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     lam: '0.04' or '0.2'
     s2g: '-2', '-3' or '-4'
     case_sample: 'mix1', 'mix2' or 'mix3'
-    control_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2', 'mix3' or 'no_ctr'
 
     Returns:
     
@@ -285,6 +285,11 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
     return(pr)
 
 
+def vcf_exists(vartype, control_sample):
+    VCFpaths = getVCFpaths(vartype=vartype, control_sample=control_sample)
+    return(bool(len(VCFpaths['callset'])))
+
+
 def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1'):
     '''
     Prepare and reduce callset and calculate precision and recall for a given
@@ -298,13 +303,15 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1')
         return(pr)
     lams = ['0.04', '0.2']
     s2gs = ['-2', '-3', '-4']
-    control_samples = ['mix2', 'mix3']
-    #control_samples = ['mix1', 'mix2', 'mix3']
+    control_samples = ['mix1', 'mix2', 'mix3', 'no_ctr']
     l = [process1exp_model(lam=l, s2g=g, control_sample=s) for l in lams for g in
-            s2gs for s in control_samples]
-    pr = pd.concat(l)
-    pr = pr_astype(pr)
-    return(pr)
+            s2gs for s in control_samples if vcf_exists(vartype, s)]
+    if len(l):
+        pr = pd.concat(l)
+        pr = pr_astype(pr)
+        return(pr)
+    else:
+        return(None)
 
 
 def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
@@ -354,6 +361,7 @@ def prepare_reduce_precrecall_all():
     vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
+    l = [y for y in l if y is not None]
     pr = pd.concat(l)
     pr = pr_astype(pr)
     return(pr)
