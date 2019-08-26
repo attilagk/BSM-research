@@ -419,9 +419,9 @@ def read_pr_csv(csvpath):
 
 def replace_categ(df, column='callset', old='Tnseq', new='MuTect2'):
     df = df.copy()
-    l = list(df['callset'].cat.categories)
-    l = [x.replace('Tnseq', 'MuTect2') for x in l]
-    df['callset'].cat.categories = l
+    l = list(df['callset'])
+    l = [x.replace(old, new) for x in l]
+    df['callset'] = l
     return(df)
 
 def replace_colname(df, old='s2g', new='s2g'):
@@ -433,8 +433,20 @@ def replace_colname(df, old='s2g', new='s2g'):
 
 def fix_names(df):
     df = replace_categ(df, column='callset', old='Tnseq', new='MuTect2')
-    df = replace_colname(df, old='s2g', new='s2g')
+    df = replace_categ(df, column='callset', old='TNseq', new='MuTect2')
     return(df)
+
+
+def singles2paireds(pr):
+    sel_rows = (pr['control_sample'] == 'no_ctr')
+    def helper(control_sample='mix1'):
+        df = pr.loc[sel_rows, :].copy()
+        df['control_sample'] = control_sample
+        return(df)
+    csamples = ['mix1', 'mix2', 'mix3']
+    l = [helper(control_sample=cs) for cs in csamples]
+    res = pd.concat([pr] + l)
+    return(res)
 
 
 def plotter1(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
@@ -564,6 +576,28 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     fg = fg.map(plt.plot, 'recall', 'precision')
     fg = fg.add_legend()
     return(fg)
+
+
+def plotter5(pr, s2g=-3, region='autosomes', vartype='snp', onepanel=False):
+    '''
+    Precision-recall plot; rows by lambda and columns by s2g
+    '''
+    seaborn.set()
+    seaborn.set_context('notebook')
+    row = 'lam'
+    sel_rows = (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['vartype']
+            == vartype) & (pr['control_sample'] != 'no_ctr')
+    if onepanel:
+        row = None
+        sel_rows = (pr['control_sample'] == 'mix3') & (pr['lam'] == 0.2) & sel_rows
+    df_sset = pr.loc[sel_rows, :]
+    fg = seaborn.FacetGrid(col='control_sample',
+            row=row, hue='callset', data=df_sset,
+            margin_titles=True, hue_kws=dict(marker=__markers__))
+    fg = fg.map(plt.plot, 'recall', 'precision')
+    fg = fg.add_legend()
+    return(fg)
+
 
 def vmc_read_svmprob(vmcVCF):
     '''
