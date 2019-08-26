@@ -328,9 +328,11 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
     outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
             region=region, vartype=vartype, normalize=False, PASS=False, overwrite=False)
     # model specific operations
-    def helper(lam, s2g, sample):
+    case_sample='mix1'
+    control_sample='mix3'
+    def helper(lam, s2g):
         VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
-                s2g=s2g, sample=sample, overwrite=False)
+                s2g=s2g, case_sample=case_sample, control_sample=control_sample, overwrite=False)
         csetVCF = VCFpaths['reduced_callset'][0]
         tsetVCF = VCFpaths['reduced_truthset']
         pr = vmc_precrecall(csetVCF=csetVCF, tsetVCF=tsetVCF)
@@ -338,14 +340,13 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
         pr['vartype'] = vartype
         pr['lam'] = lam
         pr['s2g'] = s2g
-        pr['sample'] = sample
+        pr['case_sample'] = case_sample
+        pr['control_sample'] = control_sample
         pr['machine'] = machine
         return(pr)
     lams = ['0.04', '0.2']
     s2gs = ['-2', '-3', '-4']
-    samples = ['mix1', 'mix2', 'mix3']
-    l = [helper(lam=l, s2g=g, sample=s) for l in lams for g in
-            s2gs for s in samples]
+    l = [helper(lam=l, s2g=g) for l in lams for g in s2gs]
     pr = pd.concat(l)
     pr = pr_astype(pr, vmc_pr=True)
     return(pr)
@@ -408,12 +409,12 @@ def pr_astype(pr, vmc_pr=False):
     return(pr)
 
 
-def read_pr_csv(csvpath):
+def read_pr_csv(csvpath, vmc_pr=False):
     '''
     Read precision recall data from a CSV into a data frame and set data types
     '''
     pr = pd.read_csv(csvpath)
-    pr = pr_astype(pr)
+    pr = pr_astype(pr, vmc_pr=vmc_pr)
     return(pr)
 
 
@@ -449,7 +450,33 @@ def singles2paireds(pr):
     return(res)
 
 
-def plotter1(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
+def plotter_vmc1(pr, vmc_pr, lam=0.2, region='chr1_2', s2g=-3,
+        case_sample='mix1', control_sample='mix3', vartype='snp',
+        callset=['strelka2Germline2s', 'strelka2Somatic', 'MuTect2', 'lofreqSomatic', 'somaticSniper']):
+    '''
+    Precision-recall curve for VariantMetaCaller
+    '''
+    seaborn.set()
+    seaborn.set_context('paper')
+    sel_rows = (pr['case_sample'] == case_sample) & (pr['control_sample'] == control_sample) & \
+                    (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['lam'] == lam) & \
+                                    (pr['callset'].isin(callset)) & (pr['vartype'] == vartype)
+    pr_sset = pr.loc[sel_rows, :]
+    machine = 'Ada'
+    vmc_sel_rows = (vmc_pr['case_sample'] == case_sample) & (vmc_pr['control_sample'] == control_sample) & \
+                    (vmc_pr['s2g'] == s2g) & (vmc_pr['region'] == region) & (vmc_pr['lam'] == lam) & \
+                            (vmc_pr['machine'] == machine) & (vmc_pr['vartype'] == vartype)
+    vmc_pr_sset = vmc_pr.loc[vmc_sel_rows, :]
+    fg = seaborn.FacetGrid(data=pr_sset, margin_titles=True,
+            hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
+    fg.axes[0][0].plot(vmc_pr_sset['recall'], vmc_pr_sset['precision'], color='black', linestyle='-')
+    fg.axes[0][0].plot(vmc_pr_sset['recall'], vmc_pr_sset['precision_estim'], color='black', linestyle=':')
+    fg = fg.map(plt.plot, 'recall', 'precision')
+    fg = fg.add_legend()
+    return(fg)
+
+
+def plotter1b(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
     '''
     Precision-recall plot; rows by s2g and columns by lambda
     '''
@@ -583,13 +610,15 @@ def plotter5(pr, s2g=-3, region='autosomes', vartype='snp', onepanel=False):
     Precision-recall plot; rows by lambda and columns by s2g
     '''
     seaborn.set()
-    seaborn.set_context('notebook')
+    size='notebook'
     row = 'lam'
     sel_rows = (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['vartype']
             == vartype) & (pr['control_sample'] != 'no_ctr')
     if onepanel:
         row = None
         sel_rows = (pr['control_sample'] == 'mix3') & (pr['lam'] == 0.2) & sel_rows
+        size='paper'
+    seaborn.set_context(size)
     df_sset = pr.loc[sel_rows, :]
     fg = seaborn.FacetGrid(col='control_sample',
             row=row, hue='callset', data=df_sset,
