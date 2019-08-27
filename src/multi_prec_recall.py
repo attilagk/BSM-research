@@ -467,7 +467,7 @@ def plotter_vmc1(pr, vmc_pr, lam=0.2, region='chr1_2', s2g=-3,
                     (vmc_pr['s2g'] == s2g) & (vmc_pr['region'] == region) & (vmc_pr['lam'] == lam) & \
                             (vmc_pr['machine'] == machine) & (vmc_pr['vartype'] == vartype)
     vmc_pr_sset = vmc_pr.loc[vmc_sel_rows, :]
-    fg = seaborn.FacetGrid(data=pr_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=pr_sset, margin_titles=True, aspect=1,
             hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
     fg.axes[0][0].plot(vmc_pr_sset['recall'], vmc_pr_sset['precision'], color='black', linestyle='-')
     fg.axes[0][0].plot(vmc_pr_sset['recall'], vmc_pr_sset['precision_estim'], color='black', linestyle=':')
@@ -484,7 +484,7 @@ def plotter1b(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
     seaborn.set_context('talk')
     sel_rows = (pr['sample'] == sample) & (pr['s2g'] == s2g) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='region', col='lam', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
     if vmc_pr is not None:
         lams = vmc_pr['lam'].cat.categories
@@ -522,7 +522,7 @@ def plotter2(df, hue='machine', sample='mix1'):
     seaborn.set_context('talk')
     sel_rows = (df['sample'] == sample)
     df_sset = df.loc[sel_rows, :]
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='s2g', col='lam', hue=hue)
     fg = fg.map(plt.plot, 'recall', 'precision')
     #fg = fg.map(plt.plot, 'recall', 'precision_estim')
@@ -538,7 +538,7 @@ def plotter3(pr, vmc_pr=None, sample='mix1', region='autosomes', vartype='snp'):
     seaborn.set_context('talk')
     sel_rows = (pr['sample'] == sample) & (pr['region'] == region) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='lam', col='s2g', hue='callset', sharey=True,
             hue_kws=dict(marker=__markers__))
     fg = fg.map(plt.plot, 'recall', 'precision')
@@ -562,7 +562,7 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     regions = vmc_pr['region'].cat.categories
     allregions = list(pr['region'].cat.categories)
     # create FacetGrid object without plotting
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='region', col='s2g', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
     def helper(reg):
         '''
@@ -620,10 +620,28 @@ def plotter5(pr, s2g=-3, region='autosomes', vartype='snp', onepanel=False):
         size='paper'
     seaborn.set_context(size)
     df_sset = pr.loc[sel_rows, :]
-    fg = seaborn.FacetGrid(col='control_sample',
+    fg = seaborn.FacetGrid(col='control_sample', aspect=1,
             row=row, hue='callset', data=df_sset,
             margin_titles=True, hue_kws=dict(marker=__markers__))
     fg = fg.map(plt.plot, 'recall', 'precision')
+    fg = fg.add_legend()
+    return(fg)
+
+
+def plotter6(pr, s2g=-3, region='autosomes', vartype='snp', lam=0.2):
+    '''
+    Precision-recall plot; hue by callset, columns by control_sample
+    '''
+    seaborn.set()
+    seaborn.set_context('notebook')
+    sel_rows = (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['vartype']
+            == vartype) & (pr['control_sample'] != 'no_ctr') & (pr['lam'] ==
+                    lam) & (pr['callset'] != 'strelka2Germline')
+    df_sset = pr.loc[sel_rows, :]
+    fg = seaborn.FacetGrid(col='callset', aspect=1,
+            col_wrap=3, hue='control_sample', data=df_sset,
+            hue_kws=dict(marker=['$1$', '$2$', '$3$']))
+    fg = fg.map(plt.plot, 'recall', 'precision', linestyle='')
     fg = fg.add_legend()
     return(fg)
 

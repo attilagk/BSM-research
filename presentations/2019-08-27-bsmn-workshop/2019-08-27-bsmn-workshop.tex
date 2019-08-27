@@ -1,0 +1,247 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, hyperref, color, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Somatic SNV Calling Accuracy of 5+ Callers}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
+\date{Chess Lab, Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}
+\begin{enumerate}
+\item callsets by 5+ callers\\
+differences:
+\begin{itemize}
+\item specificity and sensitivity
+\item bias: technical + biol (germline)
+\end{itemize}
+\item integration by machine learning
+\begin{itemize}
+\item quality annotations as input features\\
+VariantMetaCaller
+\item training sets: concordant and discordant calls
+\end{itemize}
+\item application 
+\begin{itemize}
+\item somatic variant calling
+\item performance (precision--recall)
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[label=precrecall]{Measuring performance of somatic variant calling}
+%{Compare call set \(C\) to truth set \(V\)}
+\begin{description}
+\item [\(C\)] some call set of somatic variants
+\item [\(V\)] the truth set of somatic variants
+\begin{enumerate}
+\item mixing experiment
+\item experimental validation 
+\end{enumerate}
+\end{description}
+\vfill
+\alert{Precision}\\
+the fraction of calls that are true
+\begin{equation}
+p(C) = \frac{|C \cap V|}{|C|} = \frac{\#\text{true calls}}{\#\mathrm{calls}}
+\end{equation}
+\alert{Recall}\\
+the fraction of variants that are called
+\begin{equation}
+r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Mixing experiment}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.3]{../../notebook/2018-05-01-ceph-vars-greally/figure/venn-S1-1.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+{\tiny
+{\large mixing proportions}
+
+\begin{tabular}{r|ccc}
+genome & mix1 & mix2 & mix3 \\
+\hline
+NA12889 & 4 & 2 & 0 \\
+NA12891 & 8 & 4 & 0 \\
+NA12890 & 16 & 8 & 0 \\
+NA12892 & 72 & 86 & 100 \\
+& & & \\
+\end{tabular}
+\vfill
+{\large genotype frequencies}
+
+\begin{tabular}{c|ccc}
+genotype & \multicolumn{3}{c}{AAF (\%)} \\
+& mix1 &  mix2 & mix3 \\
+\hline
+0001 & 36 & 43 & 50\\
+0010 & 8 & 4 & 0\\
+0100 & 4 & 2 & 0\\
+1000 & 2 & 1 & 0\\
+0002 & 72 & 86 & 100\\
+... & ... & ... & ...\\
+1222 & 98 & 99 & 100\\
+2122 & 96 & 98 & 100\\
+2212 & 92 & 96 & 100\\
+2221 & 64 & 57 & 50\\
+2222 & 100 & 100 & 100\\
+\end{tabular}
+}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Allele frequency}
+
+{\tiny
+\begin{tabular}{c|ccc}
+genotype & \multicolumn{3}{c}{AAF (\%)} \\
+& mix1 &  mix2 & mix3 \\
+\hline
+0001 & 36 & 43 & 50\\
+0010 & 8 & 4 & 0\\
+0100 & 4 & 2 & 0\\
+1000 & 2 & 1 & 0\\
+0002 & 72 & 86 & 100\\
+... & ... & ... & ...\\
+1222 & 98 & 99 & 100\\
+2122 & 96 & 98 & 100\\
+2212 & 92 & 96 & 100\\
+2221 & 64 & 57 & 50\\
+2222 & 100 & 100 & 100\\
+\end{tabular}
+}
+\end{frame}
+
+\begin{frame}{Unrealistic: (1) number of variants; (2) AAF distribution}
+\includegraphics[scale=0.3]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/vaf-mix123-vaf.pdf}
+\end{frame}
+
+\begin{frame}{What's realistic?}
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\(\hat{\lambda} = 0.2\)
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{../../notebook/2019-04-24-vaf-model-taejeong/named-figure/tj-vaf-hist-expon.pdf}
+
+\tiny Bae et al 2018 (Science 359 (6375), 550-555)
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\# somatic variants in autosomes
+\begin{center}
+\begin{tabular}{c|r|r}
+s2g & SNV & indel \\
+\hline
+-4 & 400 & 80 \\
+-3 & 4000 & 800 \\
+-2 & 40000 & 8000 \\
+\end{tabular}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{A family of new truth sets}
+\begin{center}
+\large mix1
+\end{center}
+
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model-mix1.pdf}
+\end{frame}
+
+
+%\begin{frame}{Performance: indels}
+%\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-indel-region-autosomes.pdf}
+%\end{frame}
+
+\begin{frame}{Performance: SNVs}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
+\end{frame}
+
+\begin{frame}{Effect of control sample}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-all-ctr-samples-snp-region-autosomes-lam02.pdf}
+\end{frame}
+
+\begin{frame}{Performance: SNVs}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-region-autosomes.pdf}
+\end{frame}
+
+\begin{frame}[plain]{VariantMetaCaller}
+\includegraphics[width=0.9\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-lambda-02.pdf}
+\end{frame}
+
+%\againframe{precrecall}
+
+\begin{frame}{Experimental validation}
+\includegraphics[scale=0.6]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
+\end{frame}
+
+\begin{frame}{Remaining questions}
+\begin{itemize}
+\item variants in both samples
+\begin{itemize}
+\item unequal (mix1--mix2)
+\item equal (mix1 : mix1)
+\end{itemize}
+\item precision--recall at different VAFs
+\item more callers:\\MuTect2 tumor-only mode; JointSNVMix2; MosaicForecast
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
