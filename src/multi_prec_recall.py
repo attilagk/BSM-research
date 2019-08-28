@@ -454,7 +454,20 @@ def plotter_vmc1(pr, vmc_pr, lam=0.2, region='chr1_2', s2g=-3,
         case_sample='mix1', control_sample='mix3', vartype='snp',
         callset=['strelka2Germline2s', 'strelka2Somatic', 'MuTect2', 'lofreqSomatic', 'somaticSniper']):
     '''
-    Precision-recall curve for VariantMetaCaller
+    Parameters:
+
+    pr: a precision recall data frame
+    vmc_pr: a precision recall data frame for VariantMetaCaller
+    lam: '0.04' or '0.2'
+    region: chr22 or autosomes
+    s2g: '-2', '-3' or '-4'
+    case_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2' or 'mix3'
+    vartype: snp or indel
+    callset: a list of caller names that were input to VMC
+
+    Returns:
+    a FacetGrid plot object; Precision-recall curve for VariantMetaCaller
     '''
     seaborn.set()
     seaborn.set_context('paper')
@@ -607,7 +620,17 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
 
 def plotter5(pr, s2g=-3, region='autosomes', vartype='snp', onepanel=False):
     '''
-    Precision-recall plot; rows by lambda and columns by s2g
+    Precision-recall plot; hue by callset, rows by lambda and columns by s2g
+
+    Parameters:
+    pr: a precision recall data frame
+    s2g: '-2', '-3' or '-4'
+    region: chr22 or autosomes
+    vartype: snp or indel
+    onepanel: whether to draw only a single panel
+
+    Returns:
+    a FacetGrid plot object
     '''
     seaborn.set()
     size='notebook'
@@ -628,19 +651,46 @@ def plotter5(pr, s2g=-3, region='autosomes', vartype='snp', onepanel=False):
     return(fg)
 
 
-def plotter6(pr, s2g=-3, region='autosomes', vartype='snp', lam=0.2):
+def plotter6(pr, region='autosomes', vartype='snp', explanvar='control_sample'):
     '''
-    Precision-recall plot; hue by callset, columns by control_sample
+    Precision-recall plot; hue by some explanatory variable, columns by callset
+
+    Parameters:
+    pr: a precision recall data frame
+    region: chr22 or autosomes
+    vartype: snp or indel
+    explanvar: the explanatory variable whose effect we study; either lam, control_sample or s2g
+
+    Returns:
+    a FacetGrid plot object
+
+    Details:
+    Columns are wrapped.  strelka2Germline is excluded
     '''
     seaborn.set()
     seaborn.set_context('notebook')
-    sel_rows = (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['vartype']
-            == vartype) & (pr['control_sample'] != 'no_ctr') & (pr['lam'] ==
-                    lam) & (pr['callset'] != 'strelka2Germline')
+    sel_rows =  (pr['region'] == region) & (pr['vartype'] == vartype) & \
+            (pr['control_sample'] != 'no_ctr') & (pr['callset'] != 'strelka2Germline')
+    if explanvar == 'control_sample':
+        lam=0.2
+        s2g=-3
+        sel_rows = sel_rows & (pr['s2g'] == s2g) & (pr['lam'] == lam)
+        marker = ['$1$', '$2$', '$3$']
+    if explanvar == 'lam':
+        control_sample='mix3'
+        s2g=-3
+        sel_rows = sel_rows & (pr['s2g'] == s2g) & (pr['control_sample'] == control_sample)
+        # r for rapidly, s for slowly decaying exponential
+        marker = ['$s$', '$r$', '$0$']
+    if explanvar == 's2g':
+        control_sample='mix3'
+        lam=0.2
+        sel_rows = sel_rows & (pr['lam'] == lam) & (pr['control_sample'] == control_sample)
+        marker = ['$4$', '$3$', '$2$']
     df_sset = pr.loc[sel_rows, :]
     fg = seaborn.FacetGrid(col='callset', aspect=1,
-            col_wrap=3, hue='control_sample', data=df_sset,
-            hue_kws=dict(marker=['$1$', '$2$', '$3$']))
+            col_wrap=3, hue=explanvar, data=df_sset,
+            hue_kws=dict(marker=marker))
     fg = fg.map(plt.plot, 'recall', 'precision', linestyle='')
     fg = fg.add_legend()
     return(fg)

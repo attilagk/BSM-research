@@ -86,6 +86,10 @@ r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
 \end{equation}
 \end{frame}
 
+\begin{frame}{Experimental validation}
+\includegraphics[scale=0.6]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
+\end{frame}
+
 \begin{frame}{Mixing experiment}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -185,15 +189,6 @@ s2g & SNV & indel \\
 \end{columns}
 \end{frame}
 
-\begin{frame}{A family of new truth sets}
-\begin{center}
-\large mix1
-\end{center}
-
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model-mix1.pdf}
-\end{frame}
-
-
 %\begin{frame}{Performance: indels}
 %\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-indel-region-autosomes.pdf}
 %\end{frame}
@@ -203,22 +198,26 @@ s2g & SNV & indel \\
 \end{frame}
 
 \begin{frame}{Effect of control sample}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-all-ctr-samples-snp-region-autosomes-lam02.pdf}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-controlsample-effect.pdf}
 \end{frame}
 
-\begin{frame}{Performance: SNVs}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-region-autosomes.pdf}
+\begin{frame}{A family of new truth sets}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model-mix1.pdf}
+\end{frame}
+
+\begin{frame}{Effect of number of somatic variants}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-s2g-effect.pdf}
+\end{frame}
+
+\begin{frame}{Effect of allele frequency distribution}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-lambda-effect.pdf}
 \end{frame}
 
 \begin{frame}[plain]{VariantMetaCaller}
-\includegraphics[width=0.9\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-lambda-02.pdf}
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
 \end{frame}
 
 %\againframe{precrecall}
-
-\begin{frame}{Experimental validation}
-\includegraphics[scale=0.6]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
-\end{frame}
 
 \begin{frame}{Remaining questions}
 \begin{itemize}
