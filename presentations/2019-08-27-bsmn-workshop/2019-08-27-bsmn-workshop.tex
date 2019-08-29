@@ -192,34 +192,169 @@ s2g & SNV & indel \\
 \includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-lambda-effect.pdf}
 \end{frame}
 
-\begin{frame}{VariantMetaCaller}
-\begin{itemize}
-\item a support vector machine classifier for each caller
-\begin{itemize}
-\item discordance pattern (Venn diagram) of callsets
-\item input features: quality annotations 
-\end{itemize}
-\item probabilisty score for calls
-\item filter at arbitrary precision (\(1-\mathrm{FDR}\))
-\end{itemize}
+\section{Callset integration and filtering by machine learning}
+
+\begin{frame}{VCF annotations for classification (idealized figures)}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+
+partially labeled, unfiltered, callset \(j\):
+
+\(\{\overbrace{y_{i}}^\text{label},
+\overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
+\end{column}
+
+\begin{column}{0.7\textwidth}
+
+{\small
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=blue, circle, inner
+sep=2.5pt] {} (1,0); false positive: \(y_{ij}=0\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, fill=red, rectangle, inner
+sep=3.0pt] {} (1,0); true positive: \(y_{ij}=1\)
+
+\tikz[baseline=-0.5ex] \path (0,0) -- node[draw, diamond, inner
+sep=3.0pt] {} (1,0); unlabeled: \(y_{ij}=?\)
+}
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=1\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-unlabeled.pdf}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=...\)
+
+\vspace{0.7in}
+\large
+\(\cdots\)
+\normalsize
+\end{center}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=5\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq-unlabeled.pdf}
+\end{column}
+\end{columns}
 \end{frame}
 
-\begin{frame}[plain]{VariantMetaCaller: precision--recall curve}
+
+\begin{frame}{Probability that a call is true}
+\begin{center}
+weighted combination of callers
+\[
+P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
+\]
+\end{center}
+\begin{columns}[t]
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=1\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/strelka2/strelka2-svm-unlabeled.pdf}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=...\)
+
+\vspace{0.7in}
+\large
+\(\cdots\)
+\normalsize
+\end{center}
+\end{column}
+
+\begin{column}{0.33\textwidth}
+\begin{center}
+\(j=5\)
+\end{center}
+
+\includegraphics[width=1\columnwidth]{figures/by-me/vcf-annot-classif/tnseq/tnseq-svm-unlabeled.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[plain]{VariantMetaCaller}{Gezsi et al 2015 BMC Genomics}
 \includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
 \end{frame}
 
 %\againframe{precrecall}
 
-\begin{frame}{Remaining questions}
+\begin{frame}{Summary}
 \begin{itemize}
-\item variants in both samples
+\item callers' relative performance depends on
 \begin{itemize}
-\item unequal (mix1--mix2)
-\item equal (mix1 : mix1)
+\item benchmark data and truth set
+\item variant allele frequency (VAF) in brain and control sample
+\item distribution of VAF across variants
 \end{itemize}
-\item precision--recall at different VAFs
-\item more callers:\\MuTect2 tumor-only mode; JointSNVMix2; MosaicForecast
+\item notable
+\begin{itemize}
+\item MosaicForecast: the best under several conditions 
+\item lofreqSomatic, strelka2Somatic, MuTect2: strong performance when control sample lacks variant 
+\item strelka2Germline: only useful for at high VAF
 \end{itemize}
+\item integrating multiple callsets
+\begin{itemize}
+\item machine learning (VariantMetaCaller)
+\item high performance
+\item precision based filtering 
+\end{itemize} 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\alert{Mount Sinai, New York}
+
+\vspace{0.5em}
+Andy Chess\\
+Chaggai Rosenbluh\\
+Attila Jones
+
+\vspace{0.5em}
+Schahram Akbarian
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\alert{Harvard}
+
+\vspace{0.5em}
+Peter Park\\
+Yanmei Dou\\
+Minseok (Daniel) Kwon
+
+\vspace{1.5em}
+\alert{Stanford}
+
+\vspace{0.5em}
+Alex Urban\\
+Xiaowei Zhu
+\end{column}
+\end{columns}
 \end{frame}
 
 \end{document}
