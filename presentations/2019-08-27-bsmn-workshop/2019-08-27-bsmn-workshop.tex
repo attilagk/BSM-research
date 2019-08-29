@@ -12,56 +12,60 @@
 % TikZ
 \usepackage{tikz}
 %\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
-%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+\usetikzlibrary{shapes.geometric}
 
 % beamer styles
 \mode<presentation>{
-\usetheme{Warsaw}
-%\usetheme{Antibes}
-\usecolortheme{beaver}
-%\usecolortheme{seahorse}
+\usetheme{CambridgeUS}
+\usecolortheme{dove}
 %\usefonttheme{structureitalicserif}
 \setbeamercovered{transparent}
 }
 \setbeamertemplate{blocks}[rounded][shadow=true]
-\AtBeginSubsection[]{
+
+\AtBeginSection[]{
   \begin{frame}<beamer>{Contents}
+    %\tableofcontents[currentsection]
     \tableofcontents[currentsection,currentsubsection]
   \end{frame}
 }
-%\useoutertheme[]{tree}
+\useoutertheme[]{miniframes}
 
 % title, etc
-\title{Somatic SNV Calling Accuracy of 5+ Callers}
+\title{Characterization of 5+ Callers}
 %\subtitle{A subtitle may be shorter and more technical}
 \author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
-\date{Chess Lab, Mount Sinai School of Medicine}
+\date{Mount Sinai, New York}
 
 \begin{document}
 
 \maketitle
 
-\begin{frame}
+\section{Introduction}
+
+\begin{frame}<1>[label=workflow]{Our workflow}
+\includegraphics[width=0.8\textwidth]{figures/from-others/bsm-science-fig2.jpg}
+\small
 \begin{enumerate}
-\item callsets by 5+ callers\\
-differences:
+\item brain sample
 \begin{itemize}
-\item specificity and sensitivity
-\item bias: technical + biol (germline)
+\item MosaicForecast (Park Lab, unpublished), strelka2Germline
 \end{itemize}
-\item integration by machine learning
+\item<2> brain + control sample
 \begin{itemize}
-\item quality annotations as input features\\
-VariantMetaCaller
-\item training sets: concordant and discordant calls
-\end{itemize}
-\item application 
-\begin{itemize}
-\item somatic variant calling
-\item performance (precision--recall)
+\item lofreqSomatic, MuTect2, strelka2Somatic, somaticSniper
 \end{itemize}
 \end{enumerate}
 \end{frame}
+
+
+\begin{frame}{Spread of somatic mosaicism}
+\includegraphics[height=0.7\textheight]{figures/from-others/lodato2015science-fig3b.png}
+\vfill
+\tiny{Lodato et al Science 2015}
+\end{frame}
+
+\againframe<2>{workflow}
 
 \begin{frame}[label=precrecall]{Measuring performance of somatic variant calling}
 %{Compare call set \(C\) to truth set \(V\)}
@@ -69,8 +73,8 @@ VariantMetaCaller
 \item [\(C\)] some call set of somatic variants
 \item [\(V\)] the truth set of somatic variants
 \begin{enumerate}
+\item validation experiment
 \item mixing experiment
-\item experimental validation 
 \end{enumerate}
 \end{description}
 \vfill
@@ -86,9 +90,13 @@ r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
 \end{equation}
 \end{frame}
 
+\section{Validation experiment}
+
 \begin{frame}{Experimental validation}
 \includegraphics[scale=0.6]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
 \end{frame}
+
+\section{Mixing experiment}
 
 \begin{frame}{Mixing experiment}
 \begin{columns}[t]
@@ -119,6 +127,7 @@ NA12892 & 72 & 86 & 100 \\
 \begin{frame}{Allele frequency}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
+
 {\tiny
 \begin{tabular}{c|ccc}
 genotype & \multicolumn{3}{c}{AAF (\%)} \\
@@ -139,6 +148,7 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 }
 
 \includegraphics[width=1.0\columnwidth]{../../notebook/2019-04-24-vaf-model-taejeong/named-figure/tj-vaf-hist-expon-pooled.pdf}
+
 \end{column}
 
 \begin{column}{0.5\textwidth}
@@ -151,7 +161,7 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \end{frame}
 
 \begin{frame}{Performance: SNVs}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
+\includegraphics[width=0.8\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
 \end{frame}
 
 \begin{frame}
@@ -172,9 +182,9 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-controlsample-effect.pdf}
 \end{frame}
 
-\begin{frame}{A family of new truth sets}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model-mix1.pdf}
-\footnotesize
+\begin{frame}[label=familyoftruthsets]{A family of truth sets}
+\includegraphics[width=0.85\textwidth]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model-mix1.pdf}
+{\tiny
 \begin{tabular}{c|r|r}
 s2g & SNV & indel \\
 \hline
@@ -182,23 +192,38 @@ s2g & SNV & indel \\
 -3 & 4000 & 800 \\
 -2 & 40000 & 8000 \\
 \end{tabular}
+}
 \end{frame}
 
 \begin{frame}{Effect of number of somatic variants}
 \includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-s2g-effect.pdf}
 \end{frame}
 
+\againframe{familyoftruthsets}
+
 \begin{frame}{Effect of allele frequency distribution}
 \includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-lambda-effect.pdf}
 \end{frame}
 
-\section{Callset integration and filtering by machine learning}
+\section{Callset combination and filtering}
 
-\begin{frame}{VCF annotations for classification (idealized figures)}
+\begin{frame}{Why combine callers with machine learing?}
+\begin{itemize}
+\item no best universal caller
+\begin{itemize}
+\item precision
+\item VAF in brain (and control) sample
+\end{itemize}
+\item callers don't provide the single best way of ranking calls
+\item much info in quality annotations on calls
+\end{itemize}
+\end{frame}
+
+\begin{frame}
 \begin{columns}[t]
 \begin{column}{0.3\textwidth}
-
-partially labeled, unfiltered, callset \(j\):
+\small
+callset \(j\):
 
 \(\{\overbrace{y_{i}}^\text{label},
 \overbrace{\mathbf{x}_{ij}}^\text{annot}\}_{i=1,...,n_j}\)
@@ -258,12 +283,13 @@ sep=3.0pt] {} (1,0); unlabeled: \(y_{ij}=?\)
 \end{frame}
 
 
-\begin{frame}{Probability that a call is true}
+\begin{frame}
+\small
 \begin{center}
-weighted combination of callers
-\[
+Probability that a call is true
+\(
 P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
-\]
+\)
 \end{center}
 \begin{columns}[t]
 \begin{column}{0.33\textwidth}
@@ -296,8 +322,8 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \end{frame}
 
 
-\begin{frame}[plain]{VariantMetaCaller}{Gezsi et al 2015 BMC Genomics}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
+\begin{frame}{VariantMetaCaller}{Gezsi et al 2015 BMC Genomics}
+\includegraphics[width=0.8\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
 \end{frame}
 
 %\againframe{precrecall}
@@ -316,7 +342,7 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \item lofreqSomatic, strelka2Somatic, MuTect2: strong performance when control sample lacks variant 
 \item strelka2Germline: only useful for at high VAF
 \end{itemize}
-\item integrating multiple callsets
+\item combining multiple callsets
 \begin{itemize}
 \item machine learning (VariantMetaCaller)
 \item high performance
@@ -328,31 +354,24 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \begin{frame}{Acknowledgements}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
-\alert{Mount Sinai, New York}
+\alert{Akbarian Lab, Mount Sinai}
 
-\vspace{0.5em}
-Andy Chess\\
-Chaggai Rosenbluh\\
-Attila Jones
+\vspace{1em}
+\alert{Park Lab, Harvard}
 
-\vspace{0.5em}
-Schahram Akbarian
+\emph{Yanmei Dou} (MosaicForecast)
+
+\vspace{1em}
+\alert{Walsh Lab, Harvard}
+
+\vspace{1em}
+\alert{Urban Lab, Stanford}
+
+\emph{Xiaowei Zhu} (RetroSom)
+
 \end{column}
 
 \begin{column}{0.5\textwidth}
-\alert{Harvard}
-
-\vspace{0.5em}
-Peter Park\\
-Yanmei Dou\\
-Minseok (Daniel) Kwon
-
-\vspace{1.5em}
-\alert{Stanford}
-
-\vspace{0.5em}
-Alex Urban\\
-Xiaowei Zhu
 \end{column}
 \end{columns}
 \end{frame}

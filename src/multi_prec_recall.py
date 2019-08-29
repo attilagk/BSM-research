@@ -406,6 +406,8 @@ def pr_astype(pr, vmc_pr=False):
         keys.append('callset')
     d = {k: 'category' for k in keys}
     pr = pr.astype(d)
+    #l = sorted(pr['callset'].cat.categories, key=str.lower)
+    #pr['callset'] = pr['callset'].cat.set_categories(l)
     return(pr)
 
 
