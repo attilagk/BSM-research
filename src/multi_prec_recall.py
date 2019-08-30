@@ -10,6 +10,8 @@ import truth_sets_aaf as tsa
 import seaborn
 import matplotlib.pyplot as plt
 
+__callsets__ = ['strelka2Germline', 'strelka2Germline2s', 'MosaicForecast',
+        'lofreqSomatic', 'MuTect2', 'strelka2Somatic', 'somaticSniper']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/mixing-experiment/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-08-15-benchmark-calls/'
@@ -389,12 +391,14 @@ def correct_vmc_pr(pr, corr_f = (249250621 + 243199373) / 86682278 ):
     return(corr_pr)
 
 
-def pr_astype(pr, vmc_pr=False):
+def pr_astype(pr, vmc_pr=False, alphabetical=False):
     '''
     Set data types for a precision recall data frame
 
     Parameters:
     pr: a precision recall data frame
+    vmc_pr: True if pr is from VariantMetaCaller
+    alphabetical: whether to sort category names alphabetically or according to the __callsets__ variable
 
     Returns: the data frame with the same data but corrected data types
     '''
@@ -405,10 +409,14 @@ def pr_astype(pr, vmc_pr=False):
     else:
         keys.append('callset')
     d = {k: 'category' for k in keys}
-    pr = pr.astype(d)
-    #l = sorted(pr['callset'].cat.categories, key=str.lower)
-    #pr['callset'] = pr['callset'].cat.set_categories(l)
-    return(pr)
+    val = pr.astype(d)
+    if not vmc_pr:
+        if alphabetical:
+            categs = sorted(val['callset'].cat.categories, key=str.lower)
+        else:
+            categs = __callsets__
+        val['callset'] = val['callset'].cat.set_categories(categs)
+    return(val)
 
 
 def read_pr_csv(csvpath, vmc_pr=False):
@@ -416,6 +424,8 @@ def read_pr_csv(csvpath, vmc_pr=False):
     Read precision recall data from a CSV into a data frame and set data types
     '''
     pr = pd.read_csv(csvpath)
+    if not vmc_pr:
+        pr = fix_names(pr)
     pr = pr_astype(pr, vmc_pr=vmc_pr)
     return(pr)
 
@@ -441,6 +451,10 @@ def fix_names(df):
 
 
 def singles2paireds(pr):
+    '''
+    Take rows for which control_sample is missing ('no_ctr') and add them to
+    all rows with control sample.
+    '''
     sel_rows = (pr['control_sample'] == 'no_ctr')
     def helper(control_sample='mix1'):
         df = pr.loc[sel_rows, :].copy()
@@ -689,13 +703,28 @@ def plotter6(pr, region='autosomes', vartype='snp', explanvar='control_sample'):
         lam=0.2
         sel_rows = sel_rows & (pr['lam'] == lam) & (pr['control_sample'] == control_sample)
         marker = ['$4$', '$3$', '$2$']
-    df_sset = pr.loc[sel_rows, :]
+    df_sset = pr.copy().loc[sel_rows, :]
+    df_sset['callset'] = df_sset['callset'].cat.remove_unused_categories()
     fg = seaborn.FacetGrid(col='callset', aspect=1,
             col_wrap=3, hue=explanvar, data=df_sset,
             hue_kws=dict(marker=marker))
     fg = fg.map(plt.plot, 'recall', 'precision', linestyle='')
     fg = fg.add_legend()
     return(fg)
+
+
+def plotter7(df, otherdata=False):
+    dt = df.copy()
+    if not otherdata:
+        dt = df.loc[df['callset'].isin(__callsets__), :].copy()
+        dt['callset'] = dt['callset'].cat.set_categories(__callsets__)
+    seaborn.set()
+    seaborn.set_context('paper')
+    g = seaborn.FacetGrid(hue='callset', data=dt, aspect=1,
+            hue_kws=dict(marker=__markers__ + ['H', 'h', '+']))
+    g = g.map(plt.plot, 'recall', 'precision', marker = 'o')
+    g.add_legend()
+    return(g)
 
 
 def vmc_read_svmprob(vmcVCF):
