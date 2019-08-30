@@ -93,7 +93,7 @@ r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
 \section{Validation experiment}
 
 \begin{frame}{Experimental validation}
-\includegraphics[scale=0.6]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
+\includegraphics[scale=0.8]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
 \end{frame}
 
 \section{Mixing experiment}
@@ -139,8 +139,6 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 1000 & 2 & 1 & 0\\
 0002 & 72 & 86 & 100\\
 ... & ... & ... & ...\\
-1222 & 98 & 99 & 100\\
-2122 & 96 & 98 & 100\\
 2212 & 92 & 96 & 100\\
 2221 & 64 & 57 & 50\\
 2222 & 100 & 100 & 100\\
@@ -164,14 +162,17 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \includegraphics[width=0.8\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Discrepancy: MosaicForecast}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 
-\includegraphics[scale=0.3]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
-\end{column}
+validation experiment
 
-\begin{column}{0.5\textwidth}{Discrepancy: MosaicForecast}
+\includegraphics[width=1.0\columnwidth]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
+\end{column}
+\begin{column}{0.5\textwidth}
+
+mixing experiment
 
 \includegraphics[width=1.0\columnwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
 \end{column}
@@ -179,7 +180,7 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \end{frame}
 
 \begin{frame}{Effect of control sample}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-controlsample-effect.pdf}
+\includegraphics[scale=0.45]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-controlsample-effect.pdf}
 \end{frame}
 
 \begin{frame}[label=familyoftruthsets]{A family of truth sets}
@@ -196,13 +197,13 @@ s2g & SNV & indel \\
 \end{frame}
 
 \begin{frame}{Effect of number of somatic variants}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-s2g-effect.pdf}
+\includegraphics[scale=0.45]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-s2g-effect.pdf}
 \end{frame}
 
 \againframe{familyoftruthsets}
 
 \begin{frame}{Effect of allele frequency distribution}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-lambda-effect.pdf}
+\includegraphics[scale=0.45]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-lambda-effect.pdf}
 \end{frame}
 
 \section{Callset combination and filtering}
@@ -323,7 +324,7 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 
 
 \begin{frame}{VariantMetaCaller}{Gezsi et al 2015 BMC Genomics}
-\includegraphics[width=0.8\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
+\includegraphics[scale=0.8]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
 \end{frame}
 
 %\againframe{precrecall}
