@@ -40,11 +40,18 @@ def call(caller='somaticSniper', case='Mix1', control='Mix2', nproc=1, overwrite
             return(None)
     if not os.path.exists(outdir):
         os.makedirs(outdir, exist_ok=False)
-    caseBAM = __BAMdir__ + os.path.sep + case + 'A.bam'
-    controlBAM = __BAMdir__ + os.path.sep + control + 'A.bam'
+    case_replica = 'A'
+    if case == control:
+        control_replica = 'B'
+    else:
+        control_replica = 'A'
+    case_sample = case + case_replica 
+    control_sample = control + control_replica 
+    caseBAM = __BAMdir__ + os.path.sep + case_sample + '.bam'
+    controlBAM = __BAMdir__ + os.path.sep + control_sample + '.bam'
     args = ['multiCaller', '-p', nproc, '-r', __REFSEQ__, '-1', caseBAM, '-2', controlBAM,
-            '-t', t_opt, '-i', __init_cfg__, '-a', case + 'A', '-b', control +
-            'A', '-o', outdir, caller]
+            '-t', t_opt, '-i', __init_cfg__, '-a', case_sample, '-b', control_sample,
+            '-o', outdir, caller]
     subprocess.run(args=args)
     return(sdir)
 
