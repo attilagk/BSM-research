@@ -131,7 +131,7 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \end{columns}
 \end{frame}
 
-\begin{frame}{Performance}
+\begin{frame}{Performance: mix1--mix3}
 \includegraphics[scale=0.3]{../../notebook/2019-03-22-prec-recall/named-figure/prec-recall-mix1-mix3.pdf}
 \end{frame}
 
@@ -140,18 +140,45 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \end{frame}
 
 \begin{frame}{What's realistic?}
-\includegraphics[scale=0.25]{../../notebook/2019-04-24-vaf-model-taejeong/named-figure/tj-vaf-hist-expon.pdf}
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\(\hat{\lambda} = 0.2\)
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{../../notebook/2019-04-24-vaf-model-taejeong/named-figure/tj-vaf-hist-expon.pdf}
+
 \tiny Bae et al 2018 (Science 359 (6375), 550-555)
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\# somatic variants in autosomes
+\begin{center}
+\begin{tabular}{c|r|r}
+s2g & SNV & indel \\
+\hline
+-4 & 400 & 80 \\
+-3 & 4000 & 800 \\
+-2 & 40000 & 8000 \\
+\end{tabular}
+\end{center}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}{A family of new truth sets}
-\includegraphics[scale=0.3]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model0.pdf}
+\begin{center}
+\large mix1
+\end{center}
+
+\includegraphics[width=1.0\textwidth]{../../notebook/2019-04-04-truth-sets-aaf/named-figure/exp-model-mix1.pdf}
 \end{frame}
 
 
-\begin{frame}{Performance: indels}
-\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-indel-region-autosomes.pdf}
-\end{frame}
+%\begin{frame}{Performance: indels}
+%\includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-indel-region-autosomes.pdf}
+%\end{frame}
 
 \begin{frame}{Performance: SNVs}
 \includegraphics[width=1.0\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-region-autosomes.pdf}
@@ -161,10 +188,22 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \includegraphics[width=0.9\textwidth]{../../notebook/2019-05-02-make-truth-sets/named-figure/prec-recall-snp-lambda-02.pdf}
 \end{frame}
 
-\againframe{precrecall}
+%\againframe{precrecall}
 
 \begin{frame}{Experimental validation}
 \includegraphics[scale=0.6]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
+\end{frame}
+
+\begin{frame}{Remaining questions}
+\begin{itemize}
+\item variants in both samples
+\begin{itemize}
+\item unequal (mix1--mix2)
+\item equal (mix1 : mix1)
+\end{itemize}
+\item precision--recall at different VAFs
+\item more callers:\\MuTect2 tumor-only mode; JointSNVMix2; MosaicForecast
+\end{itemize}
 \end{frame}
 
 \end{document}

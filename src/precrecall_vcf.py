@@ -87,7 +87,7 @@ def prec_recall(callset_vcfpath,
     else:
         recall = None
     # package results in a data frame of a single row
-    d = {'caller': caller, 'PASS_filter': PASS, 'n_variants': n_variants, 'n_calls':
+    d = {'callset': caller, 'PASS_filter': PASS, 'n_variants': n_variants, 'n_calls':
             n_calls, 'n_truecalls':n_truecalls, 'precision': precision,
             'recall': recall}
     df = pd.DataFrame(d, index=[0])
@@ -115,3 +115,4 @@ def prec_recall_all(callers=['lofreqSomatic', 'somaticSniper', 'strelka2Germline
         PASS=False) for c in callset_vcfpaths]
     df = pd.concat(l_True + l_False)
     return(df)
+
