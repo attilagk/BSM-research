@@ -49,17 +49,18 @@
 \begin{enumerate}
 \item brain sample
 \begin{itemize}
-\item MosaicForecast (Park Lab, unpublished), strelka2Germline
+\item strelka2Germline, MosaicForecast (Park Lab, unpublished)
 \end{itemize}
 \item<2> brain + control sample
 \begin{itemize}
-\item lofreqSomatic, MuTect2, strelka2Somatic, somaticSniper
+\item lofreqSomatic, MuTect2, strelka2Somatic, somaticSniper,
+strelka2Germline2s
 \end{itemize}
 \end{enumerate}
 \end{frame}
 
 
-\begin{frame}{Spread of somatic mosaicism}
+\begin{frame}{Extent of a ``somatic mosaic''}
 \includegraphics[height=0.7\textheight]{figures/from-others/lodato2015science-fig3b.png}
 \vfill
 \tiny{Lodato et al Science 2015}
@@ -93,7 +94,8 @@ r(C) = \frac{|C \cap V|}{|V|} = \frac{\#\text{true calls}}{\#\mathrm{variants}}
 \section{Validation experiment}
 
 \begin{frame}{Experimental validation}
-\includegraphics[scale=0.8]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
+\includegraphics[width=\textwidth]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample.pdf}
+%\includegraphics[scale=0.8]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
 \end{frame}
 
 \section{Mixing experiment}
@@ -162,24 +164,25 @@ genotype & \multicolumn{3}{c}{AAF (\%)} \\
 \includegraphics[width=0.8\textwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
 \end{frame}
 
-\begin{frame}{Discrepancy: MosaicForecast}
+\begin{frame}{Comparison to validation experiment}
 \begin{columns}[t]
-\begin{column}{0.5\textwidth}
-
-validation experiment
-
-\includegraphics[width=1.0\columnwidth]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
-\end{column}
-\begin{column}{0.5\textwidth}
+\begin{column}{0.4\textwidth}
 
 mixing experiment
 
-\includegraphics[width=1.0\columnwidth]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
+\includegraphics[scale=0.45]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-snp-region-autosomes-mix3_ctr.pdf}
+\end{column}
+\begin{column}{0.7\textwidth}
+
+validation experiment
+
+\includegraphics[scale=0.45]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample.pdf}
+%\includegraphics[width=1.0\columnwidth]{../../notebook/2019-07-23-commonsample-precrecall/named-figure/prec-recall-common-sample-mosaicforecast.pdf}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Effect of control sample}
+\begin{frame}{Brain sample: mix1. Control sample: varied}
 \includegraphics[scale=0.45]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-controlsample-effect.pdf}
 \end{frame}
 
@@ -217,6 +220,7 @@ s2g & SNV & indel \\
 \end{itemize}
 \item callers don't provide the single best way of ranking calls
 \item much info in quality annotations on calls
+\item VariantMetaCaller: Gezsi et al 2015 BMC Genomics 
 \end{itemize}
 \end{frame}
 
@@ -323,7 +327,8 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \end{frame}
 
 
-\begin{frame}{VariantMetaCaller}{Gezsi et al 2015 BMC Genomics}
+\begin{frame}{VariantMetaCaller}{Calls ranked by estimated precision (dotted
+line)}
 \includegraphics[scale=0.8]{../../notebook/2019-08-15-benchmark-calls/named-figure/prec-recall-vmc-s2g-3.pdf}
 \end{frame}
 
@@ -337,10 +342,11 @@ P(i) = \frac{1}{5} \sum_{j=1}^5 P_j(y_{ij} | \mathbf{x}_{ij})
 \item variant allele frequency (VAF) in brain and control sample
 \item distribution of VAF across variants
 \end{itemize}
-\item notable
+\item caller specific
 \begin{itemize}
-\item MosaicForecast: the best under several conditions 
-\item lofreqSomatic, strelka2Somatic, MuTect2: strong performance when control sample lacks variant 
+\item lofreqSomatic, strelka2Somatic, MuTect2: strong when variant is absent
+from control sample
+\item MosaicForecast: the best when variant is also in control sample
 \item strelka2Germline: only useful for at high VAF
 \end{itemize}
 \item combining multiple callsets
