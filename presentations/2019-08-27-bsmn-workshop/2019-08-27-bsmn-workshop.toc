@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{Introduction}{2}{0}{1}
+\beamer@sectionintoc {2}{Validation experiment}{7}{0}{2}
+\beamer@sectionintoc {3}{Mixing experiment}{9}{0}{3}
+\beamer@sectionintoc {4}{Callset combination and filtering}{19}{0}{4}

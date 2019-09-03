@@ -330,7 +330,7 @@ def exp_model_df_concat(nvariants, s2gs=[-2, -3, -4], lambdas=[0.2, 0.04]):
     return(df)
 
 
-def exp_model_plot0(expm, s2g=-3, region='autosomes'):
+def exp_model_plot0(expm, s2g=-3, region='autosomes', onepanel=False):
     '''
     Plots a grid of histograms of AAF corresponding to a set of exponential models
 
@@ -342,16 +342,27 @@ def exp_model_plot0(expm, s2g=-3, region='autosomes'):
     Returns:
     a seaborn FacetGrid object
     '''
+    sns.set()
+    sns.set_context('notebook')
     sel_rows = (expm['s2g'] == s2g) & (expm['region'] == region)
+    if onepanel:
+        sample = 'mix1'
+        lam = 0.2
+        sel_rows = sel_rows & (expm['lambda'] == lam) & (expm['sample'] == sample)
     df = expm.loc[sel_rows, :]
-    g = sns.FacetGrid(df, row='sample', col='lambda', hue='vartype',
-            sharey=False, aspect=2, margin_titles=True)
-    g.map(plt.plot, 'AAF', 'count', marker='o', linestyle='dotted', markeredgecolor='white')
+    if not onepanel:
+        g = sns.FacetGrid(df, row='sample', col='lambda', hue='vartype', sharey=False, aspect=2, margin_titles=True)
+    else:
+        g = sns.FacetGrid(df, hue='vartype', sharey=False, aspect=1.5)
+    g = (g.map(plt.plot, 'AAF', 'count', marker='o', linestyle='dotted',
+            markeredgecolor='white').set_axis_labels('VAF', 'count'))
     g = g.add_legend()
     return(g)
 
 
 def exp_model_plot1(expm, sample='mix1', region='autosomes'):
+    sns.set()
+    sns.set_context('notebook')
     sel_rows = (expm['sample'] == sample) & (expm['region'] == region)
     df = expm.loc[sel_rows, :]
     g = sns.FacetGrid(df, row='lambda', col='s2g', hue='vartype',
@@ -360,7 +371,7 @@ def exp_model_plot1(expm, sample='mix1', region='autosomes'):
     g = g.add_legend()
     return(g)
 
-def aaf_distplot(aafdf=get_taejeongs_aaf(), fit=stats.expon):
+def aaf_distplot(aafdf=get_taejeongs_aaf(), fit=stats.expon, onesample=None):
     '''
     Plot the distribution of VAF values 
 
@@ -374,15 +385,20 @@ def aaf_distplot(aafdf=get_taejeongs_aaf(), fit=stats.expon):
     Returns: a seaborn FacetGrid object
     '''
     sns.set()
-    sns.set_context('talk')
-    g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5)
-    #g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5, height=4)
-    g.map(sns.distplot, 'VAF', hist=True, rug=True, kde=False,
-            fit=fit)
-    if fit is None:
-        pass
+    sns.set_context('notebook')
+    if onesample is None:
+        g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5)
+    elif onesample in set(aafdf['sample']):
+        g =  sns.FacetGrid(aafdf.loc[aafdf['sample'] == onesample, :], aspect=1.5)
     else:
-        pass
+        raise ValueError('"onesample" must be None or one of the samples in "aafdf"')
+    #g =  sns.FacetGrid(aafdf, row='sample', aspect=2.5, height=4)
+    if fit is None:
+        ylab = 'count'
+    else:
+        ylab = 'normalized count'
+    g = (g.map(sns.distplot, 'VAF', hist=True, rug=True, kde=False,
+            fit=fit).set_axis_labels('VAF', ylab))
     return(g)
 
 
@@ -403,6 +419,20 @@ def aaf_distplot1(aafdf):
     g.map(plt.step, 'bins', 'count', where='post')
     return(histo)
 
+
+def nvar_aaf_plot(nvariants, region='autosomes', sample=None):
+    sns.set()
+    sns.set_context('notebook')
+    sel_rows = (nvariants['region'] == region)
+    if sample is None:
+        fg = sns.FacetGrid(data=nvariants.loc[sel_rows, :], row='sample', hue='vartype', sharey=False, aspect=2)
+    elif sample in ['mix1', 'mix2', 'mix3']:
+        sel_rows = sel_rows & (nvariants['sample'] == sample)
+        fg = sns.FacetGrid(data=nvariants.loc[sel_rows, :], hue='vartype', sharey=False, aspect=1.5)
+    fg = (fg.map(plt.plot, 'AAF', 'count', marker='o',
+        markeredgecolor='white', linestyle='dashed').set_axis_labels('VAF', 'count'))
+    fg = fg.add_legend()
+    return(fg)
 
 
 def downsample_aaf_vcf(ssize, invcfpath, outvcfpath, seed=19760415):

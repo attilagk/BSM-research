@@ -10,6 +10,8 @@ import truth_sets_aaf as tsa
 import seaborn
 import matplotlib.pyplot as plt
 
+__callsets__ = ['strelka2Germline', 'strelka2Germline2s', 'MosaicForecast',
+        'lofreqSomatic', 'MuTect2', 'strelka2Somatic', 'somaticSniper']
 __callsetmaindir__ = '/home/attila/projects/bsm/results/calls/mixing-experiment/'
 __truthsetmaindir__ = '/home/attila/projects/bsm/results/2019-03-18-truth-sets/'
 __outmaindir__ = '/home/attila/projects/bsm/results/2019-08-15-benchmark-calls/'
@@ -32,7 +34,7 @@ def getVCFpaths(callsetbn=None, region='chr22', vartype='snp', lam='0.04',
     lam: '0.04' or '0.2'
     s2g: '-2', '-3' or '-4'
     case_sample: 'mix1', 'mix2' or 'mix3'
-    control_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2', 'mix3' or 'no_ctr'
 
     Returns:
     
@@ -285,6 +287,11 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
     return(pr)
 
 
+def vcf_exists(vartype, control_sample):
+    VCFpaths = getVCFpaths(vartype=vartype, control_sample=control_sample)
+    return(bool(len(VCFpaths['callset'])))
+
+
 def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1'):
     '''
     Prepare and reduce callset and calculate precision and recall for a given
@@ -298,13 +305,15 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1')
         return(pr)
     lams = ['0.04', '0.2']
     s2gs = ['-2', '-3', '-4']
-    control_samples = ['mix2', 'mix3']
-    #control_samples = ['mix1', 'mix2', 'mix3']
+    control_samples = ['mix1', 'mix2', 'mix3', 'no_ctr']
     l = [process1exp_model(lam=l, s2g=g, control_sample=s) for l in lams for g in
-            s2gs for s in control_samples]
-    pr = pd.concat(l)
-    pr = pr_astype(pr)
-    return(pr)
+            s2gs for s in control_samples if vcf_exists(vartype, s)]
+    if len(l):
+        pr = pd.concat(l)
+        pr = pr_astype(pr)
+        return(pr)
+    else:
+        return(None)
 
 
 def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
@@ -321,9 +330,11 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
     outVCF = do_prepare4prec_recall(csetVCF=csetVCF, outdir=outdir,
             region=region, vartype=vartype, normalize=False, PASS=False, overwrite=False)
     # model specific operations
-    def helper(lam, s2g, sample):
+    case_sample='mix1'
+    control_sample='mix3'
+    def helper(lam, s2g):
         VCFpaths = reduce_prepared_callsets(callsetbn=callsetbn, region=region, vartype=vartype, lam=lam,
-                s2g=s2g, sample=sample, overwrite=False)
+                s2g=s2g, case_sample=case_sample, control_sample=control_sample, overwrite=False)
         csetVCF = VCFpaths['reduced_callset'][0]
         tsetVCF = VCFpaths['reduced_truthset']
         pr = vmc_precrecall(csetVCF=csetVCF, tsetVCF=tsetVCF)
@@ -331,14 +342,13 @@ def vmc_prepare_reduce_precrecall(csetVCF, region='chr22', vartype='snp',
         pr['vartype'] = vartype
         pr['lam'] = lam
         pr['s2g'] = s2g
-        pr['sample'] = sample
+        pr['case_sample'] = case_sample
+        pr['control_sample'] = control_sample
         pr['machine'] = machine
         return(pr)
     lams = ['0.04', '0.2']
     s2gs = ['-2', '-3', '-4']
-    samples = ['mix1', 'mix2', 'mix3']
-    l = [helper(lam=l, s2g=g, sample=s) for l in lams for g in
-            s2gs for s in samples]
+    l = [helper(lam=l, s2g=g) for l in lams for g in s2gs]
     pr = pd.concat(l)
     pr = pr_astype(pr, vmc_pr=True)
     return(pr)
@@ -354,6 +364,7 @@ def prepare_reduce_precrecall_all():
     vartypes = ['snp', 'indel']
     l = [prepare_reduce_precrecall(region=r, vartype=v) for r in regions for v
             in vartypes]
+    l = [y for y in l if y is not None]
     pr = pd.concat(l)
     pr = pr_astype(pr)
     return(pr)
@@ -380,12 +391,14 @@ def correct_vmc_pr(pr, corr_f = (249250621 + 243199373) / 86682278 ):
     return(corr_pr)
 
 
-def pr_astype(pr, vmc_pr=False):
+def pr_astype(pr, vmc_pr=False, alphabetical=False):
     '''
     Set data types for a precision recall data frame
 
     Parameters:
     pr: a precision recall data frame
+    vmc_pr: True if pr is from VariantMetaCaller
+    alphabetical: whether to sort category names alphabetically or according to the __callsets__ variable
 
     Returns: the data frame with the same data but corrected data types
     '''
@@ -396,24 +409,32 @@ def pr_astype(pr, vmc_pr=False):
     else:
         keys.append('callset')
     d = {k: 'category' for k in keys}
-    pr = pr.astype(d)
-    return(pr)
+    val = pr.astype(d)
+    if not vmc_pr:
+        if alphabetical:
+            categs = sorted(val['callset'].cat.categories, key=str.lower)
+        else:
+            categs = __callsets__
+        val['callset'] = val['callset'].cat.set_categories(categs)
+    return(val)
 
 
-def read_pr_csv(csvpath):
+def read_pr_csv(csvpath, vmc_pr=False):
     '''
     Read precision recall data from a CSV into a data frame and set data types
     '''
     pr = pd.read_csv(csvpath)
-    pr = pr_astype(pr)
+    if not vmc_pr:
+        pr = fix_names(pr)
+    pr = pr_astype(pr, vmc_pr=vmc_pr)
     return(pr)
 
 
 def replace_categ(df, column='callset', old='Tnseq', new='MuTect2'):
     df = df.copy()
-    l = list(df['callset'].cat.categories)
-    l = [x.replace('Tnseq', 'MuTect2') for x in l]
-    df['callset'].cat.categories = l
+    l = list(df['callset'])
+    l = [x.replace(old, new) for x in l]
+    df['callset'] = l
     return(df)
 
 def replace_colname(df, old='s2g', new='s2g'):
@@ -425,11 +446,66 @@ def replace_colname(df, old='s2g', new='s2g'):
 
 def fix_names(df):
     df = replace_categ(df, column='callset', old='Tnseq', new='MuTect2')
-    df = replace_colname(df, old='s2g', new='s2g')
+    df = replace_categ(df, column='callset', old='TNseq', new='MuTect2')
     return(df)
 
 
-def plotter1(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
+def singles2paireds(pr):
+    '''
+    Take rows for which control_sample is missing ('no_ctr') and add them to
+    all rows with control sample.
+    '''
+    sel_rows = (pr['control_sample'] == 'no_ctr')
+    def helper(control_sample='mix1'):
+        df = pr.loc[sel_rows, :].copy()
+        df['control_sample'] = control_sample
+        return(df)
+    csamples = ['mix1', 'mix2', 'mix3']
+    l = [helper(control_sample=cs) for cs in csamples]
+    res = pd.concat([pr] + l)
+    return(res)
+
+
+def plotter_vmc1(pr, vmc_pr, lam=0.2, region='chr1_2', s2g=-3,
+        case_sample='mix1', control_sample='mix3', vartype='snp',
+        callset=['strelka2Germline2s', 'strelka2Somatic', 'MuTect2', 'lofreqSomatic', 'somaticSniper']):
+    '''
+    Parameters:
+
+    pr: a precision recall data frame
+    vmc_pr: a precision recall data frame for VariantMetaCaller
+    lam: '0.04' or '0.2'
+    region: chr22 or autosomes
+    s2g: '-2', '-3' or '-4'
+    case_sample: 'mix1', 'mix2' or 'mix3'
+    control_sample: 'mix1', 'mix2' or 'mix3'
+    vartype: snp or indel
+    callset: a list of caller names that were input to VMC
+
+    Returns:
+    a FacetGrid plot object; Precision-recall curve for VariantMetaCaller
+    '''
+    seaborn.set()
+    seaborn.set_context('paper')
+    sel_rows = (pr['case_sample'] == case_sample) & (pr['control_sample'] == control_sample) & \
+                    (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['lam'] == lam) & \
+                                    (pr['callset'].isin(callset)) & (pr['vartype'] == vartype)
+    pr_sset = pr.loc[sel_rows, :]
+    machine = 'Ada'
+    vmc_sel_rows = (vmc_pr['case_sample'] == case_sample) & (vmc_pr['control_sample'] == control_sample) & \
+                    (vmc_pr['s2g'] == s2g) & (vmc_pr['region'] == region) & (vmc_pr['lam'] == lam) & \
+                            (vmc_pr['machine'] == machine) & (vmc_pr['vartype'] == vartype)
+    vmc_pr_sset = vmc_pr.loc[vmc_sel_rows, :]
+    fg = seaborn.FacetGrid(data=pr_sset, margin_titles=True, aspect=1,
+            hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
+    fg.axes[0][0].plot(vmc_pr_sset['recall'], vmc_pr_sset['precision'], color='black', linestyle='-')
+    fg.axes[0][0].plot(vmc_pr_sset['recall'], vmc_pr_sset['precision_estim'], color='black', linestyle=':')
+    fg = fg.map(plt.plot, 'recall', 'precision')
+    fg = fg.add_legend()
+    return(fg)
+
+
+def plotter1b(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
     '''
     Precision-recall plot; rows by s2g and columns by lambda
     '''
@@ -437,7 +513,7 @@ def plotter1(pr, vmc_pr=None, sample='mix1', s2g=-2, vartype='snp'):
     seaborn.set_context('talk')
     sel_rows = (pr['sample'] == sample) & (pr['s2g'] == s2g) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='region', col='lam', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
     if vmc_pr is not None:
         lams = vmc_pr['lam'].cat.categories
@@ -475,7 +551,7 @@ def plotter2(df, hue='machine', sample='mix1'):
     seaborn.set_context('talk')
     sel_rows = (df['sample'] == sample)
     df_sset = df.loc[sel_rows, :]
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='s2g', col='lam', hue=hue)
     fg = fg.map(plt.plot, 'recall', 'precision')
     #fg = fg.map(plt.plot, 'recall', 'precision_estim')
@@ -491,7 +567,7 @@ def plotter3(pr, vmc_pr=None, sample='mix1', region='autosomes', vartype='snp'):
     seaborn.set_context('talk')
     sel_rows = (pr['sample'] == sample) & (pr['region'] == region) & (pr['vartype'] == vartype)
     df_sset = fix_names(pr.loc[sel_rows, :])
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='lam', col='s2g', hue='callset', sharey=True,
             hue_kws=dict(marker=__markers__))
     fg = fg.map(plt.plot, 'recall', 'precision')
@@ -506,6 +582,8 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     seaborn.set_context('talk')
     # filter pr and vmc_pr
     pr = pr_astype(pr, False)
+    # filter pr and vmc_pr
+    pr = pr_astype(pr, False)
     vmc_pr = pr_astype(vmc_pr, True)
     sel_rows = (pr['sample'] == sample) & (pr['lam'] == lam) & (pr['vartype'] == vartype)
     df_sset = pr.loc[sel_rows, :]
@@ -515,8 +593,11 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     regions = vmc_pr['region'].cat.categories
     allregions = list(pr['region'].cat.categories)
     # create FacetGrid object without plotting
-    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True,
+    fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='region', col='s2g', hue='callset', sharey=True, hue_kws=dict(marker=__markers__))
+    def helper(reg):
+        '''
+        Make all plots for a given region (a row of the plot matrix)
     def helper(reg):
         '''
         Make all plots for a given region (a row of the plot matrix)
@@ -542,6 +623,12 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
             elif s2g == -4:
                 column = 0
             # plot on the axes object for row 'regix' and column 'column'
+                column = 2
+            elif s2g == -3:
+                column = 1
+            elif s2g == -4:
+                column = 0
+            # plot on the axes object for row 'regix' and column 'column'
             fg.axes[regix][column].plot(df['recall'], df[y],
                     color='black', linestyle=linestyle)
             return(None)
@@ -556,6 +643,100 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     fg = fg.map(plt.plot, 'recall', 'precision')
     fg = fg.add_legend()
     return(fg)
+
+
+def plotter5(pr, s2g=-3, region='autosomes', vartype='snp', onepanel=False):
+    '''
+    Precision-recall plot; hue by callset, rows by lambda and columns by s2g
+
+    Parameters:
+    pr: a precision recall data frame
+    s2g: '-2', '-3' or '-4'
+    region: chr22 or autosomes
+    vartype: snp or indel
+    onepanel: whether to draw only a single panel
+
+    Returns:
+    a FacetGrid plot object
+    '''
+    seaborn.set()
+    size='notebook'
+    row = 'lam'
+    sel_rows = (pr['s2g'] == s2g) & (pr['region'] == region) & (pr['vartype']
+            == vartype) & (pr['control_sample'] != 'no_ctr')
+    if onepanel:
+        row = None
+        sel_rows = (pr['control_sample'] == 'mix3') & (pr['lam'] == 0.2) & sel_rows
+        size='paper'
+    seaborn.set_context(size)
+    df_sset = pr.loc[sel_rows, :]
+    fg = seaborn.FacetGrid(col='control_sample', aspect=1,
+            row=row, hue='callset', data=df_sset,
+            margin_titles=True, hue_kws=dict(marker=__markers__))
+    fg = fg.map(plt.plot, 'recall', 'precision')
+    fg = fg.add_legend()
+    return(fg)
+
+
+def plotter6(pr, region='autosomes', vartype='snp', explanvar='control_sample'):
+    '''
+    Precision-recall plot; hue by some explanatory variable, columns by callset
+
+    Parameters:
+    pr: a precision recall data frame
+    region: chr22 or autosomes
+    vartype: snp or indel
+    explanvar: the explanatory variable whose effect we study; either lam, control_sample or s2g
+
+    Returns:
+    a FacetGrid plot object
+
+    Details:
+    Columns are wrapped.  strelka2Germline is excluded
+    '''
+    seaborn.set()
+    seaborn.set_context('notebook')
+    sel_rows =  (pr['region'] == region) & (pr['vartype'] == vartype) & \
+            (pr['control_sample'] != 'no_ctr') & (pr['callset'] != 'strelka2Germline')
+    if explanvar == 'control_sample':
+        lam=0.2
+        s2g=-3
+        sel_rows = sel_rows & (pr['s2g'] == s2g) & (pr['lam'] == lam)
+        marker = ['$1$', '$2$', '$3$']
+    if explanvar == 'lam':
+        control_sample='mix3'
+        s2g=-3
+        sel_rows = sel_rows & (pr['s2g'] == s2g) & (pr['control_sample'] == control_sample)
+        # r for rapidly, s for slowly decaying exponential
+        marker = ['$s$', '$r$', '$0$']
+    if explanvar == 's2g':
+        control_sample='mix3'
+        lam=0.2
+        sel_rows = sel_rows & (pr['lam'] == lam) & (pr['control_sample'] == control_sample)
+        marker = ['$4$', '$3$', '$2$']
+    df_sset = pr.copy().loc[sel_rows, :]
+    df_sset['callset'] = df_sset['callset'].cat.remove_unused_categories()
+    fg = seaborn.FacetGrid(col='callset', aspect=1,
+            col_wrap=3, hue=explanvar, data=df_sset,
+            hue_kws=dict(marker=marker))
+    fg = fg.map(plt.plot, 'recall', 'precision', linestyle='')
+    fg = fg.add_legend()
+    return(fg)
+
+
+def plotter7(df, otherdata=False):
+    dt = df.copy()
+    if not otherdata:
+        dt = df.loc[df['callset'].isin(__callsets__), :].copy()
+        dt['callset'] = dt['callset'].cat.set_categories(__callsets__)
+    seaborn.set()
+    seaborn.set_context('paper')
+    g = seaborn.FacetGrid(hue='callset', data=dt, aspect=1,
+            hue_kws=dict(marker=__markers__ + ['H', 'h', '+']))
+    g = g.map(plt.plot, 'recall', 'precision', marker = 'o')
+    g.add_legend()
+    return(g)
+
 
 def vmc_read_svmprob(vmcVCF):
     '''
