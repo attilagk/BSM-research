@@ -451,17 +451,26 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     '''
     '''
     seaborn.set()
+    # filter pr and vmc_pr
     pr = pr_astype(pr, False)
     vmc_pr = pr_astype(vmc_pr, True)
     sel_rows = (pr['sample'] == sample) & (pr['lam'] == lam) & (pr['vartype'] == vartype)
     df_sset = pr.loc[sel_rows, :]
     df_sset = pr_astype(df_sset, False)
     df_sset = fix_names(pr.loc[sel_rows, :])
+    # all levels of regions in either pr or vmc_pr
     regions = vmc_pr['region'].cat.categories
     allregions = list(pr['region'].cat.categories)
+    # create FacetGrid object without plotting
     fg = seaborn.FacetGrid(data=df_sset,
             row='region', col='s2g', hue='callset', sharey=True)
     def helper(reg):
+        '''
+        Make all plots for a given region (a row of the plot matrix)
+        Parameter:
+        reg: the region such as autosomes, chr1_2, chr22
+        '''
+        # get index for reg
         regix = allregions.index(reg)
         sel_rows = (vmc_pr['machine'] == 'Ada') \
                 & (vmc_pr['sample'] == sample) \
@@ -469,14 +478,17 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
                 & (vmc_pr['region'] == reg) \
                 & (vmc_pr['lam'] == '0.2')
         def curveplotter(y='precision', linestyle='-', log10s2g=-3):
+            # filter df
             df = vmc_pr.loc[sel_rows & (vmc_pr['log10s2g'] == log10s2g), :].copy()
             df = pr_astype(df, True)
+            # determine column index based on log10s2g
             if log10s2g == -2:
                 column = 2
             elif log10s2g == -3:
                 column = 1
             elif log10s2g == -4:
                 column = 0
+            # plot on the axes object for row 'regix' and column 'column'
             fg.axes[regix][column].plot(df['recall'], df[y],
                     color='black', linestyle=linestyle)
             return(None)
