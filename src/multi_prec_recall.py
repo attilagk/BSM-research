@@ -236,7 +236,7 @@ def reduce_prepared_callsets(callsetbn=None, region='chr22', vartype='snp', lam=
     VCFpaths = getVCFpaths(region=region, vartype=vartype, case_sample=case_sample, control_sample=control_sample)
     if callsetbn is None:
         callsetbn = get_callsetbn(vartype, case_sample=case_sample,
-                control_sample=control_sample, from_prepared_callset_dir=True)
+                control_sample=control_sample, from_prepared_callset_dir=False)
     VCFpaths = getVCFpaths(callsetbn=callsetbn, region=region,
             vartype=vartype, lam=lam, s2g=s2g, case_sample=case_sample, control_sample=control_sample)
     def helper(prepared_cset):
@@ -283,7 +283,7 @@ def reduce_precrecall(region='chr22', vartype='snp', lam='0.04',
     pr['s2g'] = s2g
     pr['case_sample'] = case_sample
     pr['control_sample'] = control_sample
-    pr = pr_astype(pr)
+    pr = pr_astype(pr, alphabetical=True)
     return(pr)
 
 
@@ -310,7 +310,7 @@ def prepare_reduce_precrecall(region='chr22', vartype='snp', case_sample='mix1')
             s2gs for s in control_samples if vcf_exists(vartype, s)]
     if len(l):
         pr = pd.concat(l)
-        pr = pr_astype(pr)
+        pr = pr_astype(pr, alphabetical=True)
         return(pr)
     else:
         return(None)
@@ -366,7 +366,7 @@ def prepare_reduce_precrecall_all():
             in vartypes]
     l = [y for y in l if y is not None]
     pr = pd.concat(l)
-    pr = pr_astype(pr)
+    pr = pr_astype(pr, alphabetical=True)
     return(pr)
 
 
@@ -598,11 +598,6 @@ def plotter4(pr, vmc_pr=None, sample='mix1', lam=0.2, vartype='snp'):
     def helper(reg):
         '''
         Make all plots for a given region (a row of the plot matrix)
-    def helper(reg):
-        '''
-        Make all plots for a given region (a row of the plot matrix)
-        Parameter:
-        reg: the region such as autosomes, chr1_2, chr22
         '''
         # get index for reg
         regix = allregions.index(reg)
