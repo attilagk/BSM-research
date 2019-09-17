@@ -548,8 +548,8 @@ def plotter2(df, hue='machine', sample='mix1'):
     Precision-recall plot; rows by s2g and columns by lambda
     '''
     seaborn.set()
-    seaborn.set_context('talk')
-    sel_rows = (df['sample'] == sample)
+    seaborn.set_context('notebook')
+    sel_rows = (df['case_sample'] == sample)
     df_sset = df.loc[sel_rows, :]
     fg = seaborn.FacetGrid(data=df_sset, margin_titles=True, aspect=1,
             row='s2g', col='lam', hue=hue)
