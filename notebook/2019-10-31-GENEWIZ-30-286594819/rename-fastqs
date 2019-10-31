@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+usage="`basename $0` srcfastq indivID celltype [index]"
+
+src=`realpath $1`
+indivID=$2
+celltype=$3 # NeuN_pl or NeuN_mn or muscle
+index=${4:-IX}
+
+# dirnames
+srcdir=/projects/bsm/reads/$GWproject
+destdir=/projects/bsm/reads/${indivID}_$celltype
+if test ! -d $destdir; then mkdir $destdir; fi
+
+sample=${indivID}_${celltype}
+instrument=$(parseFASTQheader $src instrument)
+flowcell=$(parseFASTQheader $src flowcell)
+lane=$(parseFASTQheader $src lane)
+pairmember=$(parseFASTQheader $src pairmember)
+dest=$destdir/${sample}_${instrument}-${index}_${flowcell}_${lane}_${pairmember}.fq.gz
+echo $dest
+exit
