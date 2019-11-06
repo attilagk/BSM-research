@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+
+cd /projects/bsm/attila/results/2019-11-04-GENEWIZ-data-check
+script=/home/attila/projects/bsm/notebook/2018-12-18-verifyBamID/CMCverifyBamID.2
+# find new data
+find /projects/bsm/alignments/ -name 'MSSM_033*.bam' -o -name 'MSSM_310*.bam' \
+    -o -name 'MSSM_338*.bam' -o -name 'MSSM_065*.bam' > CMCbam-names
+# run verifyBamID
+for bam in `cat CMCbam-names`; do
+    $script $bam &
+done
