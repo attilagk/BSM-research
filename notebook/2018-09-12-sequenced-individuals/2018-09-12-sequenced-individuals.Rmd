@@ -113,7 +113,7 @@ summ <- c(lapply(Dx, function(d) summ$cmc[ names(summ$cmc) %in% rownames(clinica
 
 The same information graphically
 
-```{r summary}
+```{r summary, fig.asp=1.5}
 summ.l <- my.levelplot(summ)
 ```
 
