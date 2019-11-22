@@ -31,7 +31,39 @@ def idxstats(indiv='MSSM_033', celltype='NeuN_pl'):
     df['Sample'] = sample
     return(df)
 
+def idxstats_contig_plot(idxstats):
+    '''
+    Plots % of unmapped reads for each contig
+
+    Arguments
+    idxstats: the value of idxstats, a pandas DataFrame
+
+    Value
+    a matplotlib figure
+    '''
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=[8, 12], sharey=True)
+    sns.stripplot(x='% Unmapped', y='Name', data=idxstats, hue='Sample', ax=ax[0])
+    sns.stripplot(x='% Unmapped', y='Name', data=idxstats, hue='Sample', ax=ax[1])
+    ax[0].grid('x')
+    ax[1].grid('x')
+    ax[1].set_xlim([-0.5, 5])
+    ax[1].set_ylabel('')
+    ax[1].legend().set_visible(False)
+    ax[0].set_title('full range')
+    ax[1].set_title('zoom')
+    return(fig)
+
+
 def selfSMplot(selfSM):
+    '''
+    Plot the FREEMIX and CHIPMIX values from VerifyBamID's .selfSM output files
+
+    Arguments
+    selfSM: a pandas DataFrame with pd.read_csv('some.selfSM, sep='\t')
+
+    Value
+    a matplotlib figure
+    '''
     plt.style.use('seaborn-notebook')
     fig, ax = plt.subplots(nrows=1, ncols=2, sharey=True)
     a = sns.stripplot(x='FREEMIX', y='sample', data=selfSM, jitter=False,
