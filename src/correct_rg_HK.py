@@ -6,9 +6,18 @@ import subprocess
 import glob
 import re
 
-diss2subj = {'S_1178': 'MSSM295', 'S_1163': 'MSSM304', 'S_700': 'PITT101', 'S_1307': 'PITT036'}
+subj2diss = {'MSSM_295': 'S_1178', 'MSSM_304': 'S_1163', 'PITT_101': 'S_700', 'PITT_036': 'S_1307'}
 
 def split_bam(bam='/projects/bsm/alignments/PITT_101/PITT_101_NeuN_pl-22-1Mb.bam'):
+    '''
+    Splits the BAM with incorrect read group into multiple BAMs in a subdir named after BAM
+
+    Argument
+    bam: path to bam
+
+    Value
+    the list of pathnames to the split BAMs
+    '''
     maindir = os.path.dirname(bam)
     bname = os.path.basename(bam).replace('.bam', '')
     subdir = maindir + os.path.sep + bname
@@ -23,7 +32,7 @@ def split_bam(bam='/projects/bsm/alignments/PITT_101/PITT_101_NeuN_pl-22-1Mb.bam
     return(splitbams)
 
 
-def correct_rg_1bam(bam, oldID='S_700', newID=None):
+def correct_rg_splitbam(bam):
     '''
     Correct read group for a single BAM by replacing the old sample ID with a new one
 
@@ -35,8 +44,11 @@ def correct_rg_1bam(bam, oldID='S_700', newID=None):
     Value
     the path to the corrected BAM
     '''
-    if newID is None:
-        newID = diss2subj[oldID]
+    bambn = os.path.basename(bam)
+    bamdir = os.path.dirname(bam)
+    indivID = re.search('(MSSM|PITT)_[0-9]+', bambn).group(0)
+    newID = indivID.replace('_', '')
+    oldID = subj2diss[indivID]
     args = ['samtools', 'view', '-H', bam]
     proc = subprocess.run(args, capture_output=True)
     m = re.search(b'@RG.*\\n', proc.stdout)
@@ -45,8 +57,6 @@ def correct_rg_1bam(bam, oldID='S_700', newID=None):
     s = re.sub('(@RG)?\\t', ' -r ', s)
     s = re.sub('^ *', '', s)
     s = re.sub('\\n', '', s)
-    bambn = os.path.basename(bam)
-    bamdir = os.path.dirname(bam)
     corrbam = bamdir + os.path.sep + 'corrected-' + bambn
     args = ['samtools', 'addreplacerg'] + s.split(' ') + ['-o', corrbam, bam]
     if subprocess.run(args, capture_output=True):
@@ -54,4 +64,10 @@ def correct_rg_1bam(bam, oldID='S_700', newID=None):
     else:
         return(None)
 
-#echo -r "ID:$ID" -r "LB:$LB" -r "SM:$SM" -r "PU:$PU" -r "CN:$CN" -r "PL:$PL"
+def merge_correct_bams(bams):
+    bamdir = os.path.dirname(bams[0])
+    outbam = bamdir + os.path.sep + 'merged.bam'
+    args = ['samtools', 'merge'] + bams + [outbam]
+    proc = subprocess.run(args, capture_output=True)
+    return(proc)
+
