@@ -2,6 +2,7 @@
 
 import os
 import os.path
+import shutil
 import subprocess
 import glob
 import re
@@ -21,8 +22,9 @@ def split_bam(bam='/projects/bsm/alignments/PITT_101/PITT_101_NeuN_pl-22-1Mb.bam
     maindir = os.path.dirname(bam)
     bname = os.path.basename(bam).replace('.bam', '')
     subdir = maindir + os.path.sep + bname
-    if not os.path.exists(subdir):
-        os.mkdir(subdir)
+    if os.path.exists(subdir):
+        shutil.rmtree(subdir)
+    os.mkdir(subdir)
     mydir = os.getcwd()
     os.chdir(subdir)
     args = ['samtools', 'split', bam]
@@ -64,10 +66,51 @@ def correct_rg_splitbam(bam):
     else:
         return(None)
 
+
 def merge_correct_bams(bams):
+    '''
+    Merge and sort the corrected BAMs
+
+    Arguments
+    bams: a list of paths to the corrected BAMs
+
+    Value
+    path to the merged, sorted BAM
+    '''
     bamdir = os.path.dirname(bams[0])
-    outbam = bamdir + os.path.sep + 'merged.bam'
-    args = ['samtools', 'merge'] + bams + [outbam]
+    mergedbam = bamdir + os.path.sep + 'merged.bam'
+    sortedbam = bamdir + os.path.sep + 'sorted.bam'
+    args1 = ['samtools', 'merge'] + [mergedbam] + bams
+    proc1 = subprocess.run(args1, capture_output=True)
+    args2 = ['samtools', 'sort', '-o', sortedbam, mergedbam]
+    proc2 = subprocess.run(args2, capture_output=True)
+    return(sortedbam)
+
+
+def correct_rg(bam):
+    '''
+    Main function that corrects read groups in a BAM
+
+    Argument
+    bam: path to the BAM to be corrected
+
+    Value
+    a procedure object representing the indexing of the corrected BAM
+    '''
+    bam = os.path.realpath(bam)
+    splitbams = split_bam(bam)
+    corrbams = [correct_rg_splitbam(b) for b in splitbams]
+    corrbam = merge_correct_bams(corrbams)
+    oldbam =  bam + '~'
+    os.replace(bam, oldbam)
+    os.replace(corrbam, bam)
+    args = ['samtools', 'index', '-b', bam]
     proc = subprocess.run(args, capture_output=True)
+    bamdir = os.path.dirname(corrbam)
+    shutil.rmtree(bamdir) and os.remove(oldbam)
     return(proc)
 
+
+if __name__ == '__main__':
+        import sys
+        correct_rg(sys.argv[1])
