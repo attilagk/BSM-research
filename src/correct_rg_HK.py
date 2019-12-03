@@ -78,6 +78,13 @@ def merge_correct_bams(bams, nthreads=4, maxMem='2G'):
 
     Value
     path to the merged, sorted BAM
+
+    Details
+    An earlier version of this function failed on big BAMs with messages like this:
+    > samtools sort: fail to open "PITT_101_NeuN_pl.bam.tmp.1020.bam": Too many open files
+    The solution was to increase the number of threads and the maximum memory
+    per thread from the default values. See this GitHub issue:
+    https://github.com/samtools/samtools/issues/603
     '''
     addthreads = str(nthreads - 1)
     bamdir = os.path.dirname(bams[0])
