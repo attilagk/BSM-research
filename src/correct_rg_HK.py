@@ -67,22 +67,32 @@ def correct_rg_splitbam(bam):
         return(None)
 
 
-def merge_correct_bams(bams):
+def merge_correct_bams(bams, nthreads=4, maxMem='2G'):
     '''
     Merge and sort the corrected BAMs
 
     Arguments
     bams: a list of paths to the corrected BAMs
+    nthreads: the number of total threads to run samtools sort
+    maxMem: the max memory per thread for samtools sort
 
     Value
     path to the merged, sorted BAM
+
+    Details
+    An earlier version of this function failed on big BAMs with messages like this:
+    > samtools sort: fail to open "PITT_101_NeuN_pl.bam.tmp.1020.bam": Too many open files
+    The solution was to increase the number of threads and the maximum memory
+    per thread from the default values. See this GitHub issue:
+    https://github.com/samtools/samtools/issues/603
     '''
+    addthreads = str(nthreads - 1)
     bamdir = os.path.dirname(bams[0])
     mergedbam = bamdir + os.path.sep + 'merged.bam'
     sortedbam = bamdir + os.path.sep + 'sorted.bam'
     args1 = ['samtools', 'merge'] + [mergedbam] + bams
     proc1 = subprocess.run(args1, capture_output=True)
-    args2 = ['samtools', 'sort', '-o', sortedbam, mergedbam]
+    args2 = ['samtools', 'sort', '-@', addthreads, '-m', maxMem, '-o', sortedbam, mergedbam]
     proc2 = subprocess.run(args2, capture_output=True)
     return(sortedbam)
 

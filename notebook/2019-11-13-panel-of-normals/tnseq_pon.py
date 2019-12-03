@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import re
 import subprocess
 import glob
 import os
@@ -26,6 +27,9 @@ def bam2pon(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_pl.bam',
 
     Value:
     a completed process (see subprocess)
+
+    Details:
+    https://support.sentieon.com/manual/TNseq_usage/tnseq/#generating-a-panel-of-normal-vcf-file
     '''
     nthreads = str(nthreads)
     vcf = os.path.basename(bam).replace('.bam', '.vcf')
@@ -74,3 +78,39 @@ def all_bam2pon_merge(bamlist=glob.glob('/projects/bsm/alignments/[MP][SI][ST][M
     args1 = ['bcftools', 'index', '--tbi', ponvcf] + vcflist
     proc1 = subprocess.run(args1, capture_output=True)
     return(proc1)
+
+
+def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
+        pon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz',
+        outdir='/projects/bsm/calls',
+        nthreads=NUMBER_THREADS, refseq=REFSEQ, algo='TNhaplotyper'):
+    nthreads = str(nthreads)
+    # get sample name from BAM header
+    args = ['samtools', 'view', '-H', bam]
+    proc = subprocess.run(args, capture_output=True)
+    headerlines = proc.stdout.decode('utf-8').split('\n')
+    matches = [re.match('^@RG.*', line) for line in headerlines]
+    samples = set([re.sub('^.*SM:([^\t]+)\t.*$', '\\1', m.string) for m in
+        matches if m])
+    if len(samples) != 1:
+        raise Exception('There must be one and only one sample in the BAM header.  Quitting...')
+    sample = samples.pop()
+    # get subject and tissue
+    pattern = '([A-Z]+)([0-9]+)_(.*)$'
+    subject = re.sub(pattern, '\\1_\\2', sample)
+    tissue = re.sub(pattern, '\\3', sample)
+    bname = subject + '_' + tissue
+    if bname != os.path.basename(bam).replace('.bam', ''):
+        raise Exception('Sample name from BAM header does not match that from filename.  Quitting...')
+    # output dir and VCF
+    vcfdir = outdir + os.path.sep + subject + os.path.sep + tissue
+    if not os.path.exists(vcfdir):
+        os.makedirs(vcfdir)
+    vcf = vcfdir + os.path.sep + bname + '-' + algo + '.vcf.gz'
+    # TODO: remove sample from PON
+    args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
+    #args = [sentieon_executable, 'driver',
+            '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
+            '--tumor_sample', sample, '--pon', pon, vcf]
+    proc = subprocess.run(args, capture_output=True)
+    return(proc)
