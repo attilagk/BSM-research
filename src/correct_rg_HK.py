@@ -67,22 +67,25 @@ def correct_rg_splitbam(bam):
         return(None)
 
 
-def merge_correct_bams(bams):
+def merge_correct_bams(bams, nthreads=4, maxMem='2G'):
     '''
     Merge and sort the corrected BAMs
 
     Arguments
     bams: a list of paths to the corrected BAMs
+    nthreads: the number of total threads to run samtools sort
+    maxMem: the max memory per thread for samtools sort
 
     Value
     path to the merged, sorted BAM
     '''
+    addthreads = str(nthreads - 1)
     bamdir = os.path.dirname(bams[0])
     mergedbam = bamdir + os.path.sep + 'merged.bam'
     sortedbam = bamdir + os.path.sep + 'sorted.bam'
     args1 = ['samtools', 'merge'] + [mergedbam] + bams
     proc1 = subprocess.run(args1, capture_output=True)
-    args2 = ['samtools', 'sort', '-o', sortedbam, mergedbam]
+    args2 = ['samtools', 'sort', '-@', addthreads, '-m', maxMem, '-o', sortedbam, mergedbam]
     proc2 = subprocess.run(args2, capture_output=True)
     return(sortedbam)
 
