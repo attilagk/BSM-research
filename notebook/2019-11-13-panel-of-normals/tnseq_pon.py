@@ -84,6 +84,51 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
         pon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz',
         outdir='/projects/bsm/calls',
         nthreads=NUMBER_THREADS, refseq=REFSEQ, algo='TNhaplotyper'):
+    '''
+    Call variants with TNseq's TNhaplotyper by default using a PON VCF
+
+    Arguments:
+    bam: path to the input BAM
+    pon: path to the PON VCF
+    outdir: the main directory for the output subdirectories and VCF file
+    nthreads: the total number of threads
+    refseq: reference genome sequence
+    algo: TNhaplotyper by default
+
+    Value:
+    a subprocess process object for the sentieon TNseq caller
+    '''
+    def remove_sample_from_pon(sample, addthreads):
+        '''
+        Remove sample from PON VCF
+
+        Arguments:
+        sample: the name of the sample
+        pon: path to the PON VCF to remove the sample from
+
+        Value:
+        path to the PON VCF without the sample
+
+        Details:
+        If PON VCF "pon" does not contain sample then no new PON VCF is created;
+        in this case the path to the original PON VCF is returned.
+        '''
+        pondir = os.path.dirname(pon)
+        ponbn = os.path.basename(pon)
+        newpon = pondir + os.path.sep + sample + '-' + ponbn
+        args = ['bcftools', 'view', '-s' '^' + sample, '-Oz', '-o', newpon, pon]
+        proc = subprocess.run(args, capture_output=True)
+        stderr = proc.stderr.decode('utf-8')
+        pattern = '.*sample.*does not exist in header.*'
+        if proc.returncode == 255 and re.match(pattern, stderr):
+            return(pon)
+        elif proc.returncode == 0:
+            args1 = ['bcftools', 'index', '--tbi', newpon]
+            proc1 = subprocess.run(args1)
+            return(newpon)
+        else:
+            raise Exception('Unidentified bcftools error.  Quitting...')
+    addthreads = str(nthreads - 1)
     nthreads = str(nthreads)
     # get sample name from BAM header
     args = ['samtools', 'view', '-H', bam]
@@ -107,10 +152,12 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     if not os.path.exists(vcfdir):
         os.makedirs(vcfdir)
     vcf = vcfdir + os.path.sep + bname + '-' + algo + '.vcf.gz'
-    # TODO: remove sample from PON
+    newpon = remove_sample_from_pon(sample, addthreads) # remove sample from PON
     args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
     #args = [sentieon_executable, 'driver',
             '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
-            '--tumor_sample', sample, '--pon', pon, vcf]
+            '--tumor_sample', sample, '--pon', newpon, vcf]
     proc = subprocess.run(args, capture_output=True)
     return(proc)
+
+
