@@ -114,8 +114,8 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
         in this case the path to the original PON VCF is returned.
         '''
         pondir = os.path.dirname(pon)
-        ponbn = os.path.basename(pon)
-        newpon = pondir + os.path.sep + sample + '-' + ponbn
+        ponbn = os.path.basename(pon).replace('.vcf.gz', '')
+        newpon = pondir + os.path.sep + ponbn + '-' + sample + '.vcf.gz'
         args = ['bcftools', 'view', '-s' '^' + sample, '-Oz', '-o', newpon, pon]
         proc = subprocess.run(args, capture_output=True)
         stderr = proc.stderr.decode('utf-8')
@@ -158,6 +158,10 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
             '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
             '--tumor_sample', sample, '--pon', newpon, vcf]
     proc = subprocess.run(args, capture_output=True)
+    # STDERR to logfile
+    log = vcf.replace('.vcf.gz', '.log')
+    print('Callset:\n' + vcf)
+    print('Logfile:\n' + log)
+    with open(log, mode='w') as f:
+        print(proc.stderr.decode('utf-8'), file=f)
     return(proc)
-
-
