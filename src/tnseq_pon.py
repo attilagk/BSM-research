@@ -153,8 +153,8 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
         os.makedirs(vcfdir)
     vcf = vcfdir + os.path.sep + bname + '-' + algo + '.vcf.gz'
     newpon = remove_sample_from_pon(sample, addthreads) # remove sample from PON
-    args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
-    #args = [sentieon_executable, 'driver',
+    #args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
+    args = [sentieon_executable, 'driver',
             '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
             '--tumor_sample', sample, '--pon', newpon, vcf]
     proc = subprocess.run(args, capture_output=True)
@@ -165,3 +165,23 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     with open(log, mode='w') as f:
         print(proc.stderr.decode('utf-8'), file=f)
     return(proc)
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('bam', help='input BAM file')
+    parser.add_argument('-p', '--pon', help='PON (panel of normal) VCF',
+            default='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz')
+    parser.add_argument('-d', '--dir', help='main output directory',
+            default='/projects/bsm/calls')
+    parser.add_argument('-t', '--nthreads', help='number of threads',
+            default=16, type=int)
+    parser.add_argument('-r', '--refseq', help='reference genome sequence',
+            default='/projects/shared/refgenome/GRCh37/dna/hs37d5.fa')
+    parser.add_argument('-a', '--algo', help='TNseq calling algorithm',
+            default='TNhaplotyper')
+    args = parser.parse_args()
+    proc = tnseq_call(bam=args.bam, pon=args.pon, outdir=args.dir, nthreads=args.nthreads,
+            refseq=args.refseq, algo=args.algo)
+    print(proc.stdout.decode('utf-8'))
