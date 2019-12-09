@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+
+outcsv=/projects/bsm/attila/results/2019-12-09-upload-to-ndar/samples-to-upload.csv
+indivs=/projects/bsm/attila/results/2018-09-12-sequenced-individuals/sequenced-individuals
+cd /projects/bsm/alignments
+echo indiv,tissue > $outcsv
+for bam in $(find `cut -f1 $indivs | sed 's/CMC_//'` -name '*.bam'); do
+    bambn=$(basename $bam .bam | sed 's/\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\(NeuN_pl\|NeuN_mn\|muscle\)/\1,\3/')
+    if ! grep $bambn /projects/bsm/attila/results/2019-02-19-upload-to-ndar/CMC_*csv > /dev/null; then
+        echo $bambn
+    fi
+done >> $outcsv
+echo samples written to $outcsv

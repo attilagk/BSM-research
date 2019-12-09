@@ -4,6 +4,7 @@ import synapseclient
 import numpy as np
 import pandas as pd
 import os
+import os.path
 import sys
 import glob
 
@@ -63,7 +64,7 @@ def extract_subject(template, subject):
     df = template.loc[template["src_subject_id"] == subject, :]
     return(df)
 
-def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True):
+def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissue=None):
     '''
     Makes all manifest files for a given CMC subject
 
@@ -71,6 +72,10 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True):
     subject: a CMC subject_id with or without the "CMC_" prefix
     syn: a synapse object returned by synapseclient.login()
     target_dir: directory for the manifest files created
+    matching_sample_ids: whether sample_id_biorepository should match sample_id_original
+
+    Value
+    a tuple of the three manifests, each in a pandas DataFrame
     '''
     def btb_or_gsubj(template_syn_id):
         manif_temp, manif_syn = get_manifest(template_syn_id, syn, download_dir=target_dir)
@@ -78,17 +83,20 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True):
         manif = correct_manifest(manif)
         temp_p = target_dir + os.sep + manif_syn.properties.name # template path
         targ_p = target_dir + os.sep + cmc_subject + "-" + os.path.basename(temp_p)
-        write_manifest(manif, temp_p, targ_p)
+        if tissue is None:
+            write_manifest(manif, temp_p, targ_p)
         return(manif)
 
     def g_sample(gsubj):
         gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=target_dir)
-        gsam = make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=matching_sample_ids)
+        gsam = make_g_sample(gsam_temp, btb, gsubj, syn,
+                matching_sample_ids=matching_sample_ids, tissue=tissue)
         gsam = correct_manifest(gsam)
         temp_p = target_dir + os.sep + gsam_syn.properties.name
         targ_p = target_dir + os.sep + cmc_subject + "-" + 'genomics_sample03_U01MH106891_Chess.csv'
         gsam['site'] = 'U01MH106891'
-        write_manifest(gsam, temp_p, targ_p)
+        if tissue is None:
+            write_manifest(gsam, temp_p, targ_p)
         return(gsam)
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
     cmc_subject = "CMC_" + subject # add CMC_ prefix
@@ -207,7 +215,7 @@ def extract_cmc_wgs(btb, syn):
     wgs = wgs[wgs['Library ID'].isin(ids)]
     return(wgs)
 
-def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True):
+def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=None):
     '''
     Creates a genomics sample manifest based on a genomics sample template and
     two other manifests
@@ -218,11 +226,13 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True):
     gsubj: genomics subject manifest, a pandas data frame
     syn: a synapse object returned by synapseclient.login()
     matching_sample_ids: whether sample_id_biorepository should match sample_id_original
+    tissue: a single tissue in {NeuN_pl, NeuN_mn, muscle} can be given
 
     Value: genomics sample manifest, a pandas data frame
 
     Details: The script deduces the sample types ("tissues") based on the BAMs
-    found
+    found when tissue=None or based on tissue when it's one of NeuN_pl,
+    NeuN_mn, muscle.
     '''
     def do_tissue(tissue):
         '''Creates a tissue-specific genomics sample'''
@@ -289,5 +299,27 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True):
     gsam['data_file_location'] = 'NDAR'
     gsam['storage_protocol'] = 'NA' # made up
     gsam['patient_id_biorepository'] = src_subject_id
-    val = pd.concat([do_tissue(t) for t in tissues])
+    if tissue is None:
+        val = pd.concat([do_tissue(t) for t in tissues])
+    else:
+        val = do_tissue(tissue)
     return(val)
+
+
+def make_manifests_main(csv, target_dir="."):
+    syn = synapseclient.login()
+    def do_one_sample(subject, tissue):
+        m = make_manifests(subject=subject, tissue=tissue, syn=syn,
+                target_dir=target_dir, matching_sample_ids=True)
+        return(m)
+    samples = pd.read_csv(csv)
+    lomanifests = [do_one_sample(subject=samples.iloc[i][0], tissue=samples.iloc[i][1]) for i in samples.index]
+    kinds = ['nichd_btb02', 'genomics_subject02', 'genomics_sample03']
+    def do_one_manifest(kind):
+        m = [row[kind] for row in lomanifests]
+        m = pd.concat(m)
+        csvpath = target_dir + os.path.sep + kinds[kind] + '-test0' + '.csv'
+        m.to_csv(csvpath)
+        return(m)
+    manifests = [do_one_manifest(k) for k in range(len(kinds))]
+    return(manifests)
