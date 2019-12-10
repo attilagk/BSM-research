@@ -8,8 +8,9 @@ import os.path
 import sys
 import glob
 
-#syn = synapseclient.login()
 experiment_id = 1223
+chess_grant =  'U01MH106891'
+manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': "syn12128754", 'genomics_sample03': "syn8464096"}
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
@@ -94,7 +95,7 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
         gsam = correct_manifest(gsam)
         temp_p = target_dir + os.sep + gsam_syn.properties.name
         targ_p = target_dir + os.sep + cmc_subject + "-" + 'genomics_sample03_U01MH106891_Chess.csv'
-        gsam['site'] = 'U01MH106891'
+        gsam['site'] = chess_grant
         if tissue is None:
             write_manifest(gsam, temp_p, targ_p)
         return(gsam)
@@ -277,6 +278,10 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
     wgs = extract_cmc_wgs(btb, syn)
     # ensure that gsubj has one and only one row
     if len(gsubj) != 1:
+        print(gsubj)
+        print(btb)
+        print(tissue)
+        return(None)
         raise Exception('genomics subjects manifest must have one and only one row')
     # get paths of BAMs and of the fastq-names files
     src_subject_id = gsubj.at[gsubj.index[0], 'src_subject_id']
@@ -306,20 +311,23 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
     return(val)
 
 
-def make_manifests_main(csv, target_dir="."):
+def make_manifests_main(slistcsv, target_dir=".", prefix='chess-'):
     syn = synapseclient.login()
     def do_one_sample(subject, tissue):
         m = make_manifests(subject=subject, tissue=tissue, syn=syn,
                 target_dir=target_dir, matching_sample_ids=True)
         return(m)
-    samples = pd.read_csv(csv)
+    samples = pd.read_csv(slistcsv)
     lomanifests = [do_one_sample(subject=samples.iloc[i][0], tissue=samples.iloc[i][1]) for i in samples.index]
     kinds = ['nichd_btb02', 'genomics_subject02', 'genomics_sample03']
     def do_one_manifest(kind):
         m = [row[kind] for row in lomanifests]
         m = pd.concat(m)
-        csvpath = target_dir + os.path.sep + kinds[kind] + '-test0' + '.csv'
-        m.to_csv(csvpath)
+        csvpath = target_dir + os.path.sep + prefix + kinds[kind] + '.csv'
+        templ_synid = manifest_template_synids[kinds[kind]]
+        templ_df, templ_syn = get_manifest(templ_synid, syn, download_dir=target_dir)
+        templ_p = target_dir + os.path.sep + templ_syn.properties.name
+        write_manifest(m, templ_p, csvpath)
         return(m)
-    manifests = [do_one_manifest(k) for k in range(len(kinds))]
+    manifests = tuple(do_one_manifest(k) for k in range(len(kinds)))
     return(manifests)
