@@ -5,9 +5,10 @@ indivs=/projects/bsm/attila/results/2018-09-12-sequenced-individuals/sequenced-i
 cd /projects/bsm/alignments
 echo indiv,tissue > $outcsv
 for bam in $(find `cut -f1 $indivs | sed 's/CMC_//'` -name '*.bam'); do
-    bambn=$(basename $bam .bam | sed 's/\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\(NeuN_pl\|NeuN_mn\|muscle\)/\1,\3/')
+    bambn=$(basename $bam)
+    entry=$(basename $bam .bam | sed 's/\(\(MSSM\|PITT\|PENN\)_[[:digit:]]\+\)_\(NeuN_pl\|NeuN_mn\|muscle\)/\1,\3/')
     if ! grep $bambn /projects/bsm/attila/results/2019-02-19-upload-to-ndar/CMC_*csv > /dev/null; then
-        echo $bambn
+        echo $entry
     fi
 done >> $outcsv
 echo samples written to $outcsv

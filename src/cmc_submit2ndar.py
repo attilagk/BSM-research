@@ -100,6 +100,7 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
             write_manifest(gsam, temp_p, targ_p)
         return(gsam)
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
+    print('processing', subject, tissue)
     cmc_subject = "CMC_" + subject # add CMC_ prefix
     btb = btb_or_gsubj("syn12154562")
     gsubj = btb_or_gsubj("syn12128754")
@@ -278,10 +279,6 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
     wgs = extract_cmc_wgs(btb, syn)
     # ensure that gsubj has one and only one row
     if len(gsubj) != 1:
-        print(gsubj)
-        print(btb)
-        print(tissue)
-        return(None)
         raise Exception('genomics subjects manifest must have one and only one row')
     # get paths of BAMs and of the fastq-names files
     src_subject_id = gsubj.at[gsubj.index[0], 'src_subject_id']
@@ -331,3 +328,13 @@ def make_manifests_main(slistcsv, target_dir=".", prefix='chess-'):
         return(m)
     manifests = tuple(do_one_manifest(k) for k in range(len(kinds)))
     return(manifests)
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('slistcsv', help='sample list CSV file')
+    parser.add_argument('-d', '--targetdir', help='target directory', default='.')
+    parser.add_argument('-p', '--prefix', help='prefix for output files', default='chess-')
+    args = parser.parse_args()
+    make_manifests_main(slistcsv=args.slistcsv, target_dir=args.targetdir, prefix=args.prefix)
