@@ -309,6 +309,21 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
 
 
 def make_manifests_main(slistcsv, target_dir=".", prefix='chess-'):
+    '''
+    Make manifests given a list of samples in a CSV file
+
+    Arguments:
+    slistcsv: path to the input CSV file
+    target_dir: where the manifest files will be created
+    prefix: common prefix to all three manifests
+
+    Value:
+    a tuple of the three manifests, each one a pandas DataFrame
+
+    Details:
+    The side effect of the function is to write the manifests in the target
+    directory with the given prefix.
+    '''
     syn = synapseclient.login()
     def do_one_sample(subject, tissue):
         m = make_manifests(subject=subject, tissue=tissue, syn=syn,
