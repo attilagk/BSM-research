@@ -73,7 +73,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--outcsv', help='output CSV: sequenced samples',
-            default='/projects/bsm/attila/results/2019-12-11-sequenced-samples/sequenced-samples.csv')
+            default='/projects/bsm/attila/results/2018-09-12-sequenced-individuals/sequenced-samples.csv')
     parser.add_argument('-d', '--dnalib', help='input CSV: DNA libraries (Mehaa\'s table)',
             default='/projects/bsm/data/dnalib/BSM_Project_Chess.csv')
     args = parser.parse_args()
