@@ -185,7 +185,9 @@ def correct_manifest(df):
         res['data_file1'] = [safely_remove_prefix(s) for s in res['data_file1']]
         res['data_file2'] = [safely_remove_prefix(s) for s in res['data_file2']]
         if any([pd.isna(y) for y in res['sample_amount']]):
-            res['sample_amount'] = 'NaN'
+            #res['sample_amount'] = 'NaN'
+            res['sample_amount'] = 1
+            res['sample_unit'] = 'NA'
     return(res)
 
 def get_sample_id_original(tissue, btb):
