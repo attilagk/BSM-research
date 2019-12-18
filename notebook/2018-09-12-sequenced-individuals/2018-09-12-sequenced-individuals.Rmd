@@ -4,7 +4,7 @@ title: Summary on CMC and Benchmark
 featimg: summary-1.png
 ---
 
-Which individuals have been sequenced?
+Which individuals and samples have been sequenced?
 
 For the answer see the `src/sequenced-individuals.sh` as well as the `data/dnalib/get-cmc-individuals` scripts.
 
