@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# create to srcfastq a symlink with a name that alignX10 can use to generate a read group tag
+usage="`basename $0` srcfastq indivID celltype [index]"
+
+# input arguments
+src=`realpath $1`
+indivID=$2
+indivID=$(echo $indivID | tr -d '_') # remove "_" from indivID
+celltype=$3 # NeuN_pl or NeuN_mn or muscle
+index=${4:-001}
+
+# variables; info from FASTQ header
+sample=${indivID}_${celltype}
+instrument=$(parseFASTQheader $src instrument)
+flowcell=$(parseFASTQheader $src flowcell)
+lane=$(parseFASTQheader $src lane)
+pairmember=$(parseFASTQheader $src pairmember)
+
+# directories
+srcdir=/projects/bsm/reads/$GWproject
+destdir=/projects/bsm/reads/$sample
+if test ! -d $destdir; then mkdir $destdir; fi
+
+# create dest file: a symlink
+dest=$destdir/${sample}_${instrument}-${index}_${flowcell}_L${lane}_${pairmember}.fq.gz
+ln -s $src $dest && echo "`basename $0`: symlink created" && ls -l $dest

@@ -26,9 +26,12 @@ if ! test $# -eq 1; then
     echo "$bam contains multiple samples: $IndIDfromBAMheader. Exiting..."
     exit 1
 fi
-if ! test $IndIDfromBAMname = $IndIDfromBAMheader; then
-    echo "Sample name from BAM file name $IndIDfromBAMname doesn't match with sample name from BAM header $IndIDfromBAMheader. Exiting..."
-    exit 1
+# The following test lead to complications so it's omitted
+if false; then
+    if ! test $IndIDfromBAMname = $IndIDfromBAMheader; then
+        echo "Sample name from BAM file name $IndIDfromBAMname doesn't match with sample name from BAM header $IndIDfromBAMheader. Exiting..."
+        exit 1
+    fi
 fi
 
 # Creating mapping from Individual_ID to Genotyping_Sample_ID.
