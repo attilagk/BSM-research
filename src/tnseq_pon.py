@@ -75,13 +75,13 @@ def all_bam2pon_merge(bamlist=glob.glob('/projects/bsm/alignments/[MP][SI][ST][M
     vcflist = glob.glob(outdir + os.path.sep + '*.vcf.gz')
     args0 = ['bcftools', 'merge', '-m', 'all', '--force-samples', '-Oz', '-o', ponvcf] + vcflist
     proc0 = subprocess.run(args0)
-    args1 = ['bcftools', 'index', '--tbi', ponvcf] + vcflist
+    args1 = ['bcftools', 'index', '--tbi', ponvcf]
     proc1 = subprocess.run(args1, capture_output=True)
     return(proc1)
 
 
 def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
-        pon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz',
+        pon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz',
         outdir='/projects/bsm/calls',
         nthreads=NUMBER_THREADS, refseq=REFSEQ, algo='TNhaplotyper'):
     '''
@@ -141,7 +141,8 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
         raise Exception('There must be one and only one sample in the BAM header.  Quitting...')
     sample = samples.pop()
     # get subject and tissue
-    pattern = '([A-Z]+)([0-9]+)_(.*)$'
+    # this works with MSSM373_NeuN_pl, MSSM_373_NeuN_pl or Common_7_NeuN_pl
+    pattern = '([a-zA-Z]+)_?([0-9]+)_(.*)$'
     subject = re.sub(pattern, '\\1_\\2', sample)
     tissue = re.sub(pattern, '\\3', sample)
     bname = subject + '_' + tissue
@@ -172,8 +173,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('bam', help='input BAM file')
     parser.add_argument('-p', '--pon', help='PON (panel of normal) VCF',
-            default='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz')
-    parser.add_argument('-d', '--dir', help='main output directory',
+            default='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz')
+    parser.add_argument('-o', '--outdir', help='main output directory',
             default='/projects/bsm/calls')
     parser.add_argument('-t', '--nthreads', help='number of threads',
             default=16, type=int)
@@ -182,6 +183,6 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--algo', help='TNseq calling algorithm',
             default='TNhaplotyper')
     args = parser.parse_args()
-    proc = tnseq_call(bam=args.bam, pon=args.pon, outdir=args.dir, nthreads=args.nthreads,
+    proc = tnseq_call(bam=args.bam, pon=args.pon, outdir=args.outdir, nthreads=args.nthreads,
             refseq=args.refseq, algo=args.algo)
     print(proc.stdout.decode('utf-8'))
