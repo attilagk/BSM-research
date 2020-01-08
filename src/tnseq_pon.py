@@ -128,6 +128,27 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
             return(newpon)
         else:
             raise Exception('Unidentified bcftools error.  Quitting...')
+    def postproc_vcf(invcf, vcfmaindir, vartype='snps'):
+        '''
+        Postprocess VCF by filtering for SNPs or indels
+
+        Arguments:
+        invcf: input VCF
+        vcfmaindir: the main VCF dir
+        vartype: snps|indels
+
+        Value:
+        a subprocess procedure
+        '''
+        germ2som = {'snps': 'snvs', 'indels': 'indels'}
+        somvt = germ2som[vartype]
+        outdir = vcfmaindir + os.sep + somvt
+        outvcf = outdir + os.sep + os.path.basename(invcf)
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+        args = ['bcftools', 'view', '-o', outvcf, '-O', 'z', '-v', vartype, invcf]
+        proc = subprocess.run(args, capture_output=True)
+        return(proc)
     addthreads = str(nthreads - 1)
     nthreads = str(nthreads)
     # get sample name from BAM header
@@ -149,10 +170,11 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     if bname != os.path.basename(bam).replace('.bam', ''):
         raise Exception('Sample name from BAM header does not match that from filename.  Quitting...')
     # output dir and VCF
-    vcfdir = outdir + os.path.sep + subject + os.path.sep + tissue
+    vcfmaindir = outdir + os.path.sep + subject + os.path.sep + tissue  + '-PON'
+    vcfdir = vcfmaindir + os.path.sep + algo
     if not os.path.exists(vcfdir):
         os.makedirs(vcfdir)
-    vcf = vcfdir + os.path.sep + bname + '-' + algo + '.vcf.gz'
+    vcf = vcfdir + os.path.sep + algo + '.vcf.gz'
     newpon = remove_sample_from_pon(sample, addthreads) # remove sample from PON
     #args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
     args = [sentieon_executable, 'driver',
@@ -165,6 +187,8 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     print('Logfile:\n' + log)
     with open(log, mode='w') as f:
         print(proc.stderr.decode('utf-8'), file=f)
+    p_snps = postproc_vcf(invcf=vcf, vcfmaindir=vcfmaindir, vartype='snps')
+    p_indels = postproc_vcf(invcf=vcf, vcfmaindir=vcfmaindir, vartype='indels')
     return(proc)
 
 
