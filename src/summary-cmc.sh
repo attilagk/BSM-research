@@ -47,10 +47,10 @@ do1indiv () {
             echo 0
         fi
     done
-    # VCFs
+    # paired sample VCFs
     for spair in $samplepairs; do
         vcfdir=/projects/bsm/calls/$indiv/$spair/snvs
-        for caller in $(sed -n "/^mu.*vcf/ { s/^\(mu\|ne\)_\(.\+\).vcf/\2/; p }" $rownames); do
+        for caller in $(sed -n "/^mu.*vcf/ { s/^\(mu\|ne\|pon\)_\(.\+\).vcf/\2/; p }" $rownames); do
             vcf=$vcfdir/$caller.vcf.gz
             if test -f $vcf; then
                 echo 1
@@ -59,6 +59,16 @@ do1indiv () {
             fi
         done
     done
+    # PON VCFs
+    vcfdir=/projects/bsm/calls/$indiv/NeuN_pl-PON/snvs
+        for caller in $(sed -n "/^pon.*vcf/ { s/^\(pon\)_\(.\+\).vcf/\2/; p }" $rownames); do
+            vcf=$vcfdir/$caller.vcf.gz
+            if test -f $vcf; then
+                echo 1
+            else
+                echo 0
+            fi
+        done
 }
 
 # do all individuals
