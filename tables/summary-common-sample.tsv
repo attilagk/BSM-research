@@ -5,6 +5,7 @@ muscle.fastq	NA
 NeuN_pl.bam	1
 NeuN_mn.bam	0
 muscle.bam	NA
+pon_TNhaplotyper.vcf	1
 lofreqSomatic.vcf	1
 somaticSniper.vcf	1
 strelka2Somatic.vcf	1
