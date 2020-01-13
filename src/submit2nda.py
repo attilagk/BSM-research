@@ -3,7 +3,7 @@
 import subprocess
 
 def submit(btb, gsub, gsam, title, description, build=False, user='andrewchess', pw='Bern1e2017',
-        collection='2965', lib='/projects/bsm/', alternateEndpoint='BSMN-S3'):
+        collection='2965', lib='/projects/bsm/'):
     '''
     Validate and submit data to NDA
 
@@ -18,14 +18,14 @@ def submit(btb, gsub, gsam, title, description, build=False, user='andrewchess',
     pw: NDA password
     collection: NDA collection
     lib: data file directory
-    alternateEndpoint: alternate endpoint
 
     Value: the process object
     '''
-    args = ['/home/attila/.local/bin/vtcmd', btb, gsub, gsam]
-    args += ['-u', user, '-p', pw, '-c', collection, '-l', lib, '-a', alternateEndpoint, '-t', title, '-d', description]
+    args = ['vtcmd']
+    args += ['-u', user, '-p', pw, '-c', collection, '-l', lib, '-t', title, '-d', description]
     if build:
         args += ['-b']
+    args += [btb, gsub, gsam]
     proc = subprocess.run(args, capture_output=True)
     return(proc)
 
@@ -47,12 +47,10 @@ if __name__ == '__main__':
             default='2965')
     parser.add_argument('-l', '--lib', help='data file directory',
             default='/projects/bsm/')
-    parser.add_argument('-a', '--alternateEndpoint', help='alternate Endpoint',
-            default='BSMN-S3')
     parser.add_argument('-b', '--build', help='build package',
             action="store_true")
     args = parser.parse_args()
     proc = submit(btb=args.btb, gsub=args.gsub, gsam=args.gsam,
             title=args.title, description=args.description, build=args.build, user=args.user, pw=args.password,
-            collection=args.collection, lib=args.lib, alternateEndpoint=args.alternateEndpoint)
+            collection=args.collection, lib=args.lib)
     print(proc.stdout.decode('utf-8'))
