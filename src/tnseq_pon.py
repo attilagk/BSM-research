@@ -98,36 +98,6 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     Value:
     a subprocess process object for the sentieon TNseq caller
     '''
-    def remove_sample_from_pon(sample, addthreads):
-        '''
-        Remove sample from PON VCF
-
-        Arguments:
-        sample: the name of the sample
-        pon: path to the PON VCF to remove the sample from
-
-        Value:
-        path to the PON VCF without the sample
-
-        Details:
-        If PON VCF "pon" does not contain sample then no new PON VCF is created;
-        in this case the path to the original PON VCF is returned.
-        '''
-        pondir = os.path.dirname(pon)
-        ponbn = os.path.basename(pon).replace('.vcf.gz', '')
-        newpon = pondir + os.path.sep + ponbn + '-' + sample + '.vcf.gz'
-        args = ['bcftools', 'view', '-s' '^' + sample, '-Oz', '-o', newpon, pon]
-        proc = subprocess.run(args, capture_output=True)
-        stderr = proc.stderr.decode('utf-8')
-        pattern = '.*sample.*does not exist in header.*'
-        if proc.returncode == 255 and re.match(pattern, stderr):
-            return(pon)
-        elif proc.returncode == 0:
-            args1 = ['bcftools', 'index', '--tbi', newpon]
-            proc1 = subprocess.run(args1)
-            return(newpon)
-        else:
-            raise Exception('Unidentified bcftools error.  Quitting...')
     def postproc_vcf(invcf, vcfmaindir, vartype='snps'):
         '''
         Postprocess VCF by filtering for SNPs or indels
@@ -175,7 +145,7 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     if not os.path.exists(vcfdir):
         os.makedirs(vcfdir)
     vcf = vcfdir + os.path.sep + algo + '.vcf.gz'
-    newpon = remove_sample_from_pon(sample, addthreads) # remove sample from PON
+    newpon = remove_sample_from_pon(bam=bam, addthreads=addthreads, mergedpon=pon) # remove sample from PON
     #args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
     args = [sentieon_executable, 'driver',
             '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
@@ -190,6 +160,41 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     p_snps = postproc_vcf(invcf=vcf, vcfmaindir=vcfmaindir, vartype='snps')
     p_indels = postproc_vcf(invcf=vcf, vcfmaindir=vcfmaindir, vartype='indels')
     return(proc)
+
+
+def remove_sample_from_pon(bam, addthreads, mergedpon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz'):
+    '''
+    Remove sample specific records from PON VCF if necessary
+
+    Arguments:
+    bam: path to bam corresponding to the sample
+    addthreads: additional threads
+    mergedpon: path to the PON VCF to remove the sample from
+
+    Value:
+    path to the PON VCF without the sample
+
+    Details:
+    If PON VCF "mergedpon" does not contain sample then no new PON VCF is created;
+    in this case the path to the original PON VCF is returned.
+    '''
+    addthreads = str(addthreads)
+    pondir = os.path.dirname(mergedpon)
+    ponbn = os.path.basename(mergedpon).replace('.vcf.gz', '')
+    sample = os.path.basename(bam).replace('.bam', '')
+    samplepon = pondir + os.sep + 'VCFs' + os.sep + sample + '.vcf.gz'
+    newpon = pondir + os.path.sep + ponbn + '-' + sample + '.vcf.gz'
+    if not os.path.exists(samplepon):
+        return(mergedpon)
+    args = ['bcftools', 'isec', '--complement', '-Oz', '-o', newpon, '-w1',
+            '--threads', addthreads, mergedpon, samplepon]
+    proc = subprocess.run(args, capture_output=True)
+    if proc.returncode == 0:
+        args1 = ['bcftools', 'index', '--tbi', newpon]
+        proc1 = subprocess.run(args1)
+        return(newpon)
+    else:
+        raise Exception('Unidentified bcftools error.  Quitting...')
 
 
 if __name__ == '__main__':
