@@ -145,7 +145,8 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     if not os.path.exists(vcfdir):
         os.makedirs(vcfdir)
     vcf = vcfdir + os.path.sep + algo + '.vcf.gz'
-    newpon = remove_sample_from_pon(bam=bam, addthreads=addthreads, mergedpon=pon) # remove sample from PON
+    newpon = pon_without_sample(bam=bam, addthreads=addthreads, mergedpon=pon,
+            subtract=False) # remove sample from PON
     #args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
     args = [sentieon_executable, 'driver',
             '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
@@ -162,7 +163,9 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     return(proc)
 
 
-def remove_sample_from_pon(bam, addthreads, mergedpon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz'):
+def pon_without_sample(bam, addthreads,
+        mergedpon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz',
+        subtract=False):
     '''
     Remove sample specific records from PON VCF if necessary
 
@@ -170,6 +173,7 @@ def remove_sample_from_pon(bam, addthreads, mergedpon='/projects/bsm/attila/resu
     bam: path to bam corresponding to the sample
     addthreads: additional threads
     mergedpon: path to the PON VCF to remove the sample from
+    subtract: set subtraction: mergedpon - samplepon
 
     Value:
     path to the PON VCF without the sample
@@ -177,6 +181,12 @@ def remove_sample_from_pon(bam, addthreads, mergedpon='/projects/bsm/attila/resu
     Details:
     If PON VCF "mergedpon" does not contain sample then no new PON VCF is created;
     in this case the path to the original PON VCF is returned.
+    If subtract is True then the PON corresponding to the input bam file is
+    subtracted from the merged PON: mergedpon - samplepon.  Otherwise, by
+    default, a new merged PON is made excluding the sample PON but including
+    all other individual PONs in the
+    '/projects/bsm/attila/results/2019-11-13-panel-of-normals/VCFs/'
+    directory.
     '''
     addthreads = str(addthreads)
     pondir = os.path.dirname(mergedpon)
@@ -186,15 +196,28 @@ def remove_sample_from_pon(bam, addthreads, mergedpon='/projects/bsm/attila/resu
     newpon = pondir + os.path.sep + ponbn + '-' + sample + '.vcf.gz'
     if not os.path.exists(samplepon):
         return(mergedpon)
-    args = ['bcftools', 'isec', '--complement', '-Oz', '-o', newpon, '-w1',
-            '--threads', addthreads, mergedpon, samplepon]
-    proc = subprocess.run(args, capture_output=True)
-    if proc.returncode == 0:
-        args1 = ['bcftools', 'index', '--tbi', newpon]
-        proc1 = subprocess.run(args1)
-        return(newpon)
+    if subtract:
+        args = ['bcftools', 'isec', '--complement', '-Oz', '-o', newpon, '-w1',
+                '--threads', addthreads, mergedpon, samplepon]
+        proc = subprocess.run(args, capture_output=True)
+        if proc.returncode == 0:
+            args1 = ['bcftools', 'index', '--tbi', newpon]
+            proc1 = subprocess.run(args1)
+            return(newpon)
+        else:
+            raise Exception('Unidentified bcftools error.  Quitting...')
     else:
-        raise Exception('Unidentified bcftools error.  Quitting...')
+        vcfdir = pondir + os.sep + 'VCFs'
+        vcflist = glob.glob(vcfdir + os.sep + '*.vcf.gz')
+        # filter for canonical filenames
+        vcflist = [y for y in vcflist if re.match(vcfdir + os.sep +
+            '(MSSM|PITT)_[0-9]{3}_(muscle|NeuN_pl|NeuN_mn)\.vcf.gz', y)]
+        # remove sample PON from the list
+        vcflist.remove(samplepon)
+        args = ['bcftools', 'merge', '-m', 'all', '--force-samples', '-Oz',
+                '-o', newpon, '--threads', addthreads] + vcflist
+        proc = subprocess.run(args, capture_output=True)
+        return(proc)
 
 
 if __name__ == '__main__':
