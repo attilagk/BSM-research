@@ -217,7 +217,7 @@ def pon_without_sample(bam, addthreads,
         args = ['bcftools', 'merge', '-m', 'all', '--force-samples', '-Oz',
                 '-o', newpon, '--threads', addthreads] + vcflist
         proc = subprocess.run(args, capture_output=True)
-        return(proc)
+        return(newpon)
 
 
 if __name__ == '__main__':
