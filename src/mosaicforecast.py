@@ -13,6 +13,12 @@ mt_pon_filter_name = 'filt_segdup_clust'
 NUMBER_THREADS=16
 
 def mt_pon_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False):
+    def filter_vcf_for_bed(invcf, outvcf, bed, nthreads=NUMBER_THREADS):
+        addthreads = str(nthreads - 1)
+        regionsf = bed2regions_file(bed)
+        args = ['bcftools', 'view', '--threads', addthreads, '-R', regionsf, '-Oz', '-o', outvcf, invcf]
+        proc = subprocess.run(args, capture_output=True)
+        return(proc)
     addthreads = str(nthreads - 1)
     # infer filetype
     gzmatch = re.match('.*\.vcf.gz$', invcf)
@@ -38,23 +44,20 @@ def mt_pon_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False):
     tmpbed = vcfbname + '.bed'
     filter_dir = os.path.dirname(invcf) + os.sep + mt_pon_filter_name
     outbed = filter_dir + os.sep + vcfbname + '.bed'
+    outvcf = filter_dir + os.sep + vcfbname + '.vcf.gz'
     os.makedirs(filter_dir, exist_ok=True)
+    # get bed with positions to keep
     args = ['python3', mt_pon_filter_script, vcfbname, tmpvcf, SegDup_and_clustered_bed]
     proc = subprocess.run(args, capture_output=True)
-    # organize, clean up
     shutil.move(tmpbed, outbed)
+    # perform filtering
+    proc = filter_vcf_for_bed(invcf=invcfgz, outvcf=outvcf, bed=outbed,
+            nthreads=nthreads)
+    # clean up
     if gzmatch and not keepVCF:
         os.remove(tmpvcf)
-    #if proc.returncode == 0:
     return(proc)
 
-
-def filter_vcf_for_bed(invcf, outvcf, bed, nthreads=NUMBER_THREADS):
-    addthreads = str(nthreads - 1)
-    regionsf = bed2regions_file(bed)
-    args = ['bcftools', 'view', '--threads', addthreads, '-R', regionsf, '-Oz', '-o', outvcf, invcf]
-    proc = subprocess.run(args, capture_output=True)
-    return(proc)
 
 def bed2regions_file(bedfile):
     # this depends on the MuTect2-PoN_filter.py script
