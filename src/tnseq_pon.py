@@ -200,11 +200,7 @@ def pon_without_sample(bam, addthreads,
         args = ['bcftools', 'isec', '--complement', '-Oz', '-o', newpon, '-w1',
                 '--threads', addthreads, mergedpon, samplepon]
         proc = subprocess.run(args, capture_output=True)
-        if proc.returncode == 0:
-            args1 = ['bcftools', 'index', '--tbi', newpon]
-            proc1 = subprocess.run(args1)
-            return(newpon)
-        else:
+        if proc.returncode != 0:
             raise Exception('Unidentified bcftools error.  Quitting...')
     else:
         vcfdir = pondir + os.sep + 'VCFs'
@@ -217,7 +213,9 @@ def pon_without_sample(bam, addthreads,
         args = ['bcftools', 'merge', '-m', 'all', '--force-samples', '-Oz',
                 '-o', newpon, '--threads', addthreads] + vcflist
         proc = subprocess.run(args, capture_output=True)
-        return(newpon)
+    args1 = ['bcftools', 'index', '--tbi', newpon]
+    proc1 = subprocess.run(args1)
+    return(newpon)
 
 
 if __name__ == '__main__':
