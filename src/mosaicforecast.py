@@ -61,9 +61,14 @@ def mt_pon_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False):
 
 def my_prefilter(invcf, outvcf):
     filtvalues = ['"panel_of_normals"', '"str_contraction"', '"triallelic_site"', '"t_lod_fstar"'] 
-    exprl = ['FILTER==' + s for s in filtvalues]
-    expr = ' || '.join(exprl)
-    args = ['bcftools', 'view', '--exclude', expr, '-Oz', '-o', outvcf, invcf]
+    expr1_l = ['FILTER!=' + s for s in filtvalues]
+    expr2_l = ['AF<0.4', 'AD[0:1]>2' ]
+    expr3A_l = ['AF>0.02', 'FORMAT/PGT==0|1']
+    expr3B_l = ['AF>0.03', 'FORMAT/PGT!=0|1']
+    exprA = ' && '.join(expr1_l + expr2_l + expr3A_l)
+    exprB = ' && '.join(expr1_l + expr2_l + expr3B_l)
+    expr = exprA + ' || ' + exprB
+    args = ['bcftools', 'view', '--include', expr, '-Oz', '-o', outvcf, invcf]
     proc = subprocess.run(args, capture_output=True)
     return(proc)
 
