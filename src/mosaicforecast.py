@@ -59,6 +59,26 @@ def mt_pon_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False):
     return(proc)
 
 
+def my_prefilter(invcf, outvcf):
+    filtvalues = ['"panel_of_normals"', '"str_contraction"', '"triallelic_site"', '"t_lod_fstar"'] 
+    expr1_l = ['FILTER!=' + s for s in filtvalues]
+    expr2_l = ['AF<0.4', 'AD[0:1]>2' ]
+    expr3A_l = ['AF>0.02', 'FORMAT/PGT==0|1']
+    expr3B_l = ['AF>0.03', 'FORMAT/PGT!=0|1']
+    exprA = ' && '.join(expr1_l + expr2_l + expr3A_l)
+    exprB = ' && '.join(expr1_l + expr2_l + expr3B_l)
+    expr = exprA + ' || ' + exprB
+    args = ['bcftools', 'view', '--include', expr, '-Oz', '-o', outvcf, invcf]
+    proc = subprocess.run(args, capture_output=True)
+    return(proc)
+
+def my_segdup_filter(invcf, outvcf):
+    #TODO: use bcftools with --regions-file and SegDup_and_clustered_bed
+    #my_cmd="subtractBed -a "+tmp_filename+" -b "+repeat_file+" > "+sample+".bed"
+    #args = ['subtractBed' '-a', invcf, SegDup_and_clustered_bed]
+    pass
+
+
 def bed2regions_file(bedfile):
     # this depends on the MuTect2-PoN_filter.py script
     colnames = ['chr', 'pos0', 'pos1', 'ref', 'alt', 'sample', 'depth', 'AF']
