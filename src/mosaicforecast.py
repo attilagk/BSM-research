@@ -59,6 +59,15 @@ def mt_pon_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False):
     return(proc)
 
 
+def my_prefilter(invcf, outvcf):
+    filtvalues = ['"panel_of_normals"', '"str_contraction"', '"triallelic_site"', '"t_lod_fstar"'] 
+    exprl = ['FILTER==' + s for s in filtvalues]
+    expr = ' || '.join(exprl)
+    args = ['bcftools', 'view', '--exclude', expr, '-Oz', '-o', outvcf, invcf]
+    proc = subprocess.run(args, capture_output=True)
+    return(proc)
+
+
 def bed2regions_file(bedfile):
     # this depends on the MuTect2-PoN_filter.py script
     colnames = ['chr', 'pos0', 'pos1', 'ref', 'alt', 'sample', 'depth', 'AF']
