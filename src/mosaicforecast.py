@@ -72,6 +72,12 @@ def my_prefilter(invcf, outvcf):
     proc = subprocess.run(args, capture_output=True)
     return(proc)
 
+def my_segdup_filter(invcf, outvcf):
+    #TODO: use bcftools with --regions-file and SegDup_and_clustered_bed
+    #my_cmd="subtractBed -a "+tmp_filename+" -b "+repeat_file+" > "+sample+".bed"
+    #args = ['subtractBed' '-a', invcf, SegDup_and_clustered_bed]
+    pass
+
 
 def bed2regions_file(bedfile):
     # this depends on the MuTect2-PoN_filter.py script
