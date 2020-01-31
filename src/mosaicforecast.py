@@ -59,7 +59,24 @@ def mt_pon_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False):
     return(proc)
 
 
-def my_prefilter(invcf, outvcf):
+def prefilter(invcf, outvcf):
+    '''
+    Perform first filtering steps to remove certain calls (see details).
+
+    Arguments
+    invcf: input VCF as .vcf.gz
+    outvcf: output VCF as .vcf.gz
+
+    Value:
+    the process object corresponding to the filtering step
+
+    Details
+    The following calls are removed:
+    FILTER: panel_of_normals, str_contraction, triallelic_site, t_lod_fstar
+    AF >= 0.4
+    AF <= 0.02 if FORMAT/PGT is 0|1
+    AF <= 0.03 otherwise
+    '''
     filtvalues = ['"panel_of_normals"', '"str_contraction"', '"triallelic_site"', '"t_lod_fstar"'] 
     expr1_l = ['FILTER!=' + s for s in filtvalues]
     expr2_l = ['AF<0.4', 'AD[0:1]>2' ]
@@ -70,13 +87,79 @@ def my_prefilter(invcf, outvcf):
     expr = exprA + ' || ' + exprB
     args = ['bcftools', 'view', '--include', expr, '-Oz', '-o', outvcf, invcf]
     proc = subprocess.run(args, capture_output=True)
+    args1 = ['bcftools', 'index', '--tbi', outvcf]
+    proc1 = subprocess.run(args1, capture_output=True)
     return(proc)
 
-def my_segdup_filter(invcf, outvcf):
-    #TODO: use bcftools with --regions-file and SegDup_and_clustered_bed
-    #my_cmd="subtractBed -a "+tmp_filename+" -b "+repeat_file+" > "+sample+".bed"
-    #args = ['subtractBed' '-a', invcf, SegDup_and_clustered_bed]
+
+def segdup_clustered_filter(invcf, replaceinvcf=False):
+    '''
+    Remove calls in segmental duplications and clutered regions
+
+    Arguments
+    invcf: pathname to input vcf.gz file
+    replaceinvcf: whether to replace invcf with outvcf
+
+    Value:
+    the last process object of subprocess module
+
+    Details:
+    If replaceinvcf is True then the output .vcf.gz file replaces invcf but
+    only after a copy of invcf is saved with the -pre.vcf.gz suffix.
+    Otherwise the name of invcf stays the same and a
+    '-segdup_clustered.vcf.gz' suffix is added to the output VCF.
+    '''
+    if replaceinvcf:
+        outvcf = invcf
+        # save the original invcf (and its index) with the -pre.vcf.gz suffix
+        invcf = invcf.replace('.vcf.gz', '-pre.vcf.gz')
+        shutil.move(outvcf, invcf)
+        shutil.move(outvcf + '.tbi', invcf + '.tbi')
+    else:
+        # the ouput VCF has the '-segdup_clustered.vcf.gz' suffix
+        outvcf = os.path.dirname(invcf) + os.sep + os.path.basename(invcf).replace('.vcf.gz', '') + '-segdup_clustered' + '.vcf.gz'
+    inbed = invcf.replace('.vcf.gz', '.bed')
+    outbed = inbed.replace('.bed', '-segdup_clustered.bed')
+    # we need non-gzipped VCF for vcf2bed conversion
+    args = ['bcftools', 'view', '-Ov', invcf]
+    proc = subprocess.run(args, capture_output=True)
+    # using bedops convert VCF to BED for bedtools arithmetic
+    # https://bedops.readthedocs.io/en/latest/index.html
+    with open(inbed, 'w') as f:
+        proc1 = subprocess.run(['vcf2bed'], input=proc.stdout, stdout=f)
+    # get regions in BED format to retain calls in
+    # this uses subtractBed a.k.a bedtools subtract
+    args2 = ['subtractBed', '-a', inbed, '-b', SegDup_and_clustered_bed]
+    with open(outbed, 'w') as f:
+        proc2 = subprocess.run(args2, stdout=f)
+    # retain calls in the regions
+    args3 = ['bcftools', 'view', '-Oz', '-o', outvcf, '--regions-file', outbed, invcf]
+    proc3 = subprocess.run(args3, capture_output=True)
+    # index output VCF
+    args4 = ['bcftools', 'index', '--tbi', outvcf]
+    proc4 = subprocess.run(args4, capture_output=True)
+    # cleanup
+    os.remove(inbed)
+    os.remove(outbed)
+    if replaceinvcf:
+        os.remove(invcf)
+        os.remove(invcf + '.tbi')
+    return(proc3)
+
+
+def gnomAD_filter(invcf, replaceinvcf=False):
+    #TODO
     pass
+
+
+def all_filters(invcf, outvcf):
+    '''
+    Perform all filtering steps on the MuTect2-PON callset
+    TODO: gnomAD filter
+    '''
+    prefilter(invcf=invcf, outvcf=outvcf)
+    proc = segdup_clustered_filter(invcf=outvcf, replaceinvcf=True)
+    return(proc)
 
 
 def bed2regions_file(bedfile):
