@@ -8,6 +8,7 @@ import pandas as pd
 import re
 
 SegDup_and_clustered_bed = '/home/attila/projects/MosaicForecast/resources/SegDup_and_clustered.bed'
+gnomAD_genome_VCF = '/projects/shared/gnomAD/gnomad.exomes.r2.1.1.sites.1.vcf.bgz'
 yifans_filter_script = '/home/attila/projects/MosaicForecast/MuTect2-PoN_filter.py'
 NUMBER_THREADS=16
 
@@ -183,9 +184,18 @@ def segdup_clustered_filter(invcf, replaceinvcf=False):
     return(proc3)
 
 
-def gnomAD_filter(invcf, replaceinvcf=False):
-    #TODO
-    pass
+def gnomAD_AF_annotate(invcf, outvcf, nthreads=NUMBER_THREADS, gnomADvcf=gnomAD_genome_VCF, replaceinvcf=False):
+    # annotate with gnomAD allele frequency
+    addthreads = str(nthreads - 1)
+    args = ['bcftools', 'annotate', '--threads', nthreads, '-a', gnomADvcf, '-c', 'INFO/AF', '-Oz', '-o', outvcf, invcf]
+    proc = subprocess.run(args, capture_output=True)
+    return(proc)
+
+def gnomAD_AF_filter(invcf, outvcf, AFthrs=0.001):
+    AFthrs = str(AFthrs)
+    args = ['bcftools', 'view', '--exclude', 'INFO/AF>=' + AFthrs, '-Oz', '-o', outvcf, invcf]
+    proc = subprocess.run(args, capture_output=True)
+    return(proc)
 
 
 def filter4mosaicforecast(invcf, do_gnomAD=True, subdir='MosaicForecast_input'):
