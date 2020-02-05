@@ -13,7 +13,7 @@ yifans_filter_script = '/home/attila/projects/MosaicForecast/MuTect2-PoN_filter.
 NUMBER_THREADS=16
 
 
-def yifans_filter(invcf, nthreads=NUMBER_THREADS, keepVCF=False, mt_pon_filter_name='filt_segdup_clust'):
+def MF_recommended_filter_yifan(invcf, nthreads=NUMBER_THREADS, keepVCF=False, mt_pon_filter_name='filt_segdup_clust'):
     '''
     Wrapper around Yifan's MuTect2-PoN_filter.py
 
@@ -94,6 +94,31 @@ def bed2regions_file(bedfile):
     return(regfname)
 
 
+def bcftools_pipe(cmd, invcf, outvcf=None):
+    '''
+    Extends and runs bcftools cmd depending on if invcf and/or outvcf is None
+
+    Arguments
+    cmd: the argument list of the bcftools cmd e.g ['bcftools', 'annotate',...]
+    invcf: a subprocess.CompletedProcess object if VCF is piped from STDIN or else a string evaluating to the path to the input VCF
+    outvcf: None if STDOUT or a string evaluating to the path to the output VCF
+
+    Value
+    a subprocess.CompletedProcess object
+    '''
+    # Is output STDOUT?
+    if outvcf is not None:
+        cmd += ['-o', outvcf]
+    # Is input STDIN?
+    if type(invcf) is subprocess.CompletedProcess:
+        args = cmd + ['-']
+        proc = subprocess.run(args, input=invcf.stdout, capture_output=True)
+    else:
+        args = cmd + [invcf]
+        proc = subprocess.run(args, capture_output=True)
+    return(proc)
+
+
 def prefilter(invcf, outvcf):
     '''
     Perform first filtering steps to remove certain calls (see details).
@@ -117,19 +142,16 @@ def prefilter(invcf, outvcf):
     expr1_l = ['FILTER!=' + s for s in filtvalues]
     expr2_l = ['AF<=0.4', 'AD[0:1]>=2' ]
     expr3A_l = ['AF>=0.02', 'FORMAT/PGT==0|1']
-    #expr3B_l = ['AF>0.03', 'FORMAT/PGT!=0|1']
     expr3B_l = ['AF>=0.02', 'FORMAT/PGT!=0|1']
     exprA = ' && '.join(expr1_l + expr2_l + expr3A_l)
     exprB = ' && '.join(expr1_l + expr2_l + expr3B_l)
     expr = exprA + ' || ' + exprB
-    args = ['bcftools', 'view', '--include', expr, '-Oz', '-o', outvcf, invcf]
-    proc = subprocess.run(args, capture_output=True)
-    args1 = ['bcftools', 'index', '--tbi', outvcf]
-    proc1 = subprocess.run(args1, capture_output=True)
+    args = ['bcftools', 'view', '--include', expr, '-Oz']
+    proc = bcftools_pipe(args, invcf, outvcf)
     return(proc)
 
 
-def segdup_clustered_filter(invcf, replaceinvcf=False):
+def segdup_clustered_filter(invcf, replaceinvcf=True):
     '''
     Remove calls in segmental duplications and clutered regions
 
@@ -184,12 +206,15 @@ def segdup_clustered_filter(invcf, replaceinvcf=False):
     return(proc3)
 
 
-def gnomAD_AF_annotate(invcf, outvcf, nthreads=NUMBER_THREADS, gnomADvcf=gnomAD_genome_VCF, replaceinvcf=False):
-    # annotate with gnomAD allele frequency
+def gnomAD_AF_annotate(invcf, outvcf, nthreads=NUMBER_THREADS, gnomADvcf=gnomAD_genome_VCF):
+    '''
+    Annotate with gnomAD allele frequency
+    '''
     addthreads = str(nthreads - 1)
-    args = ['bcftools', 'annotate', '--threads', nthreads, '-a', gnomADvcf, '-c', 'INFO/AF', '-Oz', '-o', outvcf, invcf]
-    proc = subprocess.run(args, capture_output=True)
+    cmd = ['bcftools', 'annotate', '--threads', addthreads, '-a', gnomADvcf, '-c', 'INFO/AF', '-Oz']
+    proc = bcftools_pipe(cmd=cmd, invcf=invcf, outvcf=outvcf)
     return(proc)
+
 
 def gnomAD_AF_filter(invcf, outvcf, AFthrs=0.001):
     AFthrs = str(AFthrs)
@@ -198,7 +223,7 @@ def gnomAD_AF_filter(invcf, outvcf, AFthrs=0.001):
     return(proc)
 
 
-def filter4mosaicforecast(invcf, do_gnomAD=True, subdir='MosaicForecast_input'):
+def MF_recommended_filter(invcf, do_gnomAD=True, subdir='MosaicForecast_input'):
     '''
     Perform all filtering steps on the MuTect2-PON callset
     TODO: gnomAD filter
