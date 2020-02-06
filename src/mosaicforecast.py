@@ -119,7 +119,7 @@ def bcftools_pipe(cmd, invcf, outvcf=None):
     return(proc)
 
 
-def prefilter(invcf, outvcf):
+def AF_filter(invcf, outvcf):
     '''
     Perform first filtering steps to remove certain calls (see details).
 
@@ -231,6 +231,6 @@ def MF_recommended_filter(invcf, do_gnomAD=True, subdir='MosaicForecast_input'):
     filter_dir = os.path.dirname(invcf) + os.sep + 'filtered' + os.sep + subdir
     os.makedirs(filter_dir, exist_ok=True)
     outvcf = filter_dir + os.sep + os.path.basename(invcf)
-    prefilter(invcf=invcf, outvcf=outvcf)
+    AF_filter(invcf=invcf, outvcf=outvcf)
     proc = segdup_clustered_filter(invcf=outvcf, replaceinvcf=True)
     return(proc)
