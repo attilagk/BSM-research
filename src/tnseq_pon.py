@@ -75,13 +75,13 @@ def all_bam2pon_merge(bamlist=glob.glob('/projects/bsm/alignments/[MP][SI][ST][M
     vcflist = glob.glob(outdir + os.path.sep + '*.vcf.gz')
     args0 = ['bcftools', 'merge', '-m', 'all', '--force-samples', '-Oz', '-o', ponvcf] + vcflist
     proc0 = subprocess.run(args0)
-    args1 = ['bcftools', 'index', '--tbi', ponvcf] + vcflist
+    args1 = ['bcftools', 'index', '--tbi', ponvcf]
     proc1 = subprocess.run(args1, capture_output=True)
     return(proc1)
 
 
 def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
-        pon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz',
+        pon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz',
         outdir='/projects/bsm/calls',
         nthreads=NUMBER_THREADS, refseq=REFSEQ, algo='TNhaplotyper'):
     '''
@@ -98,36 +98,27 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     Value:
     a subprocess process object for the sentieon TNseq caller
     '''
-    def remove_sample_from_pon(sample, addthreads):
+    def postproc_vcf(invcf, vcfmaindir, vartype='snps'):
         '''
-        Remove sample from PON VCF
+        Postprocess VCF by filtering for SNPs or indels
 
         Arguments:
-        sample: the name of the sample
-        pon: path to the PON VCF to remove the sample from
+        invcf: input VCF
+        vcfmaindir: the main VCF dir
+        vartype: snps|indels
 
         Value:
-        path to the PON VCF without the sample
-
-        Details:
-        If PON VCF "pon" does not contain sample then no new PON VCF is created;
-        in this case the path to the original PON VCF is returned.
+        a subprocess procedure
         '''
-        pondir = os.path.dirname(pon)
-        ponbn = os.path.basename(pon).replace('.vcf.gz', '')
-        newpon = pondir + os.path.sep + ponbn + '-' + sample + '.vcf.gz'
-        args = ['bcftools', 'view', '-s' '^' + sample, '-Oz', '-o', newpon, pon]
+        germ2som = {'snps': 'snvs', 'indels': 'indels'}
+        somvt = germ2som[vartype]
+        outdir = vcfmaindir + os.sep + somvt
+        outvcf = outdir + os.sep + os.path.basename(invcf)
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+        args = ['bcftools', 'view', '-o', outvcf, '-O', 'z', '-v', vartype, invcf]
         proc = subprocess.run(args, capture_output=True)
-        stderr = proc.stderr.decode('utf-8')
-        pattern = '.*sample.*does not exist in header.*'
-        if proc.returncode == 255 and re.match(pattern, stderr):
-            return(pon)
-        elif proc.returncode == 0:
-            args1 = ['bcftools', 'index', '--tbi', newpon]
-            proc1 = subprocess.run(args1)
-            return(newpon)
-        else:
-            raise Exception('Unidentified bcftools error.  Quitting...')
+        return(proc)
     addthreads = str(nthreads - 1)
     nthreads = str(nthreads)
     # get sample name from BAM header
@@ -141,18 +132,21 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
         raise Exception('There must be one and only one sample in the BAM header.  Quitting...')
     sample = samples.pop()
     # get subject and tissue
-    pattern = '([A-Z]+)([0-9]+)_(.*)$'
+    # this works with MSSM373_NeuN_pl, MSSM_373_NeuN_pl or Common_7_NeuN_pl
+    pattern = '([a-zA-Z]+)_?([0-9]+)_(.*)$'
     subject = re.sub(pattern, '\\1_\\2', sample)
     tissue = re.sub(pattern, '\\3', sample)
     bname = subject + '_' + tissue
     if bname != os.path.basename(bam).replace('.bam', ''):
         raise Exception('Sample name from BAM header does not match that from filename.  Quitting...')
     # output dir and VCF
-    vcfdir = outdir + os.path.sep + subject + os.path.sep + tissue
+    vcfmaindir = outdir + os.path.sep + subject + os.path.sep + tissue  + '-PON'
+    vcfdir = vcfmaindir + os.path.sep + algo
     if not os.path.exists(vcfdir):
         os.makedirs(vcfdir)
-    vcf = vcfdir + os.path.sep + bname + '-' + algo + '.vcf.gz'
-    newpon = remove_sample_from_pon(sample, addthreads) # remove sample from PON
+    vcf = vcfdir + os.path.sep + algo + '.vcf.gz'
+    newpon = pon_without_sample(bam=bam, addthreads=addthreads, mergedpon=pon,
+            subtract=False) # remove sample from PON
     #args = [sentieon_executable, 'driver', '--interval', '22:20000000-25000000', # for testing
     args = [sentieon_executable, 'driver',
             '-t', nthreads, '-r', refseq, '-i', bam, '--algo', algo,
@@ -164,7 +158,64 @@ def tnseq_call(bam='/projects/bsm/alignments/PITT_118/PITT_118_NeuN_mn.bam',
     print('Logfile:\n' + log)
     with open(log, mode='w') as f:
         print(proc.stderr.decode('utf-8'), file=f)
+    p_snps = postproc_vcf(invcf=vcf, vcfmaindir=vcfmaindir, vartype='snps')
+    p_indels = postproc_vcf(invcf=vcf, vcfmaindir=vcfmaindir, vartype='indels')
     return(proc)
+
+
+def pon_without_sample(bam, addthreads,
+        mergedpon='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz',
+        subtract=False):
+    '''
+    Remove sample specific records from PON VCF if necessary
+
+    Arguments:
+    bam: path to bam corresponding to the sample
+    addthreads: additional threads
+    mergedpon: path to the PON VCF to remove the sample from
+    subtract: set subtraction: mergedpon - samplepon
+
+    Value:
+    path to the PON VCF without the sample
+
+    Details:
+    If PON VCF "mergedpon" does not contain sample then no new PON VCF is created;
+    in this case the path to the original PON VCF is returned.
+    If subtract is True then the PON corresponding to the input bam file is
+    subtracted from the merged PON: mergedpon - samplepon.  Otherwise, by
+    default, a new merged PON is made excluding the sample PON but including
+    all other individual PONs in the
+    '/projects/bsm/attila/results/2019-11-13-panel-of-normals/VCFs/'
+    directory.
+    '''
+    addthreads = str(addthreads)
+    pondir = os.path.dirname(mergedpon)
+    ponbn = os.path.basename(mergedpon).replace('.vcf.gz', '')
+    sample = os.path.basename(bam).replace('.bam', '')
+    samplepon = pondir + os.sep + 'VCFs' + os.sep + sample + '.vcf.gz'
+    newpon = pondir + os.path.sep + ponbn + '-' + sample + '.vcf.gz'
+    if not os.path.exists(samplepon):
+        return(mergedpon)
+    if subtract:
+        args = ['bcftools', 'isec', '--complement', '-Oz', '-o', newpon, '-w1',
+                '--threads', addthreads, mergedpon, samplepon]
+        proc = subprocess.run(args, capture_output=True)
+        if proc.returncode != 0:
+            raise Exception('Unidentified bcftools error.  Quitting...')
+    else:
+        vcfdir = pondir + os.sep + 'VCFs'
+        vcflist = glob.glob(vcfdir + os.sep + '*.vcf.gz')
+        # filter for canonical filenames
+        vcflist = [y for y in vcflist if re.match(vcfdir + os.sep +
+            '(MSSM|PITT)_[0-9]{3}_(muscle|NeuN_pl|NeuN_mn)\.vcf.gz', y)]
+        # remove sample PON from the list
+        vcflist.remove(samplepon)
+        args = ['bcftools', 'merge', '-m', 'all', '--force-samples', '-Oz',
+                '-o', newpon, '--threads', addthreads] + vcflist
+        proc = subprocess.run(args, capture_output=True)
+    args1 = ['bcftools', 'index', '--tbi', newpon]
+    proc1 = subprocess.run(args1)
+    return(newpon)
 
 
 if __name__ == '__main__':
@@ -172,8 +223,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('bam', help='input BAM file')
     parser.add_argument('-p', '--pon', help='PON (panel of normal) VCF',
-            default='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon1.vcf.gz')
-    parser.add_argument('-d', '--dir', help='main output directory',
+            default='/projects/bsm/attila/results/2019-11-13-panel-of-normals/pon-v1.vcf.gz')
+    parser.add_argument('-o', '--outdir', help='main output directory',
             default='/projects/bsm/calls')
     parser.add_argument('-t', '--nthreads', help='number of threads',
             default=16, type=int)
@@ -182,6 +233,6 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--algo', help='TNseq calling algorithm',
             default='TNhaplotyper')
     args = parser.parse_args()
-    proc = tnseq_call(bam=args.bam, pon=args.pon, outdir=args.dir, nthreads=args.nthreads,
+    proc = tnseq_call(bam=args.bam, pon=args.pon, outdir=args.outdir, nthreads=args.nthreads,
             refseq=args.refseq, algo=args.algo)
     print(proc.stdout.decode('utf-8'))

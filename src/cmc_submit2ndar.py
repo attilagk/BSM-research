@@ -89,7 +89,7 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
         return(manif)
 
     def g_sample(gsubj):
-        gsam_temp, gsam_syn = get_manifest("syn8464096", syn, download_dir=target_dir)
+        gsam_temp, gsam_syn = get_manifest(manifest_template_synids['genomics_sample03'], syn, download_dir=target_dir)
         gsam = make_g_sample(gsam_temp, btb, gsubj, syn,
                 matching_sample_ids=matching_sample_ids, tissue=tissue)
         gsam = correct_manifest(gsam)
@@ -102,8 +102,8 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
     subject = subject.replace("CMC_", "") # ensure that subject lacks CMC_ prefix
     print('processing', subject, tissue)
     cmc_subject = "CMC_" + subject # add CMC_ prefix
-    btb = btb_or_gsubj("syn12154562")
-    gsubj = btb_or_gsubj("syn12128754")
+    btb = btb_or_gsubj(manifest_template_synids['nichd_btb02'])
+    gsubj = btb_or_gsubj(manifest_template_synids['genomics_subject02'])
     gsam = g_sample(gsubj)
     return((btb, gsubj, gsam))
 
