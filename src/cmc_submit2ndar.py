@@ -264,6 +264,9 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
                 df['data_file1_type'] = 'BAM'
             return(df)
 
+        # TODO
+        # new feature needed: get fastq names from somewhere else than path to
+        # BAM files
         fq_names = fastq_names[tissue]
         with open(fq_names) as fqs:
             fastqs = fqs.readlines()
