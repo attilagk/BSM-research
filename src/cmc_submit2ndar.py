@@ -7,10 +7,14 @@ import os
 import os.path
 import sys
 import glob
+import subprocess
+import io
+import re
 
 experiment_id = 1223
 chess_grant =  'U01MH106891'
 manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': "syn12128754", 'genomics_sample03': "syn8464096"}
+genewiz_serialn_synid = 'syn21982509'
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
@@ -28,6 +32,11 @@ def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     entity = syn.get(synapse_id, downloadLocation = download_dir, ifcollision="overwrite.local")
     df = pd.read_csv(download_dir + os.sep + entity.properties.name, skiprows=skiprows)
     return((df, entity))
+
+def get_genewiz_serialn(syn):
+    e = syn.get(genewiz_serialn_synid)
+    df = pd.read_csv(e['path'], index_col='CMC_simple_id')
+    return(df)
 
 
 def write_manifest(df, template_path, target_path):
@@ -219,7 +228,8 @@ def extract_cmc_wgs(btb, syn):
     wgs = wgs[wgs['Library ID'].isin(ids)]
     return(wgs)
 
-def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=None):
+def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
+        tissue=None, s3loc=None, genewiz_serialn=None):
     '''
     Creates a genomics sample manifest based on a genomics sample template and
     two other manifests
@@ -285,16 +295,22 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
     # ensure that gsubj has one and only one row
     if len(gsubj) != 1:
         raise Exception('genomics subjects manifest must have one and only one row')
-    # get paths of BAMs and of the fastq-names files
     src_subject_id = gsubj.at[gsubj.index[0], 'src_subject_id']
     simple_id = src_subject_id.replace('CMC_', '')
-    aln_p = '/projects/bsm/alignments/' + simple_id + os.sep
-    bams = glob.glob(aln_p + simple_id + '*.bam')
-    fastq_names = [s.replace('.bam', '-fastq-names') for s in bams]
-    tissues = [s.replace(aln_p + simple_id + '_', '').replace('.bam', '') for s in bams]
-    # these variables are referred to in inside functions
-    bams = dict(zip(tissues, bams))
-    fastq_names = dict(zip(tissues, fastq_names))
+    if s3loc is None:
+        # get fastq names from the BAMs and the fastq-names files
+        aln_p = '/projects/bsm/alignments/' + simple_id + os.sep
+        bams = glob.glob(aln_p + simple_id + '*.bam')
+        fastq_names = [s.replace('.bam', '-fastq-names') for s in bams]
+        tissues = [s.replace(aln_p + simple_id + '_', '').replace('.bam', '') for s in bams]
+        # these variables are referred to in inside functions
+        bams = dict(zip(tissues, bams))
+        fastq_names = dict(zip(tissues, fastq_names))
+    else:
+        # get fastq names from the S3 bucket using genewiz_serialn
+        fastq_names = get_fastq_names_s3(simple_id, genewiz_serialn, s3loc)
+        fastq_names = dict(zip(tissue, fastq_names))
+    #return(fastq_names)
     # obtain shared columns
     is_shared = [y in gsubj.columns for y in gsam_temp.columns]
     shared = gsam_temp.loc[:, is_shared].columns
@@ -311,6 +327,23 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True, tissue=N
     else:
         val = do_tissue(tissue)
     return(val)
+
+
+def get_fastq_names_s3(simple_id, genewiz_serialn, s3loc='s3://chesslab-bsmn/GENEWIZ/30-317737003/'):
+    '''
+    Get fastq names in S3 that match a CMC subject simple_id
+    '''
+    prefix = genewiz_serialn.loc[simple_id, 'GENEWIZ_serialn']
+    l = ['aws', 's3', 'ls', 's3://chesslab-bsmn/GENEWIZ/30-317737003/']
+    p = subprocess.run(l, capture_output=True)
+    cnames = ['date', 'time', 'size', 'filename']
+    s3ls = pd.read_csv(io.BytesIO(p.stdout), sep='\s+', names=cnames)
+    filenames = s3ls['filename']
+    def ismatch(fn):
+        m = re.match('^' + prefix + '_R.*$', fn)
+        return(m is not None)
+    matches = [fn for fn in filenames if ismatch(fn)]
+    return(matches)
 
 
 def make_manifests_main(slistcsv, target_dir=".", prefix='chess-'):
