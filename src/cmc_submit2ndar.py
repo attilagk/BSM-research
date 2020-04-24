@@ -15,6 +15,7 @@ experiment_id = 1223
 chess_grant =  'U01MH106891'
 manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': "syn12128754", 'genomics_sample03': "syn8464096"}
 genewiz_serialn_synid = 'syn21982509'
+chess_s3_bucket = 's3://chesslab-bsmn' 
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
@@ -229,7 +230,7 @@ def extract_cmc_wgs(btb, syn):
     return(wgs)
 
 def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
-        tissue=None, s3loc=None, genewiz_serialn=None):
+        tissue=None, s3prefix=None, genewiz_serialn=None):
     '''
     Creates a genomics sample manifest based on a genomics sample template and
     two other manifests
@@ -297,7 +298,7 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
         raise Exception('genomics subjects manifest must have one and only one row')
     src_subject_id = gsubj.at[gsubj.index[0], 'src_subject_id']
     simple_id = src_subject_id.replace('CMC_', '')
-    if s3loc is None:
+    if s3prefix is None:
         # get fastq names from the BAMs and the fastq-names files
         aln_p = '/projects/bsm/alignments/' + simple_id + os.sep
         bams = glob.glob(aln_p + simple_id + '*.bam')
@@ -308,7 +309,7 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
         fastq_names = dict(zip(tissues, fastq_names))
     else:
         # get fastq names from the S3 bucket using genewiz_serialn
-        fastq_names = get_fastq_names_s3(simple_id, genewiz_serialn, s3loc)
+        fastq_names = get_fastq_names_s3(simple_id, genewiz_serialn, s3prefix)
         fastq_names = dict(zip(tissue, fastq_names))
     #return(fastq_names)
     # obtain shared columns
@@ -329,12 +330,12 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
     return(val)
 
 
-def get_fastq_names_s3(simple_id, genewiz_serialn, s3loc='s3://chesslab-bsmn/GENEWIZ/30-317737003/'):
+def get_fastq_names_s3(simple_id, genewiz_serialn, s3prefix='GENEWIZ/30-317737003/'):
     '''
     Get fastq names in S3 that match a CMC subject simple_id
     '''
     prefix = genewiz_serialn.loc[simple_id, 'GENEWIZ_serialn']
-    l = ['aws', 's3', 'ls', 's3://chesslab-bsmn/GENEWIZ/30-317737003/']
+    l = ['aws', 's3', 'ls', chess_s3_bucket + '/' + s3prefix]
     p = subprocess.run(l, capture_output=True)
     cnames = ['date', 'time', 'size', 'filename']
     s3ls = pd.read_csv(io.BytesIO(p.stdout), sep='\s+', names=cnames)
@@ -343,6 +344,7 @@ def get_fastq_names_s3(simple_id, genewiz_serialn, s3loc='s3://chesslab-bsmn/GEN
         m = re.match('^' + prefix + '_R.*$', fn)
         return(m is not None)
     matches = [fn for fn in filenames if ismatch(fn)]
+    matches = [s3prefix + m for m in matches]
     return(matches)
 
 
