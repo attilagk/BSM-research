@@ -100,6 +100,7 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
 
     def g_sample(gsubj):
         gsam_temp, gsam_syn = get_manifest(manifest_template_synids['genomics_sample03'], syn, download_dir=target_dir)
+        return((gsam_temp, gsam_syn))
         gsam = make_g_sample(gsam_temp, btb, gsubj, syn,
                 matching_sample_ids=matching_sample_ids, tissue=tissue)
         gsam = correct_manifest(gsam)
@@ -114,6 +115,8 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
     cmc_subject = "CMC_" + subject # add CMC_ prefix
     btb = btb_or_gsubj(manifest_template_synids['nichd_btb02'])
     gsubj = btb_or_gsubj(manifest_template_synids['genomics_subject02'])
+    gsam_temp, gsam_syn = g_sample(gsubj)
+    return((btb, gsubj, gsam_temp, gsam_syn))
     gsam = g_sample(gsubj)
     return((btb, gsubj, gsam))
 
@@ -278,12 +281,19 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
         # TODO
         # new feature needed: get fastq names from somewhere else than path to
         # BAM files
-        fq_names = fastq_names[tissue]
-        with open(fq_names) as fqs:
-            fastqs = fqs.readlines()
-        fastqs_1 = sorted([s.replace('\n', '') for s in fastqs if '_1.fq.gz' in s])
-        fastqs_2 = sorted([s.replace('\n', '') for s in fastqs if '_2.fq.gz' in s])
-        data_files = list(zip(fastqs_1, fastqs_2)) + [(bams[tissue], )]
+        if s3prefix is None:
+            fq_names = fastq_names[tissue]
+            with open(fq_names) as fqs:
+                fastqs = fqs.readlines()
+            fastqs_1 = sorted([s.replace('\n', '') for s in fastqs if '_1.fq.gz' in s])
+            fastqs_2 = sorted([s.replace('\n', '') for s in fastqs if '_2.fq.gz' in s])
+            data_files = list(zip(fastqs_1, fastqs_2)) + [(bams[tissue], )]
+        else:
+            # get fastq names from the S3 bucket using genewiz_serialn
+            fq_names = get_fastq_names_s3(simple_id, genewiz_serialn, s3prefix)
+            data_files = fq_names
+            #fq_names = dict(zip(tissue, fastq_names))
+            return(data_files)
         sample_description = 'frontal cortex'
         if tissue == 'muscle':
             sample_description = 'muscle'
@@ -307,10 +317,6 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
         # these variables are referred to in inside functions
         bams = dict(zip(tissues, bams))
         fastq_names = dict(zip(tissues, fastq_names))
-    else:
-        # get fastq names from the S3 bucket using genewiz_serialn
-        fastq_names = get_fastq_names_s3(simple_id, genewiz_serialn, s3prefix)
-        fastq_names = dict(zip(tissue, fastq_names))
     #return(fastq_names)
     # obtain shared columns
     is_shared = [y in gsubj.columns for y in gsam_temp.columns]
