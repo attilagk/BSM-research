@@ -11,11 +11,21 @@ import subprocess
 import io
 import re
 
+cmc_metadata = {'CMC_Human_clinical_metadata': 'syn2279441',
+        'CMC_Human_brainRegion_metadata': 'syn21446693',
+        'CMC_Human_isolation_metadata_DNA': 'syn2279444'}
+
 experiment_id = 1223
 chess_grant =  'U01MH106891'
 manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': "syn12128754", 'genomics_sample03': "syn8464096"}
-genewiz_serialn_synid = 'syn21982509'
+genewiz_serialn_synid = 'syn21982509' # a.k.a samples-from-Chaggai.csv
 chess_s3_bucket = 's3://chesslab-bsmn' 
+
+def get_cmc_metadata(syn):
+    clinical = pd.read_csv(syn.get(cmc_metadata['CMC_Human_clinical_metadata']).path, index_col='Individual ID')
+    brainRegion = pd.read_csv(syn.get(cmc_metadata['CMC_Human_brainRegion_metadata']).path, index_col='Institution Dissection ID')
+    dna_isolation = pd.read_csv(syn.get(cmc_metadata['CMC_Human_isolation_metadata_DNA']).path, index_col='Sample DNA ID')
+    return((clinical, brainRegion, dna_isolation))
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
