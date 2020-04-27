@@ -10,6 +10,7 @@ import glob
 import subprocess
 import io
 import re
+import datetime
 
 cmc_metadata = {'CMC_Human_clinical_metadata': 'syn2279441',
         'CMC_Human_brainRegion_metadata': 'syn21446693',
@@ -26,6 +27,52 @@ def get_cmc_metadata(syn):
     brainRegion = pd.read_csv(syn.get(cmc_metadata['CMC_Human_brainRegion_metadata']).path, index_col='Institution Dissection ID')
     dna_isolation = pd.read_csv(syn.get(cmc_metadata['CMC_Human_isolation_metadata_DNA']).path, index_col='Sample DNA ID')
     return((clinical, brainRegion, dna_isolation))
+
+def empty_manifest_row(manifest):
+    lastrow = manifest.iloc[-1:, :]
+    a = np.array(lastrow)
+    a.fill(np.nan)
+    new = pd.DataFrame(a, columns=lastrow.columns)
+    return(new)
+
+
+def fillin_gsubrow(gsubr, indiv_id, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    cmc = cmc_clinical.loc[indiv_id]
+    gsubr['src_subject_id'] = indiv_id
+    gsubr['interview_date'] = datetime.date.today().strftime('%m/%d/%y')
+    gsubr['interview_age'] = int(cmc['ageOfDeath'] * 12)
+    gsubr['gender'] = cmc['Reported Gender']
+    gsubr['race'] = cmc['Race']
+    gsubr['ethnic_group'] = cmc['Ethnicity']
+    gsubr['phenotype'] = cmc['Dx']
+    gsubr['phenotype_description'] = 'No'
+    gsubr['twins_study'] = 'No'
+    gsubr['sibling_study'] = 'No'
+    gsubr['sample_taken'] = 'Yes'
+    instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
+    gsubr['sample_id_original'] = instdissectionID + '.np1'
+    gsubr['sample_description'] = 'PFC'
+    if re.match('.*MSSM.*', indiv_id):
+        gsubr['biorepository'] = 'PFC'
+    elif re.match('.*PITT.*', indiv_id):
+        gsubr['biorepository'] = 'UPittNBB'
+    return(gsubr)
+
+
+def get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn):
+    brainr = cmc_brainreg.loc[cmc_brainreg['Individual ID'] == indiv_id, :]
+    simple_id = indiv_id.replace('CMC_', '')
+    PFCn = str(int(genewiz_serialn.loc[simple_id, 'PFC #']))
+    matches = [y for y in brainr['Institution Dissection ID'] if
+            re.match('^.*(DRPC|PFC).*' + PFCn + '.*$', y) is not None]
+    psych = [y for y in matches if re.match('^.*PsychENCODE.*$', y) is not
+            None]
+    if len(psych) >= 1:
+        return(psych[0])
+    else:
+        return(matches[0])
+
+
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
