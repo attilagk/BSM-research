@@ -23,7 +23,7 @@ def nreads_from_bamlist(bamlist=testbams):
     l = [nreads_from_bam(bam) for bam in bamlist]
     df = pd.concat(l, axis=0)
     outdir = '/projects/bsm/attila/results/2020-04-29-sample-fastq-sizes/'
-    outfile = outdir + os.path.sep + 'nreads.csv'
+    outfile = outdir + os.path.sep + 'nreads.tsv'
     df.to_csv(outfile, sep='\t', index=False, header=True)
     return(df)
 
