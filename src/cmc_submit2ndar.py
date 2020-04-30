@@ -35,34 +35,51 @@ def empty_manifest_row(manifest):
     new = pd.DataFrame(a, columns=lastrow.columns)
     return(new)
 
-
-def fillin_gsubrow(gsubr, indiv_id, cmc_clinical, cmc_brainreg, genewiz_serialn):
+def fillin_gsub_or_btb_row(indiv_id, manif, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    manifr = empty_manifest_row(manif)
     cmc = cmc_clinical.loc[indiv_id]
-    gsubr['src_subject_id'] = indiv_id
-    gsubr['interview_date'] = datetime.date.today().strftime('%m/%d/%y')
-    gsubr['interview_age'] = int(cmc['ageOfDeath'] * 12)
-    gsubr['gender'] = cmc['Reported Gender']
-    gsubr['race'] = cmc['Race']
-    gsubr['ethnic_group'] = cmc['Ethnicity']
+    manifr['src_subject_id'] = indiv_id
+    manifr['interview_date'] = datetime.date.today().strftime('%m/%d/%y')
+    manifr['interview_age'] = int(cmc['ageOfDeath'] * 12)
+    manifr['gender'] = cmc['Reported Gender']
+    manifr['race'] = cmc['Race']
+    manifr['ethnic_group'] = cmc['Ethnicity']
+    instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
+    manifr['sample_id_original'] = instdissectionID + '.np1'
+    return(manifr)
+
+def fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    simple_id = indiv_id.replace('CMC_', '')
+    indiv_id = 'CMC_' + simple_id
+    gsubr = fillin_gsub_or_btb_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
+    cmc = cmc_clinical.loc[indiv_id]
     gsubr['phenotype'] = cmc['Dx']
     gsubr['phenotype_description'] = 'No'
     gsubr['twins_study'] = 'No'
     gsubr['sibling_study'] = 'No'
     gsubr['sample_taken'] = 'Yes'
-    instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
-    gsubr['sample_id_original'] = instdissectionID + '.np1'
     gsubr['sample_description'] = 'PFC'
     if re.match('.*MSSM.*', indiv_id):
-        gsubr['biorepository'] = 'PFC'
+        gsubr['biorepository'] = 'MSBB'
     elif re.match('.*PITT.*', indiv_id):
         gsubr['biorepository'] = 'UPittNBB'
     return(gsubr)
 
 
+def fillin_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    simple_id = indiv_id.replace('CMC_', '')
+    indiv_id = 'CMC_' + simple_id
+    btbr = fillin_gsub_or_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn)
+    return(btbr)
+
+
 def get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn):
     brainr = cmc_brainreg.loc[cmc_brainreg['Individual ID'] == indiv_id, :]
     simple_id = indiv_id.replace('CMC_', '')
-    PFCn = str(int(genewiz_serialn.loc[simple_id, 'PFC #']))
+    PFCn = genewiz_serialn.loc[simple_id, 'PFC #']
+    if re.match('^CMC_.*', PFCn):
+        return(PFCn)
+    #PFCn = str(int(genewiz_serialn.loc[simple_id, 'PFC #']))
     matches = [y for y in brainr['Institution Dissection ID'] if
             re.match('^.*(DRPC|PFC).*' + PFCn + '.*$', y) is not None]
     psych = [y for y in matches if re.match('^.*PsychENCODE.*$', y) is not
@@ -72,6 +89,35 @@ def get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn):
     else:
         return(matches[0])
 
+def add_subj_key(manif, pGUIDpath='/home/attila/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/s3-pseudo-guids'):
+    wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'
+    pGUIDs = list(pd.read_csv(wdir + 's3-pseudo-guids', header=None)[0])
+    manif['subjectkey'] = pGUIDs[:manif.shape[0]]
+    return(manif)
+
+def make_manif_s3():
+    syn = synapseclient.login()
+    wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'
+    gsubtempl, gsub_syn = get_manifest(manifest_template_synids['genomics_subject02'], syn, download_dir=wdir)
+    btbtempl, btb_syn = get_manifest(manifest_template_synids['nichd_btb02'], syn, download_dir=wdir)
+    # CMC_Human_clinical_metadata.csv
+    cmc_clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
+    cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
+    # CMC_Human_brainRegion_metadata.csv
+    cmc_brainreg_syn = syn.get('syn21446693', downloadLocation=wdir, ifcollision='overwrite.local')
+    cmc_brainreg = pd.read_csv(cmc_brainreg_syn.path)
+    # originally created by Chaggai but manually edited by Attila with Institution Dissection IDs
+    genewiz_serialn_syn = syn.get('syn21982509', downloadLocation=wdir, ifcollision='overwrite.local')
+    genewiz_serialn = pd.read_csv(genewiz_serialn_syn.path, index_col='CMC_simple_id')
+    def helper(fun=fillin_gsub_row, maniftempl=gsubtempl):
+        l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn) for s in genewiz_serialn.index]
+        df = pd.concat(l, axis=0)
+        df = add_subj_key(df)
+        return(df)
+    # make genomics subjects
+    gsub = helper(fillin_gsub_row, gsubtempl)
+    btb = helper(fillin_btb_row, btbtempl)
+    return((gsub, btb))
 
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
@@ -172,6 +218,7 @@ def make_manifests(subject, syn, target_dir=".", matching_sample_ids=True, tissu
     cmc_subject = "CMC_" + subject # add CMC_ prefix
     btb = btb_or_gsubj(manifest_template_synids['nichd_btb02'])
     gsubj = btb_or_gsubj(manifest_template_synids['genomics_subject02'])
+    # TODO: something is not right below
     gsam_temp, gsam_syn = g_sample(gsubj)
     return((btb, gsubj, gsam_temp, gsam_syn))
     gsam = g_sample(gsubj)
