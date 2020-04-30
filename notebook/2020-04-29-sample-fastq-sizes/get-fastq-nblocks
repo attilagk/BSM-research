@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+outdir=/projects/bsm/attila/results/2020-04-29-sample-fastq-sizes
+outfile=$outdir/fastq-nblocks
+echo -e "sample\tnblocks, kB\tfile path" > $outfile
+find /projects/bsm/reads -type f -name '*.fq.gz' | head |
+    for fq in `cat`; do
+        sample=$(dirname $fq | sed 's|/projects/bsm/reads/||')
+        du_out=$(du $fq | tr -s ' ' '\t')
+        echo -e "$sample\t$du_out"
+    done >> $outfile
