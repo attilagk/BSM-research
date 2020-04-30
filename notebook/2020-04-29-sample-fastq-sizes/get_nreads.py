@@ -13,7 +13,7 @@ def nreads_from_bam(bam=testbams[0]):
     args = ['samtools', 'idxstats', bam]
     p = subprocess.run(args, capture_output=True)
     df = pd.read_csv(io.BytesIO(p.stdout), sep='\s+', header=None)
-    nreads = np.sum(np.array(df.iloc[:, 1:]).ravel())
+    nreads = np.sum(np.array(df.iloc[:, 2:]).ravel())
     sample = os.path.basename(bam).replace('.bam', '')
     d = {'sample': sample, 'nreads': nreads, 'path': bam}
     df = pd.DataFrame(d, index=[sample])
