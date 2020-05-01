@@ -5,6 +5,7 @@ import numpy as np
 import re
 import io
 import os.path
+import glob
 
 testbams = ['/projects/bsm/alignments/MSSM_118/MSSM_118_NeuN_pl.bam',
         '/projects/bsm/alignments/MSSM_118/MSSM_118_muscle.bam']
@@ -12,10 +13,21 @@ testbams = ['/projects/bsm/alignments/MSSM_118/MSSM_118_NeuN_pl.bam',
 def nreads_from_bam(bam=testbams[0]):
     args = ['samtools', 'idxstats', bam]
     p = subprocess.run(args, capture_output=True)
-    df = pd.read_csv(io.BytesIO(p.stdout), sep='\s+', header=None)
+    idxstats = io.BytesIO(p.stdout)
+    df = nreads_from_idxstats(idxstats, bam)
+    return(df)
+
+def nreads_from_idxstats(idxstats, bam=None):
+    df = pd.read_csv(idxstats, sep='\s+', header=None)
     nreads = np.sum(np.array(df.iloc[:, 2:]).ravel())
-    sample = os.path.basename(bam).replace('.bam', '')
-    d = {'sample': sample, 'nreads': nreads, 'path': bam}
+    if bam is None:
+        ext = '.idxstats'
+        fpath = idxstats
+    else:
+        ext = '.bam'
+        fpath = bam
+    sample = os.path.basename(fpath).replace(ext, '')
+    d = {'sample': sample, 'nreads': nreads, 'path': fpath}
     df = pd.DataFrame(d, index=[sample])
     return(df)
 
@@ -24,6 +36,15 @@ def nreads_from_bamlist(bamlist=testbams):
     df = pd.concat(l, axis=0)
     outdir = '/projects/bsm/attila/results/2020-04-29-sample-fastq-sizes/'
     outfile = outdir + os.path.sep + 'nreads.tsv'
+    df.to_csv(outfile, sep='\t', index=False, header=True)
+    return(df)
+
+def nreads_from_idxstatslist():
+    outdir='/home/attila/projects/bsm/results/2020-04-29-sample-fastq-sizes/'
+    idxstatslist = glob.glob(outdir + os.path.sep + 'GENEWIZ-idxstats/*.idxstats')
+    l = [nreads_from_idxstats(i, bam=None) for i in idxstatslist]
+    df = pd.concat(l, axis=0)
+    outfile = outdir + os.path.sep + 'nreads-genewiz.tsv'
     df.to_csv(outfile, sep='\t', index=False, header=True)
     return(df)
 
