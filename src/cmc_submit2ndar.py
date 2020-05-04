@@ -120,6 +120,56 @@ def make_manif_s3():
     return((gsub, btb))
 
 
+def fillin_gsam_rows(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    gsam = gsam_temp.copy()
+    cmc = cmc_clinical.loc[indiv_id]
+    simple_id = indiv_id.replace('CMC_', '')
+    # begin with the column that determines the number of rows
+    gsam['data_file1'] = get_fastq_names_s3(simple_id, genewiz_serialn)
+    gsam['data_file1_type'] = 'FASTQ'
+    # fill the rest of the columns
+    gsam['experiment_id'] = experiment_id
+    gsam['src_subject_id'] = indiv_id
+    gsam['interview_age'] = int(cmc['ageOfDeath'] * 12)
+    gsam['interview_date'] = datetime.date.today().strftime('%m/%d/%y')
+    gsam['sample_description'] = 'frontal cortex'
+    gsam['organism'] = 'human'
+    gsam['sample_amount'] = 1
+    gsam['sample_unit'] = 'NA'
+    # TODO
+    gsam['data_file_location'] = 'NDAR'
+    gsam['storage_protocol'] = 'NA' # made up
+    gsam['patient_id_biorepository'] = src_subject_id
+    instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
+    gsam['sample_id_original'] = instdissectionID + '.np1'
+    return(gsam)
+
+
+
+def get_fastq_names_s3_helper(simple_id, genewiz_serialn, s3prefix='GENEWIZ/30-317737003/'):
+    '''
+    Get fastq names in S3 that match a CMC subject simple_id
+    '''
+    prefix = genewiz_serialn.loc[simple_id, 'GENEWIZ_serialn']
+    l = ['aws', 's3', 'ls', chess_s3_bucket + '/' + s3prefix]
+    p = subprocess.run(l, capture_output=True)
+    cnames = ['date', 'time', 'size', 'filename']
+    s3ls = pd.read_csv(io.BytesIO(p.stdout), sep='\s+', names=cnames)
+    filenames = s3ls['filename']
+    def ismatch(fn):
+        m = re.match('^' + prefix + '_[RS].*$', fn)
+        return(m is not None)
+    matches = [fn for fn in filenames if ismatch(fn)]
+    matches = [s3prefix + m for m in matches]
+    return(matches)
+
+def get_fastq_names_s3(simple_id, genewiz_serialn):
+    s3prefixes = ['GENEWIZ/30-317737003/', 'GENEWIZ/30-317737003_12_lanes/']
+    fastq_names = [get_fastq_names_s3_helper(simple_id, genewiz_serialn, y)
+            for y in s3prefixes]
+    fastq_names = list(np.array(fastq_names).ravel())
+    return(fastq_names)
+
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
     Download manifest from Synapse and read it into a pandas data frame
@@ -438,24 +488,6 @@ def make_g_sample(gsam_temp, btb, gsubj, syn, matching_sample_ids=True,
     else:
         val = do_tissue(tissue)
     return(val)
-
-
-def get_fastq_names_s3(simple_id, genewiz_serialn, s3prefix='GENEWIZ/30-317737003/'):
-    '''
-    Get fastq names in S3 that match a CMC subject simple_id
-    '''
-    prefix = genewiz_serialn.loc[simple_id, 'GENEWIZ_serialn']
-    l = ['aws', 's3', 'ls', chess_s3_bucket + '/' + s3prefix]
-    p = subprocess.run(l, capture_output=True)
-    cnames = ['date', 'time', 'size', 'filename']
-    s3ls = pd.read_csv(io.BytesIO(p.stdout), sep='\s+', names=cnames)
-    filenames = s3ls['filename']
-    def ismatch(fn):
-        m = re.match('^' + prefix + '_R.*$', fn)
-        return(m is not None)
-    matches = [fn for fn in filenames if ismatch(fn)]
-    matches = [s3prefix + m for m in matches]
-    return(matches)
 
 
 def make_manifests_main(slistcsv, target_dir=".", prefix='chess-'):
