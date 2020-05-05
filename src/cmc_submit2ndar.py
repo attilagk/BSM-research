@@ -48,7 +48,7 @@ def fillin_gsub_or_btb_row(indiv_id, manif, cmc_clinical, cmc_brainreg, genewiz_
     manifr['sample_id_original'] = instdissectionID + '.np1'
     return(manifr)
 
-def fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn):
+def fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn, syn=None, tissue='NeuN_pl'):
     simple_id = indiv_id.replace('CMC_', '')
     indiv_id = 'CMC_' + simple_id
     gsubr = fillin_gsub_or_btb_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
@@ -66,7 +66,7 @@ def fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
     return(gsubr)
 
 
-def fillin_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn):
+def fillin_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn, syn=None, tissue='NeuN_pl'):
     simple_id = indiv_id.replace('CMC_', '')
     indiv_id = 'CMC_' + simple_id
     btbr = fillin_gsub_or_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn)
@@ -95,11 +95,11 @@ def add_subj_key(manif, pGUIDpath='/home/attila/projects/bsm/results/2020-04-22-
     manif['subjectkey'] = pGUIDs[:manif.shape[0]]
     return(manif)
 
-def make_manif_s3():
+def resources_for_make_manif_s3(wdir):
     syn = synapseclient.login()
-    wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'
     gsubtempl, gsub_syn = get_manifest(manifest_template_synids['genomics_subject02'], syn, download_dir=wdir)
     btbtempl, btb_syn = get_manifest(manifest_template_synids['nichd_btb02'], syn, download_dir=wdir)
+    gsamtempl, gsam_syn = get_manifest(manifest_template_synids['genomics_sample03'], syn, download_dir=wdir)
     # CMC_Human_clinical_metadata.csv
     cmc_clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
     cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
@@ -109,31 +109,61 @@ def make_manif_s3():
     # originally created by Chaggai but manually edited by Attila with Institution Dissection IDs
     genewiz_serialn_syn = syn.get('syn21982509', downloadLocation=wdir, ifcollision='overwrite.local')
     genewiz_serialn = pd.read_csv(genewiz_serialn_syn.path, index_col='CMC_simple_id')
+    return((syn, gsubtempl, btbtempl, gsamtempl, cmc_clinical, cmc_brainreg, genewiz_serialn))
+
+
+def make_manif_s3(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
+    syn, gsubtempl, btbtempl, gsamtempl, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
+    tissue = 'NeuN_pl'
     def helper(fun=fillin_gsub_row, maniftempl=gsubtempl):
-        l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn) for s in genewiz_serialn.index]
+        l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue) for s in genewiz_serialn.index]
         df = pd.concat(l, axis=0)
         df = add_subj_key(df)
         return(df)
     # make genomics subjects
     gsub = helper(fillin_gsub_row, gsubtempl)
     btb = helper(fillin_btb_row, btbtempl)
+    gsam = helper(fillin_gsam_rows_scratch_space, gsamtempl)
     return((gsub, btb))
 
 
+def make_manif_scratch_space(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
+    syn, gsubtempl, btbtempl, gsamtempl, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
+    indiv_ids = None
+    fun = fillin_gsam_rows_scratch_space
+    fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
+    l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn) for s in genewiz_serialn.index]
+
 def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
-    gsam = gsam_temp.copy()
     simple_id = indiv_id.replace('CMC_', '')
-    el = get_scratch_space_data_s3(simple_id, syn, ext='.cram', tissue=tissue)
-    el = get_scratch_space_data_s3(simple_id, syn, ext='.crai', tissue=tissue)
-    el = get_scratch_space_data_s3(simple_id, syn, ext='.vcf.gz', tissue=tissue)
-    gsaml = list()
-    for e in el:
-        gsam = gsam_temp.copy()
-        gsam['data_file1'] = [e._file_handle['key']]
-        gsaml.append(gsam)
+    def helper(ftype1='CRAM'):
+        if ftype1 == 'CRAM':
+            ftype2 = 'CRAM index'
+            el1 = get_scratch_space_data_s3(simple_id, syn, ext='.cram', tissue=tissue)
+            el2 = get_scratch_space_data_s3(simple_id, syn, ext='.cram.crai', tissue=tissue)
+        elif ftype1 == 'VCF':
+            ftype2 = 'VCF index'
+            el1 = get_scratch_space_data_s3(simple_id, syn, ext='.vcf.gz', tissue=tissue)
+            el2 = get_scratch_space_data_s3(simple_id, syn, ext='.vcf.gz.tbi', tissue=tissue)
+        gsaml = list()
+        for e1, e2 in zip(el1, el2):
+            gsam = gsam_temp.copy()
+            gsam['data_file1'] = [e1._file_handle['key']]
+            gsam['data_file2'] = [e1._file_handle['key']]
+            if gsam.shape[0] != 0:
+                gsaml.append(gsam)
+        if len(gsaml) == 0:
+            return(None)
+        gsam = pd.concat(gsaml, axis=0)
+        gsam['data_file1_type'] = ftype1
+        gsam['data_file2_type'] = ftype2
+        return(gsam)
+    #gsaml = [helper(ft) for ft in ['CRAM']]
+    gsaml = [helper(ft) for ft in ['CRAM', 'VCF']]
     gsam = pd.concat(gsaml, axis=0)
-    gsam['data_file1_type'] = 'VCF'
+    gsam = fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn)
     return(gsam)
+
 
 def fillin_gsam_rows_chesslab_bsmn(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn):
     gsam = gsam_temp.copy()
@@ -197,7 +227,7 @@ def get_fastq_names_s3(simple_id, genewiz_serialn):
 
 
 def get_scratch_space_data_s3(simple_id, syn, ext='.cram', tissue='NeuN_pl'):
-    if ext == '.cram' or ext == '.crai':
+    if ext == '.cram' or ext == '.cram.crai' or ext == '.crai':
         syn_folder_id='syn20735395'
     elif ext == '.vcf.gz' or ext == '.vcf.gz.tbi':
         syn_folder_id='syn20812330'
