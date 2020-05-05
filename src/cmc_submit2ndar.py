@@ -120,28 +120,53 @@ def make_manif_s3():
     return((gsub, btb))
 
 
-def fillin_gsam_rows(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn):
+def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
     gsam = gsam_temp.copy()
-    cmc = cmc_clinical.loc[indiv_id]
+    simple_id = indiv_id.replace('CMC_', '')
+    el = get_scratch_space_data_s3(simple_id, syn, ext='.cram', tissue=tissue)
+    el = get_scratch_space_data_s3(simple_id, syn, ext='.crai', tissue=tissue)
+    el = get_scratch_space_data_s3(simple_id, syn, ext='.vcf.gz', tissue=tissue)
+    gsaml = list()
+    for e in el:
+        gsam = gsam_temp.copy()
+        gsam['data_file1'] = [e._file_handle['key']]
+        gsaml.append(gsam)
+    gsam = pd.concat(gsaml, axis=0)
+    gsam['data_file1_type'] = 'VCF'
+    return(gsam)
+
+def fillin_gsam_rows_chesslab_bsmn(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    gsam = gsam_temp.copy()
     simple_id = indiv_id.replace('CMC_', '')
     # begin with the column that determines the number of rows
     gsam['data_file1'] = get_fastq_names_s3(simple_id, genewiz_serialn)
     gsam['data_file1_type'] = 'FASTQ'
     # fill the rest of the columns
+    gsam = fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn)
+    return(gsam)
+
+
+def fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    cmc = cmc_clinical.loc[indiv_id]
     gsam['experiment_id'] = experiment_id
     gsam['src_subject_id'] = indiv_id
     gsam['interview_age'] = int(cmc['ageOfDeath'] * 12)
     gsam['interview_date'] = datetime.date.today().strftime('%m/%d/%y')
     gsam['sample_description'] = 'frontal cortex'
+    instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
+    gsam['sample_id_original'] = instdissectionID + '.np1'
     gsam['organism'] = 'human'
     gsam['sample_amount'] = 1
     gsam['sample_unit'] = 'NA'
-    # TODO
-    gsam['data_file_location'] = 'NDAR'
     gsam['storage_protocol'] = 'NA' # made up
-    gsam['patient_id_biorepository'] = src_subject_id
-    instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
-    gsam['sample_id_original'] = instdissectionID + '.np1'
+    gsam['data_file_location'] = 'NDAR'
+    if re.match('.*MSSM.*', indiv_id):
+        gsam['biorepository'] = 'MSBB'
+    elif re.match('.*PITT.*', indiv_id):
+        gsam['biorepository'] = 'UPittNBB'
+    gsam['patient_id_biorepository'] = indiv_id
+    gsam['sample_id_biorepository'] = gsam['sample_id_original']
+    gsam['site'] = chess_grant
     return(gsam)
 
 
@@ -169,6 +194,20 @@ def get_fastq_names_s3(simple_id, genewiz_serialn):
             for y in s3prefixes]
     fastq_names = list(np.array(fastq_names).ravel())
     return(fastq_names)
+
+
+def get_scratch_space_data_s3(simple_id, syn, ext='.cram', tissue='NeuN_pl'):
+    if ext == '.cram' or ext == '.crai':
+        syn_folder_id='syn20735395'
+    elif ext == '.vcf.gz' or ext == '.vcf.gz.tbi':
+        syn_folder_id='syn20812330'
+    entity_list = list()
+    for item in syn.getChildren(syn_folder_id):
+        if re.match('^.*' + simple_id + '_' + tissue + '.*' + ext + '$', item['name']):
+            e = syn.get(item['id'], downloadFile=False)
+            entity_list.append(e)
+    return(entity_list)
+
 
 def get_manifest(synapse_id, syn, skiprows=1, download_dir="/tmp/"):
     '''
