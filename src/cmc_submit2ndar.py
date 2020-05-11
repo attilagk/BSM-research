@@ -124,7 +124,7 @@ def make_manif_s3(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-
     gsub = helper(fillin_gsub_row, gsubtempl)
     btb = helper(fillin_btb_row, btbtempl)
     gsam = helper(fillin_gsam_rows_scratch_space, gsamtempl)
-    return((gsub, btb))
+    return((gsub, btb, gsam))
 
 
 def make_manif_scratch_space(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
@@ -134,8 +134,11 @@ def make_manif_scratch_space(wdir = '~/projects/bsm/results/2020-04-22-upload-to
     fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
     l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn) for s in genewiz_serialn.index]
 
+
 def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
     simple_id = indiv_id.replace('CMC_', '')
+    indiv_id = 'CMC_' + simple_id
+    print(indiv_id)
     def helper(ftype1='CRAM'):
         if ftype1 == 'CRAM':
             ftype2 = 'CRAM index'
@@ -158,8 +161,9 @@ def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainr
         gsam['data_file1_type'] = ftype1
         gsam['data_file2_type'] = ftype2
         return(gsam)
-    #gsaml = [helper(ft) for ft in ['CRAM']]
     gsaml = [helper(ft) for ft in ['CRAM', 'VCF']]
+    if all([y is None for y in gsaml]):
+        return(None)
     gsam = pd.concat(gsaml, axis=0)
     gsam = fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn)
     return(gsam)
