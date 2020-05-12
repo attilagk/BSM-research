@@ -41,8 +41,11 @@ def fillin_gsub_or_btb_row(indiv_id, manif, cmc_clinical, cmc_brainreg, genewiz_
     manifr['src_subject_id'] = indiv_id
     manifr['interview_date'] = datetime.date.today().strftime('%m/%d/%y')
     manifr['interview_age'] = int(cmc['ageOfDeath'] * 12)
-    manifr['gender'] = cmc['Reported Gender']
-    manifr['race'] = cmc['Race']
+    manifr['gender'] = cmc['Reported Gender'][0]
+    if cmc['Race'] is np.nan:
+        manifr['race'] = 'Unknown or not reported'
+    else:
+        manifr['race'] = cmc['Race']
     manifr['ethnic_group'] = cmc['Ethnicity']
     instdissectionID = get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn)
     manifr['sample_id_original'] = instdissectionID + '.np1'
@@ -109,26 +112,45 @@ def resources_for_make_manif_s3(wdir):
     # originally created by Chaggai but manually edited by Attila with Institution Dissection IDs
     genewiz_serialn_syn = syn.get('syn21982509', downloadLocation=wdir, ifcollision='overwrite.local')
     genewiz_serialn = pd.read_csv(genewiz_serialn_syn.path, index_col='CMC_simple_id')
-    return((syn, gsubtempl, btbtempl, gsamtempl, cmc_clinical, cmc_brainreg, genewiz_serialn))
+    return((syn, gsubtempl, gsub_syn, btbtempl, btb_syn, gsamtempl, gsam_syn, cmc_clinical, cmc_brainreg, genewiz_serialn))
 
 
-def make_manif_s3(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
-    syn, gsubtempl, btbtempl, gsamtempl, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
+def make_manif_s3(wdir = '/home/attila/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
+    syn, gsubtempl, gsub_syn, btbtempl, btb_syn, gsamtempl, gsam_syn, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
     tissue = 'NeuN_pl'
     def helper(fun=fillin_gsub_row, maniftempl=gsubtempl):
         l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue) for s in genewiz_serialn.index]
         df = pd.concat(l, axis=0)
         df = add_subj_key(df)
+        df = correct_manifest(df)
         return(df)
     # make genomics subjects
     gsub = helper(fillin_gsub_row, gsubtempl)
     btb = helper(fillin_btb_row, btbtempl)
     gsam = helper(fillin_gsam_rows_scratch_space, gsamtempl)
+    # retain those subjects/samples only that are present in gsam
+    gsub.index = gsub['src_subject_id']
+    gsub = gsub.loc[gsam['src_subject_id'], :]
+    btb.index = btb['src_subject_id']
+    btb = btb.loc[gsam['src_subject_id'], :]
+    # write data frames to CSVs
+    manifs = {'nichd_btb02': (btb, btb_syn), 'genomics_subject02': (gsub, gsub_syn), 'genomics_sample03': (gsam, gsam_syn)}
+    #def writer(manif=gsub, manif_syn=gsub_syn, manifname='gsub'):
+    def writer(manifname='nichd_btb02'):
+        manif = manifs[manifname][0]
+        manif_syn = manifs[manifname][1]
+        datestr = datetime.date.today().strftime('%Y-%m-%d')
+        csvpath = wdir + os.sep + datestr + '-' + manifname + '.csv'
+        csvpath = os.path.normpath(csvpath)
+        write_manifest(manif, manif_syn.path, csvpath)
+        print(manifname, 'written to', csvpath)
+        return(None)
+    [writer(k) for k in manifs.keys()]
     return((gsub, btb, gsam))
 
 
 def make_manif_scratch_space(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
-    syn, gsubtempl, btbtempl, gsamtempl, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
+    syn, gsubtempl, gsub_syn, btbtempl, btb_syn, gsamtempl, gsam_syn, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
     indiv_ids = None
     fun = fillin_gsam_rows_scratch_space
     fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
@@ -138,7 +160,6 @@ def make_manif_scratch_space(wdir = '~/projects/bsm/results/2020-04-22-upload-to
 def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
     simple_id = indiv_id.replace('CMC_', '')
     indiv_id = 'CMC_' + simple_id
-    print(indiv_id)
     def helper(ftype1='CRAM'):
         if ftype1 == 'CRAM':
             ftype2 = 'CRAM index'
@@ -413,6 +434,7 @@ def correct_manifest(df):
     res['interview_date'] = pd.to_datetime(df['interview_date'])
     if manifest_type(res) in ('btb', 'gsubj'):
         res.loc[res['race'] == 'African American', 'race'] = 'Black or African American'
+        #res.loc[[r is np.nan for r in res['race']], 'race'] = 'Unknown or not reported'
     if manifest_type(res) == 'btb':
         res['celltype'] = btb_sample_specs('celltype')
         res['br_reg'] = btb_sample_specs('br_reg')
