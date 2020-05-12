@@ -22,13 +22,10 @@ manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': 
 genewiz_serialn_synid = 'syn21982509' # a.k.a samples-from-Chaggai.csv
 chess_s3_bucket = 's3://chesslab-bsmn' 
 
-def get_cmc_metadata(syn):
-    clinical = pd.read_csv(syn.get(cmc_metadata['CMC_Human_clinical_metadata']).path, index_col='Individual ID')
-    brainRegion = pd.read_csv(syn.get(cmc_metadata['CMC_Human_brainRegion_metadata']).path, index_col='Institution Dissection ID')
-    dna_isolation = pd.read_csv(syn.get(cmc_metadata['CMC_Human_isolation_metadata_DNA']).path, index_col='Sample DNA ID')
-    return((clinical, brainRegion, dna_isolation))
-
 def empty_manifest_row(manifest):
+    '''
+    Returns the NaN-filled last row of a manifest, a pandas DataFrame
+    '''
     lastrow = manifest.iloc[-1:, :]
     a = np.array(lastrow)
     a.fill(np.nan)
@@ -36,6 +33,18 @@ def empty_manifest_row(manifest):
     return(new)
 
 def fillin_gsub_or_btb_row(indiv_id, manif, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    '''
+    Given a CMC indiv ID fill in a one-rowed gsub or btb manifest
+
+    Parameters
+    indiv_id: a CMC individual ID (string)
+    manif: the manifest template (pandas DataFrame)
+    cmc_clinical: pandas DataFrame holding CMC clinical info
+    cmc_brainreg: pandas DataFrame holding CMC brainreg info
+    genewiz_serialn: pandas DataFrame with a map GENEWIZ serialnumbers to CMC indiv IDs
+    
+    Value: a one-rowed gsub or btb manifest
+    '''
     manifr = empty_manifest_row(manif)
     cmc = cmc_clinical.loc[indiv_id]
     manifr['src_subject_id'] = indiv_id
@@ -52,6 +61,20 @@ def fillin_gsub_or_btb_row(indiv_id, manif, cmc_clinical, cmc_brainreg, genewiz_
     return(manifr)
 
 def fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn, syn=None, tissue='NeuN_pl'):
+    '''
+    Given a CMC indiv ID fill in a one-rowed gsub
+
+    Parameters
+    indiv_id: a CMC individual ID (string)
+    manif: the manifest template (pandas DataFrame)
+    cmc_clinical: pandas DataFrame holding CMC clinical info
+    cmc_brainreg: pandas DataFrame holding CMC brainreg info
+    genewiz_serialn: pandas DataFrame with a map GENEWIZ serialnumbers to CMC indiv IDs
+    syn: a synapse object
+    tissue: for the S3 samples it's invariably NeuN_pl
+    
+    Value: a one-rowed gsubmanifest
+    '''
     simple_id = indiv_id.replace('CMC_', '')
     indiv_id = 'CMC_' + simple_id
     gsubr = fillin_gsub_or_btb_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
@@ -70,6 +93,10 @@ def fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn,
 
 
 def fillin_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn, syn=None, tissue='NeuN_pl'):
+    '''
+    Given a CMC indiv ID fill in a one-rowed btb manifest.  For details see
+    the doc string of fillin_gsub_row.
+    '''
     simple_id = indiv_id.replace('CMC_', '')
     indiv_id = 'CMC_' + simple_id
     btbr = fillin_gsub_or_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn)
@@ -77,12 +104,23 @@ def fillin_btb_row(indiv_id, btb, cmc_clinical, cmc_brainreg, genewiz_serialn, s
 
 
 def get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn):
+    '''
+    Deduce CMC Institution Dissection ID for a CMC Individual ID
+
+    Details: Because for one individual there can be (and typically are)
+    multiple dissections additional info is used here to select a single
+    Dissection ID.  These include genewiz_serialn, cmc_brainreg and some
+    arbitrary rules.
+
+    Parameters: see fillin_gsub_row docstring for details
+
+    Value: Institution Dissection ID
+    '''
     brainr = cmc_brainreg.loc[cmc_brainreg['Individual ID'] == indiv_id, :]
     simple_id = indiv_id.replace('CMC_', '')
     PFCn = genewiz_serialn.loc[simple_id, 'PFC #']
     if re.match('^CMC_.*', PFCn):
         return(PFCn)
-    #PFCn = str(int(genewiz_serialn.loc[simple_id, 'PFC #']))
     matches = [y for y in brainr['Institution Dissection ID'] if
             re.match('^.*(DRPC|PFC).*' + PFCn + '.*$', y) is not None]
     psych = [y for y in matches if re.match('^.*PsychENCODE.*$', y) is not
@@ -93,12 +131,20 @@ def get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn):
         return(matches[0])
 
 def add_subj_key(manif, pGUIDpath='/home/attila/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/s3-pseudo-guids'):
+    '''
+    Add subject keys (pseudo GUIDs) to manifest.
+
+    Details: pseudo GUIDs were created by Andy and sent over to me via email on 2020-04-27
+    '''
     wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'
     pGUIDs = list(pd.read_csv(wdir + 's3-pseudo-guids', header=None)[0])
     manif['subjectkey'] = pGUIDs[:manif.shape[0]]
     return(manif)
 
 def resources_for_make_manif_s3(wdir):
+    '''
+    Download and return a bunch of resources to make manifests for data in our S3 bucket
+    '''
     syn = synapseclient.login()
     gsubtempl, gsub_syn = get_manifest(manifest_template_synids['genomics_subject02'], syn, download_dir=wdir)
     btbtempl, btb_syn = get_manifest(manifest_template_synids['nichd_btb02'], syn, download_dir=wdir)
@@ -116,6 +162,17 @@ def resources_for_make_manif_s3(wdir):
 
 
 def make_manif_s3(wdir = '/home/attila/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
+    '''
+    Make all three manifests for the data at s3://chesslab-bsmn/GENEWIZ
+
+    Parameters
+    wdir: directory path to download resources and create manifests in
+
+    Value: the three manifests
+
+    Details: The prefix of the manifest files is in the format of YYYY-MM-DD-
+    reflecting the date of invocation.
+    '''
     syn, gsubtempl, gsub_syn, btbtempl, btb_syn, gsamtempl, gsam_syn, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
     tissue = 'NeuN_pl'
     def helper(fun=fillin_gsub_row, maniftempl=gsubtempl):
@@ -149,15 +206,14 @@ def make_manif_s3(wdir = '/home/attila/projects/bsm/results/2020-04-22-upload-to
     return((gsub, btb, gsam))
 
 
-def make_manif_scratch_space(wdir = '~/projects/bsm/results/2020-04-22-upload-to-ndar-from-s3/'):
-    syn, gsubtempl, gsub_syn, btbtempl, btb_syn, gsamtempl, gsam_syn, cmc_clinical, cmc_brainreg, genewiz_serialn = resources_for_make_manif_s3(wdir)
-    indiv_ids = None
-    fun = fillin_gsam_rows_scratch_space
-    fillin_gsub_row(indiv_id, gsub, cmc_clinical, cmc_brainreg, genewiz_serialn)
-    l = [fun(s, maniftempl, cmc_clinical, cmc_brainreg, genewiz_serialn) for s in genewiz_serialn.index]
-
-
 def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
+    '''
+    Fill in multiple rows of gsam corresponding to a single CMC individual
+
+    Parameters: see fillin_gsub_row docstring for details
+
+    Value: gsam manifest for the individual
+    '''
     simple_id = indiv_id.replace('CMC_', '')
     indiv_id = 'CMC_' + simple_id
     def helper(ftype1='CRAM'):
@@ -190,18 +246,10 @@ def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainr
     return(gsam)
 
 
-def fillin_gsam_rows_chesslab_bsmn(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn):
-    gsam = gsam_temp.copy()
-    simple_id = indiv_id.replace('CMC_', '')
-    # begin with the column that determines the number of rows
-    gsam['data_file1'] = get_fastq_names_s3(simple_id, genewiz_serialn)
-    gsam['data_file1_type'] = 'FASTQ'
-    # fill the rest of the columns
-    gsam = fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn)
-    return(gsam)
-
-
 def fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn):
+    '''
+    Lower level function analogous to fillin_gsub_row et al; called by fillin_gsam_rows_scratch_space
+    '''
     cmc = cmc_clinical.loc[indiv_id]
     gsam['experiment_id'] = experiment_id
     gsam['src_subject_id'] = indiv_id
