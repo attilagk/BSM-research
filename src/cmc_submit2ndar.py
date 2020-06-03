@@ -119,12 +119,16 @@ def get_instdissectionID(indiv_id, cmc_brainreg, genewiz_serialn):
     brainr = cmc_brainreg.loc[cmc_brainreg['Individual ID'] == indiv_id, :]
     simple_id = indiv_id.replace('CMC_', '')
     PFCn = genewiz_serialn.loc[simple_id, 'PFC #']
+    return(PFCn)
     if re.match('^CMC_.*', PFCn):
         return(PFCn)
     matches = [y for y in brainr['Institution Dissection ID'] if
             re.match('^.*(DRPC|PFC).*' + PFCn + '.*$', y) is not None]
     psych = [y for y in matches if re.match('^.*PsychENCODE.*$', y) is not
             None]
+    if len(matches) == 0:
+        print('Institution Dissection ID for', indiv_id, 'not found')
+        return('TODO')
     if len(psych) >= 1:
         return(psych[0])
     else:
@@ -156,7 +160,7 @@ def resources_for_make_manif_s3(wdir):
     cmc_brainreg_syn = syn.get('syn21446693', downloadLocation=wdir, ifcollision='overwrite.local')
     cmc_brainreg = pd.read_csv(cmc_brainreg_syn.path)
     # originally created by Chaggai but manually edited by Attila with Institution Dissection IDs
-    genewiz_serialn_syn = syn.get('syn21982509', downloadLocation=wdir, ifcollision='overwrite.local')
+    genewiz_serialn_syn = syn.get(genewiz_serialn_synid, downloadLocation=wdir, ifcollision='overwrite.local')
     genewiz_serialn = pd.read_csv(genewiz_serialn_syn.path, index_col='CMC_simple_id')
     return((syn, gsubtempl, gsub_syn, btbtempl, btb_syn, gsamtempl, gsam_syn, cmc_clinical, cmc_brainreg, genewiz_serialn))
 
@@ -184,7 +188,8 @@ def make_manif_s3(wdir = '/home/attila/projects/bsm/results/2020-04-22-upload-to
     # make genomics subjects
     gsub = helper(fillin_gsub_row, gsubtempl)
     btb = helper(fillin_btb_row, btbtempl)
-    gsam = helper(fillin_gsam_rows_scratch_space, gsamtempl)
+    #gsam = helper(fillin_gsam_rows_scratch_space, gsamtempl)
+    gsam = helper(fillin_gsam_rows_chess_s3, gsamtempl)
     # retain those subjects/samples only that are present in gsam
     gsub.index = gsub['src_subject_id']
     gsub = gsub.loc[gsam['src_subject_id'], :]
@@ -204,6 +209,19 @@ def make_manif_s3(wdir = '/home/attila/projects/bsm/results/2020-04-22-upload-to
         return(None)
     [writer(k) for k in manifs.keys()]
     return((gsub, btb, gsam))
+
+
+def fillin_gsam_rows_chess_s3(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
+    simple_id = indiv_id.replace('CMC_', '')
+    indiv_id = 'CMC_' + simple_id
+    fastq_names = get_fastq_names_s3(simple_id, genewiz_serialn)
+    gsam = gsam_temp.copy()
+    gsam['data_file1'] = [fastq_names[0]]
+    gsam['data_file2'] = [fastq_names[1]]
+    gsam['data_file1_type'] = ['FASTQ']
+    gsam['data_file2_type'] = ['FASTQ']
+    gsam = fillin_gsam_rows(indiv_id, gsam, cmc_clinical, cmc_brainreg, genewiz_serialn)
+    return(gsam)
 
 
 def fillin_gsam_rows_scratch_space(indiv_id, gsam_temp, cmc_clinical, cmc_brainreg, genewiz_serialn, syn, tissue='NeuN_pl'):
@@ -292,7 +310,8 @@ def get_fastq_names_s3_helper(simple_id, genewiz_serialn, s3prefix='GENEWIZ/30-3
     return(matches)
 
 def get_fastq_names_s3(simple_id, genewiz_serialn):
-    s3prefixes = ['GENEWIZ/30-317737003/', 'GENEWIZ/30-317737003_12_lanes/']
+    #s3prefixes = ['GENEWIZ/30-317737003/', 'GENEWIZ/30-317737003_12_lanes/']
+    s3prefixes = ['GENEWIZ/30-317737003/']
     fastq_names = [get_fastq_names_s3_helper(simple_id, genewiz_serialn, y)
             for y in s3prefixes]
     fastq_names = list(np.array(fastq_names).ravel())
