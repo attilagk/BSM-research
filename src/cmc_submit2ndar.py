@@ -306,7 +306,10 @@ def get_fastq_names_s3_helper(simple_id, genewiz_serialn, s3prefix='GENEWIZ/30-3
         m = re.match('^' + prefix + '_[RS].*$', fn)
         return(m is not None)
     matches = [fn for fn in filenames if ismatch(fn)]
-    matches = [s3prefix + m for m in matches]
+    # Adding here s3 prefix is not needed because the following syntax takes
+    # care of it:
+    # $ vtcmd -pre GENEWIZ/30-317737003
+    #matches = [s3prefix + m for m in matches]
     return(matches)
 
 def get_fastq_names_s3(simple_id, genewiz_serialn):
@@ -500,7 +503,10 @@ def correct_manifest(df):
     res = df.copy()
     res['interview_date'] = pd.to_datetime(df['interview_date'])
     if manifest_type(res) in ('btb', 'gsubj'):
-        res.loc[res['race'] == 'African American', 'race'] = 'Black or African American'
+        #res.loc[res['race'] == 'African American', 'race'] = 'Black or African American'
+        res.loc[res['ethnic_group'] == 'African-American', 'race'] = 'Black or African American'
+        res.loc[res['ethnic_group'] == 'Caucasian', 'race'] = 'White'
+        res.loc[res['ethnic_group'] == 'Hispanic', 'race'] = 'White'
         #res.loc[[r is np.nan for r in res['race']], 'race'] = 'Unknown or not reported'
     if manifest_type(res) == 'btb':
         res['celltype'] = btb_sample_specs('celltype')
