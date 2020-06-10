@@ -2,6 +2,7 @@ data
 results
 test
 calls
+resources
 
 .tmp
 *.log
