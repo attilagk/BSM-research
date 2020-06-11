@@ -1,0 +1,36 @@
+#! /usr/bin/env bash
+
+usage="`basename $0` [-t targetdir] invcf sample"
+
+targetdir=$PWD
+# process options
+while getopts "t:h" opt; do
+    case $opt in
+        t) targetdir="$OPTARG";;
+        h) echo -e $usage 2>&1; exit ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+invcf=$1
+sample=$2
+
+# input/output file types and names
+if echo $invcf | grep '\.gz$' >/dev/null; then
+    Otype=z
+    ext=.vcf.gz
+    doindex=true
+elif echo $invcf | grep '\.vcf$' >/dev/null; then
+    Otype=v
+    ext=.vcf
+    doindex=false
+else
+    echo Unexpected file extension.  Exiting; exit
+fi
+outvcf=$targetdir/`basename $invcf $ext`-annot$ext
+
+bcftools view -Ov $invcf |
+~/projects/bsm/src/annotate-vcf-sample $sample |
+    ~/projects/bsm/src/annotate-vcf-chromat-state |
+    bcftools view -O$Otype -o $outvcf
+if $doindex; then bcftools index --tbi $outvcf; fi

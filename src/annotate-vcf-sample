@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+# Correct sample name in VCF
+
+sample=$1
+invcf=${2:-/dev/stdin}
+outvcf=${3:-/dev/stdout}
+
+bcftools reheader -s <(echo $sample) -o $outvcf $invcf
