@@ -29,9 +29,9 @@ paste <(cut -f2-3 $intersec) <(cut -f1 $intersec) > $annotations
 bgzip $annotations
 tabix -s1 -b2 -e2 $annotations.gz
 # create header
-header='##INFO=<ID=ChromatinState,Number=1,Type=Integer,Description="Chromatin state from the Roadmap Epigenomics project">'
+header='##INFO=<ID=ChromatinState_DLPFC,Number=1,Type=Integer,Description="Chromatin state from the Roadmap Epigenomics project">'
 echo $header > $headerfile
-columns='CHROM,POS,INFO/ChromatinState' 
+columns='CHROM,POS,INFO/ChromatinState_DLPFC' 
 # annotate VCF
 bcftools annotate -a $annotations.gz -c $columns -h $headerfile -o $outvcf $invcf
 

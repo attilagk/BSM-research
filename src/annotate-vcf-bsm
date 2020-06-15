@@ -15,6 +15,19 @@ shift $(($OPTIND - 1))
 invcf=$1
 sample=$2
 
+# ensure targetdir is different from sourcedir
+sourcedir=$(realpath $(dirname $invcf))
+if test `realpath $targetdir` ==  $sourcedir; then
+    echo "Error: targetdir is the same as sourcedir. Exiting"; exit 1
+fi
+# make targetdir if necessary
+if test -d $targetdir; then
+    :
+elif test -e $targetdir; then
+    echo "Error: targetdir exists but is not a directory. Exiting"; exit 1
+else mkdir -p $targetdir
+fi
+
 # input/output file types and names
 if echo $invcf | grep '\.gz$' >/dev/null; then
     Otype=z
@@ -27,7 +40,7 @@ elif echo $invcf | grep '\.vcf$' >/dev/null; then
 else
     echo Unexpected file extension.  Exiting; exit
 fi
-outvcf=$targetdir/`basename $invcf $ext`-annot$ext
+outvcf=$targetdir/`basename $invcf`
 
 bcftools view -Ov $invcf |
 ~/projects/bsm/src/annotate-vcf-sample $sample |

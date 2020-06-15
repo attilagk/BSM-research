@@ -1,9 +1,12 @@
+#! /usr/bin/env python3
+
 import pandas as pd
 import numpy as np
 import subprocess
 import io
 import re
 import synapseclient
+import os.path
 
 def read_annotlist(annotpath='/home/attila/projects/bsm/tables/VCF-HC.annotations', withFORMAT=False):
     with open(annotpath) as f:
@@ -49,13 +52,38 @@ def add_clinical(vcfpath, clinical):
     outvcf = pd.concat([vcf, df], axis=1)
     return(outvcf)
 
-def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv'):
+def annotateVCF(invcf='/home/attila/projects/bsm/results/calls/filtered/MSSM_106_brain.ploidy_50.filtered.vcf',
+        sample='MSSM_106_NeuN_pl',
+        targetdir='/home/attila/projects/bsm/results/calls/annotated/'):
+    script = '/home/attila/projects/bsm/src/annotate-vcf-bsm'
+    cmd = [script, '-t', targetdir, invcf, sample]
+    p =  subprocess.run(cmd, capture_output=True)
+    return(p)
+
+def annotate_or_readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+        vcfdir='/home/attila/projects/bsm/results/calls/', fun=annotateVCF, cmc_clinical=None):
+    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
+    def helper(sample):
+        subdir = 'filtered' if fun is annotateVCF else 'annotated'
+        invcf = vcfdir + os.path.sep + subdir + os.path.sep + vcflist.loc[sample, 'file']
+        arg2 = sample if cmc_clinical is None else cmc_clinical
+        val = fun(invcf, arg2)
+        return(val)
+    l = [helper(y) for y in vcflist.index]
+    return(l)
+
+def annotateVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+        vcfdir='/home/attila/projects/bsm/results/calls/'):
+    pp = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=annotateVCF, cmc_clinical=None)
+    return(pp)
+
+def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+        vcfdir='/home/attila/projects/bsm/results/calls/'):
     # CMC_Human_clinical_metadata.csv
     syn = synapseclient.login()
     wdir='/tmp'
     cmc_clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
     cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
-    # TODO
-    add_clinical('/big/results/bsm/2020-06-10-chromatin-state/MSSM_109_brain.ploidy_50.filtered-annot.vcf',
-            clinical)
-    return(cmc_clinical)
+    l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=add_clinical, cmc_clinical=cmc_clinical)
+    val = pd.concat(l, axis=0)
+    return(val)
