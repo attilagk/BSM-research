@@ -45,8 +45,12 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
 def add_clinical(vcfpath, clinical):
     vcf = readVCF(vcfpath)
     sample = sample_fromVCF(vcfpath)
-    indiv_id = convert_sample(sample)[0]
+    indiv_id, tissue = convert_sample(sample)
     df = clinical.loc[[indiv_id]]
+    id_df = pd.DataFrame({'Sample': [sample], 'Individual ID': [indiv_id],
+        'Tissue': [tissue]})
+    id_df.index = df.index
+    df = pd.concat([id_df, df], axis=1)
     df = df.iloc[np.zeros(vcf.shape[0]), :]
     df.index = vcf.index
     outvcf = pd.concat([vcf, df], axis=1)
@@ -86,4 +90,17 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
     l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=add_clinical, cmc_clinical=cmc_clinical)
     val = pd.concat(l, axis=0)
+    csvpath = vcfdir + os.path.sep + 'annotations.csv'
+    val.to_csv(csvpath, index=False)
     return(val)
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dir', help='main VCF directory (/home/attila/projects/bsm/results/calls/)',
+            default='/home/attila/projects/bsm/results/calls/')
+    parser.add_argument('-l', '--vcflist', help='list of samples and VCF files (/big/results/bsm/calls/filtered-vcfs.tsv)',
+            default='/big/results/bsm/calls/filtered-vcfs.tsv')
+    args = parser.parse_args()
+    annotateVCFs(vcflistpath=args.vcflist, vcfdir=args.dir)
+    readVCFs(vcflistpath=args.vcflist, vcfdir=args.dir)
