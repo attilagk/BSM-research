@@ -8,7 +8,34 @@ import re
 import synapseclient
 import os.path
 
+# from
+# https://egg2.wustl.edu/roadmap/data/byFileType/chromhmmSegmentations/ChmmModels/coreMarks/jointModel/final/browserlabelmap_15_coreMarks.tab
+state15label = {1 :  "TssA",
+                2 :  "TssAFlnk",
+                3 :  "TxFlnk",
+                4 :  "Tx",
+                5 :  "TxWk",
+                6 :  "EnhG",
+                7 :  "Enh",
+                8 :  "ZNF/Rpts",
+                9 :  "Het",
+                10:  "TssBiv",
+                11:  "BivFlnk",
+                12:  "EnhBiv",
+                13:  "ReprPC",
+                14:  "ReprPCWk",
+                15:  "Quies"}
+
 def read_annotlist(annotpath='/home/attila/projects/bsm/tables/VCF-HC.annotations', withFORMAT=False):
+    '''
+    Reads a file containing list of annotations in VCFs into a list.
+
+    Parameters
+    annotpath: the path to the aforementioned file
+    withFORMAT: if False (default) the FORMAT fields are omitted
+
+    Value: the list of annotations
+    '''
     with open(annotpath) as f:
         l = f.readlines()
     l = [y.replace('\n', '') for y in l] # remove newline characters
@@ -42,8 +69,10 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     df = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames)
     return(df)
 
-def add_clinical(vcfpath, clinical):
+def read_extend(vcfpath, clinical):
     vcf = readVCF(vcfpath)
+    # turn numeric chromatin states into labels
+    vcf['chromatinState_DLPFC'] = [state15label[x] for x in vcf['ChromatinState_DLPFC']]
     sample = sample_fromVCF(vcfpath)
     indiv_id, tissue = convert_sample(sample)
     df = clinical.loc[[indiv_id]]
@@ -88,11 +117,17 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     wdir='/tmp'
     cmc_clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
     cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
-    l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=add_clinical, cmc_clinical=cmc_clinical)
+    l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=read_extend, cmc_clinical=cmc_clinical)
     val = pd.concat(l, axis=0)
+    val = set_dtypes(val)
     csvpath = vcfdir + os.path.sep + 'annotations.csv'
     val.to_csv(csvpath, index=False)
     return(val)
+
+def set_dtypes(vcf):
+    vcf['Dx'] = pd.Categorical(vcf['Dx'], categories=['Control', 'SCZ'])
+    vcf['chromatinState_DLPFC'] = pd.Categorical(vcf['chromatinState_DLPFC'], categories=state15label.values())
+    return(vcf)
 
 if __name__ == '__main__':
     import argparse
