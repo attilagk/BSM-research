@@ -66,7 +66,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     colnames = [y.replace('INFO/', '') for y in annotlist]
     cmd = ['bcftools', 'query', '-f', formatstr, vcfpath]
     p =  subprocess.run(cmd, capture_output=True)
-    df = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames)
+    df = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames, na_values='.')
     return(df)
 
 def read_extend(vcfpath, clinical):

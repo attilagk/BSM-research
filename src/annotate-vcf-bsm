@@ -15,6 +15,16 @@ shift $(($OPTIND - 1))
 invcf=$1
 sample=$2
 
+# RESOURCES
+# chromatin state from RoadMap project
+bed_chrstate="$HOME/projects/bsm/resources/roadmap-epigenomics/chromatin-state/15-state-model/E073_15_coreMarks_stateno-no-chr-prefix.bed"
+headerf_chrstate="$HOME/projects/bsm/resources/roadmap-epigenomics/chromatin-state/15-state-model/coreMarks_stateno.hdr"
+columns_chrstate='CHROM,POS,INFO/ChromatinState_DLPFC' 
+# SiPhy: evol constrained elements
+bed_siphy="$HOME/projects/bsm/resources/constrained-elements/SiPhy/elementPartition-annot.bed"
+headerf_siphy="$HOME/projects/bsm/resources/constrained-elements/SiPhy/elementPartition-annot.hdr"
+columns_siphy='CHROM,POS,INFO/SiPhyLOD,INFO/SiPhyBranchLen'
+
 # ensure targetdir is different from sourcedir
 sourcedir=$(realpath $(dirname $invcf))
 if test `realpath $targetdir` ==  $sourcedir; then
@@ -44,6 +54,7 @@ outvcf=$targetdir/`basename $invcf`
 
 bcftools view -Ov $invcf |
 ~/projects/bsm/src/annotate-vcf-sample $sample |
-    ~/projects/bsm/src/annotate-vcf-chromat-state |
+    ~/projects/bsm/src/annotate-vcf-general -b $bed_chrstate -e $headerf_chrstate -c $columns_chrstate |
+    ~/projects/bsm/src/annotate-vcf-general -b $bed_siphy -e $headerf_siphy -c $columns_siphy |
     bcftools view -O$Otype -o $outvcf
 if $doindex; then bcftools index --tbi $outvcf; fi
