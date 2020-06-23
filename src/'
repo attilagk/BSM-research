@@ -121,7 +121,6 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=read_extend, cmc_clinical=cmc_clinical)
     val = pd.concat(l, axis=0)
     val = set_dtypes(val)
-    val = add_ancestry(val)
     csvpath = vcfdir + os.path.sep + 'annotations.csv'
     val.to_csv(csvpath, index=False)
     return(val)
@@ -134,8 +133,7 @@ def set_dtypes(vcf):
 def add_ancestry(callsdf,
         ancestrypath='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'):
     ancestry = pd.read_csv(ancestrypath, sep='\t', index_col='Individual_ID')
-    ancestry_reshaped = ancestry.loc[callsdf['Individual ID'], :]
-    ancestry_reshaped.index = callsdf.index
+    ancestry_reshaped = ancestry.loc[callsdf['Individual_ID'], :]
     val = pd.concat([callsdf, ancestry_reshaped], axis=1)
     return(val)
 
