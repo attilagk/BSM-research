@@ -8,7 +8,7 @@ import re
 import synapseclient
 import os.path
 
-# from
+# Source:
 # https://egg2.wustl.edu/roadmap/data/byFileType/chromhmmSegmentations/ChmmModels/coreMarks/jointModel/final/browserlabelmap_15_coreMarks.tab
 state15label = {1 :  "TssA",
                 2 :  "TssAFlnk",
