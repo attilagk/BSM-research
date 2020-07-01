@@ -65,3 +65,5 @@ ndar/account-info
 
 # lock files made by Libre Office
 *.~lock.*
+
+**/tags
