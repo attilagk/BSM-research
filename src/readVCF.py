@@ -89,6 +89,9 @@ def read_extend(vcfpath, clinical):
 def annotateVCF(invcf='/home/attila/projects/bsm/results/calls/filtered/MSSM_106_brain.ploidy_50.filtered.vcf',
         sample='MSSM_106_NeuN_pl',
         targetdir='/home/attila/projects/bsm/results/calls/annotated/'):
+    '''
+    Some help would be nice
+    '''
     script = '/home/attila/projects/bsm/src/annotate-vcf-bsm'
     cmd = [script, '-t', targetdir, invcf, sample]
     p =  subprocess.run(cmd, capture_output=True)

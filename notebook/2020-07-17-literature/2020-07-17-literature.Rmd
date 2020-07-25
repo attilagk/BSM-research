@@ -1,0 +1,47 @@
+---
+layout: default
+#title: 
+tags: [literature]
+#featimg: "venn-snvs-1.png"
+---
+
+Here I collect and comment on previous studies that are relevant to our BSM-schizophrenia project.
+
+## Title
+
+### Chatterjee2016
+Chatterjee, N.; Shi, J. & García-Closas, M.
+
+Developing and evaluating polygenic risk prediction models for stratified disease prevention. 
+
+Nature reviews. Genetics, 2016, 17, 392-406 
+
+A great review on how to put together genetic and environmental risk factors to arrive at absolute risk.  Relative risk and its relation to Cox's proportional hazards model are discussed as well as polygenic risk scores from GWAS.
+
+
+### Purcell2014
+Purcell, S. M.; Moran, J. L.; Fromer, M.; Ruderfer, D.; Solovieff, N.; Roussos, P.; O'Dushlaine, C.; Chambert, K.; Bergen, S. E.; Kähler, A.; Duncan, L.; Stahl, E.; Genovese, G.; Fernández, E.; Collins, M. O.; Komiyama, N. H.; Choudhary, J. S.; Magnusson, P. K. E.; Banks, E.; Shakir, K.; Garimella, K.; Fennell, T.; DePristo, M.; Grant, S. G. N.; Haggarty, S. J.; Gabriel, S.; Scolnick, E. M.; Lander, E. S.; Hultman, C. M.; Sullivan, P. F.; McCarroll, S. A. & Sklar, P.
+
+A polygenic burden of rare disruptive mutations in schizophrenia. 
+
+Nature, Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved., 2014, 506, 185-90 
+
+Schizophrenia GWAS based on exome sequencing that focussed on rare SNPs.  Notably the authors compiled a list of "2,546 genes (~10% of the exome) based on prior genetic studies that we hypothesized to be enriched for schizophrenia-associated mutations (SI section 6)".
+
+### Consortium2009
+Consortium, I. S.; Purcell, S. M.; Wray, N. R.; Stone, J. L.; Visscher, P. M.; O'Donovan, M. C.; Sullivan, P. F. & Sklar, P.
+
+Common polygenic variation contributes to risk of schizophrenia and bipolar disorder. 
+
+Nature, 2009, 460, 748-752 
+
+The first study that applied polygenic risk score (PGS) to schizophrenia and in more generally to any complex disease. "We summarized variation across many nominally-associated loci into quantitative scores and related the scores to disease state in independent samples"
+
+### Zheutlin2019
+Zheutlin, A. B.; Dennis, J.; Karlsson Linnér, R.; Moscati, A.; Restrepo, N.; Straub, P.; Ruderfer, D.; Castro, V. M.; Chen, C.-Y.; Ge, T.; Huckins, L. M.; Charney, A.; Kirchner, H. L.; Stahl, E. A.; Chabris, C. F.; Davis, L. K. & Smoller, J. W.
+
+Penetrance and Pleiotropy of Polygenic Risk Scores for Schizophrenia in 106,160 Patients Across Four Health Care Systems. 
+
+The American journal of psychiatry, 2019, 176, 846-855 
+
+The authors built and validated polygenic risk score models (PGSs) trained on the schizophrenia GWAS data (Ripke et al 2014 10.1038/nature13595) and deposited to https://www.pgscatalog.org.  Specifically, the model PGS000134 features 830,589 variants that match an Illumina Infinium HumanOmniExpressExome genotyping chip.  This is essentially the same chip that was used to genotype the exome of our samples by the Common Mind consortium.
