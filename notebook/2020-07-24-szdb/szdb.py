@@ -27,6 +27,7 @@ def expandCNVrow(CNV, hgcb, corr_cb, ix):
     row['hg chr cytoband'] = [(c, n) for c, n in zip(hgcb_chunk['chromosome'], hgcb_chunk['name'])]
     row['start'] = hgcb_chunk['start']
     row['end'] = hgcb_chunk['end']
+    row.drop(columns=['start cytoband', 'end cytoband'], inplace=True)
     return(row)
 
 
@@ -45,3 +46,13 @@ def expandCNV(CNV, hgcb, corr_cb):
     l = [expandCNVrow(CNV, hgcb, corr_cb, ix) for ix in range(len(CNV))]
     CNV = pd.concat(l, axis=0)
     return(CNV)
+
+
+def summarizeCNV(CNV):
+    gb = CNV.groupby(['chromosome', 'hg cytoband'])
+    first = gb.first()[['start', 'end']]
+    chrom = pd.DataFrame({'chrom': [y[0] for y in first.index]})
+    chrom.index = first.index
+    count = pd.DataFrame({'count': gb.size()})
+    val = pd.concat([chrom, first, count], axis=1)
+    return(val)
