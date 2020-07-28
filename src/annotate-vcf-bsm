@@ -24,6 +24,10 @@ columns_chrstate='CHROM,POS,INFO/ChromatinState_DLPFC'
 bed_siphy="$HOME/projects/bsm/resources/constrained-elements/SiPhy/elementPartition-annot.bed"
 headerf_siphy="$HOME/projects/bsm/resources/constrained-elements/SiPhy/elementPartition-annot.hdr"
 columns_siphy='CHROM,POS,INFO/SiPhyLOD,INFO/SiPhyBranchLen'
+# szdb CNV
+bed_szdb_cnv="$HOME/projects/bsm/results/2020-07-24-szdb/szdb-CNV-cytogenic-band-counts.bed"
+headerf_szdb_cnv="$HOME/projects/bsm/results/2020-07-24-szdb/szdb-CNV-cytogenic-band-counts.hdr"
+columns_szdb_cnv='CHROM,POS,INFO/szdbCNVcount' 
 
 # ensure targetdir is different from sourcedir
 sourcedir=$(realpath $(dirname $invcf))
@@ -56,5 +60,6 @@ bcftools view -Ov $invcf |
 ~/projects/bsm/src/annotate-vcf-sample $sample |
     ~/projects/bsm/src/annotate-vcf-general -b $bed_chrstate -e $headerf_chrstate -c $columns_chrstate |
     ~/projects/bsm/src/annotate-vcf-general -b $bed_siphy -e $headerf_siphy -c $columns_siphy |
+    ~/projects/bsm/src/annotate-vcf-general -b $bed_szdb_cnv -e $headerf_szdb_cnv -c $columns_szdb_cnv |
     bcftools view -O$Otype -o $outvcf
 if $doindex; then bcftools index --tbi $outvcf; fi
