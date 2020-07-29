@@ -28,6 +28,10 @@ columns_siphy='CHROM,POS,INFO/SiPhyLOD,INFO/SiPhyBranchLen'
 bed_szdb_cnv="$HOME/projects/bsm/results/2020-07-24-szdb/szdb-CNV-cytogenic-band-counts.bed"
 headerf_szdb_cnv="$HOME/projects/bsm/results/2020-07-24-szdb/szdb-CNV-cytogenic-band-counts.hdr"
 columns_szdb_cnv='CHROM,POS,INFO/szdbCNVcount' 
+# CLOZUK GWAS
+bed_clozuk_gwas="$HOME/projects/bsm/resources/CLOZUK/gwas.bed"
+headerf_clozuk_gwas="$HOME/projects/bsm/resources/CLOZUK/gwas.hdr"
+columns_clozuk_gwas='CHROM,POS,INFO/GWASpval' 
 
 # ensure targetdir is different from sourcedir
 sourcedir=$(realpath $(dirname $invcf))
@@ -61,5 +65,6 @@ bcftools view -Ov $invcf |
     ~/projects/bsm/src/annotate-vcf-general -b $bed_chrstate -e $headerf_chrstate -c $columns_chrstate |
     ~/projects/bsm/src/annotate-vcf-general -b $bed_siphy -e $headerf_siphy -c $columns_siphy |
     ~/projects/bsm/src/annotate-vcf-general -b $bed_szdb_cnv -e $headerf_szdb_cnv -c $columns_szdb_cnv |
+    ~/projects/bsm/src/annotate-vcf-general -b $bed_clozuk_gwas -e $headerf_clozuk_gwas -c $columns_clozuk_gwas |
     bcftools view -O$Otype -o $outvcf
 if $doindex; then bcftools index --tbi $outvcf; fi
