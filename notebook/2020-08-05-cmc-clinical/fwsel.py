@@ -1,5 +1,8 @@
 import statsmodels.formula.api as smf
 
+# Taken from
+# https://planspace.org/20150423-forward_selection_with_statsmodels/
+
 def forward_selected(data, response):
     """Linear model designed by forward selection.
 
