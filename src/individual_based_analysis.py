@@ -8,8 +8,7 @@ ancestry_path='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pi
 
 def clean_clinical(calls, remove_ancestry=False):
     clin = pd.read_csv(cmc_clinical_path)
-    selvars = list(clin.columns)
-    todrop = set(clin.columns) - set(selvars)
+    todrop = set(calls.columns).intersection(set(clin.columns)) - set(selvars)
     if remove_ancestry:
         ancestry = pd.read_csv(ancestry_path, sep='\t', index_col='Individual_ID')
         todrop = todrop.union(set(ancestry.columns))

@@ -69,6 +69,13 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     df = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames, na_values='.')
     return(df)
 
+def index_with_variants(calls):
+    calls['Mutation'] = [str(a) + '->' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
+    calls = calls.set_index(['Individual ID', 'CHROM', 'POS', 'Mutation'])
+    return(calls)
+    calls = calls.drop(columns='Mutation')
+    return(calls)
+
 def read_extend(vcfpath, clinical):
     vcf = readVCF(vcfpath)
     # turn numeric chromatin states into labels
@@ -127,6 +134,7 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     val = add_ancestry(val)
     csvpath = vcfdir + os.path.sep + 'annotations.csv'
     val.to_csv(csvpath, index=False)
+    val = index_with_variants(val)
     return(val)
 
 def set_dtypes(vcf):
