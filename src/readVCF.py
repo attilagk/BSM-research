@@ -71,7 +71,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
 
 def index_with_variants(calls):
     calls['Mutation'] = [str(a) + '->' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
-    calls = calls.set_index(['Individual ID', 'CHROM', 'POS', 'Mutation'])
+    calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
     return(calls)
     calls = calls.drop(columns='Mutation')
     return(calls)
