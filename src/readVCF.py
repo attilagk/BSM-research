@@ -71,9 +71,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
 
 def index_with_variants(calls):
     calls['Mutation'] = [str(a) + '->' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
-    calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
-    return(calls)
-    calls = calls.drop(columns='Mutation')
+    calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'], drop=False)
     return(calls)
 
 def read_extend(vcfpath, clinical):
@@ -145,6 +143,11 @@ def set_dtypes(vcf):
 def add_ancestry(callsdf,
         ancestrypath='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'):
     ancestry = pd.read_csv(ancestrypath, sep='\t', index_col='Individual_ID')
+    # take care of missing values
+    c = set(callsdf['Individual ID'])
+    a = set(ancestry.index)
+    ancestry = ancestry.reindex(list(ancestry.index) + list(c - a))
+    # reshape ancestry according to callsdf
     ancestry_reshaped = ancestry.loc[callsdf['Individual ID'], :]
     ancestry_reshaped.index = callsdf.index
     val = pd.concat([callsdf, ancestry_reshaped], axis=1)
