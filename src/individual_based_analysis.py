@@ -2,7 +2,7 @@ import readVCF
 import pandas as pd
 import statsmodels.api as sm
 
-selvars = ['AntipsychAtyp', 'Alcohol', 'AntipsychTyp', 'Ethnicity']
+selvars = ['Dx', 'AntipsychAtyp', 'Alcohol', 'AntipsychTyp', 'Ethnicity']
 cmc_clinical_path = '/big/results/bsm/2020-08-05-cmc-clinical/CMC_Human_clinical_metadata.csv'
 ancestry_path='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
 
