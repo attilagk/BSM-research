@@ -5,7 +5,6 @@ import numpy as np
 import subprocess
 import io
 import re
-import synapseclient
 import os.path
 
 # Source:
@@ -62,6 +61,16 @@ def convert_sample(bsm_sample):
     return((indiv_id, tissue))
 
 def readVCF(vcfpath, annotlist=read_annotlist()):
+    '''
+    Reads the calls/records of VCF into rows of a DataFrame
+
+    Arguments
+    vcfpath: path to VCF file
+    annotlist: the list of annotations (CHROM, POS, ..., FILTER/1, ..., INFO/1, ...)
+
+    Value:
+    calls: a pandas DataFrame
+    '''
     formatstr = make_formatstr(annotlist)
     colnames = [y.replace('INFO/', '') for y in annotlist]
     cmd = ['bcftools', 'query', '-f', formatstr, vcfpath]
@@ -76,7 +85,45 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     calls['Tissue'] = tissue
     calls['Mutation'] = [str(a) + '->' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
     # set index
-    calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'], drop=False)
+    calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'], drop=True)
+    return(calls)
+
+def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+        vcfdir='/home/attila/projects/bsm/results/calls/annotated/', clean=True):
+    '''
+    Reads the calls/records of several VCFs into rows of a single DataFrame
+
+    Arguments
+    vcflistpath: path to file listing all VCFs
+    vcfdir: the directory of the VCFs
+    clean: weather to remove redundant & degenerate columns
+
+    Value:
+    calls: a pandas DataFrame
+    '''
+    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
+    vcflist['filepath'] = [vcfdir + f for f in vcflist['file']]
+    l = [readVCF(y) for y in vcflist['filepath']]
+    calls = pd.concat(l, axis=0)
+    if clean:
+        calls = clean_calls(calls)
+    return(calls)
+
+def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
+    '''
+    Remove redundant & degenerate columns and those with missing values
+
+    Details:
+    The set of redundant and degenerate variables was established in 2020-08-07-cleaning-data
+    '''
+    redundant_vars = ['FILTER/HC', 'FILTER/EXT', 'QUAL', 'AC', 'MLEAC', 'MLEAF', 'QD']
+    degenerate_vars = ['AN', 'MQ', 'MQRankSum']
+    if dropna:
+        calls = calls.dropna(axis=1)
+    if dropdegenerate:
+        calls = calls.drop(columns=degenerate_vars)
+    if dropredundant:
+        calls = calls.drop(columns=redundant_vars)
     return(calls)
 
 
@@ -100,74 +147,6 @@ def annotateVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
         return(val)
     pp = [helper(y) for y in vcflist.index]
     return(pp)
-
-def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
-        vcfdir='/home/attila/projects/bsm/results/calls/'):
-    # CMC_Human_clinical_metadata.csv
-    syn = synapseclient.login()
-    wdir = '/home/attila/projects/bsm/resources/'
-    clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
-    clinical = pd.read_csv(clinical_syn.path, index_col='Individual ID')
-    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
-    vcflist['filepath'] = [vcfdir + '/annotated/' + f for f in vcflist['file']]
-    l = [readVCF(y) for y in vcflist['filepath']]
-    val = pd.concat(l, axis=0)
-    return(val)
-#    val = set_dtypes(val)
-#    val = add_ancestry(val)
-#    csvpath = vcfdir + os.path.sep + 'annotations.csv'
-#    val.to_csv(csvpath, index=False)
-#    val = index_with_variants(val)
-#    return(val)
-
-#def set_dtypes(vcf):
-#    vcf['Dx'] = pd.Categorical(vcf['Dx'], categories=['Control', 'SCZ'])
-#    vcf['chromatinState_DLPFC'] = pd.Categorical(vcf['chromatinState_DLPFC'], categories=state15label.values())
-#    return(vcf)
-
-def add_ancestry(callsdf,
-        ancestrypath='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'):
-    ancestry = pd.read_csv(ancestrypath, sep='\t', index_col='Individual_ID')
-    # take care of missing values
-    c = set(callsdf['Individual ID'])
-    a = set(ancestry.index)
-    ancestry = ancestry.reindex(list(ancestry.index) + list(c - a))
-    # reshape ancestry according to callsdf
-    ancestry_reshaped = ancestry.loc[callsdf['Individual ID'], :]
-    ancestry_reshaped.index = callsdf.index
-    val = pd.concat([callsdf, ancestry_reshaped], axis=1)
-    return(val)
-
-def agg2samples(calls):
-    callsg = calls.groupby('Sample')
-    # call specific numeric variables are aggregated by mean and std
-    A = callsg.aggregate(
-            QUAL_mean=pd.NamedAgg(column='QUAL', aggfunc=np.mean),
-            QUAL_std=pd.NamedAgg(column='QUAL', aggfunc=np.std),
-            AF_mean=pd.NamedAgg(column='AF', aggfunc=np.mean),
-            AF_std=pd.NamedAgg(column='AF', aggfunc=np.std),
-            BaseQRankSum_mean=pd.NamedAgg(column='BaseQRankSum', aggfunc=np.mean),
-            BaseQRankSum_std=pd.NamedAgg(column='BaseQRankSum', aggfunc=np.std),
-            DP_mean=pd.NamedAgg(column='DP', aggfunc=np.mean),
-            DP_std=pd.NamedAgg(column='DP', aggfunc=np.std),
-            FS_mean=pd.NamedAgg(column='FS', aggfunc=np.mean),
-            FS_std=pd.NamedAgg(column='FS', aggfunc=np.std),
-            QD_mean=pd.NamedAgg(column='QD', aggfunc=np.mean),
-            QD_std=pd.NamedAgg(column='QD', aggfunc=np.std),
-            ReadPosRankSum_mean=pd.NamedAgg(column='ReadPosRankSum', aggfunc=np.mean),
-            ReadPosRankSum_std=pd.NamedAgg(column='ReadPosRankSum', aggfunc=np.std),
-            SOR_mean=pd.NamedAgg(column='SOR', aggfunc=np.mean),
-            SOR_std=pd.NamedAgg(column='SOR', aggfunc=np.std),
-            VQSLOD_mean=pd.NamedAgg(column='VQSLOD', aggfunc=np.mean),
-            VQSLOD_std=pd.NamedAgg(column='VQSLOD', aggfunc=np.std),
-            # call specific categorical variables are aggregated by count
-            evolConstrain_count=pd.NamedAgg(column='evolConstrain', aggfunc=np.sum),
-            # TODO: chromatinState_DLPFC value counts to separate columns for each value like Quies
-            )
-    # sample specific variables are left as it is
-    B = calls.loc[:, 'Sample':].groupby('Sample').aggregate('first')
-    samples = pd.concat([A, B], axis=1)
-    return(samples)
 
 if __name__ == '__main__':
     import argparse

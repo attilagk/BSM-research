@@ -9,6 +9,26 @@ cmc_ancestry_path='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Pen
 v1 = ['AF', 'ALT', 'BaseQRankSum', 'DP', 'FILTER/PASS', 'FS', 'GWASpval', 'REF', 'ReadPosRankSum', 'SOR', 'VQSLOD', 'chromatinState_DLPFC', 'culprit', 'evolConstrain', 'szdbCNVcount']
 v2 = ['Dx', 'AntipsychAtyp', 'AntipsychTyp', 'Institution', 'EV.3']
 
+def read_clinical():
+    # CMC_Human_clinical_metadata.csv
+    syn = synapseclient.login()
+    wdir = '/home/attila/projects/bsm/resources/'
+    clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
+    clinical = pd.read_csv(clinical_syn.path, index_col='Individual ID')
+
+def add_ancestry(callsdf,
+        ancestrypath='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'):
+    ancestry = pd.read_csv(ancestrypath, sep='\t', index_col='Individual_ID')
+    # take care of missing values
+    c = set(callsdf['Individual ID'])
+    a = set(ancestry.index)
+    ancestry = ancestry.reindex(list(ancestry.index) + list(c - a))
+    # reshape ancestry according to callsdf
+    ancestry_reshaped = ancestry.loc[callsdf['Individual ID'], :]
+    ancestry_reshaped.index = callsdf.index
+    val = pd.concat([callsdf, ancestry_reshaped], axis=1)
+    return(val)
+
 def autofilter(calls):
     ourindivs = set(calls.index.get_level_values(0))
     clinical = pd.read_csv(cmc_clinical_path, index_col='Individual ID')
