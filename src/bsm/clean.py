@@ -37,3 +37,9 @@ def impute_vars(calls, vnames=['ReadPosRankSum', 'EV_3'], v1=v1, v2=v2):
         print(v)
         calls[v].fillna(value=helper(v), inplace=True)
     return(calls)
+
+
+def standardize(calls):
+    stdcalls = calls.apply(lambda y: (y - y.mean()) / y.std() if (y.dtype == 'float64' or y.dtype == 'int64') else y, axis=0)
+    return(stdcalls)
+
