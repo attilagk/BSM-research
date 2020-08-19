@@ -2,8 +2,18 @@ import readVCF
 import pandas as pd
 import re
 
+cmc_clinical_synid = 'syn2279441'
+cmc_clinical_path = '/home/attila/projects/bsm/resources/CMC_Human_clinical_metadata.csv'
+cmc_ancestry_path='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
+
 v1 = ['AF', 'ALT', 'BaseQRankSum', 'DP', 'FILTER/PASS', 'FS', 'GWASpval', 'REF', 'ReadPosRankSum', 'SOR', 'VQSLOD', 'chromatinState_DLPFC', 'culprit', 'evolConstrain', 'szdbCNVcount']
 v2 = ['Dx', 'AntipsychAtyp', 'AntipsychTyp', 'Institution', 'EV.3']
+
+def autofilter(calls):
+    ourindivs = set(calls.index.get_level_values(0))
+    clinical = pd.read_csv(cmc_clinical_path, index_col='Individual ID')
+    ancestry = pd.read_csv(cmc_ancestry_path, sep='\t', index_col='Individual_ID')
+    set(clinical.index)
 
 def preselect(calls, vnames=v1 + v2):
     calls = calls.loc[:, vnames]

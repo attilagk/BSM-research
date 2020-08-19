@@ -123,7 +123,7 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
         vcfdir='/home/attila/projects/bsm/results/calls/'):
     # CMC_Human_clinical_metadata.csv
     syn = synapseclient.login()
-    wdir='/tmp'
+    wdir = '/home/attila/projects/bsm/resources/'
     cmc_clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
     cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
     l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=read_extend, cmc_clinical=cmc_clinical)
