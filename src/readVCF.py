@@ -66,30 +66,19 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     colnames = [y.replace('INFO/', '') for y in annotlist]
     cmd = ['bcftools', 'query', '-f', formatstr, vcfpath]
     p =  subprocess.run(cmd, capture_output=True)
-    df = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames, na_values='.')
-    return(df)
-
-def index_with_variants(calls):
+    calls = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames, na_values='.')
+    # extra columns
+    calls['ChromatinState_DLPFC'] = [state15label[x] for x in calls['ChromatinState_DLPFC']]
+    calls['evolConstrain'] = [not np.isnan(y) for y in calls['SiPhyLOD']]
+    sample = sample_fromVCF(vcfpath)
+    indiv_id, tissue = convert_sample(sample)
+    calls['Individual ID'] = indiv_id
+    calls['Tissue'] = tissue
     calls['Mutation'] = [str(a) + '->' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
+    # set index
     calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'], drop=False)
     return(calls)
 
-def read_extend(vcfpath, clinical):
-    vcf = readVCF(vcfpath)
-    # turn numeric chromatin states into labels
-    vcf['chromatinState_DLPFC'] = [state15label[x] for x in vcf['ChromatinState_DLPFC']]
-    vcf['evolConstrain'] = [not np.isnan(y) for y in vcf['SiPhyLOD']]
-    sample = sample_fromVCF(vcfpath)
-    indiv_id, tissue = convert_sample(sample)
-    df = clinical.loc[[indiv_id]]
-    id_df = pd.DataFrame({'Sample': [sample], 'Individual ID': [indiv_id],
-        'Tissue': [tissue]})
-    id_df.index = df.index
-    df = pd.concat([id_df, df], axis=1)
-    df = df.iloc[np.zeros(vcf.shape[0]), :]
-    df.index = vcf.index
-    outvcf = pd.concat([vcf, df], axis=1)
-    return(outvcf)
 
 def annotateVCF(invcf='/home/attila/projects/bsm/results/calls/filtered/MSSM_106_brain.ploidy_50.filtered.vcf',
         sample='MSSM_106_NeuN_pl',
@@ -102,21 +91,14 @@ def annotateVCF(invcf='/home/attila/projects/bsm/results/calls/filtered/MSSM_106
     p =  subprocess.run(cmd, capture_output=True)
     return(p)
 
-def annotate_or_readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
-        vcfdir='/home/attila/projects/bsm/results/calls/', fun=annotateVCF, cmc_clinical=None):
-    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
-    def helper(sample):
-        subdir = 'filtered' if fun is annotateVCF else 'annotated'
-        invcf = vcfdir + os.path.sep + subdir + os.path.sep + vcflist.loc[sample, 'file']
-        arg2 = sample if cmc_clinical is None else cmc_clinical
-        val = fun(invcf, arg2)
-        return(val)
-    l = [helper(y) for y in vcflist.index]
-    return(l)
-
 def annotateVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
         vcfdir='/home/attila/projects/bsm/results/calls/'):
-    pp = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=annotateVCF, cmc_clinical=None)
+    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
+    def helper(sample):
+        invcf = vcfdir + os.path.sep + 'filtered' + os.path.sep + vcflist.loc[sample, 'file']
+        val = annotateVCF(invcf=invcf, sample=sample)
+        return(val)
+    pp = [helper(y) for y in vcflist.index]
     return(pp)
 
 def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
@@ -124,21 +106,24 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     # CMC_Human_clinical_metadata.csv
     syn = synapseclient.login()
     wdir = '/home/attila/projects/bsm/resources/'
-    cmc_clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
-    cmc_clinical = pd.read_csv(cmc_clinical_syn.path, index_col='Individual ID')
-    l = annotate_or_readVCFs(vcflistpath=vcflistpath, vcfdir=vcfdir, fun=read_extend, cmc_clinical=cmc_clinical)
+    clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
+    clinical = pd.read_csv(clinical_syn.path, index_col='Individual ID')
+    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
+    vcflist['filepath'] = [vcfdir + '/annotated/' + f for f in vcflist['file']]
+    l = [readVCF(y) for y in vcflist['filepath']]
     val = pd.concat(l, axis=0)
-    val = set_dtypes(val)
-    val = add_ancestry(val)
-    csvpath = vcfdir + os.path.sep + 'annotations.csv'
-    val.to_csv(csvpath, index=False)
-    val = index_with_variants(val)
     return(val)
+#    val = set_dtypes(val)
+#    val = add_ancestry(val)
+#    csvpath = vcfdir + os.path.sep + 'annotations.csv'
+#    val.to_csv(csvpath, index=False)
+#    val = index_with_variants(val)
+#    return(val)
 
-def set_dtypes(vcf):
-    vcf['Dx'] = pd.Categorical(vcf['Dx'], categories=['Control', 'SCZ'])
-    vcf['chromatinState_DLPFC'] = pd.Categorical(vcf['chromatinState_DLPFC'], categories=state15label.values())
-    return(vcf)
+#def set_dtypes(vcf):
+#    vcf['Dx'] = pd.Categorical(vcf['Dx'], categories=['Control', 'SCZ'])
+#    vcf['chromatinState_DLPFC'] = pd.Categorical(vcf['chromatinState_DLPFC'], categories=state15label.values())
+#    return(vcf)
 
 def add_ancestry(callsdf,
         ancestrypath='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'):
