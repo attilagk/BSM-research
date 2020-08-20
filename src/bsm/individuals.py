@@ -22,19 +22,42 @@ def read_clinical(ancestry=True):
     clinical = pd.read_csv(fpath, index_col='Individual ID')
     if ancestry:
         ancestry = pd.read_csv(cmc_ancestry_path, sep='\t', index_col='Individual_ID')
+        ancestry = ancestry.drop(columns=['Genotyping_Sample_ID', 'Cluster'])
         clinical = pd.concat([clinical, ancestry], axis=1)
     return(clinical)
 
-def clean_clinical(clin, calls):
+def clin_drop(clin, calls, columns=[]):
+    '''
+    Drop columns from clinical data frame
+
+    clin: data frame with clinical data
+    calls: data frame with variant data
+    columns: additional columns to drop
+    '''
     bsm_indiv = set(calls.index.get_level_values('Individual ID'))
     cmc_indiv = set(clin.index)
-    return((bsm_indiv, cmc_indiv))
+    clin = clin.loc[bsm_indiv, :]
+    nobs = clin.count().sort_values()
+    min_obs = nobs['EV.1']
+    cols2drop = list(nobs[nobs < min_obs].index) + columns
+    clin = clin.drop(columns=cols2drop)
+    return(clin)
 
-def autofilter(calls):
-    ourindivs = set(calls.index.get_level_values(0))
-    clinical = pd.read_csv(cmc_clinical_path, index_col='Individual ID')
-    ancestry = pd.read_csv(cmc_ancestry_path, sep='\t', index_col='Individual_ID')
-    set(clinical.index)
+def impute(clin):
+    nobs = clin.count()
+    max_obs = len(clin)
+    cols2impute = set(nobs[nobs < max_obs].index)
+    # drop all non-numeric columns with missing data
+    numeric = set(clin.select_dtypes(include=['float64', 'int64']).columns)
+    cols2drop = cols2impute - cols2impute.intersection(numeric)
+    clin = clin.drop(columns=cols2drop)
+    # function to calculate impute value
+    def helper(col):
+        return(clin[col].mean())
+    # do the imputation for all columns
+    for col in cols2impute:
+        clin[col].fillna(value=helper(col), inplace=True)
+    return(clin)
 
 def preselect(calls, vnames=v1 + v2):
     calls = calls.loc[:, vnames]
