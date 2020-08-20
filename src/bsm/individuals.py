@@ -1,6 +1,7 @@
 import pandas as pd
 import os.path
 from bsm import readVCF
+from bsm import preprocessing
 
 cmc_clinical_synid = 'syn2279441'
 cmc_clinical_path = '/home/attila/projects/bsm/resources/CMC_Human_clinical_metadata.csv'
@@ -43,23 +44,7 @@ def clin_drop(clin, calls, columns=[]):
     clin = clin.drop(columns=cols2drop)
     return(clin)
 
-def impute(clin):
-    nobs = clin.count()
-    max_obs = len(clin)
-    cols2impute = set(nobs[nobs < max_obs].index)
-    # drop all non-numeric columns with missing data
-    numeric = set(clin.select_dtypes(include=['float64', 'int64']).columns)
-    cols2drop = cols2impute - cols2impute.intersection(numeric)
-    clin = clin.drop(columns=cols2drop)
-    # function to calculate impute value
-    def helper(col):
-        return(clin[col].mean())
-    # do the imputation for all columns
-    for col in cols2impute:
-        clin[col].fillna(value=helper(col), inplace=True)
-    return(clin)
-
-def get_data(merge=False, cols2drop=[]):
+def get_data(merge=False, categorize=True, cols2drop=[]):
     '''
     Get all data for BSM project: calls and clinical data
 
@@ -73,7 +58,9 @@ def get_data(merge=False, cols2drop=[]):
     clin = read_clinical()
     calls = readVCF.readVCFs()
     clin = clin_drop(clin, calls, columns=cols2drop)
-    clin = impute(clin)
+    if categorize:
+        calls = preprocessing.convert2categorical(calls)
+        clin = preprocessing.convert2categorical(clin)
     data = (calls, clin)
     if merge:
         data = merge_data(calls,clin)
