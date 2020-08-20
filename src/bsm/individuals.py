@@ -60,10 +60,26 @@ def impute(clin):
     return(clin)
 
 def get_data(merge=False, cols2drop=[]):
+    '''
+    Get all data for BSM project: calls and clinical data
+
+    Arguments
+    merge: wether to merge calls and clinical data
+    cols2drop: list of columns to drop in clinical data
+
+    Value: calls and clinical data frame separately (in a tuple) or merged
+    into a single data frame
+    '''
     clin = read_clinical()
     calls = readVCF.readVCFs()
     clin = clin_drop(clin, calls, columns=cols2drop)
     clin = impute(clin)
+    data = (calls, clin)
     if merge:
-        pass #TODO
-    return((calls, clin))
+        data = merge_data(calls,clin)
+    return(data)
+
+def merge_data(calls,clin):
+    calls, clin = calls.align(clin, level='Individual ID', axis=0)
+    data = pd.concat([calls, clin], axis=1)
+    return(data)
