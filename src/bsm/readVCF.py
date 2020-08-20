@@ -106,7 +106,7 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     l = [readVCF(y) for y in vcflist['filepath']]
     calls = pd.concat(l, axis=0)
     if clean:
-        calls = clean_calls(calls)
+        calls = clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True)
     return(calls)
 
 def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
