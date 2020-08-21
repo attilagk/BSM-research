@@ -6,9 +6,12 @@ import re
 
 def convert2categorical(data, max_ncat=5):
     def helper(y):
-        # if y is
-        if not set(y) - set(range(-1, max_ncat + 1)):
-            max_level = np.int(max(set(y)))
+        # if y contains only 1 kind of non-nan value
+        if len(set(y.dropna())) < 2:
+            return(y)
+        # if y is a numeric categorical variable
+        if not set(y.dropna()) - set(range(-1, max_ncat + 1)):
+            max_level = np.int(max(set(y.dropna())))
             y = pd.Categorical(y, categories=range(max_level + 1), ordered=True)
         # if y is type object and contains at least one non-unique value
         elif y.dtype == 'object' and y[y == y.mode().values[0]].count() > 1:
@@ -16,6 +19,13 @@ def convert2categorical(data, max_ncat=5):
         return(y)
     data = data.apply(helper, axis=0)
     return(data)
+
+def drop_unused_categories(data):
+    val = data.copy()
+    categorical = val.select_dtypes(include='category')
+    for col in categorical.columns:
+        val[col] = val[col].cat.remove_unused_categories()
+    return(val)
 
 def impute_vars(data, dropthrs=0.10):
     '''
@@ -49,7 +59,7 @@ def impute_vars(data, dropthrs=0.10):
         impdata[col].fillna(value=impute_categ(col), inplace=True)
     return(impdata)
 
-def prettify_colnames(data, repl='_', pattern='[ ./\:	]+'):
+def prettify_colnames(data, repl='', pattern='[ ./\():	]+'):
     data = data.rename(lambda y: re.sub(pattern, repl, y), axis='columns')
     return(data)
 

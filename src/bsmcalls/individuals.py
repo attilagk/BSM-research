@@ -1,7 +1,7 @@
 import pandas as pd
 import os.path
-from bsm import readVCF
-from bsm import preprocessing
+from bsmcalls import readVCF
+from bsmcalls import preprocessing
 
 cmc_clinical_synid = 'syn2279441'
 cmc_clinical_path = '/home/attila/projects/bsm/resources/CMC_Human_clinical_metadata.csv'
@@ -44,7 +44,7 @@ def clin_drop(clin, calls, columns=[]):
     clin = clin.drop(columns=cols2drop)
     return(clin)
 
-def get_data(merge=False, cleancalls=True, categorize=True, cols2drop=[]):
+def get_data(merge=False, cleancalls=True, categorize=True, cols2drop=['Sex']):
     '''
     Get all data for BSM project: calls and clinical data
 
@@ -57,10 +57,12 @@ def get_data(merge=False, cleancalls=True, categorize=True, cols2drop=[]):
     '''
     clin = read_clinical()
     calls = readVCF.readVCFs(clean=cleancalls)
-    clin = clin_drop(clin, calls, columns=cols2drop)
     if categorize:
         calls = preprocessing.convert2categorical(calls)
         clin = preprocessing.convert2categorical(clin)
+    clin = clin_drop(clin, calls, columns=cols2drop)
+    clin = preprocessing.drop_unused_categories(clin)
+    calls = preprocessing.drop_unused_categories(calls)
     data = (calls, clin)
     if merge:
         data = merge_data(calls,clin)
