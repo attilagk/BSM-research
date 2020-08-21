@@ -93,3 +93,11 @@ def preprocess(data, impute=True, prettify=True, dummify=True, standardize=True)
     if standardize:
         data = standardize_numvars(data)
     return(data)
+
+def dummify_df(df):
+    numeric = df.select_dtypes(exclude='category')
+    categorical = df.select_dtypes(include='category')
+    dummy = pd.get_dummies(categorical)
+    dfnum = pd.concat([numeric, dummy], axis=1)
+    return(dfnum)
+
