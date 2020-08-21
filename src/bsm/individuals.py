@@ -44,7 +44,7 @@ def clin_drop(clin, calls, columns=[]):
     clin = clin.drop(columns=cols2drop)
     return(clin)
 
-def get_data(merge=False, categorize=True, cols2drop=[]):
+def get_data(merge=False, cleancalls=True, categorize=True, cols2drop=[]):
     '''
     Get all data for BSM project: calls and clinical data
 
@@ -56,7 +56,7 @@ def get_data(merge=False, categorize=True, cols2drop=[]):
     into a single data frame
     '''
     clin = read_clinical()
-    calls = readVCF.readVCFs()
+    calls = readVCF.readVCFs(clean=cleancalls)
     clin = clin_drop(clin, calls, columns=cols2drop)
     if categorize:
         calls = preprocessing.convert2categorical(calls)
@@ -66,7 +66,7 @@ def get_data(merge=False, categorize=True, cols2drop=[]):
         data = merge_data(calls,clin)
     return(data)
 
-def merge_data(calls,clin):
+def merge_data(calls, clin):
     calls, clin = calls.align(clin, level='Individual ID', axis=0)
     data = pd.concat([calls, clin], axis=1)
     return(data)

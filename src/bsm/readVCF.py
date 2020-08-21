@@ -77,7 +77,8 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     p =  subprocess.run(cmd, capture_output=True)
     calls = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames, na_values='.')
     # extra columns
-    calls['ChromatinState_DLPFC'] = [state15label[x] for x in calls['ChromatinState_DLPFC']]
+    l = [state15label[x] for x in calls['ChromatinState_DLPFC']]
+    calls['ChromatinState_DLPFC'] = pd.Categorical(l, categories=state15label.values(), ordered=True)
     calls['evolConstrain'] = [not np.isnan(y) for y in calls['SiPhyLOD']]
     sample = sample_fromVCF(vcfpath)
     indiv_id, tissue = convert_sample(sample)

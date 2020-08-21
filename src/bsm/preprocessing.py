@@ -17,16 +17,32 @@ def convert2categorical(data, max_ncat=5):
     data = data.apply(helper, axis=0)
     return(data)
 
-def impute_vars(data, droprest=True):
+def impute_vars(data, dropthrs=0.10):
+    '''
+    Impute variables with their mean or mode for numeric or categorical vars, respectively
+
+    Arguments
+    data: a data frame
+    dropthrs: if the fraction of missing values exceeds it the variable is dropped
+
+    Value: the imputed data frame
+    '''
+    # drop variables depending on dropthrs
+    droplessthan = len(data) - len(data) // (1 / dropthrs)
     nobs = data.count()
+    columns2drop = data.count().index[data.count() < droplessthan]
+    data = data.drop(columns=columns2drop)
+    # determine which columns to impute and how
     max_obs = len(data)
     cols2impute = set(nobs[nobs < max_obs].index)
     numeric_cols = set(data.select_dtypes(include=['float64', 'int64']).columns)
     categ_cols = set(data.select_dtypes(include=['category', 'object']).columns)
+    # helper functions calculating the fillin value
     def impute_numeric(col): return(data[col].mean())
     def impute_categ(col): return(data[col].mode().values[0])
     # Create a copy so that the input 'data' isn't modified
     impdata = data.copy()
+    # perform imputation separately for numeric and categorical columns
     for col in numeric_cols:
         impdata[col].fillna(value=impute_numeric(col), inplace=True)
     for col in categ_cols:
@@ -54,6 +70,11 @@ def standardize_numvars(data):
     return(std_data)
 
 def preprocess(data, impute=True, prettify=True, dummify=True, standardize=True):
+    '''
+    Preprocess data by imputing, prettifying, dummifying (Dx) and standardizing
+    '''
+    if impute:
+        data = impute_vars(data)
     if prettify:
         data = prettify_colnames(data)
     if dummify:
