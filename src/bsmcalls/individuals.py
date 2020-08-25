@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import os.path
 from bsmcalls import readVCF
@@ -72,3 +73,14 @@ def merge_data(calls, clin):
     calls, clin = calls.align(clin, level='Individual ID', axis=0)
     data = pd.concat([calls, clin], axis=1)
     return(data)
+
+def agg_calls_by_funlist(calls, dtypes=['float64', 'int64'], funlist=[np.mean, np.std]):
+    grouped = calls.select_dtypes(include=dtypes).groupby('Individual ID')
+    val = grouped.agg(funlist)
+    return(val)
+
+def agg_calls(calls):
+    count = pd.DataFrame({'nCalls': calls.groupby('Individual ID').size()})
+    numeric = agg_calls_by_funlist(calls, dtypes=['float64', 'int64'], funlist=[np.mean, np.std])
+    val = pd.concat([count, numeric], axis=1)
+    return(val)
