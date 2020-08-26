@@ -1,3 +1,4 @@
+import scipy.stats
 import numpy as np
 import pandas as pd
 import os.path
@@ -74,13 +75,32 @@ def merge_data(calls, clin):
     data = pd.concat([calls, clin], axis=1)
     return(data)
 
-def agg_calls_by_funlist(calls, dtypes=['float64', 'int64'], funlist=[np.mean, np.std]):
-    grouped = calls.select_dtypes(include=dtypes).groupby('Individual ID')
+def agg_calls_numeric(calls, funlist=[np.mean, np.std]):
+    grouped = calls.select_dtypes(include=['float64', 'int64']).groupby('Individual ID')
     val = grouped.agg(funlist)
+    return(val)
+
+def agg_calls_categ(col, calls):
+    s = calls[col]
+    global_mode = scipy.stats.mode(s).mode[0]
+    grouped = s.groupby('Individual ID')
+    def Marg_mode(x):
+        return(global_mode)
+    def Frequency(x):
+        val = x.value_counts(normalize=True).loc[global_mode]
+        return(val)
+    def Entropy(x):
+        pk = x.value_counts(normalize=True)
+        val = scipy.stats.entropy(pk)
+        return(val)
+    funlist = [Marg_mode, Frequency, Entropy]
+    val = grouped.agg(funlist)
+    iterables = [[col], ['Marg_mode', 'Frequency', 'Entropy']]
+    val.columns = pd.MultiIndex.from_product(iterables, names=['Variable', 'Transform'])
     return(val)
 
 def agg_calls(calls):
     count = pd.DataFrame({'nCalls': calls.groupby('Individual ID').size()})
-    numeric = agg_calls_by_funlist(calls, dtypes=['float64', 'int64'], funlist=[np.mean, np.std])
+    numeric = agg_calls_numeric(calls, funlist=[np.mean, np.std])
     val = pd.concat([count, numeric], axis=1)
     return(val)
