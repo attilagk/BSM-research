@@ -80,27 +80,37 @@ def agg_calls_numeric(calls, funlist=[np.mean, np.std]):
     val = grouped.agg(funlist)
     return(val)
 
-def agg_calls_categ(col, calls):
-    s = calls[col]
-    global_mode = scipy.stats.mode(s).mode[0]
-    grouped = s.groupby('Individual ID')
-    def Marg_mode(x):
-        return(global_mode)
-    def Frequency(x):
-        val = x.value_counts(normalize=True).loc[global_mode]
+def agg_calls_categ(calls):
+    def do_col(col, df):
+        s = calls[col]
+        global_mode = scipy.stats.mode(s).mode[0]
+        grouped = s.groupby('Individual ID')
+        def marg_mode(x):
+            return(global_mode)
+        def frequency(x):
+            val = x.value_counts(normalize=True).loc[global_mode]
+            return(val)
+        def entropy(x):
+            pk = x.value_counts(normalize=True)
+            val = scipy.stats.entropy(pk)
+            return(val)
+        funlist = [marg_mode, frequency, entropy]
+        val = grouped.agg(funlist)
+        iterables = [[col], ['marg_mode', 'frequency', 'entropy']]
+        val.columns = pd.MultiIndex.from_product(iterables, names=['Variable', 'Transform'])
         return(val)
-    def Entropy(x):
-        pk = x.value_counts(normalize=True)
-        val = scipy.stats.entropy(pk)
-        return(val)
-    funlist = [Marg_mode, Frequency, Entropy]
-    val = grouped.agg(funlist)
-    iterables = [[col], ['Marg_mode', 'Frequency', 'Entropy']]
-    val.columns = pd.MultiIndex.from_product(iterables, names=['Variable', 'Transform'])
-    return(val)
+    df = calls.select_dtypes(include=['category'])
+    l = [do_col(c, df) for c in df.columns]
+    agg_calls = pd.concat(l, axis=1)
+    return(agg_calls)
 
 def agg_calls(calls):
+    arrays = [['nCalls'], ['count']]
+    tuples = list(zip(*arrays))
+    index = pd.MultiIndex.from_tuples(tuples, names=['Variable', 'Transform'])
     count = pd.DataFrame({'nCalls': calls.groupby('Individual ID').size()})
+    count.columns = index
     numeric = agg_calls_numeric(calls, funlist=[np.mean, np.std])
-    val = pd.concat([count, numeric], axis=1)
+    categ = agg_calls_categ(calls)
+    val = pd.concat([count, numeric, categ], axis=1)
     return(val)

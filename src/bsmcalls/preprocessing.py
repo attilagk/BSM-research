@@ -60,8 +60,13 @@ def impute_vars(data, dropthrs=0.10):
     return(impdata)
 
 def prettify_colnames(data, repl='', pattern='[ ./\():	]+'):
-    data = data.rename(lambda y: re.sub(pattern, repl, y), axis='columns')
-    return(data)
+    def foo(x):
+        val = '_'.join(x) if isinstance(x, tuple) else x
+        return(val)
+    res = data.copy()
+    res.columns = [foo(x) for x in res.columns]
+    res = res.rename(lambda y: re.sub(pattern, repl, y), axis='columns')
+    return(res)
 
 def dummify_var(data, vname='Dx'):
     '''
