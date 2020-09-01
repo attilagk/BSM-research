@@ -106,3 +106,23 @@ def dummify_df(df):
     dfnum = pd.concat([numeric, dummy], axis=1)
     return(dfnum)
 
+def collapse_categories(series, categdict):
+    '''
+    Collapse lists of categories into single categories
+
+    Arguments
+    series: a pandas Series of category dtype
+    categdict: a dictionary whose keys are new categories and values are lists of old categories
+
+    Value: the same series with the collapsed categories
+    '''
+    # take a single item of categdict
+    newcategory, oldcategories = categdict.popitem()
+    # remove old categories
+    series = series.cat.remove_categories(oldcategories)
+    # add new category and fill with it data points of old categories
+    series = series.cat.add_categories(newcategory).fillna(newcategory)
+    if len(categdict) == 0:
+        return(series)
+    else:
+        return(collapse_categories(series, categdict))
