@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Annotate VCF with chromatin state from Roadmap Epigenomics project
+# Annotate VCF from a BED annotation input file
 usage="`basename $0` -b annot.bed -e vcfheader.hdr -c'COL1,...,COLn' [invcf [outvcf]]"
 # outvcf is optional; if omitted then data are sent to STDOUT
 # If outvcf is omitted then invcf is also optional; if omitted then data
@@ -31,10 +31,8 @@ endcol=$(($bedcols + 2))
 
 # intersect BED and VCF
 bedtools intersect -wo -a $bed -b $invcf | cut -f4-$(($bedcols + 2)) > $intersec
-#bedtools intersect -wo -a $bed -b $invcf | cut -f4-6 > $intersec
 # create annotations file for bcftools annotate
 paste <(cut -f$(($bedcols - 2))-$(($bedcols - 1)) $intersec) <(cut -f1-$(($bedcols - 3)) $intersec) > $annotations
-#paste <(cut -f2-3 $intersec) <(cut -f1 $intersec) > $annotations
 # bgzipping and indexing
 bgzip $annotations
 tabix -s1 -b2 -e2 $annotations.gz

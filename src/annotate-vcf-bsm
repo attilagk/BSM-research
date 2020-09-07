@@ -62,9 +62,9 @@ outvcf=$targetdir/`basename $invcf`
 
 bcftools view -Ov $invcf |
 ~/projects/bsm/src/annotate-vcf-sample $sample |
-    ~/projects/bsm/src/annotate-vcf-general -b $bed_chrstate -e $headerf_chrstate -c $columns_chrstate |
-    ~/projects/bsm/src/annotate-vcf-general -b $bed_siphy -e $headerf_siphy -c $columns_siphy |
-    ~/projects/bsm/src/annotate-vcf-general -b $bed_szdb_cnv -e $headerf_szdb_cnv -c $columns_szdb_cnv |
-    ~/projects/bsm/src/annotate-vcf-general -b $bed_clozuk_gwas -e $headerf_clozuk_gwas -c $columns_clozuk_gwas |
+    ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_chrstate -e $headerf_chrstate -c $columns_chrstate |
+    ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_siphy -e $headerf_siphy -c $columns_siphy |
+    ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_szdb_cnv -e $headerf_szdb_cnv -c $columns_szdb_cnv |
+    ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_clozuk_gwas -e $headerf_clozuk_gwas -c $columns_clozuk_gwas |
     bcftools view -O$Otype -o $outvcf
 if $doindex; then bcftools index --tbi $outvcf; fi
