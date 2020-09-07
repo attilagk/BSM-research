@@ -84,7 +84,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     indiv_id, tissue = convert_sample(sample)
     calls['Individual ID'] = indiv_id
     calls['Tissue'] = tissue
-    calls['Mutation'] = [str(a) + '->' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
+    calls['Mutation'] = [str(a) + '/' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
     # set index
     calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'], drop=True)
     return(calls)
@@ -109,6 +109,19 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     if clean:
         calls = clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True)
     return(calls)
+
+def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl'):
+    annot = pd.read_csv(tsvpath, sep='\t')
+    l = [[indivID, tissue] + varid2index(s) for s in annot['Variation ID']]
+    a = np.array(l)
+    return(a)
+    index = pd.MultiIndex.from_arrays(a)
+    return(index)
+
+def varid2index(varid):
+    s = re.sub('^chr(.+):1$', '\\1', varid)
+    val = s.split(':')
+    return(val)
 
 def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
     '''

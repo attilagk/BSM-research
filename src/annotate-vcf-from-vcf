@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+# Annotate VCF from a VCF annotation input file
+usage="`basename $0` -a annot.vcf -e vcfheader.hdr -c'COL1,...,COLn' [invcf [outvcf]]"
+
+# process options
+while getopts "a:e:h" opt; do
+    case $opt in
+        a) annotvcf=$OPTARG;; # annotation VCF file
+        e) headerfile="$OPTARG";; # header file for VCF
+        h) echo -e $usage 2>&1; exit ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+invcfarg=${1:-/dev/stdin}
+outvcf=${2:-/dev/stdout}
+
+invcf=`tempfile`
+annotvcfgz=`tempfile`
+annotvcftbi=`tempfile`
+cat $invcfarg > $invcf
+
+bcftools view -Oz -o $annotvcfgz $annotvcf 2> /dev/null
+bcftools index --tbi --output-file $annotvcftbi $annotvcfgz
+
+# clean up
+rm $invcf
