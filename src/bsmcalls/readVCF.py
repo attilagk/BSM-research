@@ -112,16 +112,19 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
 
 def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl'):
     annot = pd.read_csv(tsvpath, sep='\t')
+    def varid2index(varid):
+        s = re.sub('^chr(.+):1$', '\\1', varid)
+        val = s.split(':')
+        return(val)
     l = [[indivID, tissue] + varid2index(s) for s in annot['Variation ID']]
     a = np.array(l)
-    return(a)
-    index = pd.MultiIndex.from_arrays(a)
-    return(index)
+    columns = ['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation']
+    df = pd.DataFrame(a, columns=columns)
+    df['POS'] = df['POS'].astype('int64')
+    #index = pd.MultiIndex.from_frame(df)
+    annot.index = pd.MultiIndex.from_frame(df)
+    return(annot)
 
-def varid2index(varid):
-    s = re.sub('^chr(.+):1$', '\\1', varid)
-    val = s.split(':')
-    return(val)
 
 def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
     '''
