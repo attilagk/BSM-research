@@ -111,6 +111,9 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     return(calls)
 
 def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl'):
+    '''
+    Reads a TXT_per_annotation file of SNPnexus into an indexed DataFrame
+    '''
     annot = pd.read_csv(tsvpath, sep='\t')
     def varid2index(varid):
         s = re.sub('^chr(.+):1$', '\\1', varid)
@@ -121,10 +124,52 @@ def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl'):
     columns = ['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation']
     df = pd.DataFrame(a, columns=columns)
     df['POS'] = df['POS'].astype('int64')
-    #index = pd.MultiIndex.from_frame(df)
     annot.index = pd.MultiIndex.from_frame(df)
     return(annot)
 
+def annotation_duplicates(annot, sep=':'):
+    '''
+    Takes care of rows with duplicated index that occur e.g with overlapping genes
+
+    Arguments
+    annot: a pandas DataFrame with possible duplicates
+    sep: the separator for the collapsed list of strings
+
+    Value: a copy of annot without duplicates
+
+    Details:
+    A duplicated index means that there are two or more rows for a the
+    variant defining that index.  This happens for example with the
+    "Overlapped Gene" feature in near_gens.txt annotation file of SNPnexus
+    when the variant is in an overlap of multiple genes.  In such cases the
+    function collapses the list of gene names into a scalar of "sep" separated
+    string of names.
+
+    In general only "object" dtype columns are collapsed into a "sep"
+    separated string.  For other dtypes simply the first point of the
+    duplicates is used and the rest of the points are discarded.
+    '''
+    # return annot unchanged unless its index has duplicates
+    if not any(annot.index.duplicated()):
+        return(annot)
+    # get the set of index values (variants)
+    A = set(annot.index)
+    # do something to the row(s) marked by a variant
+    def do_var(var):
+        lines = annot.loc[[var]].copy()
+        # if it's just a single row return it unchanged
+        if len(lines) == 1:
+            return(lines)
+        # otherwise collapse the multiple rows into a single row
+        else:
+            line = lines.iloc[[0]].copy()
+            for col in annot.columns:
+                if lines[col].dtype == 'object':
+                    line[col] = sep.join(list(lines[col]))
+            return(line)
+    l = [do_var(a) for a in A]
+    val = pd.concat(l, axis=0)
+    return(val)
 
 def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
     '''
