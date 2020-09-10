@@ -81,13 +81,15 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     colnames = [y.replace('INFO/', '') for y in annotlist]
     cmd = ['bcftools', 'query', '-f', formatstr, vcfpath]
     p =  subprocess.run(cmd, capture_output=True)
-    calls = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames, na_values='.')
+    calls = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames,
+                        na_values='.', dtype={'CHROM': 'object'})
     # extra columns
     l = [state15label[x] for x in calls['ChromatinState_DLPFC']]
     calls['ChromatinState_DLPFC'] = pd.Categorical(l, categories=state15label.values(), ordered=True)
     calls['evolConstrain'] = [not np.isnan(y) for y in calls['SiPhyLOD']]
     sample = sample_fromVCF(vcfpath)
     indiv_id, tissue = convert_sample(sample)
+    calls['CHROM'] = calls['CHROM']
     calls['Individual ID'] = indiv_id
     calls['Tissue'] = tissue
     calls['Mutation'] = [str(a) + '/' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
@@ -183,8 +185,30 @@ def annotation_duplicates(annot, sep=':'):
     val = pd.concat(l, axis=0)
     return(val)
 
-def get_multi_annotations(sample, annotlist, annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations'):
-    pass
+def get_multi_annotations(annotlist, vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+                          annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations'):
+    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
+    samplestr = '((MSSM|PITT)_[0-9]+)_(NeuN_pl|NeuN_mn|muscle)'
+    def sample2indivID(sample):
+        return(re.sub(samplestr, 'CMC_\\1', sample))
+    def sample2tissue(sample):
+        return(re.sub(samplestr, '\\3', sample))
+    annotyp = 'near_gens'
+    #annotyp = 'sift'
+    def get_annot(sample):
+        sampledir = annotdirpath + os.path.sep + sample
+        tsvpath = sampledir + os.path.sep + annotyp + '.txt'
+        indivID = sample2indivID(sample)
+        tissue = sample2tissue(sample)
+        try:
+            annot = read_TXT_per_annotation(tsvpath, indivID, tissue)
+            annot = annotation_duplicates(annot, sep=':')
+        except ValueError:
+            annot = None
+        return(annot)
+    a = pd.concat([get_annot(s) for s in vcflist.index], axis=0)
+    return(a)
+
 
 '''
 ========================================================================
