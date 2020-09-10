@@ -25,6 +25,12 @@ state15label = {1 :  "TssA",
                 14:  "ReprPCWk",
                 15:  "Quies"}
 
+'''
+========================================================================
+Reading VCFs
+========================================================================
+'''
+
 def read_annotlist(annotpath='/home/attila/projects/bsm/tables/VCF-HC.annotations', withFORMAT=False):
     '''
     Reads a file containing list of annotations in VCFs into a list.
@@ -110,6 +116,12 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
         calls = clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True)
     return(calls)
 
+'''
+========================================================================
+SNPnexus annotations
+========================================================================
+'''
+
 def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl'):
     '''
     Reads a TXT_per_annotation file of SNPnexus into an indexed DataFrame
@@ -170,6 +182,15 @@ def annotation_duplicates(annot, sep=':'):
     l = [do_var(a) for a in A]
     val = pd.concat(l, axis=0)
     return(val)
+
+def get_multi_annotations(sample, annotlist, annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations'):
+    pass
+
+'''
+========================================================================
+Annotate VCFs
+========================================================================
+'''
 
 def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
     '''
