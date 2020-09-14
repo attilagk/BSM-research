@@ -27,6 +27,7 @@ def read_clinical(ancestry=True):
         ancestry = pd.read_csv(cmc_ancestry_path, sep='\t', index_col='Individual_ID')
         ancestry = ancestry.drop(columns=['Genotyping_Sample_ID', 'Cluster'])
         clinical = pd.concat([clinical, ancestry], axis=1)
+    #clinical.columns = pd.MultiIndex.from_product([['Clinical'], calls.columns], names=['Source', 'Annotation'])
     return(clinical)
 
 def clin_drop(clin, calls, columns=[]):

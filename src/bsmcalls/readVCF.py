@@ -95,6 +95,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     calls['Mutation'] = [str(a) + '/' + str(b) for a, b in zip(calls['REF'], calls['ALT'])]
     # set index
     calls = calls.set_index(['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'], drop=True)
+    #calls.columns = pd.MultiIndex.from_product([['VCF'], calls.columns], names=['Source', 'Annotation'])
     return(calls)
 
 def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
@@ -117,97 +118,6 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     if clean:
         calls = clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True)
     return(calls)
-
-'''
-========================================================================
-SNPnexus annotations
-========================================================================
-'''
-
-def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl'):
-    '''
-    Reads a TXT_per_annotation file of SNPnexus into an indexed DataFrame
-    '''
-    annot = pd.read_csv(tsvpath, sep='\t')
-    def varid2index(varid):
-        s = re.sub('^chr(.+):1$', '\\1', varid)
-        val = s.split(':')
-        return(val)
-    l = [[indivID, tissue] + varid2index(s) for s in annot['Variation ID']]
-    a = np.array(l)
-    columns = ['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation']
-    df = pd.DataFrame(a, columns=columns)
-    df['POS'] = df['POS'].astype('int64')
-    annot.index = pd.MultiIndex.from_frame(df)
-    return(annot)
-
-def annotation_duplicates(annot, sep=':'):
-    '''
-    Takes care of rows with duplicated index that occur e.g with overlapping genes
-
-    Arguments
-    annot: a pandas DataFrame with possible duplicates
-    sep: the separator for the collapsed list of strings
-
-    Value: a copy of annot without duplicates
-
-    Details:
-    A duplicated index means that there are two or more rows for a the
-    variant defining that index.  This happens for example with the
-    "Overlapped Gene" feature in near_gens.txt annotation file of SNPnexus
-    when the variant is in an overlap of multiple genes.  In such cases the
-    function collapses the list of gene names into a scalar of "sep" separated
-    string of names.
-
-    In general only "object" dtype columns are collapsed into a "sep"
-    separated string.  For other dtypes simply the first point of the
-    duplicates is used and the rest of the points are discarded.
-    '''
-    # return annot unchanged unless its index has duplicates
-    if not any(annot.index.duplicated()):
-        return(annot)
-    # get the set of index values (variants)
-    A = set(annot.index)
-    # do something to the row(s) marked by a variant
-    def do_var(var):
-        lines = annot.loc[[var]].copy()
-        # if it's just a single row return it unchanged
-        if len(lines) == 1:
-            return(lines)
-        # otherwise collapse the multiple rows into a single row
-        else:
-            line = lines.iloc[[0]].copy()
-            for col in annot.columns:
-                if lines[col].dtype == 'object':
-                    line[col] = sep.join(list(lines[col]))
-            return(line)
-    l = [do_var(a) for a in A]
-    val = pd.concat(l, axis=0)
-    return(val)
-
-def get_multi_annotations(annotlist, vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
-                          annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations'):
-    vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
-    samplestr = '((MSSM|PITT)_[0-9]+)_(NeuN_pl|NeuN_mn|muscle)'
-    def sample2indivID(sample):
-        return(re.sub(samplestr, 'CMC_\\1', sample))
-    def sample2tissue(sample):
-        return(re.sub(samplestr, '\\3', sample))
-    annotyp = 'near_gens'
-    #annotyp = 'sift'
-    def get_annot(sample):
-        sampledir = annotdirpath + os.path.sep + sample
-        tsvpath = sampledir + os.path.sep + annotyp + '.txt'
-        indivID = sample2indivID(sample)
-        tissue = sample2tissue(sample)
-        try:
-            annot = read_TXT_per_annotation(tsvpath, indivID, tissue)
-            annot = annotation_duplicates(annot, sep=':')
-        except ValueError:
-            annot = None
-        return(annot)
-    a = pd.concat([get_annot(s) for s in vcflist.index], axis=0)
-    return(a)
 
 
 '''
