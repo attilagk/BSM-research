@@ -21,6 +21,7 @@ bed_chrstate="$HOME/projects/bsm/resources/roadmap-epigenomics/chromatin-state/1
 headerf_chrstate="$HOME/projects/bsm/resources/roadmap-epigenomics/chromatin-state/15-state-model/coreMarks_stateno.hdr"
 columns_chrstate='CHROM,POS,INFO/ChromatinState_DLPFC' 
 # SiPhy: evol constrained elements
+# WARNING: do not use these because they are for hg18/GRCh36
 bed_siphy="$HOME/projects/bsm/resources/constrained-elements/SiPhy/elementPartition-annot.bed"
 headerf_siphy="$HOME/projects/bsm/resources/constrained-elements/SiPhy/elementPartition-annot.hdr"
 columns_siphy='CHROM,POS,INFO/SiPhyLOD,INFO/SiPhyBranchLen'
@@ -63,7 +64,6 @@ outvcf=$targetdir/`basename $invcf`
 bcftools view -Ov $invcf |
 ~/projects/bsm/src/annotate-vcf-sample $sample |
     ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_chrstate -e $headerf_chrstate -c $columns_chrstate |
-    ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_siphy -e $headerf_siphy -c $columns_siphy |
     ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_szdb_cnv -e $headerf_szdb_cnv -c $columns_szdb_cnv |
     ~/projects/bsm/src/annotate-vcf-from-bed -b $bed_clozuk_gwas -e $headerf_clozuk_gwas -c $columns_clozuk_gwas |
     bcftools view -O$Otype -o $outvcf

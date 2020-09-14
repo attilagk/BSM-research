@@ -86,7 +86,8 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     # extra columns
     l = [state15label[x] for x in calls['ChromatinState_DLPFC']]
     calls['ChromatinState_DLPFC'] = pd.Categorical(l, categories=state15label.values(), ordered=True)
-    calls['evolConstrain'] = [not np.isnan(y) for y in calls['SiPhyLOD']]
+    # SiPhy turned out to refer to hg18/GRCh36 instead of hg19/GRCh37
+    #calls['evolConstrain'] = [not np.isnan(y) for y in calls['SiPhyLOD']]
     sample = sample_fromVCF(vcfpath)
     indiv_id, tissue = convert_sample(sample)
     calls['CHROM'] = calls['CHROM']
@@ -99,7 +100,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     return(calls)
 
 def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
-        vcfdir='/home/attila/projects/bsm/results/calls/annotated/', clean=True):
+        vcfdir='/home/attila/projects/bsm/results/calls/', clean=True):
     '''
     Reads the calls/records of several VCFs into rows of a single DataFrame
 
@@ -112,7 +113,7 @@ def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     calls: a pandas DataFrame
     '''
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
-    vcflist['filepath'] = [vcfdir + f for f in vcflist['file']]
+    vcflist['filepath'] = [vcfdir + os.sep + 'annotated' + os.sep + f for f in vcflist['file']]
     l = [readVCF(y) for y in vcflist['filepath']]
     calls = pd.concat(l, axis=0)
     if clean:
@@ -160,7 +161,8 @@ def annotateVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
     def helper(sample):
         invcf = vcfdir + os.path.sep + 'filtered' + os.path.sep + vcflist.loc[sample, 'file']
-        val = annotateVCF(invcf=invcf, sample=sample)
+        targetdir = vcfdir + os.path.sep + 'annotated' + os.path.sep
+        val = annotateVCF(invcf=invcf, sample=sample, targetdir=targetdir)
         return(val)
     pp = [helper(y) for y in vcflist.index]
     return(pp)
