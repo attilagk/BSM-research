@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import re
 import os.path
+import functools
+import operator
 
 
 def tsvpath2annotname(tsvpath):
@@ -110,3 +112,43 @@ def get_multi_annotations(annotlist, vcflistpath='/big/results/bsm/calls/filtere
     annot = pd.concat([do_annotyp(a) for a in annotlist], axis=1)
     return(annot)
 
+'''
+========================================================================
+Specific Annotations
+========================================================================
+'''
+
+def binarize_cols(cols, annot, calls, suffix='_bin'):
+    '''
+    Binarize the selected columns of annot and reindex it to match calls
+
+    Arguments
+    cols: list of column names to binarize
+    annot: the pandas DataFrame containing cols
+    calls: annot will be reindexed according to this DataFrame
+    suffix: of the names of binarized columns
+
+    Value: a copy of annot extended with the binarized columns
+    '''
+    val = annot.copy()
+    def helper(c):
+        val = [c, c + suffix] if c in cols else [c]
+        return(val)
+    l = [helper(c) for c in annot.columns]
+    columns = functools.reduce(operator.concat, l)
+    val = val.reindex(columns=columns)
+    val = val.reindex(index=calls.index)
+    def do_col(col):
+        s = np.int8(np.isnan(val[col]))
+        val[col + suffix] = pd.Categorical(s)
+    for col in cols:
+        do_col(col)
+    return(val)
+
+def foo(cols, annot, suffix='_bin'):
+    def helper(c):
+        val = [c, c + suffix] if c in cols else [c]
+        return(val)
+    l = [helper(c) for c in annot.columns]
+    val = functools.reduce(operator.concat, l)
+    return(val)
