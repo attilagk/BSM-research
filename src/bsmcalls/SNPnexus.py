@@ -86,7 +86,8 @@ def annotation_duplicates(annot, sep=':'):
     val = pd.concat(l, axis=0)
     return(val)
 
-def get_multi_annotations(annotlist, vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+def get_multi_annotations(annotlist,
+                          vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
                           annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations',
                           simplecolumns=True):
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
@@ -111,12 +112,6 @@ def get_multi_annotations(annotlist, vcflistpath='/big/results/bsm/calls/filtere
         return(a)
     annot = pd.concat([do_annotyp(a) for a in annotlist], axis=1)
     return(annot)
-
-'''
-========================================================================
-Specific Annotations
-========================================================================
-'''
 
 def binarize_cols(cols, annot, calls, suffix='_bin'):
     '''
@@ -145,10 +140,15 @@ def binarize_cols(cols, annot, calls, suffix='_bin'):
         do_col(col)
     return(val)
 
-def foo(cols, annot, suffix='_bin'):
-    def helper(c):
-        val = [c, c + suffix] if c in cols else [c]
-        return(val)
-    l = [helper(c) for c in annot.columns]
-    val = functools.reduce(operator.concat, l)
-    return(val)
+def do_annot(annotlist, calls, cols2process=None):
+    annot = get_multi_annotations(annotlist)
+    numeric_cols = annot.select_dtypes(np.number).columns
+    cols2binarize = [c for c in numeric_cols if c in cols2process]
+    annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
+    return(annot)
+
+'''
+========================================================================
+Specific Annotations
+========================================================================
+'''
