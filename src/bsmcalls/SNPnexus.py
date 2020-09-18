@@ -4,6 +4,7 @@ import re
 import os.path
 import functools
 import operator
+import copy
 
 
 def tsvpath2annotname(tsvpath):
@@ -113,6 +114,14 @@ def get_multi_annotations(annotlist,
     annot = pd.concat([do_annotyp(a) for a in annotlist], axis=1)
     return(annot)
 
+def extended_columns(columns, cols2insert, suffix='_bin'):
+    def helper(c):
+        val = [c, c + suffix] if c in cols2insert else [c]
+        return(val)
+    l = [helper(c) for c in columns]
+    extcolumns = functools.reduce(operator.concat, l)
+    return(extcolumns)
+
 def binarize_cols(cols, annot, calls, suffix='_bin'):
     '''
     Binarize the selected columns of annot and reindex it to match calls
@@ -126,11 +135,7 @@ def binarize_cols(cols, annot, calls, suffix='_bin'):
     Value: a copy of annot extended with the binarized columns
     '''
     val = annot.copy()
-    def helper(c):
-        val = [c, c + suffix] if c in cols else [c]
-        return(val)
-    l = [helper(c) for c in annot.columns]
-    columns = functools.reduce(operator.concat, l)
+    columns = extended_columns(columns=annot.columns, cols2insert=cols, suffix=suffix)
     val = val.reindex(columns=columns)
     val = val.reindex(index=calls.index)
     def do_col(col):
@@ -138,6 +143,44 @@ def binarize_cols(cols, annot, calls, suffix='_bin'):
         val[col + suffix] = pd.Categorical(s)
     for col in cols:
         do_col(col)
+    return(val)
+
+def process_categ_cols(colsdict, annot, calls, nafillval='other'):
+    '''
+    Process categorical columns in annot: map vectors to scalars and fill NAs
+
+    Arguments
+    colsdict: a dictonary of column names (keys) and the list of their ordered categories
+    annot: the DataFrame to be modified (copy)
+    calls: the DataFrame based on our VCF
+    nafillval: the value to replace missing values with
+
+    Value: the modified copy of annot
+
+    Details:
+    When there are multiple values for a row/variant in a given column
+    represented in colsdict then the corresponding order of categories
+    determines which value is kept and which are removed.
+    '''
+    val = annot.copy()
+    # deep copy is necessary to prevent mutation of colsdict
+    d = copy.deepcopy(colsdict)
+    col, categories = list(d.items())[0]
+    categories += ['other']
+    s = val[col]
+    def helper(old):
+        if old is np.nan:
+            return(old)
+        if not isinstance(old, str):
+            raise ValueError('expected either str or np.nan')
+        l = old.split(':')
+        for cat in categories:
+            if cat in l: return(cat)
+        return(old)
+    s = [helper(x) for x in s]
+    s = pd.Categorical(s, categories=categories, ordered=True)
+    s = s.fillna(nafillval)
+    val[col] = s
     return(val)
 
 def do_annot(annotlist, calls, cols2process=None):
