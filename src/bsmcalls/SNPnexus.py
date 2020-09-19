@@ -12,7 +12,7 @@ def tsvpath2annotname(tsvpath):
     return(val)
 
 def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl',
-                            annotname=None, simplecolumns=True):
+                            annotname=None, na_values=[], simplecolumns=True):
     '''
     Reads a TXT_per_annotation file of SNPnexus into an indexed DataFrame
 
@@ -27,7 +27,7 @@ def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl',
     '''
     if annotname is None:
         annotname = tsvpath2annotname(tsvpath)
-    annot = pd.read_csv(tsvpath, sep='\t')
+    annot = pd.read_csv(tsvpath, sep='\t', na_values=na_values)
     def varid2index(varid):
         s = re.sub('^chr(.+):1$', '\\1', varid)
         val = s.split(':')
@@ -90,7 +90,7 @@ def annotation_duplicates(annot, sep=':'):
 def get_multi_annotations(annotlist,
                           vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
                           annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations',
-                          simplecolumns=True):
+                          na_values=[], simplecolumns=True):
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
     samplestr = '((MSSM|PITT)_[0-9]+)_(NeuN_pl|NeuN_mn|muscle)'
     def sample2indivID(sample):
@@ -102,8 +102,10 @@ def get_multi_annotations(annotlist,
         tsvpath = sampledir + os.path.sep + annotyp + '.txt'
         indivID = sample2indivID(sample)
         tissue = sample2tissue(sample)
+        na_val = na_values[annotyp] if annotyp in na_values.keys() else []
         try:
-            annot = read_TXT_per_annotation(tsvpath, indivID, tissue, simplecolumns=simplecolumns)
+            annot = read_TXT_per_annotation(tsvpath, indivID, tissue,
+                                            simplecolumns=simplecolumns, na_values=na_val)
             annot = annotation_duplicates(annot, sep=':')
         except ValueError:
             annot = None
@@ -122,32 +124,32 @@ def extended_columns(columns, cols2insert, suffix='_bin'):
     extcolumns = functools.reduce(operator.concat, l)
     return(extcolumns)
 
-def binarize_cols(cols, annot, calls, suffix='_bin'):
+def binarize_cols(cols2binarize, annot, calls, suffix='_bin'):
     '''
     Binarize the selected columns of annot and reindex it to match calls
 
     Arguments
-    cols: list of column names to binarize
-    annot: the pandas DataFrame containing cols
+    cols2binarize: list of column names to binarize
+    annot: the pandas DataFrame containing cols2binarize
     calls: annot will be reindexed according to this DataFrame
     suffix: of the names of binarized columns
 
     Value: a copy of annot extended with the binarized columns
     '''
     val = annot.copy()
-    columns = extended_columns(columns=annot.columns, cols2insert=cols, suffix=suffix)
+    columns = extended_columns(columns=annot.columns, cols2insert=cols2binarize, suffix=suffix)
     val = val.reindex(columns=columns)
     val = val.reindex(index=calls.index)
     def do_col(col):
         s = np.int8(np.isnan(val[col]))
         val[col + suffix] = pd.Categorical(s)
-    for col in cols:
+    for col in cols2binarize:
         do_col(col)
     return(val)
 
-def process_categ_cols(colsdict, annot, calls, nafillval='other'):
+def regularize_categ_cols(colsdict, annot, calls, nafillval='other'):
     '''
-    Process categorical columns in annot: map vectors to scalars and fill NAs
+    Regularize categorical columns in annot: map vectors to scalars and fill NAs
 
     Arguments
     colsdict: a dictonary of column names (keys) and the list of their ordered categories
@@ -165,22 +167,22 @@ def process_categ_cols(colsdict, annot, calls, nafillval='other'):
     val = annot.copy()
     # deep copy is necessary to prevent mutation of colsdict
     d = copy.deepcopy(colsdict)
-    col, categories = list(d.items())[0]
-    categories += ['other']
-    s = val[col]
-    def helper(old):
-        if old is np.nan:
+    for col, categories in d.items():
+        categories += ['other']
+        s = val[col]
+        def helper(old):
+            if old is np.nan:
+                return(old)
+            if not isinstance(old, str):
+                raise ValueError('expected either str or np.nan')
+            l = old.split(':')
+            for cat in categories:
+                if cat in l: return(cat)
             return(old)
-        if not isinstance(old, str):
-            raise ValueError('expected either str or np.nan')
-        l = old.split(':')
-        for cat in categories:
-            if cat in l: return(cat)
-        return(old)
-    s = [helper(x) for x in s]
-    s = pd.Categorical(s, categories=categories, ordered=True)
-    s = s.fillna(nafillval)
-    val[col] = s
+        s = [helper(x) for x in s]
+        s = pd.Categorical(s, categories=categories, ordered=True)
+        s = s.fillna(nafillval)
+        val[col] = s
     return(val)
 
 def do_annot(annotlist, calls, cols2process=None):
