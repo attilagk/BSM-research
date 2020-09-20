@@ -141,7 +141,7 @@ def binarize_cols(cols2binarize, annot, calls, suffix='_bin'):
     val = val.reindex(columns=columns)
     val = val.reindex(index=calls.index)
     def do_col(col):
-        s = np.int8(np.isnan(val[col]))
+        s = np.int8(val[col].isna())
         val[col + suffix] = pd.Categorical(s)
     for col in cols2binarize:
         do_col(col)
