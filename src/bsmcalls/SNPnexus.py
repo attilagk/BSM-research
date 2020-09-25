@@ -38,6 +38,7 @@ def read_TXT_per_annotation(tsvpath, indivID, tissue='NeuN_pl',
     df = pd.DataFrame(a, columns=columns)
     df['POS'] = df['POS'].astype('int64')
     annot.index = pd.MultiIndex.from_frame(df)
+    annot = annot.loc[:, ~annot.columns.isin(['Variation ID', 'Chromosome', 'Position'])]
     simpleindex = [annotname + '_' + a for a in annot.columns]
     multiindex = pd.MultiIndex.from_product([[annotname], annot.columns], names=['Source', 'Annotation'])
     annot.columns = simpleindex if simplecolumns else multiindex
@@ -124,7 +125,7 @@ def extended_columns(columns, cols2insert, suffix='_bin'):
     extcolumns = functools.reduce(operator.concat, l)
     return(extcolumns)
 
-def binarize_cols(cols2binarize, annot, calls, suffix='_bin'):
+def binarize_cols(cols2binarize, annot, calls, suffix='_bin', do_categ=False):
     '''
     Binarize the selected columns of annot and reindex it to match calls
 
@@ -142,7 +143,7 @@ def binarize_cols(cols2binarize, annot, calls, suffix='_bin'):
     val = val.reindex(index=calls.index)
     def do_col(col):
         s = np.int8(val[col].isna())
-        val[col + suffix] = pd.Categorical(s)
+        val[col + suffix] = pd.Categorical(s) if do_categ else s
     for col in cols2binarize:
         do_col(col)
     return(val)
@@ -191,9 +192,3 @@ def do_annot(annotlist, calls, cols2process=None):
     cols2binarize = [c for c in numeric_cols if c in cols2process]
     annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
     return(annot)
-
-'''
-========================================================================
-Specific Annotations
-========================================================================
-'''
