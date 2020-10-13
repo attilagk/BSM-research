@@ -6,7 +6,7 @@
 %\setdefaultlanguage{magyar}
 
 % common packages
-\usepackage{amsmath, multimedia, hyperref, color, multirow}
+\usepackage{amsmath, multimedia, url, hyperref, color, multirow}
 %\usepackage{graphicx}
 
 % TikZ
@@ -43,40 +43,125 @@
 
 \section{Introduction}
 
-\begin{frame}{Heritability and genetic complexity of schizophrenia}
-	Hello, World!
+\begin{frame}{Schizophrenia}
+\begin{itemize}
+\item 80\% heritability
+\item extreme genetic complexity
+\end{itemize}
+\includegraphics[width=1.0\textwidth]{from-others/sullivan-natrevgenet-2012-fig1b.jpg}
 \end{frame}
 
-\begin{frame}{The CommonMind Consortium}
-
-\end{frame}
 
 \begin{frame}{De novo variants in schizophrenia}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+        \item Fromer et al Nature 2014
+        \item exome sequencing
+	\item \(>600\) schizophrenia trios
+\end{itemize}
+\end{column}
 
-\end{frame}
+\begin{column}{0.5\textwidth}
 
-\begin{frame}{Questions}
-
+\includegraphics[scale=0.5]{from-others/fromer-denovo-figA.png}
+\end{column}
+\end{columns}
 \end{frame}
 
 \section{Chess Study: Data}
 
-\begin{frame}{Overall approach}
-	\begin{enumerate}
-		\item
-	\end{enumerate}
+\begin{frame}{Our study}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+Questions
+\begin{enumerate}
+\item role of somatic variants in schizophrenia
+\item relative risk: germline vs somatic variants	
+\item WGS: coding, intronic and intergenic regions
+\end{enumerate}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+Approach
+\begin{enumerate}
+\item SCZ and Control samples
+	\begin{itemize}
+		\item cortical neurons (NeuN+)
+                \item cortical non-neurons (NeuN-)
+                \item muscle
+	\end{itemize}
+\item bulk
+\end{enumerate}
+\end{column}
+\end{columns}
 \end{frame}
 
+
 \begin{frame}{Samples and sequencing}
-Other samples from BSMN consortium
+\includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
+\end{frame}
+
+\begin{frame}{Samples from the CommonMind Consortium}
+\begin{enumerate}
+\item \(> 700\) brains
+\item SCZ, AFF, Control
+\end{enumerate}
+\vfill
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+Data sets
+\begin{itemize}
+\item Clinical
+\item RNAseq
+\item ATACseq
+\item Genotypes
+\end{itemize}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+Analyses
+\begin{itemize}
+\item Ancestry
+\item Differential Expression
+\item Expression outlier
+\item eQTL
+\item Sherlock scores
+\item Gene co-expression Networks
+\end{itemize}
+\end{column}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{Cortical bulk WGS data sets in BSMN}
+\includegraphics[width=1.0\textwidth]{../../notebook/2020-09-28-wgs-data-other-groups/named-figure/bsmn-case-control-ssizes.pdf}
 \end{frame}
 
 \begin{frame}{The bsmn-pipeline}
-
+\begin{itemize}
+\item Taejeong Bae \url{https://github.com/bsmn/bsmn-pipeline}
+\item autoscaling AWS parallelCluster
+\item somatic variant calling
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
+\end{itemize}
 \end{frame}
 
-\begin{frame}[label=numcalls-depth]{Call sets}
+\begin{frame}{Call sets}
+\begin{columns}[t]
+\begin{column}{0.7\textwidth}
 
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/num-indiv-calls-Dx.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/eCDF-calls.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=numcalls-depth]{Number of calls per sample}
 \includegraphics[scale=0.5]{../../notebook/2020-08-19-indiv-based-analysis/named-figure/numcalls-depth-Dx.pdf}
 \end{frame}
 
