@@ -1,0 +1,106 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, hyperref, color, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Somatic SNVs from WGS data from Schizophrenic Brains}
+\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\begin{frame}{Heritability and genetic complexity of schizophrenia}
+	Hello, World!
+\end{frame}
+
+\begin{frame}{The CommonMind Consortium}
+
+\end{frame}
+
+\begin{frame}{De novo variants in schizophrenia}
+
+\end{frame}
+
+\begin{frame}{Questions}
+
+\end{frame}
+
+\section{Chess Study: Data}
+
+\begin{frame}{Overall approach}
+	\begin{enumerate}
+		\item
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Samples and sequencing}
+Other samples from BSMN consortium
+\end{frame}
+
+\begin{frame}{The bsmn-pipeline}
+
+\end{frame}
+
+\begin{frame}[label=numcalls-depth]{Call sets}
+
+\includegraphics[scale=0.5]{../../notebook/2020-08-19-indiv-based-analysis/named-figure/numcalls-depth-Dx.pdf}
+\end{frame}
+
+\begin{frame}{Call features}
+
+\end{frame}
+
+\section{Results}
+
+\againframe{numcalls-depth}
+
+\begin{frame}{Low frequency variants are missed at low depth}
+\includegraphics[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+\end{frame}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
+
+
+\end{document}
