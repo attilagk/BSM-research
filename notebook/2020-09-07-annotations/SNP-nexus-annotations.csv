@@ -1,0 +1,10 @@
+Gene annotation systems ,"Ensembl, RefSeq, UCSC, CCDS, coding, intronic, non-coding"
+Protein deleterious effects ,SIFT and PolyPhen
+Population data ,"gnomAD, 1000Genomes, HapMap"
+Regulatory elements ,"miRBASE, CpG islands, TarBase, microRNAs / snoRNAs / scaRNAs, Ensembl Regulatory Build, ENCODE Project, Roadmap Epigenomics "
+Conservation scores ,"GERP++, PHAST "
+Disease studies ,"GAD, COSMIC, NHGRI-GWAS, ClinVar "
+Non-coding scoring ,"fitCons, EIGEN, FATHMM GWAVA, DeepSEA, ReMM, CADD, FunSeq2 "
+Structural variations ,"Gain, Loss, Gain+Loss, Duplication, Deletion, Insertion, Complex, Inversion, Tandem duplication, Novel sequence insertion, Mobile element insertion, Sequence alteration "
+Pathway Analysis ,Reactome pathways 
+Biological / Clinical Interpretation ,Cancer genome interpreter 
