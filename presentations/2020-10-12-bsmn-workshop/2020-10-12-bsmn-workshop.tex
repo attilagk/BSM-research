@@ -34,7 +34,7 @@
 % title, etc
 \title{Somatic SNVs from WGS data from Schizophrenic Brains}
 \subtitle{A subtitle may be shorter and more technical}
-\author{Attila Jones}
+\author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
 \date{Mount Sinai School of Medicine}
 
 \begin{document}
@@ -43,65 +43,66 @@
 
 \section{Introduction}
 
-\begin{frame}{Schizophrenia}
+\begin{frame}{Genetic risk in schizophrenia}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+Germline variants
 \begin{itemize}
 \item 80\% heritability
 \item extreme genetic complexity
-	\begin{itemize}
-		\item common variants: shared risk with other psychiatric
-			disorders
-	\end{itemize}
+\begin{itemize}
+\item common variants: shared risk with other psychiatric disorders
 \item recurrent deletions% \(\approx 1\%\)
 \end{itemize}
-%\includegraphics[width=1.0\textwidth]{from-others/sullivan-natrevgenet-2012-fig1b.jpg}
-\end{frame}
-
-
-\begin{frame}{De novo variants in schizophrenia}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-\begin{itemize}
-        \item Fromer et al Nature 2014
-        \item exome sequencing
-	\item \(>600\) schizophrenia trios
 \end{itemize}
 \end{column}
-
 \begin{column}{0.5\textwidth}
-
-\includegraphics[scale=0.5]{from-others/fromer-denovo-figA.png}
+De novo variants
+\begin{itemize}
+	\item only coding regions investigated%\footnote{Nature 2014, 506, 179-84}
+        \item synaptic gene networks
+\end{itemize}
 \end{column}
 \end{columns}
+%\includegraphics[scale=0.5]{from-others/fromer-denovo-figA.png}
 \end{frame}
 
 \section{Our Study: Data}
 
-\begin{frame}{Our study}
+\begin{frame}[label=our-study]{Our study}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 Questions
 \begin{enumerate}
 \item role of somatic variants in schizophrenia
-\item relative risk: germline vs somatic variants	
 \item WGS: coding, intronic and intergenic regions
+\item relative risk: germline vs somatic variants	
 \end{enumerate}
 \end{column}
 
 \begin{column}{0.5\textwidth}
 Approach
-\begin{enumerate}
+\begin{itemize}
 \item SCZ and Control samples
 	\begin{itemize}
 		\item cortical neurons (NeuN+)
                 \item cortical non-neurons (NeuN-)
                 \item muscle
 	\end{itemize}
-\item bulk
-\end{enumerate}
+\item bulk WGS
+\end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
+\begin{frame}{Germline and somatic risk variants in cancer}
+\includegraphics[height=0.8\textheight]{from-others/sommutcount-vs-polygenicriskscore.png}
+
+\tiny
+British Journal of Cancer volume 115, pages752–760(2016)
+\end{frame}
+
+\againframe{our-study}
 
 \begin{frame}{Samples and sequencing}
 \includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
@@ -143,7 +144,7 @@ Analyses
 \includegraphics[width=1.0\textwidth]{../../notebook/2020-09-28-wgs-data-other-groups/named-figure/bsmn-case-control-ssizes.pdf}
 \end{frame}
 
-\begin{frame}{The bsmn-pipeline}
+\begin{frame}{Calling somatic SNVs and small indels}
 \begin{itemize}
 \item Taejeong Bae \url{https://github.com/bsmn/bsmn-pipeline}
 \item autoscaling AWS parallelCluster
@@ -280,17 +281,37 @@ Correlated errors
 \end{frame}
 
 \begin{frame}{Addressing the challenge}
+\footnotesize
 \begin{tabular}{cccc}
-approach & formula & least squares & effects & issue \\
+approach & regression formula & least squares & effects \\
 \hline
 A & \(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\) & ordinary & fixed \\
 B &\(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\) & generalized & fixed \\
 C & \(\mathrm{Dx} = X\gamma_x + Y\beta_y + \epsilon\) & ordinary & mixed\\
-D & \(\mathrm{\#calls} = X\gamma_x + Y'\beta'_y + \epsilon\) & ordinary & mixed\\
+D & \(\mathrm{\#calls} = X\beta_x + a(Y)\beta'_y + \epsilon\) & ordinary & mixed\\
 \end{tabular}
+\vfill
+\begin{flushright}
+approach D
+\begin{tabular}{cc|c|c}
+& & clinical feat. & genomic feat. \\
+sample & variant & \(X\) & \(a(Y)\) \\
+\hline
+\multirow{4}{*}{\(s_1\)} & \(v1\) & \multirow{4}{*}{\(x_1\)} &
+\multirow{4}{*}{\(a_1 = a(y_1, y_2, y_3, y_4)\)} \\
+& \(v2\) & & \\
+& \(v3\) & & \\
+& \(v4\) & & \\
+\hline
+\multirow{3}{*}{\(s_2\)} & \(v5\) & \multirow{3}{*}{\(x_2\)} &
+\multirow{3}{*}{\(a_2 = a(y_5, y_6, y_7)\)} \\
+& \(v6\) & & \\
+& \(v7\) & & \\
+\end{tabular}
+\end{flushright}
 \end{frame}
 
-\begin{frame}{Features selected by forward algorithm}
+\begin{frame}{15 from 48 features selected by forward algorithm}
 \tiny
 \begin{tabular}{rcc}
 	variable & \(P>|t|\) & direction \\
@@ -315,13 +336,47 @@ Ethnicity[T.Hispanic] & 0.897 & - \\
 \end{tabular}
 \end{frame}
 
-\begin{frame}{Germline and somatic risk variants in cancer}
-\includegraphics[height=0.8\textheight]{from-others/sommutcount-vs-polygenicriskscore.png}
-
-\tiny
-British Journal of Cancer volume 115, pages752–760(2016)
+\begin{frame}{Summary and early conclusions}
+\begin{enumerate}
+\item somatic SNVs and small indels called from bulk WGS 
+\begin{enumerate}
+\item 2488 calls from 61 SCZ brains
+\item 895 calls from 25 Control brains
+\end{enumerate}
+\item Trade-off: sequencing depth \emph{vs} variant recall. Depends on AF
+\item \(> 100\) biological and technical features to each call
+\item preliminary statistical analysis shows no difference between SCZ and Control variants
+\item somatic SNVs and indels: negligible risk for SCZ compared to germline variants?
+\end{enumerate}
 \end{frame}
 
+\begin{frame}{TODO...}
+\begin{enumerate}
+\item more in-depth analysis of SNVs schizophrenia
+\begin{enumerate}
+\item include 15 additional Control brains (Walsh group)
+\item analyze full feature set regression approach \(\mathrm{\#calls} \sim X + \mathrm{Dx}\)
+\item two more regression approaches \(\mathrm{Dx} \sim X\)
+\end{enumerate}
+\end{enumerate}
+\begin{enumerate}
+\item copy number variation (Eduardo M, Walsh lab)
+\item joint analysis of somatic and germline variants
+\begin{enumerate}
+\item polygenic risk score
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\begin{enumerate}
+\item Taejeong Bae, Abyzov lab
+\item David Obensheim, NIMH
+\item Kenny Daily, Cindy Molitor, Sage
+\end{enumerate}
+\end{frame}
+
+\end{document}
 
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -332,6 +387,3 @@ British Journal of Cancer volume 115, pages752–760(2016)
 
 \end{column}
 \end{columns}
-
-
-\end{document}
