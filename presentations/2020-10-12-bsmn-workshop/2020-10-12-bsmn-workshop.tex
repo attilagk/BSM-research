@@ -32,7 +32,7 @@
 %\useoutertheme[]{tree}
 
 % title, etc
-\title{Somatic SNVs from WGS data from Schizophrenic Brains}
+\title{Somatic SNVs from WGS data in Schizophrenic Brains}
 \subtitle{A subtitle may be shorter and more technical}
 \author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
 \date{Mount Sinai School of Medicine}
@@ -41,7 +41,7 @@
 
 \maketitle
 
-\section{Introduction}
+%\section{Introduction}
 
 \begin{frame}{Genetic risk in schizophrenia}
 \begin{columns}[t]
@@ -59,40 +59,19 @@ Germline variants
 \begin{column}{0.5\textwidth}
 De novo variants
 \begin{itemize}
-	\item only coding regions investigated%\footnote{Nature 2014, 506, 179-84}
         \item synaptic gene networks
+	\item only coding regions investigated%\footnote{Nature 2014, 506, 179-84}
 \end{itemize}
-\end{column}
-\end{columns}
-%\includegraphics[scale=0.5]{from-others/fromer-denovo-figA.png}
-\end{frame}
-
-\section{Our Study: Data}
-
-\begin{frame}[label=our-study]{Our study}
-\begin{columns}[t]
-\begin{column}{0.5\textwidth}
-Questions
+\vfill
+Somatic variants?
 \begin{enumerate}
-\item role of somatic variants in schizophrenia
-\item WGS: coding, intronic and intergenic regions
+\item role in schizophrenia
+\item intronic and intergenic regions
 \item relative risk: germline vs somatic variants	
 \end{enumerate}
 \end{column}
-
-\begin{column}{0.5\textwidth}
-Approach
-\begin{itemize}
-\item SCZ and Control samples
-	\begin{itemize}
-		\item cortical neurons (NeuN+)
-                \item cortical non-neurons (NeuN-)
-                \item muscle
-	\end{itemize}
-\item bulk WGS
-\end{itemize}
-\end{column}
 \end{columns}
+%\includegraphics[scale=0.5]{from-others/fromer-denovo-figA.png}
 \end{frame}
 
 \begin{frame}{Germline and somatic risk variants in cancer}
@@ -102,9 +81,15 @@ Approach
 British Journal of Cancer volume 115, pages752–760(2016)
 \end{frame}
 
-\againframe{our-study}
+%\section{Our Study: Data}
 
-\begin{frame}{Samples and sequencing}
+\begin{frame}{Our study}
+\item SCZ and Control samples, bulk WGS
+	\begin{itemize}
+		\item cortical neurons (NeuN+)
+                \item cortical non-neurons (NeuN-)
+                \item muscle
+	\end{itemize}
 \includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
 \end{frame}
 
@@ -146,7 +131,7 @@ Analyses
 
 \begin{frame}{Calling somatic SNVs and small indels}
 \begin{itemize}
-\item Taejeong Bae \url{https://github.com/bsmn/bsmn-pipeline}
+\item \url{https://github.com/bsmn/bsmn-pipeline}
 \item autoscaling AWS parallelCluster
 \item somatic variant calling
 \includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
@@ -172,10 +157,11 @@ Analyses
 \end{frame}
 
 \begin{frame}{Low frequency variants are missed at low depth}
-\includegraphics[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+\includegraphics<1>[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
+\includegraphics<2>[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
 \end{frame}
 
-\section{Results}
+%\section{Results}
 
 \begin{frame}{Annotating somatic variants with features}
 \includegraphics[width=1.0\textwidth]{../../results/2020-09-07-annotations/named-figure/MSSM_224-NeuN_pl-karyotype-of-genomic-consequences.png}
@@ -225,7 +211,7 @@ Analyses
 	\end{description}
 \end{frame}
 
-\begin{frame}{Dx: no association with GWAS loci}
+\begin{frame}{Dx: no association with schizophrenia GWAS loci}
 \includegraphics[scale=0.7]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/gwas-Dx.pdf}
 \end{frame}
 
@@ -242,12 +228,13 @@ Analyses
 
 \begin{column}{0.5\textwidth}
 
-\includegraphics[scale=0.35]{../../notebook/2020-09-07-annotations/named-figure/corr-mat-snpnexus.png}
+\includegraphics[scale=0.35]{../../notebook/2020-09-07-annotations/named-figure/corr-mat-snpnexus.pdf}
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}{Statistical modeling challenge}
+	\(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\)
 \footnotesize
 \begin{columns}[t]
 \begin{column}{0.6\textwidth}
@@ -280,7 +267,7 @@ Correlated errors
 \end{columns}
 \end{frame}
 
-\begin{frame}{Addressing the challenge}
+\begin{frame}[label=regr-models]{Regression models for inference}
 \footnotesize
 \begin{tabular}{cccc}
 approach & regression formula & least squares & effects \\
@@ -288,7 +275,7 @@ approach & regression formula & least squares & effects \\
 A & \(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\) & ordinary & fixed \\
 B &\(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\) & generalized & fixed \\
 C & \(\mathrm{Dx} = X\gamma_x + Y\beta_y + \epsilon\) & ordinary & mixed\\
-D & \(\mathrm{\#calls} = X\beta_x + a(Y)\beta'_y + \epsilon\) & ordinary & mixed\\
+D & \(\mathrm{\#calls} = \mathrm{Dx}\beta_\mathrm{Dx} + X\beta_x + a(Y)\beta'_y + \epsilon\) & ordinary & fixed\\
 \end{tabular}
 \vfill
 \begin{flushright}
@@ -369,11 +356,13 @@ Ethnicity[T.Hispanic] & 0.897 & - \\
 \end{frame}
 
 \begin{frame}{Acknowledgements}
-\begin{enumerate}
-\item Taejeong Bae, Abyzov lab
+\begin{itemize}
+\item Taejeong Bae, Abyzov lab, Mayo Clinique
 \item David Obensheim, NIMH
 \item Kenny Daily, Cindy Molitor, Sage
-\end{enumerate}
+\item Akbarian lab, Mount Sinai
+\item Park lab
+\end{itemize}
 \end{frame}
 
 \end{document}
