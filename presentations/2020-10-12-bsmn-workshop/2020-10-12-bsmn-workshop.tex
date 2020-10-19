@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[usenames,dvipsnames]{beamer}
 %\documentclass[handout]{beamer}
 
 % language settings
@@ -6,7 +6,7 @@
 %\setdefaultlanguage{magyar}
 
 % common packages
-\usepackage{amsmath, multimedia, url, hyperref, color, multirow}
+\usepackage{amsmath, multimedia, url, hyperref, xcolor, multirow}
 %\usepackage{graphicx}
 
 % TikZ
@@ -246,14 +246,14 @@ Nested observations
 & & clinical feat. & genomic feat. \\
 sample & variant & \(X\) & \(Y\) \\
 \hline
-\multirow{4}{*}{\(s_1\)} & \(v1\) & \(x_1\) & \(y_1\) \\
-& \(v2\) & \(x_1\) & \(y_2\) \\
-& \(v3\) & \(x_1\) & \(y_3\) \\
-& \(v4\) & \(x_1\) & \(y_4\) \\
+\multirow{4}{*}{\colorbox{Apricot}{\(s_1\)}} & \colorbox{Yellow}{\(v_1\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{Yellow}{\(y_1\)} \\
+& \colorbox{Periwinkle}{\(v_2\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{Periwinkle}{\(y_2\)} \\
+& \colorbox{CarnationPink}{\(v_3\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{CarnationPink}{\(y_3\)} \\
+& \colorbox{CornflowerBlue}{\(v_4\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{CornflowerBlue}{\(y_4\)} \\
 \hline
-\multirow{3}{*}{\(s_2\)} & \(v5\) & \(x_2\) & \(y_5\) \\
-& \(v6\) & \(x_2\) & \(y_6\) \\
-& \(v7\) & \(x_2\) & \(y_7\) \\
+\multirow{3}{*}{{\colorbox{LimeGreen}{\(s_2\)}}} & \colorbox{Dandelion}{\(v_5\)} & \colorbox{LimeGreen}{\(x_2\)} & \colorbox{Dandelion}{\(y_5\)} \\
+& \colorbox{Emerald}{\(v_6\)} & \colorbox{LimeGreen}{\(x_2\)} & \colorbox{Emerald}{\(y_6\)} \\
+& \colorbox{Gray}{\(v_7\)} & \colorbox{LimeGreen}{\(x_2\)} & \colorbox{Gray}{\(y_7\)} \\
 \end{tabular}
 \end{center}
 \end{column}
@@ -284,16 +284,19 @@ approach D
 & & clinical feat. & genomic feat. \\
 sample & variant & \(X\) & \(a(Y)\) \\
 \hline
-\multirow{4}{*}{\(s_1\)} & \(v1\) & \multirow{4}{*}{\(x_1\)} &
-\multirow{4}{*}{\(a_1 = a(y_1, y_2, y_3, y_4)\)} \\
-& \(v2\) & & \\
-& \(v3\) & & \\
-& \(v4\) & & \\
+\multirow{4}{*}{\colorbox{Apricot}{\(s_1\)}} & \colorbox{Yellow}{\(v_1\)} & \multirow{4}{*}{\colorbox{Apricot}{\(x_1\)}} &
+\multirow{4}{*}{\(\colorbox{Apricot}{\(a_1\)} = a(\colorbox{Yellow}{\(y_1\)},
+		\colorbox{Periwinkle}{\(y_2\)},
+		\colorbox{CarnationPink}{\(y_3\)},
+		\colorbox{CornflowerBlue}{\(y_4\)})\)} \\
+& \colorbox{Periwinkle}{\(v_2\)} & & \\
+& \colorbox{CarnationPink}{\(v_3\)} & & \\
+& \colorbox{CornflowerBlue}{\(v_4\)} & & \\
 \hline
-\multirow{3}{*}{\(s_2\)} & \(v5\) & \multirow{3}{*}{\(x_2\)} &
-\multirow{3}{*}{\(a_2 = a(y_5, y_6, y_7)\)} \\
-& \(v6\) & & \\
-& \(v7\) & & \\
+\multirow{3}{*}{\colorbox{LimeGreen}{\(s_2\)}} & \colorbox{Dandelion}{\(v_5\)} & \multirow{3}{*}{\colorbox{LimeGreen}{\(x_2\)}} &
+\multirow{3}{*}{\(\colorbox{LimeGreen}{\(a_2\)} = a(\colorbox{Dandelion}{\(y_5\)}, \colorbox{Emerald}{\(y_6\)}, \colorbox{Gray}{\(y_7\)})\)} \\
+& \colorbox{Emerald}{\(v_6\)} & & \\
+& \colorbox{Gray}{\(v_7\)} & & \\
 \end{tabular}
 \end{flushright}
 \end{frame}
