@@ -1,0 +1,342 @@
+\documentclass[usenames,dvipsnames]{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, url, hyperref, xcolor, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Warsaw}
+%\usetheme{Antibes}
+\usecolortheme{beaver}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Somatic SNVs from WGS data in Schizophrenic Brains}
+\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+%\section{Introduction}
+
+\begin{frame}{Genetic risk in schizophrenia}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+Germline variants
+\begin{itemize}
+\item 80\% heritability
+\item extreme genetic complexity
+\begin{itemize}
+\item common variants: shared risk with other psychiatric disorders
+\item recurrent deletions% \(\approx 1\%\)
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+De novo variants
+\begin{itemize}
+        \item synaptic gene networks
+	\item only coding regions investigated%\footnote{Nature 2014, 506, 179-84}
+\end{itemize}
+\vfill
+Somatic variants?
+\begin{enumerate}
+\item role in schizophrenia
+\item intronic and intergenic regions
+%\item relative risk: germline vs somatic variants	
+\end{enumerate}
+\end{column}
+\end{columns}
+%\includegraphics[scale=0.5]{from-others/fromer-denovo-figA.png}
+\end{frame}
+
+%\section{Our Study: Data}
+
+\begin{frame}{Our study}
+\item SCZ and Control samples, bulk WGS
+	\begin{itemize}
+		\item cortical neurons (NeuN+)
+                \item cortical non-neurons (NeuN-)
+                \item muscle
+	\end{itemize}
+\includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
+\end{frame}
+
+%\begin{frame}{Cortical bulk WGS data sets in BSMN}
+%\includegraphics[width=1.0\textwidth]{../../notebook/2020-09-28-wgs-data-other-groups/named-figure/bsmn-case-control-ssizes.pdf}
+%\end{frame}
+
+\begin{frame}{Calling somatic SNVs and small indels}
+\begin{itemize}
+\item \url{https://github.com/bsmn/bsmn-pipeline}
+\item autoscaling AWS parallelCluster
+\item somatic variant calling
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Call sets}
+\begin{columns}[t]
+\begin{column}{0.7\textwidth}
+
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/num-indiv-calls-Dx.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/eCDF-calls.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=numcalls-depth]{Number of calls per sample}
+\includegraphics[scale=0.5]{../../notebook/2020-08-19-indiv-based-analysis/named-figure/numcalls-depth-Dx.pdf}
+\end{frame}
+
+\begin{frame}{Low frequency variants are missed at low depth}
+\includegraphics<1>[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
+\includegraphics<2>[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+\end{frame}
+
+%\section{Results}
+
+\begin{frame}{Annotating somatic variants with features}
+\includegraphics[width=1.0\textwidth]{../../results/2020-09-07-annotations/named-figure/MSSM_224-NeuN_pl-karyotype-of-genomic-consequences.png}
+\end{frame}
+
+\begin{frame}{Call features}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+	Knowledge bases
+\begin{itemize}
+\item \url{www.szdb.org}
+\begin{itemize}
+\item GWAS loci
+\item SCZ-CNV loci
+\end{itemize}
+\item Roadmap Epigenomics
+\begin{itemize}
+\item chromatin state in DLPC; 15 state HMM
+\end{itemize}
+\item \url{www.snp-nexus.org}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+	Data specific
+\begin{itemize}
+\item VCF fields: DP, AF, ...
+\item clinical info: Dx, ethnicity, ...
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Call features: SNPnexus}
+	\tiny
+	\begin{description}
+		\item[Gene annotation systems]  Ensembl, RefSeq, UCSC, CCDS, coding, intronic, non-coding
+                \item[Protein deleterious effects] SIFT and PolyPhen
+                \item[Population data] gnomAD, 1000Genomes, HapMap
+                \item[Regulatory elements] miRBASE, CpG islands, TarBase, microRNAs / snoRNAs / scaRNAs, Ensembl Regulatory Build, ENCODE Project, Roadmap Epigenomics 
+                \item[Conservation scores] GERP++, PHAST 
+                \item[Disease studies] GAD, COSMIC, NHGRI-GWAS, ClinVar
+                \item[Non-coding scoring] fitCons, EIGEN, FATHMM GWAVA, DeepSEA, ReMM, CADD, FunSeq2 
+                \item[Structural variations] Gain, Loss, Gain+Loss, Duplication, Deletion, Insertion, Complex, Inversion, Tandem duplication, Novel sequence insertion, Mobile element insertion, Sequence alteration 
+                \item[Pathway Analysis] Reactome pathways 
+                \item[Biological / Clinical Interpretation] Cancer genome interpreter 
+	\end{description}
+\end{frame}
+
+\begin{frame}{Dx: no association with schizophrenia GWAS loci}
+\includegraphics[scale=0.7]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/gwas-Dx.pdf}
+\end{frame}
+
+%\begin{frame}{Dx: weak association with transcription start sites}
+%\includegraphics[scale=0.7]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/chromatin-state-DLPFC-Dx-10.pdf}
+%\end{frame}
+
+\begin{frame}{Correlation analysis}
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[scale=0.35]{../../notebook/2020-09-07-annotations/named-figure/corr-Dx-snpnexus.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.35]{../../notebook/2020-09-07-annotations/named-figure/corr-mat-snpnexus.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Statistical modeling challenge}
+	\(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\)
+\footnotesize
+\begin{columns}[t]
+\begin{column}{0.6\textwidth}
+\begin{center}
+Nested observations
+\end{center}
+\begin{center}
+\begin{tabular}{cc|c|c}
+& & clinical feat. & genomic feat. \\
+sample & variant & \(X\) & \(Y\) \\
+\hline
+\multirow{4}{*}{\colorbox{Apricot}{\(s_1\)}} & \colorbox{Yellow}{\(v_1\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{Yellow}{\(y_1\)} \\
+& \colorbox{Periwinkle}{\(v_2\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{Periwinkle}{\(y_2\)} \\
+& \colorbox{CarnationPink}{\(v_3\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{CarnationPink}{\(y_3\)} \\
+& \colorbox{CornflowerBlue}{\(v_4\)} & \colorbox{Apricot}{\(x_1\)} & \colorbox{CornflowerBlue}{\(y_4\)} \\
+\hline
+\multirow{3}{*}{{\colorbox{LimeGreen}{\(s_2\)}}} & \colorbox{Dandelion}{\(v_5\)} & \colorbox{LimeGreen}{\(x_2\)} & \colorbox{Dandelion}{\(y_5\)} \\
+& \colorbox{Emerald}{\(v_6\)} & \colorbox{LimeGreen}{\(x_2\)} & \colorbox{Emerald}{\(y_6\)} \\
+& \colorbox{Gray}{\(v_7\)} & \colorbox{LimeGreen}{\(x_2\)} & \colorbox{Gray}{\(y_7\)} \\
+\end{tabular}
+\end{center}
+\end{column}
+
+\begin{column}{0.4\textwidth}
+\begin{center}
+Correlated errors
+\end{center}
+\includegraphics[width=1.0\columnwidth]{from-others/regrression-correlated-error.png}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=regr-models]{Regression models for inference}
+\footnotesize
+\begin{tabular}{cccc}
+approach & regression formula & least squares & effects \\
+\hline
+A & \(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\) & ordinary & fixed \\
+B &\(\mathrm{Dx} = X\beta_x + Y\beta_y + \epsilon\) & generalized & fixed \\
+C & \(\mathrm{Dx} = X\gamma_x + Y\beta_y + \epsilon\) & ordinary & mixed\\
+D & \(\mathrm{\#calls} = \mathrm{Dx}\beta_\mathrm{Dx} + X\beta_x + a(Y)\beta'_y + \epsilon\) & ordinary & fixed\\
+\end{tabular}
+\vfill
+\begin{flushright}
+approach D
+\begin{tabular}{cc|c|c}
+& & clinical feat. & genomic feat. \\
+sample & variant & \(X\) & \(a(Y)\) \\
+\hline
+\multirow{4}{*}{\colorbox{Apricot}{\(s_1\)}} & \colorbox{Yellow}{\(v_1\)} & \multirow{4}{*}{\colorbox{Apricot}{\(x_1\)}} &
+\multirow{4}{*}{\(\colorbox{Apricot}{\(a_1\)} = a(\colorbox{Yellow}{\(y_1\)},
+		\colorbox{Periwinkle}{\(y_2\)},
+		\colorbox{CarnationPink}{\(y_3\)},
+		\colorbox{CornflowerBlue}{\(y_4\)})\)} \\
+& \colorbox{Periwinkle}{\(v_2\)} & & \\
+& \colorbox{CarnationPink}{\(v_3\)} & & \\
+& \colorbox{CornflowerBlue}{\(v_4\)} & & \\
+\hline
+\multirow{3}{*}{\colorbox{LimeGreen}{\(s_2\)}} & \colorbox{Dandelion}{\(v_5\)} & \multirow{3}{*}{\colorbox{LimeGreen}{\(x_2\)}} &
+\multirow{3}{*}{\(\colorbox{LimeGreen}{\(a_2\)} = a(\colorbox{Dandelion}{\(y_5\)}, \colorbox{Emerald}{\(y_6\)}, \colorbox{Gray}{\(y_7\)})\)} \\
+& \colorbox{Emerald}{\(v_6\)} & & \\
+& \colorbox{Gray}{\(v_7\)} & & \\
+\end{tabular}
+\end{flushright}
+\end{frame}
+
+\begin{frame}{15 from 48 features selected by forward algorithm}
+\tiny
+\begin{tabular}{rcc}
+	variable & \(P>|t|\) & direction \\
+\hline
+DP std & 0.007 & + \\
+AF mean & 0.011 & - \\
+culprit entropy & 0.011 & + \\
+ReportedGender[T.Male] & 0.016 & - \\
+AntipsychAtyp[T.1] & 0.033 & + \\
+Anticonvulsants[T.1] & 0.043 & - \\
+REF entropy & 0.054 & + \\
+szdbCNVcount std & 0.065 & + \\
+YearofAutopsy & 0.069 & - \\
+Intercept & 0.114 & + \\
+EV1 & 0.147 & - \\
+DP mean & 0.183 & + \\
+Alcohol[T.1] & 0.252 & - \\
+Lithium[T.1] & 0.284 & - \\
+EV3 & 0.292 & + \\
+Ethnicity[T.Caucasian] & 0.498 & - \\
+Ethnicity[T.Hispanic] & 0.897 & - \\
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Summary and early conclusions}
+\begin{enumerate}
+\item somatic SNVs and small indels called from bulk WGS 
+\begin{enumerate}
+\item 2488 calls from 61 SCZ brains
+\item 895 calls from 25 Control brains
+\end{enumerate}
+\item Trade-off: sequencing depth \emph{vs} variant recall. Depends on AF
+\item \(> 100\) biological and technical features to each call
+\item preliminary statistical analysis shows no difference between SCZ and Control variants
+\item somatic SNVs and indels: negligible risk for SCZ compared to germline variants?
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{TODO...}
+\begin{enumerate}
+\item more in-depth analysis of SNVs schizophrenia
+\begin{enumerate}
+\item include 15 additional Control brains (Walsh group)
+\item analyze full feature set regression approach \(\mathrm{\#calls} \sim X + \mathrm{Dx}\)
+\item two more regression approaches \(\mathrm{Dx} \sim X\)
+\end{enumerate}
+\end{enumerate}
+\begin{enumerate}
+\item copy number variation (Eduardo M, Walsh lab)
+\item joint analysis of somatic and germline variants
+\begin{enumerate}
+\item polygenic risk score
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\begin{itemize}
+\item Taejeong Bae, Abyzov lab, Mayo Clinique
+\item David Obensheim, NIMH
+\item Kenny Daily, Cindy Molitor, Sage
+\item Akbarian lab, Mount Sinai
+\item Park lab
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
