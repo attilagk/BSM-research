@@ -77,12 +77,9 @@ Somatic variants?
 %\section{Our Study: Data}
 
 \begin{frame}{Our study}
-\item SCZ and Control samples, bulk WGS
-	\begin{itemize}
-		\item cortical neurons (NeuN+)
-                \item cortical non-neurons (NeuN-)
-                \item muscle
-	\end{itemize}
+\begin{center}
+61 SCZ and 25 Control samples, bulk WGS
+\end{center}
 \includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
 \end{frame}
 
@@ -91,12 +88,13 @@ Somatic variants?
 %\end{frame}
 
 \begin{frame}{Calling somatic SNVs and small indels}
-\begin{itemize}
-\item \url{https://github.com/bsmn/bsmn-pipeline}
-\item autoscaling AWS parallelCluster
-\item somatic variant calling
+\footnotesize
+Taejeong Bae et al \\
+\url{https://github.com/bsmn/bsmn-pipeline}
+\vfill
 \includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
-\end{itemize}
+
+\includegraphics[scale=0.5]{../../results/2020-06-05-filtered-callsets/aws-ec2-master-cpu-usage.png}
 \end{frame}
 
 \begin{frame}{Call sets}
@@ -117,7 +115,7 @@ Somatic variants?
 \includegraphics[scale=0.5]{../../notebook/2020-08-19-indiv-based-analysis/named-figure/numcalls-depth-Dx.pdf}
 \end{frame}
 
-\begin{frame}{Low frequency variants are missed at low depth}
+\begin{frame}{Occurrence of calls}{Interplay between read depth and allele frequency}
 \includegraphics<1>[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
 \includegraphics<2>[scale=0.5]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
 \end{frame}
@@ -262,28 +260,39 @@ sample & variant & \(X\) & \(a(Y)\) \\
 \end{flushright}
 \end{frame}
 
-\begin{frame}{15 from 48 features selected by forward algorithm}
+\begin{frame}{27 from 55 features selected by forward algorithm}
 \tiny
+
 \begin{tabular}{rcc}
-	variable & \(P>|t|\) & direction \\
+feature & p value & direction \\
 \hline
-DP std & 0.007 & + \\
-AF mean & 0.011 & - \\
-culprit entropy & 0.011 & + \\
-ReportedGender[T.Male] & 0.016 & - \\
-AntipsychAtyp[T.1] & 0.033 & + \\
-Anticonvulsants[T.1] & 0.043 & - \\
-REF entropy & 0.054 & + \\
-szdbCNVcount std & 0.065 & + \\
-YearofAutopsy & 0.069 & - \\
-Intercept & 0.114 & + \\
-EV1 & 0.147 & - \\
-DP mean & 0.183 & + \\
-Alcohol[T.1] & 0.252 & - \\
-Lithium[T.1] & 0.284 & - \\
-EV3 & 0.292 & + \\
-Ethnicity[T.Caucasian] & 0.498 & - \\
-Ethnicity[T.Hispanic] & 0.897 & - \\
+DP mean & 0.003 & + \\
+BaseQRankSum mean & 0.003 & - \\
+phast Score bin mean & 0.005 & + \\
+Intercept & 0.007 & + \\
+Antidepress[T.1] & 0.007 & - \\
+AF mean & 0.012 & - \\
+\color{NavyBlue}{gerp ElementRSScore bin mean} & 0.016 & - \\
+\color{NavyBlue}{ensembl PredictedFunction entropy} & 0.017 & + \\
+MQRankSum mean & 0.025 & - \\
+\color{NavyBlue}{GWASpval mean} & 0.036 & - \\
+\color{NavyBlue}{szdbCNVcount mean} & 0.045 & + \\
+\color{NavyBlue}{cpg CpGIsland bin mean} & 0.053 & + \\
+ageOfDeath & 0.069 & - \\
+\color{NavyBlue}{encode FeatureTypeClass entropy} & 0.072 & + \\
+EV2 & 0.079 & - \\
+Ethnicity[T.Caucasian] & 0.086 & - \\
+culprit entropy & 0.132 & + \\
+Alcohol[T.1] & 0.147 & - \\
+ReportedGender[T.Male] & 0.148 & - \\
+Lithium[T.1] & 0.162 & - \\
+YearofAutopsy & 0.165 & - \\
+QD mean & 0.178 & + \\
+EV1 & 0.221 & - \\
+Anticonvulsants[T.1] & 0.224 & - \\
+AntipsychAtyp[T.1] & 0.326 & + \\
+Ethnicity[T.Hispanic] & 0.372 & - \\
+\color{NavyBlue}{sift Prediction entropy} & 0.428 & - \\
 \end{tabular}
 \end{frame}
 
@@ -294,10 +303,13 @@ Ethnicity[T.Hispanic] & 0.897 & - \\
 \item 2488 calls from 61 SCZ brains
 \item 895 calls from 25 Control brains
 \end{enumerate}
-\item Trade-off: sequencing depth \emph{vs} variant recall. Depends on AF
+\item sensitivity: joint dependence on read depth and allele freq
 \item \(> 100\) biological and technical features to each call
-\item preliminary statistical analysis shows no difference between SCZ and Control variants
-\item somatic SNVs and indels: negligible risk for SCZ compared to germline variants?
+\item preliminary statistical modeling \(\mathrm{\#calls} \sim \mathrm{Dx} + X\)
+\begin{itemize}
+\item some genomic features \(X\) affect \(\mathrm{\#calls}\)
+\item \(\mathrm{Dx}\) (SCZ) does not affect \(\mathrm{\#calls}\)
+\end{itemize}
 \end{enumerate}
 \end{frame}
 
@@ -305,9 +317,9 @@ Ethnicity[T.Hispanic] & 0.897 & - \\
 \begin{enumerate}
 \item more in-depth analysis of SNVs schizophrenia
 \begin{enumerate}
-\item include 15 additional Control brains (Walsh group)
-\item analyze full feature set regression approach \(\mathrm{\#calls} \sim X + \mathrm{Dx}\)
+%\item include 15 additional Control brains (Walsh group)
 \item two more regression approaches \(\mathrm{Dx} \sim X\)
+\item SCZ gene centric analysis
 \end{enumerate}
 \end{enumerate}
 \begin{enumerate}
@@ -321,11 +333,12 @@ Ethnicity[T.Hispanic] & 0.897 & - \\
 
 \begin{frame}{Acknowledgements}
 \begin{itemize}
+\item Alex Urban %transposable elements
 \item Taejeong Bae, Abyzov lab, Mayo Clinique
 \item David Obensheim, NIMH
-\item Kenny Daily, Cindy Molitor, Sage
-\item Akbarian lab, Mount Sinai
-\item Park lab
+\item Mette Peters, Kenny Daily, Cindy Molitor, Sage
+\item Akbarian lab, Mount Sinai % nuclei sorting
+\item Park \& Walsh labs %CNV control
 \end{itemize}
 \end{frame}
 
