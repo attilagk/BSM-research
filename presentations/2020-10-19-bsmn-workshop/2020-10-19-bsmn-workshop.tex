@@ -18,8 +18,8 @@
 \mode<presentation>{
 \usetheme{Warsaw}
 %\usetheme{Antibes}
-\usecolortheme{beaver}
-%\usecolortheme{seahorse}
+%\usecolortheme{beaver}
+\usecolortheme{seahorse}
 %\usefonttheme{structureitalicserif}
 \setbeamercovered{transparent}
 }
@@ -129,6 +129,13 @@ Taejeong Bae et al \\
 \begin{frame}{Call features}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
+	Data specific
+\begin{itemize}
+\item VCF fields: DP, AF, ...
+\item clinical info: Dx, ethnicity, ...
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
 	Knowledge bases
 \begin{itemize}
 \item \url{www.szdb.org}
@@ -136,19 +143,11 @@ Taejeong Bae et al \\
 \item GWAS loci
 \item SCZ-CNV loci
 \end{itemize}
-\item Roadmap Epigenomics
-\begin{itemize}
-\item chromatin state in DLPC; 15 state HMM
-\end{itemize}
+%\item Roadmap Epigenomics
+%\begin{itemize}
+%\item chromatin state in DLPC; 15 state HMM
+%\end{itemize}
 \item \url{www.snp-nexus.org}
-\end{itemize}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-	Data specific
-\begin{itemize}
-\item VCF fields: DP, AF, ...
-\item clinical info: Dx, ethnicity, ...
 \end{itemize}
 \end{column}
 \end{columns}
@@ -333,12 +332,12 @@ Ethnicity[T.Hispanic] & 0.372 & - \\
 
 \begin{frame}{Acknowledgements}
 \begin{itemize}
+\item Taejeong Bae, Abyzov lab, Mayo Clinic
+\item Park \& Walsh labs %CNV control
 \item Alex Urban %transposable elements
-\item Taejeong Bae, Abyzov lab, Mayo Clinique
+\item Akbarian lab, Mount Sinai % nuclei sorting
 \item David Obensheim, NIMH
 \item Mette Peters, Kenny Daily, Cindy Molitor, Sage
-\item Akbarian lab, Mount Sinai % nuclei sorting
-\item Park \& Walsh labs %CNV control
 \end{itemize}
 \end{frame}
 
@@ -353,3 +352,15 @@ Ethnicity[T.Hispanic] & 0.372 & - \\
 
 \end{column}
 \end{columns}
+
+% Sequencing this Spring
+% We did the calling with Alexej and TJ
+% shorten the intro and contrast with autism that SCZ risk is spread out
+% among thousands of germline variants
+% study question: somatic mutations that are distinct?
+% muscle and NeuN-: early study design "a remnant"
+% first pass analysis: focus on all available features; final analysis:
+% hypothesis driven, gene centric
+% emphasize hypothesis driven and present the large feature set as a basis for that
+% DONTs: don't say the data science way is superior to the hypothesis driven way
+% we don't know the answer to our main question yet
