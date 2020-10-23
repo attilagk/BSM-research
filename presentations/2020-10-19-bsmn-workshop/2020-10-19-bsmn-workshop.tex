@@ -33,7 +33,7 @@
 
 % title, etc
 \title{Somatic SNVs from WGS data in Schizophrenic Brains}
-\subtitle{A subtitle may be shorter and more technical}
+%\subtitle{A subtitle may be shorter and more technical}
 \author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
 \date{Mount Sinai School of Medicine}
 
@@ -46,27 +46,25 @@
 \begin{frame}{Genetic risk in schizophrenia}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
-Germline variants
+\begin{itemize}
+\item germline variants
 \begin{itemize}
 \item 80\% heritability
-\item extreme genetic complexity
+\item thousands of risk variants
+\end{itemize}
+\item de novo variants
 \begin{itemize}
-\item common variants: shared risk with other psychiatric disorders
-\item recurrent deletions% \(\approx 1\%\)
+        \item synaptic gene networks
+	\item exome investigated only%\footnote{Nature 2014, 506, 179-84}
 \end{itemize}
 \end{itemize}
 \end{column}
 \begin{column}{0.5\textwidth}
-De novo variants
-\begin{itemize}
-        \item synaptic gene networks
-	\item only coding regions investigated%\footnote{Nature 2014, 506, 179-84}
-\end{itemize}
 \vfill
-Somatic variants?
+This study: somatic variants
 \begin{enumerate}
 \item role in schizophrenia
-\item intronic and intergenic regions
+\item whole genome
 %\item relative risk: germline vs somatic variants	
 \end{enumerate}
 \end{column}
@@ -312,14 +310,14 @@ Ethnicity[T.Hispanic] & 0.372 & - \\
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{TODO...}
+\begin{frame}{Further work}
 \begin{enumerate}
-\item more in-depth analysis of SNVs schizophrenia
-\begin{enumerate}
-%\item include 15 additional Control brains (Walsh group)
-\item two more regression approaches \(\mathrm{Dx} \sim X\)
-\item SCZ gene centric analysis
-\end{enumerate}
+\item close look at genes implicated in SCZ and psychiatric disorders
+\item statistical modeling \(\mathrm{Dx} \sim X\)
+\begin{itemize}
+\item confirm findings
+\item feature selection
+\end{itemize}
 \end{enumerate}
 \begin{enumerate}
 \item copy number variation (Eduardo M, Walsh lab)
@@ -333,8 +331,8 @@ Ethnicity[T.Hispanic] & 0.372 & - \\
 \begin{frame}{Acknowledgements}
 \begin{itemize}
 \item Taejeong Bae, Abyzov lab, Mayo Clinic
-\item Park \& Walsh labs %CNV control
-\item Alex Urban %transposable elements
+\item Park \& Walsh labs, Harvard %CNV control
+\item Urban lab, Stanford %transposable elements
 \item Akbarian lab, Mount Sinai % nuclei sorting
 \item David Obensheim, NIMH
 \item Mette Peters, Kenny Daily, Cindy Molitor, Sage
