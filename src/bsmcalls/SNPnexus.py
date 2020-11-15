@@ -5,6 +5,7 @@ import os.path
 import functools
 import operator
 import copy
+import itertools
 
 
 def tsvpath2annotname(tsvpath):
@@ -192,3 +193,38 @@ def do_annot(annotlist, calls, cols2process=None):
     cols2binarize = [c for c in numeric_cols if c in cols2process]
     annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
     return(annot)
+
+def read_annot(csvpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.csv'):
+    data = pd.read_csv(csvpath, index_col=['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
+    return(data)
+
+def vectorize_setvalued(annot, colname, sepstr=':', nonestr='None'):
+    data = annot.copy()
+    ll = [y.split(sepstr) for y in data[colname]]
+    s = set(list(itertools.chain(*ll)))
+    s.discard(nonestr)
+    prefix = ''
+    if any([y in data.columns for y in s]):
+        prefix = colname + '_'
+    new_colnames = [prefix + y for y in list(s)]
+    old_colnames = list(data.columns)
+    ix = old_colnames.index(colname)
+    colnames = old_colnames[:ix] + new_colnames + old_colnames[ix:]
+    for col in new_colnames:
+        data[col] = [col in y for y in ll]
+    return(data)
+
+def vectorize_multiple_setvalued(annot, colnamel, sepstrl=':', nonestrl='None'):
+    colname = colnamel.pop()
+    #sepstr = sepstrl.pop()
+    #nonestr = nonestrl.pop()
+    # base case
+    if len(colnamel) == 1:
+    #    colname = colnamel[0]
+    #    sepstr = sepstrl[0]
+    #    nonestr = nonestrl[0]
+        data = vectorize_setvalued(annot, colname, sepstr=':', nonestr='None')
+        return(data)
+    else:
+        data = vectorize_multiple_setvalued(annot, colnamel, sepstrl, nonestrl)
+        return(data)
