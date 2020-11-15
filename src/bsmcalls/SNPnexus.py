@@ -198,33 +198,45 @@ def read_annot(csvpath='/home/attila/projects/bsm/results/2020-09-07-annotations
     data = pd.read_csv(csvpath, index_col=['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
     return(data)
 
-def vectorize_setvalued(annot, colname, sepstr=':', nonestr='None'):
-    data = annot.copy()
-    ll = [y.split(sepstr) for y in data[colname]]
+def vectorize_setvalued(annot, colname, nonestr='None', sepstr=':'):
+    '''
+    Vectorize a set valued feature/colname modifying annot *in place* (so call this function on a copy of annot!)
+
+    Arguments
+    annot: pandas DataFrame returned by do_annot or read by read_annot
+    colname: the name of the single column to be vectorized
+    sepstr: separator of items e.g ':' in 'protein_coding:antisense'
+    nonestr: indicates the lack of 
+
+    Value: annot, modified *in place*
+    '''
+    ll = [y.split(sepstr) for y in annot[colname]]
     s = set(list(itertools.chain(*ll)))
     s.discard(nonestr)
     prefix = ''
-    if any([y in data.columns for y in s]):
+    if any([y in annot.columns for y in s]):
         prefix = colname + '_'
     new_colnames = [prefix + y for y in list(s)]
-    old_colnames = list(data.columns)
+    old_colnames = list(annot.columns)
     ix = old_colnames.index(colname)
     colnames = old_colnames[:ix] + new_colnames + old_colnames[ix:]
     for col in new_colnames:
-        data[col] = [col in y for y in ll]
-    return(data)
+        annot[col] = [col in y for y in ll]
+    return(annot)
 
-def vectorize_multiple_setvalued(annot, colnamel, sepstrl=':', nonestrl='None'):
-    colname = colnamel.pop()
-    #sepstr = sepstrl.pop()
-    #nonestr = nonestrl.pop()
-    # base case
-    if len(colnamel) == 1:
-    #    colname = colnamel[0]
-    #    sepstr = sepstrl[0]
-    #    nonestr = nonestrl[0]
-        data = vectorize_setvalued(annot, colname, sepstr=':', nonestr='None')
-        return(data)
-    else:
-        data = vectorize_multiple_setvalued(annot, colnamel, sepstrl, nonestrl)
-        return(data)
+def vectorize_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
+    '''
+    Vectorize multiple set valued feature/colname on *a copy* of annot
+
+    Arguments
+    annot: pandas DataFrame returned by do_annot or read by read_annot
+    colnamel: list of column names to be vectorized
+    nonestrl: lisft of None names
+    sepstr: separator of items e.g ':' in 'protein_coding:antisense'
+
+    Value: a modified *copy of* annot
+    '''
+    data = annot.copy()
+    for colname, nonestr in zip(colnamel, nonestrl):
+        vectorize_setvalued(data, colname, nonestr=nonestr, sepstr=sepstr)
+    return(data)
