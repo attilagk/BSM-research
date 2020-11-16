@@ -143,7 +143,7 @@ def binarize_cols(cols2binarize, annot, calls, suffix='_bin', do_categ=False):
     val = val.reindex(columns=columns)
     val = val.reindex(index=calls.index)
     def do_col(col):
-        s = np.int8(val[col].isna())
+        s = np.int8([not y for y in val[col].isna()])
         val[col + suffix] = pd.Categorical(s) if do_categ else s
     for col in cols2binarize:
         do_col(col)
@@ -198,7 +198,7 @@ def read_annot(csvpath='/home/attila/projects/bsm/results/2020-09-07-annotations
     data = pd.read_csv(csvpath, index_col=['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
     return(data)
 
-def vectorize_setvalued(annot, colname, nonestr='None', sepstr=':'):
+def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
     '''
     Vectorize a set valued feature/colname modifying annot *in place* (so call this function on a copy of annot!)
 
@@ -210,21 +210,26 @@ def vectorize_setvalued(annot, colname, nonestr='None', sepstr=':'):
 
     Value: annot, modified *in place*
     '''
-    ll = [y.split(sepstr) for y in annot[colname]]
+    def helper(y):
+        y = y.replace(',', sepstr)
+        val = y.split(sepstr)
+        return(val)
+    ll = [helper(y) for y in annot[colname]]
     s = set(list(itertools.chain(*ll)))
     s.discard(nonestr)
     prefix = ''
     if any([y in annot.columns for y in s]):
         prefix = colname + '_'
-    new_colnames = [prefix + y for y in list(s)]
+    new_colnames = [y for y in list(s)]
+    new_colnames.sort(reverse=True)
     old_colnames = list(annot.columns)
     ix = old_colnames.index(colname)
-    colnames = old_colnames[:ix] + new_colnames + old_colnames[ix:]
     for col in new_colnames:
-        annot[col] = [col in y for y in ll]
+        value = [col in y for y in ll]
+        annot.insert(ix + 1, column=prefix + col, value=value)
     return(annot)
 
-def vectorize_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
+def expand_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
     '''
     Vectorize multiple set valued feature/colname on *a copy* of annot
 
@@ -238,5 +243,5 @@ def vectorize_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
     '''
     data = annot.copy()
     for colname, nonestr in zip(colnamel, nonestrl):
-        vectorize_setvalued(data, colname, nonestr=nonestr, sepstr=sepstr)
+        expand_setvalued(data, colname, nonestr=nonestr, sepstr=sepstr)
     return(data)
