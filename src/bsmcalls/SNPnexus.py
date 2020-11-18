@@ -203,6 +203,11 @@ def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False)
     Turn a column with values like 'YEATS2:YEATS2-AS1' to {YEATS2, YEATS2-AS1}
     '''
     def helper(y):
+        if y is np.nan:
+            val = []
+            if not listval:
+                val = set(val)
+            return(val)
         y = y.replace(',', sepstr)
         val = y.split(sepstr)
         def removenonestr(x):
@@ -214,6 +219,7 @@ def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False)
         val = removenonestr(val)
         if val is None:
             val = []
+        val = [s.strip() for s in val]
         if not listval:
             val = set(val)
         return(val)
