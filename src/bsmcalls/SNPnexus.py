@@ -198,6 +198,28 @@ def read_annot(csvpath='/home/attila/projects/bsm/results/2020-09-07-annotations
     data = pd.read_csv(csvpath, index_col=['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
     return(data)
 
+def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False):
+    '''
+    Turn a column with values like 'YEATS2:YEATS2-AS1' to {YEATS2, YEATS2-AS1}
+    '''
+    def helper(y):
+        y = y.replace(',', sepstr)
+        val = y.split(sepstr)
+        def removenonestr(x):
+            l = x.copy()
+            if nonestr not in l:
+                return(l)
+            else:
+                return(l.remove(nonestr))
+        val = removenonestr(val)
+        if val is None:
+            val = []
+        if not listval:
+            val = set(val)
+        return(val)
+    val = [helper(y) for y in annot[colname]]
+    return(val)
+
 def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
     '''
     Vectorize a set valued feature/colname modifying annot *in place* (so call this function on a copy of annot!)
@@ -210,13 +232,8 @@ def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
 
     Value: annot, modified *in place*
     '''
-    def helper(y):
-        y = y.replace(',', sepstr)
-        val = y.split(sepstr)
-        return(val)
-    ll = [helper(y) for y in annot[colname]]
+    ll = str2set_setvalued(annot, colname, nonestr, sepstr, listval=True)
     s = set(list(itertools.chain(*ll)))
-    s.discard(nonestr)
     prefix = ''
     if any([y in annot.columns for y in s]):
         prefix = colname + '_'
