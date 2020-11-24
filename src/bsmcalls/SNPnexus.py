@@ -6,6 +6,7 @@ import functools
 import operator
 import copy
 import itertools
+import ensembl_rest
 
 
 def tsvpath2annotname(tsvpath):
@@ -268,3 +269,32 @@ def expand_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
     for colname, nonestr in zip(colnamel, nonestrl):
         expand_setvalued(data, colname, nonestr=nonestr, sepstr=sepstr)
     return(data)
+
+def ensembl_description(annot, colname='near_gens_Overlapped Gene set'):
+    def helper(symbolset=annot[colname][1]):
+        if len(symbolset) == 0:
+            return(dict())
+        d = dict()
+        for sym in symbolset:
+            try:
+                description = ensembl_rest.symbol_lookup('homo sapiens', sym, expand=1)['description']
+            except Exception:
+                description = 'No valid lookup found for symbol ' + sym
+            d[sym] = description
+        return(d)
+    val = [helper(y) for y in annot[colname]]
+    return(val)
+
+def insert_col(s, df, oldname, newname, inplace=False):
+    '''
+    Insert vector s into df as column newname after column oldname
+    '''
+    if inplace:
+        D = df
+    else:
+        D = df.copy()
+    if newname in D.columns:
+        return(D)
+    ix = list(D.columns).index(oldname)
+    D.insert(ix + 1, column=newname, value=s)
+    return(D)
