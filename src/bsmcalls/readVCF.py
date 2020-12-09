@@ -60,9 +60,19 @@ def sample_fromVCF(vcfpath):
     return(sample)
 
 def convert_sample(bsm_sample):
-    s = re.sub('^((MSSM|PITT)_([0-9]+))_(.*)$', '\\1:\\4', bsm_sample)
+    cmc_pattern = '^((MSSM|PITT)_([0-9]+))_(.*)$'
+    walsh_pattern = '^(([A-Z]+[^_]*))_((FrontalCortex))$'
+    if re.match(cmc_pattern, bsm_sample):
+        pattern = cmc_pattern
+        prefix = 'CMC_'
+    elif re.match(walsh_pattern, bsm_sample):
+        pattern = walsh_pattern
+        prefix = ''
+    else:
+        raise ValueError('Unexpected sample name: ' + bsm_sample)
+    s = re.sub(pattern, '\\1:\\4', bsm_sample)
     l = s.split(':')
-    indiv_id = 'CMC_' + l[0]
+    indiv_id = prefix + l[0]
     tissue = l[1]
     return((indiv_id, tissue))
 
