@@ -1,0 +1,280 @@
+\documentclass[usenames,dvipsnames]{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, url, hyperref, xcolor, multirow}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Singapore}
+%\usetheme{Warsaw}
+%\usetheme{Antibes}
+%\usecolortheme{beaver}
+\usecolortheme{crane}
+%\usecolortheme{seahorse}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Somatic SNVs from WGS data in Schizophrenic Brains}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
+\date{Brain Somatic Mosaicism Network}
+
+\begin{document}
+
+\maketitle
+
+\section{Genetics of Schizophrenia}
+
+\begin{frame}{What is schizophrenia (SCZ)?}
+\begin{columns}[t]
+\begin{column}{0.55\textwidth}
+	\begin{itemize}
+                \item psychotic symptoms
+			\begin{itemize}
+				\item delusions, hallucinations
+			\end{itemize}
+                \item dysfunction
+			\begin{itemize}
+				\item motivational, cognitive
+			\end{itemize}
+                \item epidemiology
+			\begin{itemize}
+				\item \(\approx\)1\% prevalence
+				\item onset in adolescence
+			\end{itemize}
+                \item environmental risk
+			\begin{itemize}
+				\item urban life, migration, drug abuse,
+					abuse in childhood
+			\end{itemize}
+                \item unclear mechanism
+			\begin{itemize}
+				\item synaptic maturation \& 
+					function
+                                \item a neurodevelopmental disorder?
+			\end{itemize}
+	\end{itemize}
+\end{column}
+
+\begin{column}{0.45\textwidth}
+	genetics carries most risk in SCZ
+
+\includegraphics[width=1.0\columnwidth]{from-others/sullivan2012-fig1a.png}
+\end{column}
+\end{columns}
+%symptoms
+%highly heritable
+%unclear aetiology:
+\end{frame}
+
+\begin{frame}{Shared heritability of psychiatric disorders}
+\begin{center}
+\includegraphics[height=0.7\textheight]{from-others/brainstorm-consortium-science2018-fig2.jpg}
+\end{center}
+
+{\tiny Brainstorm Consortium 2018 Science}
+\end{frame}
+
+\begin{frame}{Genetic architecture: polygenic}
+\begin{center}
+	Polymorphisms (germline variants)
+
+\includegraphics[height=0.8\textheight]{from-others/schizophrenia-kahn-2015-fig3.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{How to translate genetics to medicine?}
+\begin{center}
+Lessons from germline variants
+\end{center}
+
+\includegraphics[width=1.1\textwidth]{from-others/schizophrenia-Foley2017-Fig1.png}
+\end{frame}
+
+\begin{frame}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+\begin{center}
+Germline variant
+\end{center}
+\end{column}
+
+\begin{column}{0.7\textwidth}
+\begin{center}
+Somatic variant
+\end{center}
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+\begin{center}
+	\footnotesize no mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1a.png}
+\begin{center}
+\end{center}
+\end{column}
+
+\begin{column}{0.3\columnwidth}
+\begin{center}
+	\footnotesize high freq.~mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1e.png}
+\end{column}
+\begin{column}{0.3\columnwidth}
+\begin{center}
+	\footnotesize low freq.~mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1g.png}
+\end{column}
+\end{columns}
+{\tiny Poduri et al 2013 Science}
+\end{frame}
+
+\section{Establishing Somatic Variant Calling} 
+\begin{frame}
+\begin{columns}[t]
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/bsmn-visual-summary.jpg}
+
+{\tiny Brain Somatic Mosaicism Network 2017 Science}
+\end{column}
+
+\begin{column}{0.4\textwidth}
+\begin{itemize}
+\item 7 NIH projects
+	\begin{itemize}
+	\item sequence brain cells/samples
+	\item call somatic variants
+	\end{itemize}
+\item collaboration
+	\begin{itemize}
+	\item methods \& tools 
+        \item validation
+        \item functional experiments
+	\end{itemize}
+\item public data
+	\begin{itemize}
+		\item NIMH Data Archive
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Calling somatic variants}
+\includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
+
+{\tiny Brain Somatic Mosaicism Network 2017 Science}
+\end{frame}
+
+\begin{frame}{Traditional variant calling practices failed}
+\includegraphics[height=0.8\textheight]{from-others/bsmn-best-practices-fig2ab.png}
+
+{\tiny Brain Somatic Mosaicism Network 2020 bioRxiv}
+\end{frame}
+
+\begin{frame}{Validation results suggested new best practices}
+\begin{center}
+\includegraphics[height=0.7\textheight]{from-others/bsmn-best-practices-fig2c.png}
+\end{center}
+
+{\tiny Brain Somatic Mosaicism Network 2020 bioRxiv}
+\end{frame}
+
+\begin{frame}{Best practices variant calling pipeline}
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
+\begin{center}
+\begin{itemize}
+\item software tool
+\begin{itemize}
+        \item cloud computing: compute resources auto-scale with data
+	\item  \url{https://github.com/bsmn/bsmn-pipeline}
+\end{itemize}
+\item validation rate (specificity): 85\%
+\item what about sensitivity?
+\end{itemize}
+\end{center}
+
+{\tiny Brain Somatic Mosaicism Network 2020 bioRxiv}
+\end{frame}
+
+\begin{frame}{Sensitivity of variant calling pipeline}{depends on sequencing depth and allele frequency}
+\begin{columns}[t]
+\begin{column}{0.35\textwidth}
+\begin{center}
+\footnotesize
+toy data, ``labeled'' variants
+\end{center}
+
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-best-practices-fig4b.png}
+
+{\tiny BSM Network 2020 bioRxiv}
+\end{column}
+
+\begin{column}{0.65\textwidth}
+\begin{center}
+\footnotesize
+real data, ``unlabeled'' variants
+\end{center}
+
+\includegraphics<1>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
+
+\includegraphics<2>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+
+{\tiny A.~Jones, unpublished }
+\end{column}
+\end{columns}
+\end{frame}
+
+\section{Somatic Variants in Schizophrenia}
+
+\begin{frame}{Somatic variant calls}
+
+\end{frame}
+
+\begin{frame}{Genomic annotations}
+
+\end{frame}
+
+\begin{frame}
+\includegraphics[height=0.7\textheight]{from-others/polygenic-to-omnigenic-fig4a.jpg}
+
+{\tiny Boyle et al 2017 Cell}
+\end{frame}
+
+\end{document}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}

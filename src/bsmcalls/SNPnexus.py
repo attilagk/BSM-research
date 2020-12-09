@@ -5,6 +5,8 @@ import os.path
 import functools
 import operator
 import copy
+import itertools
+import ensembl_rest
 
 
 def tsvpath2annotname(tsvpath):
@@ -142,7 +144,7 @@ def binarize_cols(cols2binarize, annot, calls, suffix='_bin', do_categ=False):
     val = val.reindex(columns=columns)
     val = val.reindex(index=calls.index)
     def do_col(col):
-        s = np.int8(val[col].isna())
+        s = np.int8([not y for y in val[col].isna()])
         val[col + suffix] = pd.Categorical(s) if do_categ else s
     for col in cols2binarize:
         do_col(col)
@@ -192,3 +194,107 @@ def do_annot(annotlist, calls, cols2process=None):
     cols2binarize = [c for c in numeric_cols if c in cols2process]
     annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
     return(annot)
+
+def read_annot(csvpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.csv'):
+    data = pd.read_csv(csvpath, index_col=['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
+    return(data)
+
+def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False):
+    '''
+    Turn a column with values like 'YEATS2:YEATS2-AS1' to {YEATS2, YEATS2-AS1}
+    '''
+    def helper(y):
+        if y is np.nan:
+            val = []
+            if not listval:
+                val = set(val)
+            return(val)
+        y = y.replace(',', sepstr)
+        val = y.split(sepstr)
+        def removenonestr(x):
+            l = x.copy()
+            if nonestr not in l:
+                return(l)
+            else:
+                return(l.remove(nonestr))
+        val = removenonestr(val)
+        if val is None:
+            val = []
+        val = [s.strip() for s in val]
+        if not listval:
+            val = set(val)
+        return(val)
+    val = [helper(y) for y in annot[colname]]
+    return(val)
+
+def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
+    '''
+    Vectorize a set valued feature/colname modifying annot *in place* (so call this function on a copy of annot!)
+
+    Arguments
+    annot: pandas DataFrame returned by do_annot or read by read_annot
+    colname: the name of the single column to be vectorized
+    sepstr: separator of items e.g ':' in 'protein_coding:antisense'
+    nonestr: indicates the lack of 
+
+    Value: annot, modified *in place*
+    '''
+    ll = str2set_setvalued(annot, colname, nonestr, sepstr, listval=True)
+    s = set(list(itertools.chain(*ll)))
+    prefix = ''
+    if any([y in annot.columns for y in s]):
+        prefix = colname + '_'
+    new_colnames = [y for y in list(s)]
+    new_colnames.sort(reverse=True)
+    old_colnames = list(annot.columns)
+    ix = old_colnames.index(colname)
+    for col in new_colnames:
+        value = [col in y for y in ll]
+        annot.insert(ix + 1, column=prefix + col, value=value)
+    return(annot)
+
+def expand_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
+    '''
+    Vectorize multiple set valued feature/colname on *a copy* of annot
+
+    Arguments
+    annot: pandas DataFrame returned by do_annot or read by read_annot
+    colnamel: list of column names to be vectorized
+    nonestrl: lisft of None names
+    sepstr: separator of items e.g ':' in 'protein_coding:antisense'
+
+    Value: a modified *copy of* annot
+    '''
+    data = annot.copy()
+    for colname, nonestr in zip(colnamel, nonestrl):
+        expand_setvalued(data, colname, nonestr=nonestr, sepstr=sepstr)
+    return(data)
+
+def ensembl_description(annot, colname='near_gens_Overlapped Gene set'):
+    def helper(symbolset=annot[colname][1]):
+        if len(symbolset) == 0:
+            return(dict())
+        d = dict()
+        for sym in symbolset:
+            try:
+                description = ensembl_rest.symbol_lookup('homo sapiens', sym, expand=1)['description']
+            except Exception:
+                description = 'No valid lookup found for symbol ' + sym
+            d[sym] = description
+        return(d)
+    val = [helper(y) for y in annot[colname]]
+    return(val)
+
+def insert_col(s, df, oldname, newname, inplace=False):
+    '''
+    Insert vector s into df as column newname after column oldname
+    '''
+    if inplace:
+        D = df
+    else:
+        D = df.copy()
+    if newname in D.columns:
+        return(D)
+    ix = list(D.columns).index(oldname)
+    D.insert(ix + 1, column=newname, value=s)
+    return(D)
