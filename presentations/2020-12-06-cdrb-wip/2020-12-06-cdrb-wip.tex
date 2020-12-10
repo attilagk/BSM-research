@@ -223,7 +223,7 @@ Somatic variant
 {\tiny Brain Somatic Mosaicism Network 2020 bioRxiv}
 \end{frame}
 
-\begin{frame}{Sensitivity of variant calling pipeline}{depends on sequencing depth and allele frequency}
+\begin{frame}[label=sensitivity]{Sensitivity of variant calling pipeline}{depends on sequencing depth and allele frequency}
 \begin{columns}[t]
 \begin{column}{0.35\textwidth}
 \begin{center}
@@ -253,8 +253,121 @@ real data, ``unlabeled'' variants
 
 \section{Somatic Variants in Schizophrenia}
 
-\begin{frame}{Somatic variant calls}
+\begin{frame}{Somatic variants in schizophrenia (SCZ)}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
 
+\end{column}
+
+\begin{column}{0.7\textwidth}
+Outline
+\begin{enumerate}
+	\item single nucleotide variants
+		\begin{itemize}
+			\item 
+		\end{itemize}
+        \item copy number variations
+		\begin{itemize}
+			\item variant calling in progress \\
+				\url{github.com/freeseek/mocha}
+			\item Eduardo Maury (Harvard)
+		\end{itemize}
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Somatic single nucleotide variant calls}
+\begin{columns}[t]
+\begin{column}{0.7\textwidth}
+
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/num-indiv-calls-Dx.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/eCDF-calls.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\againframe<2>{sensitivity}
+
+\begin{frame}[label=regr-models]{Modeling the joint effect of SCZ and other features}
+\tiny
+\begin{tabular}{cc|c|ccl}
+	& & & & clinical feat. & technical \& genomic features \\
+sample & variant & \(\mathrm{\#calls}\) & Dx & \(X\) & \(a(Y)\) \\
+\hline
+\multirow{4}{*}{\colorbox{Apricot}{\(s_1\)}} & \colorbox{Yellow}{\(v_1\)} & \multirow{4}{*}{\(4\)} & \multirow{4}{*}{SCZ/1} & \multirow{4}{*}{\colorbox{Apricot}{\(x_1\)}} &
+\multirow{4}{*}{\(\colorbox{Apricot}{\(a_1\)} = a(\colorbox{Yellow}{\(y_1\)},
+		\colorbox{Periwinkle}{\(y_2\)},
+		\colorbox{CarnationPink}{\(y_3\)},
+		\colorbox{CornflowerBlue}{\(y_4\)})\)} \\
+& \colorbox{Periwinkle}{\(v_2\)} & & \\
+& \colorbox{CarnationPink}{\(v_3\)} & & \\
+& \colorbox{CornflowerBlue}{\(v_4\)} & & \\
+\hline
+\multirow{2}{*}{\colorbox{LimeGreen}{\(s_2\)}} & \colorbox{Salmon}{\(v_5\)} & \multirow{2}{*}{\(2\)} & \multirow{2}{*}{SCZ/1} & \multirow{2}{*}{\colorbox{LimeGreen}{\(x_2\)}} &
+\multirow{2}{*}{\(\colorbox{LimeGreen}{\(a_2\)} = a(\colorbox{Salmon}{\(y_5\)}, \colorbox{Tan}{\(y_6\)})\)} \\
+& \colorbox{Tan}{\(v_6\)} & & \\
+\hline
+\multirow{3}{*}{\colorbox{Lavender}{\(s_3\)}} & \colorbox{Dandelion}{\(v_7\)} & \multirow{4}{*}{\(3\)} & \multirow{4}{*}{Control/0} & \multirow{3}{*}{\colorbox{Lavender}{\(x_3\)}} &
+\multirow{3}{*}{\(\colorbox{Lavender}{\(a_3\)} = a(\colorbox{Dandelion}{\(y_7\)}, \colorbox{Emerald}{\(y_8\)}, \colorbox{Gray}{\(y_9\)})\)} \\
+& \colorbox{Emerald}{\(v_8\)} & & \\
+& \colorbox{Gray}{\(v_9\)} & & \\
+\end{tabular}
+%dental consultation => oral surgery program for authorization
+%212 423 4400
+%oral surgery appointment
+%212 241 7131
+%212 241 4148
+\vfill
+\normalsize
+Linear regression model
+
+{\footnotesize \({\color{red}\mathbf{\beta}_\mathrm{Dx}}\): effect of
+	schizophrenia on genome wide mutation rate}
+\[\mathrm{\#calls} = \mathrm{Dx}{\color{red}\mathbf{\beta}_\mathrm{Dx}} + X\beta_x + a(Y)\beta'_y + \epsilon\]
+
+\end{frame}
+
+\begin{frame}{Unaltered mutation rate in SCZ brains}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\textwidth]{from-others/forward-stepwise-algorithm.png}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{center}
+\small
+selected 15 features (out of 48)
+\end{center}
+\tiny
+\begin{tabular}{rcc}
+	feature/variable & \(P>|t|\) & sign of effect \\
+\hline
+DP std & 0.007 & + \\
+AF mean & 0.011 & - \\
+culprit entropy & 0.011 & + \\
+ReportedGender[T.Male] & 0.016 & - \\
+AntipsychAtyp[T.1] & 0.033 & + \\
+Anticonvulsants[T.1] & 0.043 & - \\
+REF entropy & 0.054 & + \\
+szdbCNVcount std & 0.065 & + \\
+YearofAutopsy & 0.069 & - \\
+Intercept & 0.114 & + \\
+EV1 & 0.147 & - \\
+DP mean & 0.183 & + \\
+Alcohol[T.1] & 0.252 & - \\
+Lithium[T.1] & 0.284 & - \\
+EV3 & 0.292 & + \\
+Ethnicity[T.Caucasian] & 0.498 & - \\
+Ethnicity[T.Hispanic] & 0.897 & - \\
+\end{tabular}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}{Genomic annotations}
