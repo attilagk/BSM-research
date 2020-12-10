@@ -7,7 +7,9 @@ from bsmcalls import preprocessing
 
 cmc_clinical_synid = 'syn2279441'
 cmc_clinical_path = '/home/attila/projects/bsm/resources/CMC_Human_clinical_metadata.csv'
-cmc_ancestry_path='/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
+cmc_ancestry_path = '/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
+walsh_gsub_path = '/home/attila/projects/bsm/resources/walsh-manifests/genomics_subject02_template_WalshParkASD-corr.csv'
+walsh_vcfs_path = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Walsh.tsv'
 
 v1 = ['AF', 'ALT', 'BaseQRankSum', 'DP', 'FILTER/PASS', 'FS', 'GWASpval', 'REF', 'ReadPosRankSum', 'SOR', 'VQSLOD', 'chromatinState_DLPFC', 'culprit', 'szdbCNVcount']
 v2 = ['Dx', 'AntipsychAtyp', 'AntipsychTyp', 'Institution', 'EV.3']
@@ -29,6 +31,22 @@ def read_clinical(ancestry=True):
         clinical = pd.concat([clinical, ancestry], axis=1)
     #clinical.columns = pd.MultiIndex.from_product([['Clinical'], calls.columns], names=['Source', 'Annotation'])
     return(clinical)
+
+def read_walsh_clinical(clin=read_clinical(), indIDs=np.loadtxt(walsh_vcfs_path, dtype=str)[:, 0]):
+    walshclin = clin.reindex(indIDs)
+    walsh_gsub = pd.read_csv(walsh_gsub_path, index_col='src_subject_id', skiprows=1)
+    walsh_gsub = walsh_gsub.loc[indIDs]
+    # Institution
+    walshclin['Institution'] = walsh_gsub['biorepository']
+    # Reported Gender
+    g = pd.Categorical(walsh_gsub['gender'], categories=['F', 'M'], ordered=False)
+    g = g.rename_categories({'F': 'Female', 'M': 'Male'}, inplace=False)
+    walshclin['Reported Gender'] = g
+    # Ethnicity
+    l = ['Black or African American', 'White', 'American Indian/Alaska Native', 'Asian', 'Unknown or not reported']
+    e = pd.Categorical(walsh_gsub['race'], categories=l, ordered=False)
+    walshclin['Ethnicity'] = e
+    return((walsh_gsub, walshclin))
 
 def clin_drop(clin, calls, columns=[]):
     '''
