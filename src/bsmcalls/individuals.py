@@ -33,6 +33,9 @@ def read_clinical(ancestry=True):
     return(clinical)
 
 def read_walsh_clinical(clin=read_clinical(), indIDs=np.loadtxt(walsh_vcfs_path, dtype=str)[:, 0]):
+    '''
+    Read genomic_subject for the Walsh data and format it like CMC clinical
+    '''
     walshclin = clin.reindex(indIDs)
     walsh_gsub = pd.read_csv(walsh_gsub_path, index_col='src_subject_id', skiprows=1)
     walsh_gsub = walsh_gsub.loc[indIDs]
@@ -43,9 +46,17 @@ def read_walsh_clinical(clin=read_clinical(), indIDs=np.loadtxt(walsh_vcfs_path,
     g = g.rename_categories({'F': 'Female', 'M': 'Male'}, inplace=False)
     walshclin['Reported Gender'] = g
     # Ethnicity
-    l = ['Black or African American', 'White', 'American Indian/Alaska Native', 'Asian', 'Unknown or not reported']
+    l = ['Black or African American', 'White', 'American Indian/Alaska Native', 'Asian']
+    d = {'Black or African American': 'African-American', 'White': 'Caucasian'}
     e = pd.Categorical(walsh_gsub['race'], categories=l, ordered=False)
+    e = e.rename_categories(d, inplace=False)
     walshclin['Ethnicity'] = e
+    # ageOfDeath (convert months to years)
+    walshclin['ageOfDeath'] = walsh_gsub['interview_age'] / 12
+    # Dx
+    d = pd.Categorical(walsh_gsub['phenotype'], categories=['Normal', 'Autism'], ordered=False)
+    d = d.rename_categories({'Normal': 'Control', 'Autism': 'ASD'}, inplace=False)
+    walshclin['Dx'] = d
     return((walsh_gsub, walshclin))
 
 def clin_drop(clin, calls, columns=[]):
