@@ -6,7 +6,8 @@
 %\setdefaultlanguage{magyar}
 
 % common packages
-\usepackage{amsmath, multimedia, url, hyperref, xcolor, multirow}
+\usepackage{amsmath, multimedia, url, hyperref, multirow, colortbl}
+\usepackage[table]{xcolor}
 %\usepackage{graphicx}
 
 % TikZ
@@ -332,7 +333,7 @@ Linear regression model
 
 \end{frame}
 
-\begin{frame}{Unaltered mutation rate in SCZ brains}
+\begin{frame}{Unaltered mutation rate in schizophrenic brains...}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 
@@ -370,14 +371,172 @@ Ethnicity[T.Hispanic] & 0.897 & - \\
 \end{columns}
 \end{frame}
 
-\begin{frame}{Genomic annotations}
+\begin{frame}<1>[label=outlier]{...except one brain} 
+\begin{columns}[t]
+\begin{column}{0.6\textwidth}
 
+\includegraphics[width=\columnwidth]{../../notebook/2020-08-19-indiv-based-analysis/named-figure/numcalls-depth-Dx.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\begin{center}
+the outlier
+\end{center}
+\begin{itemize}
+		\footnotesize
+	\item schizophrenic female
+	\item<2> deleterious mutations in NOTCH3 and WFIKKN1 (a protease inhibitor)
+        \item<2> NOTCH3 implicated in
+		\begin{itemize}
+			\item neural development
+			\item hereditary stroke, lateral meningocele syndrome
+		\end{itemize}
+	\item<2> but why the high mutation rate?
+\end{itemize}
+\end{column}
+\end{columns}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[label=annotations]{Annotating variants with genomic features}
+\tiny
+
+%\rowcolors{1}{green}{pink}
+\begin{tabular}{rp{2in}}
+\scshape{Category} & \scshape{Details}\\
+\hline
+&\\
+\multicolumn{2}{l}{\textit{General}} \\
+\hline
+\rowcolor{Melon}
+Gene Annotation & Ensembl\\
+\rowcolor{GreenYellow}
+Protein Effect & SIFT, PolyPhen\\
+\rowcolor{Melon}
+Population Data & 1000 Genomes, gnomAD\\
+\rowcolor{GreenYellow}
+Regulatory Elements & TFBS, miRBASE, Vista, CpG Islands, TargetScan, TarBase miRNA, Other RNAs, ENCODE regions, RoadMap Epigenomics, Ensembl Regulatory Build\\
+\rowcolor{Melon}
+Phenotype/Disease Association & GAD, COSMIC, GWAS, ClinVar\\
+\rowcolor{GreenYellow}
+Conserved Elements & PhastConsElements, GERP++\\
+\rowcolor{Melon}
+Structural Variations &\\
+\rowcolor{GreenYellow}
+Non-coding Variation Scoring & DeepSEA\\
+\rowcolor{Melon}
+Reactome Pathways &\\
+\rowcolor{GreenYellow}
+Cancer Genome Interpreter &\\
+\hline
+&\\
+\multicolumn{2}{l}{\textit{Brain specific}} \\
+\hline
+\rowcolor{Melon}
+Chromatin state & RoadMap Epigenomics \\
+\hline
+&\\
+\multicolumn{2}{l}{\textit{Scizophrenia specific}} \\
+\hline
+\rowcolor{Melon}
+SCZ GWAS & susceptibility loci \\
+\rowcolor{GreenYellow}
+SCZ copy number variants & literature weighted\\
+\hline
+\end{tabular}
+\end{frame}
+
+\againframe<2>{outlier}
+
+\begin{frame}{General functional categories are not enriched in SCZ variants}
+\small
+\begin{tabular}{r|cc}
+& \multicolumn{2}{c}{\# variant calls} \\
+& Control & SCZ \\
+\rowcolor{gray}
+total & 901 & 2510 \\
+& & \\
+\scshape{functional category} & & \\
+\rowcolor{GreenYellow}
+coding nonsyn & 15 (expected value) & 44 (expected value) \\
+\rowcolor{Melon}
+stop-gain & 0 & 4 \\
+\rowcolor{GreenYellow}
+intronic (splice site) & 0 & 1 \\
+\rowcolor{Melon}
+regbuild Epigenome nervoussys bin & 208 & 521 \\
+\rowcolor{GreenYellow}
+tfbs TFBS Name bin & 22 & 79 \\
+\rowcolor{Melon}
+Deleterious & 6 & 14 \\
+\rowcolor{GreenYellow}
+Deleterious - Low Confidence & 1 & 3 \\
+\rowcolor{Melon}
+non-coding, high functional significance & 3 & 12 \\
+\rowcolor{GreenYellow}
+in evol.~conserved element & 75 & 265 \\
+\end{tabular}
+\end{frame}
+
+\againframe{annotations}
+
+\begin{frame}{No chromatin state is enriched in SCZ variants}
+\includegraphics[scale=0.7]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/chromatin-state-DLPFC-Dx-10.pdf}
+\end{frame}
+
+\begin{frame}{SCZ susceptibility loci are not enriched in SCZ variants}
+\includegraphics[scale=0.7]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/gwas-Dx.pdf}
+\end{frame}
+
+\begin{frame}{Enrichment expected in core genes}
 \includegraphics[height=0.7\textheight]{from-others/polygenic-to-omnigenic-fig4a.jpg}
 
 {\tiny Boyle et al 2017 Cell}
+\end{frame}
+
+\begin{frame}{Future work}
+test
+\begin{itemize}
+\item genes enriched in rare or de novo variants in SCZ
+\item Gene Ontology categories related to SCZ
+\begin{itemize}
+\item synaptic function
+\end{itemize}
+\end{itemize}
+
+\vfill
+discover
+\begin{itemize}
+\item genes with recurrent variants
+\item Gene Ontology entities enriched in SCZ \textit{vs} Control
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Summary}
+\begin{enumerate}
+\item Schizophrenia is a polygenic disease
+	\begin{itemize}
+                \item unclear pathological mechanism
+		\item comorbidity and shared heritability with psychiatric and
+			neurodevelopmental disorders
+	\end{itemize}
+\item We study somatic variants in schizophrenia
+	\begin{itemize}
+		\item The Brain Somatic Mosaicism Network 
+		\item new tool: somatic single nucleotide variant (SNV) calling pipeline
+	\end{itemize}
+\item somatic SNV mutation rate in schizophrenia
+	\begin{itemize}
+		\item unaltered genome-wide
+		\item not enriched in general functinal categories,
+			schizophrenia GWAS loci
+	\end{itemize}
+\item ongoing investigation: core genes and mechanisms
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+
 \end{frame}
 
 \end{document}

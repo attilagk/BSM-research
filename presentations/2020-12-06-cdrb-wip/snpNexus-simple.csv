@@ -1,0 +1,28 @@
+"Category","Detail"
+"Known SNP information",
+"Gene Annotation","Ensembl"
+"Protein Effect","SIFT"
+,"PolyPhen"
+"Population Data","1000 Genomes"
+,"gnomAD Exome Data"
+,"gnomAD Genome Data"
+"Regulatory Elements","TFBS"
+,"miRBASE"
+,"Vista"
+,"CpG Islands"
+,"TargetScan"
+,"TarBase miRNA"
+,"Other RNAs"
+,"ENCODE regions"
+,"RoadMap Epigenomics"
+,"Ensembl Regulatory Build"
+"Phenotype/Disease Association","GAD"
+,"COSMIC"
+,"GWAS"
+,"ClinVar"
+"Conserved Elements","PhastConsElements"
+,"GERP++"
+"Structural Variations",
+"Non-coding Variation Scoring","DeepSEA"
+"Reactome Pathways",
+"Cancer Genome Interpreter",
