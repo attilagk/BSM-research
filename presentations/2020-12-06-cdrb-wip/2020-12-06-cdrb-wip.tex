@@ -35,7 +35,7 @@
 %\useoutertheme[]{tree}
 
 % title, etc
-\title{Somatic SNVs from WGS data in Schizophrenic Brains}
+\title{Genome-wide Study of Brain Somatic Mosaicism in Schizophrenia}
 %\subtitle{A subtitle may be shorter and more technical}
 \author{Attila Jones, Chaggai Rosenbluh, Andy Chess}
 \date{Brain Somatic Mosaicism Network}
@@ -255,27 +255,21 @@ real data, ``unlabeled'' variants
 \section{Somatic Variants in Schizophrenia}
 
 \begin{frame}{Somatic variants in schizophrenia (SCZ)}
-\begin{columns}[t]
-\begin{column}{0.3\textwidth}
-
-\end{column}
-
-\begin{column}{0.7\textwidth}
-Outline
+	Outline
 \begin{enumerate}
-	\item single nucleotide variants
+	\item single nucleotide mutations
 		\begin{itemize}
-			\item 
+			\item genom wide rate
+			\item general functinal categories
+			\item schizophrenia GWAS loci
 		\end{itemize}
-        \item copy number variations
+        \item copy number variants
 		\begin{itemize}
 			\item variant calling in progress \\
 				\url{github.com/freeseek/mocha}
 			\item Eduardo Maury (Harvard)
 		\end{itemize}
 \end{enumerate}
-\end{column}
-\end{columns}
 \end{frame}
 
 \begin{frame}{Somatic single nucleotide variant calls}
@@ -287,7 +281,7 @@ Outline
 
 \begin{column}{0.5\textwidth}
 
-\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/eCDF-calls.pdf}
+\includegraphics[scale=0.5]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
 \end{column}
 \end{columns}
 \end{frame}
@@ -325,12 +319,10 @@ sample & variant & \(\mathrm{\#calls}\) & Dx & \(X\) & \(a(Y)\) \\
 %212 241 4148
 \vfill
 \normalsize
-Linear regression model
 
-{\footnotesize \({\color{red}\mathbf{\beta}_\mathrm{Dx}}\): effect of
-	schizophrenia on genome wide mutation rate}
-\[\mathrm{\#calls} = \mathrm{Dx}{\color{red}\mathbf{\beta}_\mathrm{Dx}} + X\beta_x + a(Y)\beta'_y + \epsilon\]
-
+\[\mathrm{\#calls} =
+	\overbrace{\mathrm{Dx}\mathbf{\beta}_\mathrm{Dx}}^{\text{effect of
+	schizophrenia}} + X\beta_x + a(Y)\beta'_y + \epsilon\]
 \end{frame}
 
 \begin{frame}{Unaltered mutation rate in schizophrenic brains...}
@@ -408,39 +400,39 @@ the outlier
 &\\
 \multicolumn{2}{l}{\textit{General}} \\
 \hline
-\rowcolor{Melon}
+\rowcolor{Yellow}
 Gene Annotation & Ensembl\\
-\rowcolor{GreenYellow}
+\rowcolor{Dandelion}
 Protein Effect & SIFT, PolyPhen\\
-\rowcolor{Melon}
+\rowcolor{Yellow}
 Population Data & 1000 Genomes, gnomAD\\
-\rowcolor{GreenYellow}
+\rowcolor{Dandelion}
 Regulatory Elements & TFBS, miRBASE, Vista, CpG Islands, TargetScan, TarBase miRNA, Other RNAs, ENCODE regions, RoadMap Epigenomics, Ensembl Regulatory Build\\
-\rowcolor{Melon}
+\rowcolor{Yellow}
 Phenotype/Disease Association & GAD, COSMIC, GWAS, ClinVar\\
-\rowcolor{GreenYellow}
+\rowcolor{Dandelion}
 Conserved Elements & PhastConsElements, GERP++\\
-\rowcolor{Melon}
+\rowcolor{Yellow}
 Structural Variations &\\
-\rowcolor{GreenYellow}
+\rowcolor{Dandelion}
 Non-coding Variation Scoring & DeepSEA\\
-\rowcolor{Melon}
+\rowcolor{Yellow}
 Reactome Pathways &\\
-\rowcolor{GreenYellow}
+\rowcolor{Dandelion}
 Cancer Genome Interpreter &\\
 \hline
 &\\
 \multicolumn{2}{l}{\textit{Brain specific}} \\
 \hline
-\rowcolor{Melon}
+\rowcolor{Yellow}
 Chromatin state & RoadMap Epigenomics \\
 \hline
 &\\
 \multicolumn{2}{l}{\textit{Scizophrenia specific}} \\
 \hline
-\rowcolor{Melon}
+\rowcolor{Yellow}
 SCZ GWAS & susceptibility loci \\
-\rowcolor{GreenYellow}
+\rowcolor{Dandelion}
 SCZ copy number variants & literature weighted\\
 \hline
 \end{tabular}
@@ -457,24 +449,24 @@ SCZ copy number variants & literature weighted\\
 total & 901 & 2510 \\
 & & \\
 \scshape{functional category} & & \\
-\rowcolor{GreenYellow}
-coding nonsyn & 15 (expected value) & 44 (expected value) \\
-\rowcolor{Melon}
-stop-gain & 0 & 4 \\
-\rowcolor{GreenYellow}
-intronic (splice site) & 0 & 1 \\
-\rowcolor{Melon}
-regbuild Epigenome nervoussys bin & 208 & 521 \\
-\rowcolor{GreenYellow}
-tfbs TFBS Name bin & 22 & 79 \\
-\rowcolor{Melon}
-Deleterious & 6 & 14 \\
-\rowcolor{GreenYellow}
-Deleterious - Low Confidence & 1 & 3 \\
-\rowcolor{Melon}
-non-coding, high functional significance & 3 & 12 \\
-\rowcolor{GreenYellow}
-in evol.~conserved element & 75 & 265 \\
+\rowcolor{SkyBlue}
+coding nonsyn & 15 {\tiny (16)} & 44 {\tiny (43)} \\
+\rowcolor{Turquoise}
+stop-gain & 0 {\tiny (1)} & 4 {\tiny (3)}\\
+\rowcolor{SkyBlue}
+intronic (splice site) & 0 {\tiny (0)}& 1 {\tiny (1)}\\
+\rowcolor{Turquoise}
+in nervous sys epigenome & 208 {\tiny (193)}& 521 {\tiny (536)}\\
+\rowcolor{SkyBlue}
+transcription factor binding site & 22 {\tiny (27)}& 79 {\tiny (74)}\\
+\rowcolor{Turquoise}
+deleterious & 6 {\tiny (5)}& 14 {\tiny (15)}\\
+\rowcolor{SkyBlue}
+deleterious - low confidence & 1 {\tiny (1)}& 3 {\tiny (3)}\\
+\rowcolor{Turquoise}
+non-coding, predicted functional & 3 {\tiny (4)}& 12 {\tiny (11)}\\
+\rowcolor{SkyBlue}
+in evolutionary conserved element & 75 {\tiny (90)}& 265 {\tiny (250)}\\
 \end{tabular}
 \end{frame}
 
@@ -494,7 +486,7 @@ in evol.~conserved element & 75 & 265 \\
 {\tiny Boyle et al 2017 Cell}
 \end{frame}
 
-\begin{frame}{Future work}
+\begin{frame}{Planned analyses}
 test
 \begin{itemize}
 \item genes enriched in rare or de novo variants in SCZ
@@ -525,18 +517,35 @@ discover
 		\item The Brain Somatic Mosaicism Network 
 		\item new tool: somatic single nucleotide variant (SNV) calling pipeline
 	\end{itemize}
-\item somatic SNV mutation rate in schizophrenia
+\item Somatic SNV mutation rate in schizophrenia is unaltered:
 	\begin{itemize}
-		\item unaltered genome-wide
-		\item not enriched in general functinal categories,
-			schizophrenia GWAS loci
+		\item genome-wide
+		\item in general functinal categories
+                \item in schizophrenia GWAS loci
 	\end{itemize}
-\item ongoing investigation: core genes and mechanisms
+\item Ongoing: more specific investigation of genes and mechanisms
 \end{enumerate}
 \end{frame}
 
 \begin{frame}{Acknowledgements}
-
+\footnotesize
+\begin{tabular}{cp{3in}}
+\parbox[c]{9em}{\includegraphics[width=0.25\textwidth]{/home/attila/projects/bsm/resources/logos/mount-sinai-logo.png}}
+& Chaggai Rosenbluh, Gabriel Hoffman, Eva Xia, Jessica Johnson, Schahram Akbarian, Andy Chess \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/mayo-clinic-logo.png}} & Taejeong Bae, Alexej Abyzov \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/harvard-logo.png}}
+& Eduardo Maury, Yanmei Dou, Peter Park, Chris Walsh \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/sage-bionetworks-logo.png}} & Kenny Daily, Cindy Molitor, Mette Peters \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/nimh-logo.png}}
+& David Obenshain \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/BSMN-NameAndTagline-Horizontal.png}}
+& \\
+\end{tabular}
 \end{frame}
 
 \end{document}
