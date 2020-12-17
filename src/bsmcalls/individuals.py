@@ -10,6 +10,7 @@ cmc_clinical_path = '/home/attila/projects/bsm/resources/CMC_Human_clinical_meta
 cmc_ancestry_path = '/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
 walsh_gsub_path = '/home/attila/projects/bsm/resources/walsh-manifests/genomics_subject02_template_WalshParkASD-corr.csv'
 walsh_vcfs_path = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Walsh.tsv'
+chess_vcfs_path = '/home/attila/projects/bsm/results/calls/filtered-vcfs.tsv'
 
 v1 = ['AF', 'ALT', 'BaseQRankSum', 'DP', 'FILTER/PASS', 'FS', 'GWASpval', 'REF', 'ReadPosRankSum', 'SOR', 'VQSLOD', 'chromatinState_DLPFC', 'culprit', 'szdbCNVcount']
 v2 = ['Dx', 'AntipsychAtyp', 'AntipsychTyp', 'Institution', 'EV.3']
@@ -57,7 +58,7 @@ def read_walsh_clinical(clin=read_clinical(), indIDs=np.loadtxt(walsh_vcfs_path,
     d = pd.Categorical(walsh_gsub['phenotype'], categories=['Normal', 'Autism'], ordered=False)
     d = d.rename_categories({'Normal': 'Control', 'Autism': 'ASD'}, inplace=False)
     walshclin['Dx'] = d
-    return((walsh_gsub, walshclin))
+    return(walshclin)
 
 def clin_drop(clin, calls, columns=[]):
     '''
@@ -93,6 +94,36 @@ def get_data(merge=False, cleancalls=True, categorize=True, cols2drop=['Sex']):
         calls = preprocessing.convert2categorical(calls)
         clin = preprocessing.convert2categorical(clin)
     clin = clin_drop(clin, calls, columns=cols2drop)
+    clin = preprocessing.drop_unused_categories(clin)
+    calls = preprocessing.drop_unused_categories(calls)
+    data = (calls, clin)
+    if merge:
+        data = merge_data(calls,clin)
+    return(data)
+
+def get_datasets(merge=True, cleancalls=True, categorize=True, cols2drop=['Sex']):
+    '''
+    Get all datasets for BSM project: calls and clinical data for the Chess and Walsh datasets
+
+    Arguments
+    merge: wether to merge calls and clinical data
+    cols2drop: list of columns to drop in clinical data
+
+    Value: calls and clinical data frame separately (in a tuple) or merged
+    into a single data frame
+    '''
+    calls_chess = readVCF.readVCFs(vcflistpath=chess_vcfs_path, clean=True)
+    calls_walsh = readVCF.readVCFs(vcflistpath=walsh_vcfs_path, clean=True)
+    clin_chess = read_clinical()
+    clin_chess = clin_drop(clin_chess, calls_chess, columns=cols2drop)
+    clin_walsh = read_walsh_clinical(clin=clin_chess)
+    clin_chess['Dataset'] = 'Chess'
+    clin_walsh['Dataset'] = 'Walsh'
+    calls = pd.concat([calls_chess, calls_walsh], axis=0)
+    clin = pd.concat([clin_chess, clin_walsh[clin_chess.columns]], axis=0)
+    if categorize:
+        calls = preprocessing.convert2categorical(calls)
+        clin = preprocessing.convert2categorical(clin)
     clin = preprocessing.drop_unused_categories(clin)
     calls = preprocessing.drop_unused_categories(calls)
     data = (calls, clin)
