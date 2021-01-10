@@ -7,6 +7,8 @@ import operator
 import copy
 import itertools
 import ensembl_rest
+import pickle
+from bsmcalls import individuals
 
 
 def tsvpath2annotname(tsvpath):
@@ -195,8 +197,17 @@ def do_annot(annotlist, calls, cols2process=None):
     annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
     return(annot)
 
-def read_annot(csvpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.csv'):
-    data = pd.read_csv(csvpath, index_col=['Individual ID', 'Tissue', 'CHROM', 'POS', 'Mutation'])
+def load_data(picklepath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.p'):
+    with open(picklepath, 'rb') as f:
+        data = pickle.load(f)
+    return(data)
+
+def filter_fulldata(fulldata):
+    chess = fulldata.loc[fulldata.Dataset == 'Chess'].xs('NeuN_pl', level='Tissue')
+    HC_list = ['HC/PASS', 'HC;PASS/PASS']
+    walsh = fulldata.loc[fulldata.Dataset == 'Walsh']
+    walsh = walsh.loc[walsh['FILTER/PASS'].isin(HC_list)]
+    data = pd.concat([chess, walsh], axis=0)
     return(data)
 
 def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False):
@@ -298,3 +309,56 @@ def insert_col(s, df, oldname, newname, inplace=False):
     ix = list(D.columns).index(oldname)
     D.insert(ix + 1, column=newname, value=s)
     return(D)
+
+def merge_snpnexus_with_other_annotations(calls=individuals.get_datasets(), testmode=False):
+    '''
+    Main function: read SNPnexus annotations for the full Chess and Walsh datasets and merge them with other annotations
+    '''
+    # SNPnexus annotations
+    annotlist = ['1KGen', 'cpg', 'deepsea', 'encode', 'ensembl', 'gerp', 'near_gens', 'phast', 'regbuild', 'sift',  'structvar', 'tfbs']
+    # custom values
+    na_values = {}
+    na_values.update({'1KGen': {'AFR Frequency': 'None', 'AMR Frequency': 'None', 'EAS Frequency': 'None', 'EUR Frequency': 'None', 'SAS Frequency': 'None'}})
+    # to binarize columns
+    cols2binarize = []
+    cols2binarize += ['1KGen_AFR Frequency', '1KGen_AMR Frequency', '1KGen_EAS Frequency', '1KGen_EUR Frequency', '1KGen_SAS Frequency']
+    cols2binarize += ['cpg_CpG Island']
+    cols2binarize += ['gerp_Element RS Score']
+    cols2binarize += ['phast_Score']
+    cols2binarize += ['tfbs_TFBS Name']
+    cols2binarize += ['structvar_Type']
+    # to regularize columns
+    colsdict = {}
+    # order reflecting severity of effect
+    l = ['Deleterious', 'Deleterious - Low Confidence', 'Tolerated', 'Tolerated - Low Confidence']
+    colsdict.update({'sift_Prediction': l})
+    # order reflecting increasing frequency of categories in the data set
+    l = ['Polymerase', 'Open Chromatin', 'Transcription Factor', 'Histone']
+    colsdict.update({'encode_Feature Type Class': l})
+    l = ['coding', 'intronic', 'intronic (splice_site)', '5utr', '3utr', '5upstream', '3downstream', 'non-coding intronic', 'non-coding']
+    colsdict.update({'ensembl_Predicted Function': l})
+    def read_categories(fpath):
+        with open(fpath) as f:
+            val = f.readlines()
+            val = [x.strip() for x in val]
+            return(val)
+    regbuild_epigenomes = read_categories('/big/results/bsm/2020-09-07-annotations/regbuild-epigenomes')
+    colsdict.update({'regbuild_Epigenome': regbuild_epigenomes})
+    colsdict.update({'structvar_Type': ['complex', 'loss', 'gain']})
+    if testmode:
+        annotlist = annotlist[:2] + ['sift' + 'regbuild']
+        cols2binarize = cols2binarize[:6]
+        features = ['sift_Prediction', 'regbuild_Epigenome']
+        colsdict = {k: colsdict[k] for k in features}
+    vcflistpaths = ['/home/attila/projects/bsm/results/calls/filtered-vcfs' + s + '.tsv' for s in ['', '-Walsh']]
+    annotdirpath = '/home/attila/projects/bsm/results/2020-09-07-annotations'
+    lannot = [get_multi_annotations(annotlist, p, annotdirpath, na_values) for p in vcflistpaths]
+    annot = pd.concat(lannot, axis=0)
+    annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
+    # read epigenome names for Ensemble Regulatory Build
+    # https://useast.ensembl.org/info/genome/funcgen/regulatory_build.html
+    annot = regularize_categ_cols(colsdict, annot, calls, nafillval='other')
+    s = annot['regbuild_Epigenome']
+    annot['regbuild_Epigenome_nervoussys_bin'] = np.int8(s.isin(regbuild_epigenomes[:7]))
+    data = pd.concat([calls, annot], axis=1)
+    return(data)
