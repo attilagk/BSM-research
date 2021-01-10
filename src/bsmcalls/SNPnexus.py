@@ -243,7 +243,7 @@ def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
     Vectorize a set valued feature/colname modifying annot *in place* (so call this function on a copy of annot!)
 
     Arguments
-    annot: pandas DataFrame returned by do_annot or read by read_annot
+    annot: pandas DataFrame returned by do_annot or read by load_data
     colname: the name of the single column to be vectorized
     sepstr: separator of items e.g ':' in 'protein_coding:antisense'
     nonestr: indicates the lack of 
@@ -269,7 +269,7 @@ def expand_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
     Vectorize multiple set valued feature/colname on *a copy* of annot
 
     Arguments
-    annot: pandas DataFrame returned by do_annot or read by read_annot
+    annot: pandas DataFrame returned by do_annot or read by load_data
     colnamel: list of column names to be vectorized
     nonestrl: lisft of None names
     sepstr: separator of items e.g ':' in 'protein_coding:antisense'
