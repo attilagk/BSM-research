@@ -23,8 +23,8 @@ def filtered_Dx_counts(annot, filtl, gb='Dx', anygwas=None):
     return(df)
 
 def get_geneset(df=pd.read_csv(clozukpath, skiprows=7), col='Gene(s) tagged'):
-    ll = SNPnexus.str2set_setvalued(df, col, nonestr='', sepstr=',', listval=True)
-    geneset = set(list(itertools.chain(*ll)))
+    val = df['Gene(s) tagged'].str.split(', ').dropna().sum()
+    geneset = set(val)
     return(geneset)
 
 def count_member(g, member='coding nonsyn'):
@@ -36,3 +36,13 @@ def count_members(annot, d={'coding nonsyn': 'near_gens_Annotation', 'stop-gain'
     l = [annot.groupby('Dx')[v].apply(count_member, k).rename(k) for k, v in d.items()]
     df = pd.DataFrame(l)
     return(df)
+
+def all_functional_counts(annot):
+    d = {'coding nonsyn': 'near_gens_Annotation', 'stop-gain': 'near_gens_Annotation', 'intronic (splice_site)': 'near_gens_Annotation'}
+    A = count_members(annot, d)
+    B = annot.groupby('Dx')['sift_Prediction'].apply(pd.Series.value_counts).unstack().T.loc[['Deleterious', 'Deleterious - Low Confidence']]
+    counts = pd.concat([A, B], axis=0)
+    counts = counts.append(annot.groupby('Dx')['tfbs_TFBS Name_bin'].sum().astype('int64'))
+    counts = counts.append(annot.groupby('Dx')['regbuild_Epigenome_nervoussys_bin'].sum().astype('int64'))
+    counts = counts.append(annot.groupby('Dx')['gerp_Element RS Score_bin'].sum().astype('int64'))
+    return(counts)
