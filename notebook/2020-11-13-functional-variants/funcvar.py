@@ -26,3 +26,13 @@ def get_geneset(df=pd.read_csv(clozukpath, skiprows=7), col='Gene(s) tagged'):
     ll = SNPnexus.str2set_setvalued(df, col, nonestr='', sepstr=',', listval=True)
     geneset = set(list(itertools.chain(*ll)))
     return(geneset)
+
+def count_member(g, member='coding nonsyn'):
+    b = g.apply(lambda x: member in x)
+    val = sum(b)
+    return(val)
+
+def count_members(annot, d={'coding nonsyn': 'near_gens_Annotation', 'stop-gain': 'near_gens_Annotation'}):
+    l = [annot.groupby('Dx')[v].apply(count_member, k).rename(k) for k, v in d.items()]
+    df = pd.DataFrame(l)
+    return(df)
