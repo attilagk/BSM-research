@@ -212,33 +212,20 @@ def filter_fulldata(fulldata):
     data = pd.concat([chess, walsh], axis=0)
     return(data)
 
-def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False):
+def str2num(annot, colname):
+    s = annot[colname].copy()
+    s = pd.to_numeric(s, errors='coerce')
+    return(s)
+
+def multi_str2num(annot, colnames):
     '''
-    Turn a column with values like 'YEATS2:YEATS2-AS1' to {YEATS2, YEATS2-AS1}
+    The multi feature version of str2list
     '''
-    def helper(y):
-        if y is np.nan:
-            val = []
-            if not listval:
-                val = set(val)
-            return(val)
-        y = y.replace(',', sepstr)
-        val = y.split(sepstr)
-        def removenonestr(x):
-            l = x.copy()
-            if nonestr not in l:
-                return(l)
-            else:
-                return(l.remove(nonestr))
-        val = removenonestr(val)
-        if val is None:
-            val = []
-        val = [s.strip() for s in val]
-        if not listval:
-            val = set(val)
-        return(val)
-    val = [helper(y) for y in annot[colname]]
-    return(val)
+    df = annot.copy()
+    l = [str2num(df, c) for c in colnames]
+    d = dict(zip(colnames, l))
+    df = df.assign(**d)
+    return(df)
 
 def str2list(annot, colname, nonestr='None', sepstr=':'):
     '''
@@ -266,6 +253,7 @@ def str2list(annot, colname, nonestr='None', sepstr=':'):
     s = s.str.split(sepstr)
     return(s)
 
+
 def multi_str2list(annot, colnames, nonestr='None', sepstr=':'):
     '''
     The multi feature version of str2list
@@ -280,49 +268,6 @@ def multi_str2list(annot, colnames, nonestr='None', sepstr=':'):
     d = dict(zip(colnames, l))
     df = df.assign(**d)
     return(df)
-
-def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
-    '''
-    Vectorize a set valued feature/colname modifying annot *in place* (so call this function on a copy of annot!)
-
-    Arguments
-    annot: pandas DataFrame returned by do_annot or read by load_data
-    colname: the name of the single column to be vectorized
-    sepstr: separator of items e.g ':' in 'protein_coding:antisense'
-    nonestr: indicates the lack of 
-
-    Value: annot, modified *in place*
-    '''
-    ll = str2set_setvalued(annot, colname, nonestr, sepstr, listval=True)
-    s = set(list(itertools.chain(*ll)))
-    prefix = ''
-    if any([y in annot.columns for y in s]):
-        prefix = colname + '_'
-    new_colnames = [y for y in list(s)]
-    new_colnames.sort(reverse=True)
-    old_colnames = list(annot.columns)
-    ix = old_colnames.index(colname)
-    for col in new_colnames:
-        value = [col in y for y in ll]
-        annot.insert(ix + 1, column=prefix + col, value=value)
-    return(annot)
-
-def expand_multiple_setvalued(annot, colnamel, nonestrl='None', sepstr=':'):
-    '''
-    Vectorize multiple set valued feature/colname on *a copy* of annot
-
-    Arguments
-    annot: pandas DataFrame returned by do_annot or read by load_data
-    colnamel: list of column names to be vectorized
-    nonestrl: lisft of None names
-    sepstr: separator of items e.g ':' in 'protein_coding:antisense'
-
-    Value: a modified *copy of* annot
-    '''
-    data = annot.copy()
-    for colname, nonestr in zip(colnamel, nonestrl):
-        expand_setvalued(data, colname, nonestr=nonestr, sepstr=sepstr)
-    return(data)
 
 def ensembl_description(annot, colname='near_gens_Overlapped Gene set'):
     def helper(symbolset=annot[colname][1]):
