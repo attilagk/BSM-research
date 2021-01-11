@@ -95,12 +95,14 @@ def annotation_duplicates(annot, sep=':'):
 def get_multi_annotations(annotlist,
                           vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
                           annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations',
-                          na_values=[], simplecolumns=True):
+                          na_values={}, simplecolumns=True):
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
     samplestr = '((MSSM|PITT)_[0-9]+)_(NeuN_pl|NeuN_mn|muscle)'
     def sample2indivID(sample):
         return(re.sub(samplestr, 'CMC_\\1', sample))
     def sample2tissue(sample):
+        if re.match('.*Walsh.*', vcflistpath):
+            return('frontal cortex')
         return(re.sub(samplestr, '\\3', sample))
     def get_annot(sample, annotyp):
         sampledir = annotdirpath + os.path.sep + sample
@@ -237,6 +239,47 @@ def str2set_setvalued(annot, colname, nonestr='None', sepstr=':', listval=False)
         return(val)
     val = [helper(y) for y in annot[colname]]
     return(val)
+
+def str2list(annot, colname, nonestr='None', sepstr=':'):
+    '''
+    Convert a string to a list removing nonestr and splitting on sepstr
+
+    Arguments
+    annot: pandas DataFrame returned by merge_snpnexus_with_other_annotations, do_annot or read by load_data
+    colname: the column name of the feature
+    nonestr: this means NA or similar
+    sepstr: splitting should be done on this string
+
+    Value: the engineered copy of annot[colname]; a pd.Series object
+
+    Details:
+    Typically used with near_gens_Overlapped Gene, near_gens_Type,
+    near_gens_Annotation as well as the upstream and downstream version of
+    these features.
+
+    '''
+    s = annot[colname].copy()
+    s = s.fillna('')
+    s = s.str.replace(',', sepstr)
+    pattern = '^None(' + sepstr + 'None)*$'
+    s = s.apply(lambda x: re.sub(pattern, '', x))
+    s = s.str.split(sepstr)
+    return(s)
+
+def multi_str2list(annot, colnames, nonestr='None', sepstr=':'):
+    '''
+    The multi feature version of str2list
+
+    Arguments are similar to those of str2list except...
+    colnames: the list of column name of the feature s
+
+    Value: the engineered copy of annot; a pd.DataFrame object
+    '''
+    df = annot.copy()
+    l = [str2list(df, c, nonestr=nonestr, sepstr=sepstr) for c in colnames]
+    d = dict(zip(colnames, l))
+    df = df.assign(**d)
+    return(df)
 
 def expand_setvalued(annot, colname, nonestr='None', sepstr=':'):
     '''
