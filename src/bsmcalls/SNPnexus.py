@@ -10,6 +10,23 @@ import ensembl_rest
 import pickle
 from bsmcalls import individuals
 
+annotlists = {'Gene Annotation': ['gen_coords', 'ensembl', 'near_gens'],
+              'Protein Effect': ['sift', 'polyphen'],
+              'Population Data': ['1KGen', 'gnomad'],
+              'Regulatory Elements': ['tfbs', 'vista', 'cpg', 'targetscan', 'tarbase', 'encode', 'roadmap', 'regbuild'],
+              'Phenotype/Disease Association': ['clinvar'],
+              'Conserved Elements': ['phast', 'gerp'],
+              'Structural Variations': ['structvar'],
+              'Non-coding Variation Scoring': ['cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm']}
+
+standard_annotlist = ['gen_coords', 'ensembl', 'near_gens', # Gene Annotation
+                      'sift', 'polyphen', # Protein Effect
+                      '1KGen', 'gnomad', # Population Data
+                      'tfbs', 'vista', 'cpg', 'targetscan', 'tarbase', 'encode', 'roadmap', 'regbuild', # Regulatory Elements
+                      'clinvar', # Phenotype/Disease Association
+                      'phast', 'gerp', # Conserved Elements
+                      'structvar', # Structural Variations
+                      'cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm'] # Non-coding Variation Scoring
 
 def tsvpath2annotname(tsvpath):
     val = re.sub('.txt', '', os.path.basename(tsvpath))
@@ -93,7 +110,7 @@ def annotation_duplicates(annot, sep=':'):
     return(val)
 
 def get_multi_annotations(annotlist,
-                          vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
+                          vcflistpath='/big/results/bsm/calls/filtered-vcfs-Chess-Walsh.tsv',
                           annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations',
                           na_values={}, simplecolumns=True):
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
@@ -101,9 +118,10 @@ def get_multi_annotations(annotlist,
     def sample2indivID(sample):
         return(re.sub(samplestr, 'CMC_\\1', sample))
     def sample2tissue(sample):
-        if re.match('.*Walsh.*', vcflistpath):
-            return('frontal cortex')
-        return(re.sub(samplestr, '\\3', sample))
+        #if re.match('.*Walsh.*', vcflistpath):
+        if not re.match(samplestr, sample):
+            return('frontal cortex') # Walsh data
+        return(re.sub(samplestr, '\\3', sample)) # Chess data
     def get_annot(sample, annotyp):
         sampledir = annotdirpath + os.path.sep + sample
         tsvpath = sampledir + os.path.sep + annotyp + '.txt'
@@ -118,8 +136,11 @@ def get_multi_annotations(annotlist,
             annot = None
         return(annot)
     def do_annotyp(annotyp):
-        a = pd.concat([get_annot(s, annotyp) for s in vcflist.index], axis=0)
-        return(a)
+        try:
+            annot = pd.concat([get_annot(s, annotyp) for s in vcflist.index], axis=0)
+        except ValueError:
+            annot = None
+        return(annot)
     annot = pd.concat([do_annotyp(a) for a in annotlist], axis=1)
     return(annot)
 
@@ -207,7 +228,7 @@ def load_data(picklepath='/home/attila/projects/bsm/results/2020-09-07-annotatio
 def filter_fulldata(fulldata):
     chess = fulldata.loc[fulldata.Dataset == 'Chess'].xs('NeuN_pl', level='Tissue')
     HC_list = ['HC/PASS', 'HC;PASS/PASS']
-    walsh = fulldata.loc[fulldata.Dataset == 'Walsh']
+    walsh = fulldata.loc[fulldata.Dataset == 'Walsh'].xs('frontal cortex', level='Tissue')
     walsh = walsh.loc[walsh['FILTER/PASS'].isin(HC_list)]
     data = pd.concat([chess, walsh], axis=0)
     return(data)
@@ -302,19 +323,18 @@ def merge_snpnexus_with_other_annotations(calls=individuals.get_datasets(), test
     '''
     Main function: read SNPnexus annotations for the full Chess and Walsh datasets and merge them with other annotations
     '''
-    # SNPnexus annotations
-    annotlist = ['1KGen', 'cpg', 'deepsea', 'encode', 'ensembl', 'gerp', 'near_gens', 'phast', 'regbuild', 'sift',  'structvar', 'tfbs']
+    annotlist = standard_annotlist
     # custom values
     na_values = {}
     na_values.update({'1KGen': {'AFR Frequency': 'None', 'AMR Frequency': 'None', 'EAS Frequency': 'None', 'EUR Frequency': 'None', 'SAS Frequency': 'None'}})
     # to binarize columns
     cols2binarize = []
-    cols2binarize += ['1KGen_AFR Frequency', '1KGen_AMR Frequency', '1KGen_EAS Frequency', '1KGen_EUR Frequency', '1KGen_SAS Frequency']
-    cols2binarize += ['cpg_CpG Island']
-    cols2binarize += ['gerp_Element RS Score']
-    cols2binarize += ['phast_Score']
-    cols2binarize += ['tfbs_TFBS Name']
-    cols2binarize += ['structvar_Type']
+    #cols2binarize += ['1KGen_AFR Frequency', '1KGen_AMR Frequency', '1KGen_EAS Frequency', '1KGen_EUR Frequency', '1KGen_SAS Frequency']
+    #cols2binarize += ['cpg_CpG Island']
+    #cols2binarize += ['gerp_Element RS Score']
+    #cols2binarize += ['phast_Score']
+    #cols2binarize += ['tfbs_TFBS Name']
+    #cols2binarize += ['structvar_Type']
     # to regularize columns
     colsdict = {}
     # order reflecting severity of effect
@@ -335,14 +355,17 @@ def merge_snpnexus_with_other_annotations(calls=individuals.get_datasets(), test
     colsdict.update({'structvar_Type': ['complex', 'loss', 'gain']})
     if testmode:
         annotlist = annotlist[:2] + ['sift' + 'regbuild']
-        cols2binarize = cols2binarize[:6]
+        #cols2binarize = cols2binarize[:6]
         features = ['sift_Prediction', 'regbuild_Epigenome']
         colsdict = {k: colsdict[k] for k in features}
-    vcflistpaths = ['/home/attila/projects/bsm/results/calls/filtered-vcfs' + s + '.tsv' for s in ['', '-Walsh']]
+    #vcflistpaths = ['/home/attila/projects/bsm/results/calls/filtered-vcfs' + s + '.tsv' for s in ['', '-Walsh']]
+    vcflistpath = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Chess-Walsh.tsv'
     annotdirpath = '/home/attila/projects/bsm/results/2020-09-07-annotations'
+    annot = get_multi_annotations(annotlist, vcflistpath, annotdirpath, na_values)
+    return(annot)
     lannot = [get_multi_annotations(annotlist, p, annotdirpath, na_values) for p in vcflistpaths]
     annot = pd.concat(lannot, axis=0)
-    annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
+    #annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
     # read epigenome names for Ensemble Regulatory Build
     # https://useast.ensembl.org/info/genome/funcgen/regulatory_build.html
     annot = regularize_categ_cols(colsdict, annot, calls, nafillval='other')
