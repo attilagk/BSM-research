@@ -10,6 +10,8 @@ import ensembl_rest
 import pickle
 from bsmcalls import individuals
 
+# TODO: GTEx
+
 annotlists = {'Gene Annotation': ['gen_coords', 'ensembl', 'near_gens'],
               'Protein Effect': ['sift', 'polyphen'],
               'Population Data': ['1KGen', 'gnomad'],
@@ -19,7 +21,30 @@ annotlists = {'Gene Annotation': ['gen_coords', 'ensembl', 'near_gens'],
               'Structural Variations': ['structvar'],
               'Non-coding Variation Scoring': ['cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm']}
 
-standard_annotlist = ['gen_coords', 'ensembl', 'near_gens', # Gene Annotation
+columns2drop = ['ensembl_Variant', 'ensembl_Strand', 'ensembl_CDNA Position', 'ensembl_CDS Position', 'ensembl_Proteins',
+                'sift_dbSNP', 'sift_Variant', 'sift_Transcript',
+                'polyphen_dbSNP', 'polyphen_Variant', 'polyphen_Transcript',
+                'polyphen_Gene', 'polyphen_AA Position', 'polyphen_Wild AA', 'polyphen_Mutant AA',
+                '1KGen_dbSNP', '1KGen_REF Allele', '1KGen_ALT Allele', '1KGen_Minor Allele',
+                'tarbase_Gene', 
+                'encode_Region Start', 'encode_Region End', 'encode_Feature Type Class', 'encode_Feature Type', 'encode_Epigenome',
+                'roadmap_Region Start', 'roadmap_Region End', 'roadmap_Feature Type Class', 'roadmap_Feature Type', 'roadmap_Epigenome',
+                'regbuild_Region Start', 'regbuild_Region End', 'regbuild_Feature Type', 'regbuild_Epigenome', 'regbuild_Activity',
+                'clinvar_Variation', 'clinvar_Type',
+                'phast_Region Start', 'phast_Region End', 'phast_Id',
+                'gerp_Region Start', 'gerp_Region End',
+                'structvar_Chrom Start', 'structvar_Chrom End', 'structvar_Type', 'structvar_Method', 'structvar_Sample', 'structvar_Gain',
+                'clinvar_Type',
+                'cadd_Variant', 'fitcons_Region Start', 'fitcons_Region End',
+                'eigen_Variant', 'fathmm_Variant', 'gwava_Known SNP','gwava_Region Score',  'gwava_TSS Score', 'gwava_Unmatched Score',
+                'deepsea_Variant', 'funseq2_Variant'
+                ]
+
+columns2categorize = ['gen_coords_Minor Allele', 'gen_coords_Contig', 'gen_coords_Band'
+                      ]
+
+
+annotlist = ['gen_coords', 'ensembl', 'near_gens', # Gene Annotation
                       'sift', 'polyphen', # Protein Effect
                       '1KGen', 'gnomad', # Population Data
                       'tfbs', 'vista', 'cpg', 'targetscan', 'tarbase', 'encode', 'roadmap', 'regbuild', # Regulatory Elements
@@ -27,6 +52,9 @@ standard_annotlist = ['gen_coords', 'ensembl', 'near_gens', # Gene Annotation
                       'phast', 'gerp', # Conserved Elements
                       'structvar', # Structural Variations
                       'cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm'] # Non-coding Variation Scoring
+
+na_values = {}
+na_values.update({'1KGen': {'AFR Frequency': 'None', 'AMR Frequency': 'None', 'EAS Frequency': 'None', 'EUR Frequency': 'None', 'SAS Frequency': 'None'}})
 
 def tsvpath2annotname(tsvpath):
     val = re.sub('.txt', '', os.path.basename(tsvpath))
@@ -175,6 +203,31 @@ def binarize_cols(cols2binarize, annot, calls, suffix='_bin', do_categ=False):
         do_col(col)
     return(val)
 
+
+def create_colsdict():
+    '''
+    Create input dictionary for regularize_categ_cols
+    '''
+    colsdict = {}
+    # order reflecting severity of effect
+    l = ['Deleterious', 'Deleterious - Low Confidence', 'Tolerated', 'Tolerated - Low Confidence']
+    colsdict.update({'sift_Prediction': l})
+    # order reflecting increasing frequency of categories in the data set
+    l = ['Polymerase', 'Open Chromatin', 'Transcription Factor', 'Histone']
+    colsdict.update({'encode_Feature Type Class': l})
+    l = ['intronic (splice_site)', 'coding', 'intronic', '5utr', '3utr', '5upstream', '3downstream', 'non-coding intronic', 'non-coding']
+    colsdict.update({'ensembl_Predicted Function': l})
+    def read_categories(fpath):
+        with open(fpath) as f:
+            val = f.readlines()
+            val = [x.strip() for x in val]
+            return(val)
+    regbuild_epigenomes = read_categories('/big/results/bsm/2020-09-07-annotations/regbuild-epigenomes')
+    colsdict.update({'regbuild_Epigenome': regbuild_epigenomes})
+    colsdict.update({'structvar_Type': ['complex', 'loss', 'gain']})
+    return(colsdict)
+
+
 def regularize_categ_cols(colsdict, annot, calls, nafillval='other'):
     '''
     Regularize categorical columns in annot: map vectors to scalars and fill NAs
@@ -213,19 +266,31 @@ def regularize_categ_cols(colsdict, annot, calls, nafillval='other'):
         val[col] = s
     return(val)
 
+
 def do_annot(annotlist, calls, cols2process=None):
+    '''
+    Obsoleteed main function superseded by merge_snpnexus_with_other_annotations
+    '''
     annot = get_multi_annotations(annotlist)
     numeric_cols = annot.select_dtypes(np.number).columns
     cols2binarize = [c for c in numeric_cols if c in cols2process]
     annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
     return(annot)
 
+
 def load_data(picklepath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.p'):
+    '''
+    Load annotated calls from pickle file
+    '''
     with open(picklepath, 'rb') as f:
         data = pickle.load(f)
     return(data)
 
+
 def filter_fulldata(fulldata):
+    '''
+    Filter all VCF records: keep only NeuN_pl from Chess data and HC from Walsh data
+    '''
     chess = fulldata.loc[fulldata.Dataset == 'Chess'].xs('NeuN_pl', level='Tissue')
     HC_list = ['HC/PASS', 'HC;PASS/PASS']
     walsh = fulldata.loc[fulldata.Dataset == 'Walsh'].xs('frontal cortex', level='Tissue')
@@ -319,57 +384,31 @@ def insert_col(s, df, oldname, newname, inplace=False):
     D.insert(ix + 1, column=newname, value=s)
     return(D)
 
-def merge_snpnexus_with_other_annotations(calls=individuals.get_datasets(), testmode=False):
+def postprocess_annot(annot, cols2drop=columns2drop):
+    annot = annot.drop(labels=cols2drop, axis=1)
+    return(annot)
+
+def merge_snpnexus_with_other_annotations(annotlist=annotlist,
+                                          na_values=na_values,
+                                          colsdict=create_colsdict(),
+                                          fpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annot.p',
+                                          calls=individuals.get_datasets()):
     '''
     Main function: read SNPnexus annotations for the full Chess and Walsh datasets and merge them with other annotations
     '''
-    annotlist = standard_annotlist
-    # custom values
-    na_values = {}
-    na_values.update({'1KGen': {'AFR Frequency': 'None', 'AMR Frequency': 'None', 'EAS Frequency': 'None', 'EUR Frequency': 'None', 'SAS Frequency': 'None'}})
-    # to binarize columns
-    cols2binarize = []
-    #cols2binarize += ['1KGen_AFR Frequency', '1KGen_AMR Frequency', '1KGen_EAS Frequency', '1KGen_EUR Frequency', '1KGen_SAS Frequency']
-    #cols2binarize += ['cpg_CpG Island']
-    #cols2binarize += ['gerp_Element RS Score']
-    #cols2binarize += ['phast_Score']
-    #cols2binarize += ['tfbs_TFBS Name']
-    #cols2binarize += ['structvar_Type']
-    # to regularize columns
-    colsdict = {}
-    # order reflecting severity of effect
-    l = ['Deleterious', 'Deleterious - Low Confidence', 'Tolerated', 'Tolerated - Low Confidence']
-    colsdict.update({'sift_Prediction': l})
-    # order reflecting increasing frequency of categories in the data set
-    l = ['Polymerase', 'Open Chromatin', 'Transcription Factor', 'Histone']
-    colsdict.update({'encode_Feature Type Class': l})
-    l = ['coding', 'intronic', 'intronic (splice_site)', '5utr', '3utr', '5upstream', '3downstream', 'non-coding intronic', 'non-coding']
-    colsdict.update({'ensembl_Predicted Function': l})
-    def read_categories(fpath):
-        with open(fpath) as f:
-            val = f.readlines()
-            val = [x.strip() for x in val]
-            return(val)
-    regbuild_epigenomes = read_categories('/big/results/bsm/2020-09-07-annotations/regbuild-epigenomes')
-    colsdict.update({'regbuild_Epigenome': regbuild_epigenomes})
-    colsdict.update({'structvar_Type': ['complex', 'loss', 'gain']})
-    if testmode:
-        annotlist = annotlist[:2] + ['sift' + 'regbuild']
-        #cols2binarize = cols2binarize[:6]
-        features = ['sift_Prediction', 'regbuild_Epigenome']
-        colsdict = {k: colsdict[k] for k in features}
-    #vcflistpaths = ['/home/attila/projects/bsm/results/calls/filtered-vcfs' + s + '.tsv' for s in ['', '-Walsh']]
-    vcflistpath = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Chess-Walsh.tsv'
-    annotdirpath = '/home/attila/projects/bsm/results/2020-09-07-annotations'
-    annot = get_multi_annotations(annotlist, vcflistpath, annotdirpath, na_values)
+    if os.path.exists(fpath):
+        print('loading annot DataFrame from', fpath)
+        with open(fpath, 'rb') as f:
+            annot = pickle.load(f)
+    else:
+        vcflistpath = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Chess-Walsh.tsv'
+        annotdirpath = '/home/attila/projects/bsm/results/2020-09-07-annotations'
+        annot = get_multi_annotations(annotlist, vcflistpath, annotdirpath, na_values)
+        pickle.dump(annot, open(fpath, 'wb'))
     return(annot)
-    lannot = [get_multi_annotations(annotlist, p, annotdirpath, na_values) for p in vcflistpaths]
-    annot = pd.concat(lannot, axis=0)
-    #annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
-    # read epigenome names for Ensemble Regulatory Build
-    # https://useast.ensembl.org/info/genome/funcgen/regulatory_build.html
+    
     annot = regularize_categ_cols(colsdict, annot, calls, nafillval='other')
-    s = annot['regbuild_Epigenome']
-    annot['regbuild_Epigenome_nervoussys_bin'] = np.int8(s.isin(regbuild_epigenomes[:7]))
+    #s = annot['regbuild_Epigenome']
+    #annot['regbuild_Epigenome_nervoussys_bin'] = np.int8(s.isin(regbuild_epigenomes[:7]))
     data = pd.concat([calls, annot], axis=1)
     return(data)
