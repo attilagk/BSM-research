@@ -12,6 +12,15 @@ from bsmcalls import individuals
 
 # TODO: GTEx
 
+annotlist = ['gen_coords', 'ensembl', 'near_gens', # Gene Annotation
+                      'sift', 'polyphen', # Protein Effect
+                      '1KGen', 'gnomad', # Population Data
+                      'tfbs', 'vista', 'cpg', 'targetscan', 'tarbase', 'encode', 'roadmap', 'regbuild', # Regulatory Elements
+                      'clinvar', # Phenotype/Disease Association
+                      'phast', 'gerp', # Conserved Elements
+                      'structvar', # Structural Variations
+                      'cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm'] # Non-coding Variation Scoring
+
 annotlists = {'Gene Annotation': ['gen_coords', 'ensembl', 'near_gens'],
               'Protein Effect': ['sift', 'polyphen'],
               'Population Data': ['1KGen', 'gnomad'],
@@ -22,6 +31,8 @@ annotlists = {'Gene Annotation': ['gen_coords', 'ensembl', 'near_gens'],
               'Non-coding Variation Scoring': ['cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm']}
 
 columns2drop = ['ensembl_Variant', 'ensembl_Strand', 'ensembl_CDNA Position', 'ensembl_CDS Position', 'ensembl_Proteins',
+                'ensembl_Symbol', 'ensembl_Gene', 'ensembl_Transcript', 'ensembl_Predicted Function', 'ensembl_AA Position',
+                'ensembl_AA Change', 'ensembl_Detail', 'ensembl_Splice Distance',
                 'sift_dbSNP', 'sift_Variant', 'sift_Transcript',
                 'polyphen_dbSNP', 'polyphen_Variant', 'polyphen_Transcript',
                 'polyphen_Gene', 'polyphen_AA Position', 'polyphen_Wild AA', 'polyphen_Mutant AA',
@@ -33,28 +44,86 @@ columns2drop = ['ensembl_Variant', 'ensembl_Strand', 'ensembl_CDNA Position', 'e
                 'clinvar_Variation', 'clinvar_Type',
                 'phast_Region Start', 'phast_Region End', 'phast_Id',
                 'gerp_Region Start', 'gerp_Region End',
-                'structvar_Chrom Start', 'structvar_Chrom End', 'structvar_Type', 'structvar_Method', 'structvar_Sample', 'structvar_Gain',
+                'structvar_Reference', 'structvar_Chrom Start', 'structvar_Chrom End', 'structvar_Type', 'structvar_Method', 'structvar_Sample', 'structvar_Gain',
                 'clinvar_Type',
                 'cadd_Variant', 'fitcons_Region Start', 'fitcons_Region End',
                 'eigen_Variant', 'fathmm_Variant', 'gwava_Known SNP','gwava_Region Score',  'gwava_TSS Score', 'gwava_Unmatched Score',
                 'deepsea_Variant', 'funseq2_Variant'
                 ]
 
-columns2categorize = ['gen_coords_Minor Allele', 'gen_coords_Contig', 'gen_coords_Band'
-                      ]
+columns2float = ['gen_coords_Minor Allele Global Frequency',
+                 'sift_Score', 'polyphen_Score',
+                 '1KGen_AFR Frequency', '1KGen_AMR Frequency', '1KGen_EAS Frequency', '1KGen_EUR Frequency', '1KGen_SAS Frequency',
+                 'gnomad_AFR Frequency', 'gnomad_AMR Frequency', 'gnomad_ASJ Frequency',
+                 'gnomad_EAS Frequency', 'gnomad_FIN Frequency', 'gnomad_NFE Frequency',
+                 'gnomad_OTH Frequency', 'gnomad_SAS Frequency',
+                 'cpg_CpG %', 'cpg_C/G %', 'cpg_Ratio',
+                 'gerp_Element RS Score', 'gerp_Base RS Score',
+                 'cadd_Raw Score', 'cadd_PHRED', 'fitcons_Fitness Score',
+                 'eigen_Score', 'eigen_PC Score',
+                 'fathmm_Non-coding Score', 'fathmm_Coding Score',
+                 'deepsea_Functional Significance Score', 'deepsea_eQTL Probability',
+                 'deepsea_GWAS Probability', 'deepsea_HGMD Probability',
+                 'funseq2_Non-coding Score', 'remm_ReMM Score'
+                   ]
+
+columns2integer = ['near_gens_Distance to Nearest Upstream Gene', 'near_gens_Distance to Nearest Downstream Gene',
+                   'gen_coords_Contig Position',
+                   'sift_AA Position',
+                   'tfbs_Region Start', 'tfbs_Region End',
+                   'vista_Region Start', 'vista_Region End', 'vista_Score',
+                   'cpg_Region Start', 'cpg_Region End', 'cpg_Length',
+                   'targetscan_Region Start', 'targetscan_Region End', 'targetscan_Score', 'targetscan_Strand',
+                   'tarbase_Region Start', 'tarbase_Region End', 'tarbase_Strand',
+                   'phast_Score', 'structvar_PubMed', 'structvar_Loss',
+                   ]
+
+columns2split_keep1st = ['sift_Gene', 'sift_Wild AA', 'sift_Mutant AA', 'sift_Prediction',
+                         'polyphen_Prediction',
+                         ]
 
 
-annotlist = ['gen_coords', 'ensembl', 'near_gens', # Gene Annotation
-                      'sift', 'polyphen', # Protein Effect
-                      '1KGen', 'gnomad', # Population Data
-                      'tfbs', 'vista', 'cpg', 'targetscan', 'tarbase', 'encode', 'roadmap', 'regbuild', # Regulatory Elements
-                      'clinvar', # Phenotype/Disease Association
-                      'phast', 'gerp', # Conserved Elements
-                      'structvar', # Structural Variations
-                      'cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm'] # Non-coding Variation Scoring
+aa_alphabet = list('ACDEFGHIKLMNPRSTVWY')
 
-na_values = {}
-na_values.update({'1KGen': {'AFR Frequency': 'None', 'AMR Frequency': 'None', 'EAS Frequency': 'None', 'EUR Frequency': 'None', 'SAS Frequency': 'None'}})
+columns2categorize = {'gen_coords_dbSNP': None,
+                      'gen_coords_REF Allele': list('ACGT'),
+                      'gen_coords_ALT Allele (IUPAC)': list('ACGT'),
+                      'gen_coords_Minor Allele': list('ACGT'),
+                      'gen_coords_Contig': None,
+                      'gen_coords_Band': None,
+                      'near_gens_Nearest Upstream Gene': None,
+                      'near_gens_Type of Nearest Upstream Gene': None,
+                      'near_gens_Nearest Downstream Gene': None,
+                      'near_gens_Type of Nearest Downstream Gene': None,
+                      'sift_Gene': None,
+                      'sift_Wild AA': aa_alphabet,
+                      'sift_Mutant AA': aa_alphabet,
+                      'sift_Prediction': None,
+                      'polyphen_Prediction': None,
+                      'gnomad_dbSNP': None,
+                      'gnomad_REF Allele': list('ACGT'),
+                      'gnomad_ALT Allele': list('ACGT'),
+                      'gnomad_Minor Allele': list('ACGT'),
+                      'clinvar_Clinical Significance': None,
+                      'clinvar_Phenotypes': None,
+                      'vista_Vista Item': None,
+                      'fathmm_Non-coding Groups': ['AB', 'A', 'AC', 'ALL', 'ADB', 'AD', 'ABC', 'ADC', 'D', 'B'],
+                      'fathmm_Coding Groups': None
+                      }
+
+na_values = dict()
+
+none_colon_none='^None(:None)*$'
+
+NA2remove = {'near_gens_Overlapped Gene': ['None'],
+             'near_gens_Type': ['None'],
+             'near_gens_Annotation': ['None'],
+             'near_gens_Nearest Upstream Gene': none_colon_none,
+             'near_gens_Type of Nearest Upstream Gene': none_colon_none,
+             'near_gens_Nearest Downstream Gene': none_colon_none,
+             'near_gens_Type of Nearest Downstream Gene': none_colon_none,
+             }
+
 
 def tsvpath2annotname(tsvpath):
     val = re.sub('.txt', '', os.path.basename(tsvpath))
@@ -384,8 +453,38 @@ def insert_col(s, df, oldname, newname, inplace=False):
     D.insert(ix + 1, column=newname, value=s)
     return(D)
 
-def postprocess_annot(annot, cols2drop=columns2drop):
-    annot = annot.drop(labels=cols2drop, axis=1)
+def postprocess_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
+                      columns2split_keep1st=columns2split_keep1st, 
+                      cols2integer=columns2integer, NA2remove=NA2remove,
+                      cols2categorize=columns2categorize):
+    # drop unnecessary columns
+    try:
+        annot = annot.drop(labels=cols2drop, axis=1)
+    except KeyError:
+        annot = annot.copy()
+    for c in cols2float + cols2integer:
+        annot[c] = pd.to_numeric(annot[c], errors='coerce')
+    for c in cols2integer:
+        annot[c] = pd.Series(annot[c], dtype=pd.Int64Dtype())
+    for k, v in NA2remove.items():
+        if isinstance(v, list):
+            b = annot[k].isin(v)
+        else:
+            b = annot[k].str.match(v)
+        annot.loc[b, k] = np.nan
+    for c in columns2split_keep1st:
+        annot[c] = annot[c].str.extract('^([^:]+):.*', expand=False)
+    for k, v in columns2categorize.items():
+        if v is None:
+            s = pd.Categorical(annot[k])
+        else:
+            s = pd.Categorical(annot[k], categories=v)
+        annot[k] = s
+    # odds and ends
+    annot['fitcons_p-Value'] = annot['fitcons_p-Value'].str.strip('<').astype('float64')
+    s = annot['cpg_CpG Island'].str.strip('CpG: ')
+    s = pd.to_numeric(s, errors='coerce')
+    annot['cpg_CpG Island'] = pd.Series(s, dtype=pd.Int64Dtype())
     return(annot)
 
 def merge_snpnexus_with_other_annotations(annotlist=annotlist,
