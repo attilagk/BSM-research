@@ -337,17 +337,6 @@ def regularize_categ_cols(colsdict, annot, calls, nafillval='other'):
     return(val)
 
 
-def do_annot(annotlist, calls, cols2process=None):
-    '''
-    Obsoleteed main function superseded by merge_snpnexus_with_other_annotations
-    '''
-    annot = get_multi_annotations(annotlist)
-    numeric_cols = annot.select_dtypes(np.number).columns
-    cols2binarize = [c for c in numeric_cols if c in cols2process]
-    annot = binarize_cols(cols2binarize, annot, calls, suffix='_bin')
-    return(annot)
-
-
 def load_data(picklepath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.p'):
     '''
     Load annotated calls from pickle file
@@ -388,7 +377,7 @@ def str2list(annot, colname, nonestr='None', sepstr=':'):
     Convert a string to a list removing nonestr and splitting on sepstr
 
     Arguments
-    annot: pandas DataFrame returned by merge_snpnexus_with_other_annotations, do_annot or read by load_data
+    annot: pandas DataFrame returned by do_annot, do_annot or read by load_data
     colname: the column name of the feature
     nonestr: this means NA or similar
     sepstr: splitting should be done on this string
@@ -454,12 +443,60 @@ def insert_col(s, df, oldname, newname, inplace=False):
     D.insert(ix + 1, column=newname, value=s)
     return(D)
 
-def multivalued2dict(annot, keycol, valcols):
+
+def multivalued2dict(annot, keycol, valcols, nested=True):
+    '''
+    Multivalued features: format into a dictionary
+    
+    Arguments
+    annot: pandas DataFrame returned by do_annot or read by load_data
+    keycol: a single column providing keys for the dict
+    valcols: one or more columns providing values for the dict
+    nested: whether the values of the dict are lists or scalars
+
+    Details:
+
+    Example I: nested=True
+
+    We are dealing with one keycol and two valcols.  The
+    keycol will be converted into a python set while each valcol into a
+    dictionary whose values are lists.
+
+    keycol = 'near_gens_Overlapped Gene'
+    valcols = ['near_gens_Type', 'near_gens_Annotation']
+
+    input key = 'CUZD1:FAM24B'
+    input val0 = 'protein_coding:protein_coding'
+    input val1 = 'intronic:non-coding intronic,intronic'
+
+    output key = {'CUZD0', 'FAM14B'}
+    output val0 = {'CUZD1': ['protein_coding'], 'FAM14B': ['protein_coding']}
+    output val1 = {'CUZD0': ['intronic'], 'FAM24B': ['non-coding intronic', 'intronic']}
+
+
+    Example II: nested=False
+
+    keycol ='tfbs_TFBS Name'
+    valcols = ['tfbs_TFBS Accession']
+    
+    input key = 'C/EBPbeta:C/EBPbeta:C/EBPbeta:C/EBPalpha:C/EBPalpha:C/EBPalpha'
+    input val0 = 'M00117:M00117:M00117:M00190:M00190:M00190'
+
+    output key = {C/EBPalpha, C/EBPbeta}
+    output val0 = {'C/EBPbeta': ['M00117'], 'C/EBPalpha': ['M00190']}
+    helper('tfbs_TFBS Name', ['tfbs_TFBS Accession'])
+    '''
     cols = [keycol] + valcols
     df = annot[cols].copy()
-    def helper(k, v):
+    def flatfun(k, v):
         val = dict(zip(k.split(':'), v.split(':')))
         return(val)
+    def nestedfun(k, v):
+        vl = v.split(':')
+        vll = [x.split(',') for x in vl]
+        val = dict(zip(k.split(':'), vll))
+        return(val)
+    helper = nestedfun if nested else flatfun
     df1 = df[cols].dropna().copy()
     for valcol in valcols:
         val = np.vectorize(helper)(df1[keycol], df1[valcol])
@@ -468,7 +505,7 @@ def multivalued2dict(annot, keycol, valcols):
     res = df1.reindex(index=df.index)
     return(res)
 
-def postprocess_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
+def clean_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
                       columns2split_keep1st=columns2split_keep1st, 
                       cols2integer=columns2integer, NA2remove=NA2remove,
                       cols2categorize=columns2categorize):
@@ -506,17 +543,34 @@ def postprocess_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
         annot[cols] = multivalued2dict(annot, keycol, valcols)
         return(None)
     helper('near_gens_Overlapped Gene', ['near_gens_Type', 'near_gens_Annotation'])
-    helper('tarbase_miRNA', ['tfbs_TFBS Accession'])
-    helper('tfbs_TFBS Name', ['tarbase_Accession'])
+    helper('tfbs_TFBS Name', ['tfbs_TFBS Accession'])
+    helper('tarbase_miRNA', ['tarbase_Accession'])
     s = annot['targetscan_Item Name'].str.split(':').dropna().apply(lambda x: set(x))
     annot['targetscan_Item Name'] = s.reindex(index=annot.index)
     return(annot)
 
-def merge_snpnexus_with_other_annotations(annotlist=annotlist,
-                                          na_values=na_values,
-                                          colsdict=create_colsdict(),
-                                          fpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annot.p',
-                                          calls=individuals.get_datasets()):
+
+def merge_clean(calls, annot, dofilter=True):
+    '''
+    Merge calls with the SNP annotations
+
+    Arguments
+    calls: output of individuals.get_datasets()
+    annot: output of do_annot()
+    dofilter: whether to remove unnecessary rows (calls)
+
+    Value: mearged, cleaned and possibly filtered calls + annot
+    '''
+    data = pd.concat([calls, annot], axis=1)
+    if dofilter:
+        data = filter_fulldata(data)
+    data = clean_annot(data)
+    return(data)
+
+
+def do_annot(annotlist=annotlist, na_values=na_values, colsdict=create_colsdict(),
+             fpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annot.p',
+             calls=individuals.get_datasets()):
     '''
     Main function: read SNPnexus annotations for the full Chess and Walsh datasets and merge them with other annotations
     '''
@@ -530,9 +584,3 @@ def merge_snpnexus_with_other_annotations(annotlist=annotlist,
         annot = get_multi_annotations(annotlist, vcflistpath, annotdirpath, na_values)
         pickle.dump(annot, open(fpath, 'wb'))
     return(annot)
-    
-    annot = regularize_categ_cols(colsdict, annot, calls, nafillval='other')
-    #s = annot['regbuild_Epigenome']
-    #annot['regbuild_Epigenome_nervoussys_bin'] = np.int8(s.isin(regbuild_epigenomes[:7]))
-    data = pd.concat([calls, annot], axis=1)
-    return(data)

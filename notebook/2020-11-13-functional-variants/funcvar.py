@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import itertools
 from bsmcalls import SNPnexus
 
@@ -28,7 +29,8 @@ def get_geneset(df=pd.read_csv(clozukpath, skiprows=7), col='Gene(s) tagged'):
     return(geneset)
 
 def count_member(g, member='coding nonsyn'):
-    b = g.apply(lambda x: member in x)
+    #b = g.apply(lambda x: member in x)
+    b = g.apply(lambda x: member in x.values() if not np.isnan(x) else False)
     val = sum(b)
     return(val)
 
