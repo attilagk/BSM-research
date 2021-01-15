@@ -453,6 +453,18 @@ def insert_col(s, df, oldname, newname, inplace=False):
     D.insert(ix + 1, column=newname, value=s)
     return(D)
 
+def multivalued2dict(annot, keycol, valcol):
+    df = annot[[keycol, valcol]].copy()
+    def helper(k, v):
+        val = dict(zip(k.split(':'), v.split(':')))
+        return(val)
+    df1 = df[[keycol, valcol]].dropna().copy()
+    val = np.vectorize(helper)(df1[keycol], df1[valcol])
+    df1[keycol] = df1[keycol].str.split(':').apply(lambda x: set(x))
+    df1[valcol] = val
+    res = df1.reindex(index=df.index)
+    return(res)
+
 def postprocess_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
                       columns2split_keep1st=columns2split_keep1st, 
                       cols2integer=columns2integer, NA2remove=NA2remove,
