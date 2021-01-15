@@ -48,7 +48,8 @@ columns2drop = ['ensembl_Variant', 'ensembl_Strand', 'ensembl_CDNA Position', 'e
                 'clinvar_Type',
                 'cadd_Variant', 'fitcons_Region Start', 'fitcons_Region End',
                 'eigen_Variant', 'fathmm_Variant', 'gwava_Known SNP','gwava_Region Score',  'gwava_TSS Score', 'gwava_Unmatched Score',
-                'deepsea_Variant', 'funseq2_Variant'
+                'deepsea_Variant', 'funseq2_Variant',
+                'tfbs_Species', 'tfbs_SwissProt Accession'
                 ]
 
 columns2float = ['gen_coords_Minor Allele Global Frequency',
@@ -453,15 +454,17 @@ def insert_col(s, df, oldname, newname, inplace=False):
     D.insert(ix + 1, column=newname, value=s)
     return(D)
 
-def multivalued2dict(annot, keycol, valcol):
-    df = annot[[keycol, valcol]].copy()
+def multivalued2dict(annot, keycol, valcols):
+    cols = [keycol] + valcols
+    df = annot[cols].copy()
     def helper(k, v):
         val = dict(zip(k.split(':'), v.split(':')))
         return(val)
-    df1 = df[[keycol, valcol]].dropna().copy()
-    val = np.vectorize(helper)(df1[keycol], df1[valcol])
+    df1 = df[cols].dropna().copy()
+    for valcol in valcols:
+        val = np.vectorize(helper)(df1[keycol], df1[valcol])
+        df1[valcol] = val
     df1[keycol] = df1[keycol].str.split(':').apply(lambda x: set(x))
-    df1[valcol] = val
     res = df1.reindex(index=df.index)
     return(res)
 
@@ -497,6 +500,16 @@ def postprocess_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
     s = annot['cpg_CpG Island'].str.strip('CpG: ')
     s = pd.to_numeric(s, errors='coerce')
     annot['cpg_CpG Island'] = pd.Series(s, dtype=pd.Int64Dtype())
+    # multivalued features
+    def helper(keycol, valcols):
+        cols = [keycol] + valcols
+        annot[cols] = multivalued2dict(annot, keycol, valcols)
+        return(None)
+    helper('near_gens_Overlapped Gene', ['near_gens_Type', 'near_gens_Annotation'])
+    helper('tarbase_miRNA', ['tfbs_TFBS Accession'])
+    helper('tfbs_TFBS Name', ['tarbase_Accession'])
+    s = annot['targetscan_Item Name'].str.split(':').dropna().apply(lambda x: set(x))
+    annot['targetscan_Item Name'] = s.reindex(index=annot.index)
     return(annot)
 
 def merge_snpnexus_with_other_annotations(annotlist=annotlist,
