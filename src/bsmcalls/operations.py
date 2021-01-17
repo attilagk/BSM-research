@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import functools
 
+_level_names = ['Feature', 'Query']
+
 def series_of_sets_intersect(series_of_sets, query):
     if not isinstance(query, set):
         query = {query}
@@ -24,6 +26,12 @@ def dicts2sets(series_of_dicts, listvalued=True):
     s = s.reindex_like(series_of_dicts)
     return(s)
 
+def scalar2sets(series_of_scalars):
+    s = series_of_scalars.dropna().astype(pd.StringDtype())
+    s = s.apply(lambda x: set([x]))
+    s = s.reindex_like(series_of_scalars)
+    return(s)
+
 features = {'near_gens_Overlapped Gene': lambda x: x,
             'near_gens_Type': lambda x: dicts2sets(x, True),
             'near_gens_Annotation': lambda x: dicts2sets(x, True),
@@ -33,14 +41,43 @@ features = {'near_gens_Overlapped Gene': lambda x: x,
             'tarbase_Accession': lambda x: dicts2sets(x, False),
             }
 
+def anyquery(feature, data):
+    s = data[feature].fillna(0).astype('bool')
+    ix = pd.MultiIndex.from_tuples([(feature, 'any')], names=_level_names)
+    df = pd.DataFrame(s.to_numpy(), index=s.index, columns=ix)
+    return(df)
+
 def query(queryitems, feature, data):
+    names = _level_names
+    if queryitems is None:
+        return(anyquery(feature, data))
     if isinstance(queryitems, list):
         querydict = dict(zip(queryitems, queryitems))
     else:
         querydict = queryitems
-    fun = features[feature]
+    if feature in features.keys():
+        fun = features[feature]
+    else:
+        fun = scalar2sets
     series_of_sets = fun(data[feature])
     l = [series_of_sets_intersect(series_of_sets, q) for q in querydict.values()]
+    df = pd.concat(l, axis=1, keys=querydict.keys())
+    iterables = [[feature], queryitems]
+    ix = pd.MultiIndex.from_product(iterables, names=names)
+    df = pd.DataFrame(df.to_numpy(), index=df.index, columns=ix)
+    return(df)
+
+def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
+    l = [query(v, k, data) for k, v in querydict.items()]
     df = pd.concat(l, axis=1)
-    df.columns = querydict.keys()
+    if do_sort:
+        df = df.sort_index(axis=1)
+    if do_sum:
+        df['Dx'] = data['Dx']
+        df = df.groupby('Dx').sum().T
+        if margin:
+            categories = list(df.columns.categories) + ['All']
+            ix = pd.CategoricalIndex(df.columns, categories=categories)
+            df = df.reindex(columns=ix)
+            df['All'] = df.sum(axis=1)
     return(df)
