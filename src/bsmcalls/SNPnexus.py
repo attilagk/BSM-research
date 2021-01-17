@@ -538,13 +538,13 @@ def clean_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
     s = pd.to_numeric(s, errors='coerce')
     annot['cpg_CpG Island'] = pd.Series(s, dtype=pd.Int64Dtype())
     # multivalued features
-    def helper(keycol, valcols):
+    def helper(keycol, valcols, nested):
         cols = [keycol] + valcols
-        annot[cols] = multivalued2dict(annot, keycol, valcols)
+        annot[cols] = multivalued2dict(annot, keycol, valcols, nested)
         return(None)
-    helper('near_gens_Overlapped Gene', ['near_gens_Type', 'near_gens_Annotation'])
-    helper('tfbs_TFBS Name', ['tfbs_TFBS Accession'])
-    helper('tarbase_miRNA', ['tarbase_Accession'])
+    helper('near_gens_Overlapped Gene', ['near_gens_Type', 'near_gens_Annotation'], nested=True)
+    helper('tfbs_TFBS Name', ['tfbs_TFBS Accession'], nested=False)
+    helper('tarbase_miRNA', ['tarbase_Accession'], nested=False)
     s = annot['targetscan_Item Name'].str.split(':').dropna().apply(lambda x: set(x))
     annot['targetscan_Item Name'] = s.reindex(index=annot.index)
     return(annot)
@@ -572,7 +572,7 @@ def do_annot(annotlist=annotlist, na_values=na_values, colsdict=create_colsdict(
              fpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annot.p',
              calls=individuals.get_datasets()):
     '''
-    Main function: read SNPnexus annotations for the full Chess and Walsh datasets and merge them with other annotations
+    Main function: read SNPnexus annotations for the full Chess and Walsh datasets
     '''
     if os.path.exists(fpath):
         print('loading annot DataFrame from', fpath)
