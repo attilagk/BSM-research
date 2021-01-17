@@ -73,11 +73,15 @@ def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
     if do_sort:
         df = df.sort_index(axis=1)
     if do_sum:
-        df['Dx'] = data['Dx']
-        df = df.groupby('Dx').sum().T
-        if margin:
-            categories = list(df.columns.categories) + ['All']
-            ix = pd.CategoricalIndex(df.columns, categories=categories)
-            df = df.reindex(columns=ix)
-            df['All'] = df.sum(axis=1)
+        df = summarize_query_results(df, data, margin=margin)
     return(df)
+
+def summarize_query_results(results, data, margin=True):
+    results['Dx'] = data['Dx']
+    results = results.groupby('Dx').sum().T
+    if margin:
+        categories = list(results.columns.categories) + ['All']
+        ix = pd.CategoricalIndex(results.columns, categories=categories)
+        results = results.reindex(columns=ix)
+        results['All'] = results.sum(axis=1)
+    return(results)
