@@ -18,6 +18,8 @@ def convert2categorical(data, max_ncat=5):
             y = pd.Categorical(y)
         return(y)
     data = data.apply(helper, axis=0)
+    if 'Dx' in data.columns:
+        data['Dx'] = pd.Categorical(data['Dx'], categories=['Control', 'SCZ', 'ASD'], ordered=True)
     return(data)
 
 def drop_unused_categories(data):

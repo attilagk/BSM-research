@@ -9,7 +9,7 @@ def series_of_sets_intersect(series_of_sets, query):
         query = {query}
     s = series_of_sets.dropna()
     s = s.apply(lambda x: len(x.intersection(query)))
-    s = s.reindex_like(series_of_sets).fillna(0).astype(np.int64)
+    s = s.reindex_like(series_of_sets).fillna(0).astype(np.int8)
     return(s)
 
 def dicts2sets(series_of_dicts, listvalued=True):

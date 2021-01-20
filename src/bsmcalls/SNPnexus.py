@@ -31,7 +31,7 @@ annotlists = {'Gene Annotation': ['gen_coords', 'ensembl', 'near_gens'],
               'Non-coding Variation Scoring': ['cadd', 'fitcons', 'eigen', 'fathmm', 'gwava', 'deepsea', 'funseq2', 'remm']}
 
 columns2drop = ['ensembl_Variant', 'ensembl_Strand', 'ensembl_CDNA Position', 'ensembl_CDS Position', 'ensembl_Proteins',
-                'ensembl_Symbol', 'ensembl_Gene', 'ensembl_Transcript', 'ensembl_Predicted Function', 'ensembl_AA Position',
+                'ensembl_Transcript', 'ensembl_AA Position',
                 'ensembl_AA Change', 'ensembl_Detail', 'ensembl_Splice Distance',
                 'sift_dbSNP', 'sift_Variant', 'sift_Transcript',
                 'polyphen_dbSNP', 'polyphen_Variant', 'polyphen_Transcript',
@@ -545,8 +545,16 @@ def clean_annot(annot, cols2drop=columns2drop, cols2float=columns2float,
     helper('near_gens_Overlapped Gene', ['near_gens_Type', 'near_gens_Annotation'], nested=True)
     helper('tfbs_TFBS Name', ['tfbs_TFBS Accession'], nested=False)
     helper('tarbase_miRNA', ['tarbase_Accession'], nested=False)
+    helper('ensembl_Gene', ['ensembl_Symbol'], nested=False)
     s = annot['targetscan_Item Name'].str.split(':').dropna().apply(lambda x: set(x))
     annot['targetscan_Item Name'] = s.reindex(index=annot.index)
+    s = annot['ensembl_Predicted Function'].dropna().str.split(':').apply(lambda x: set(x))
+    annot['ensembl_Predicted Function'] = s.reindex(index=annot.index)
+    if 'Dx' in annot.columns:
+        annot['Dx'] = pd.Categorical(annot['Dx'], categories=['Control', 'SCZ', 'ASD'], ordered=True)
+    # the 
+    annot.loc[annot['fathmm_Non-coding Score'] == -99.0, 'fathmm_Non-coding Score'] = np.nan
+    annot.loc[annot['fathmm_Coding Score'] == -99.0, 'fathmm_Coding Score'] = np.nan
     return(annot)
 
 
