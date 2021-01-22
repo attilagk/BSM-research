@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import functools
 from bsmcalls import individuals
+from scipy import stats
 
 _level_names = ['Feature', 'Query']
 
@@ -140,7 +141,7 @@ def query(queryitems, feature, data):
     return(df)
 
 
-def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
+def multiquery(querydict, data, do_sum=False, do_sort=False):
     '''
     Query multiple features at once
 
@@ -149,7 +150,6 @@ def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
     data: an annot DataFrame
     do_sum: whether to summarize results by calling summarize_query_results
     do_sort: unsorted pandas multiindex gives a warning about low performance
-    margin: whether to calculate marginal counts 'All' in the summary
 
     Value:
     a DataFrame of counts either for each call if do_sum=False or aggregated
@@ -162,7 +162,7 @@ def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
                    'near_gens_Overlapped Gene': {'SCZ GWAS genes': gwasgenes},
                    'ensembl_Gene': {'brain enriched HPA': set(pa_enriched.index), 'brain elevated HPA': set(pa_elevated.index)},
                    }
-    > multiquery(querydict, data, do_sum=True, do_sort=False, margin=True)
+    > multiquery(querydict, data, do_sum=True, do_sort=False)
 
     Dx                                                      Control  SCZ  ASD  All
     Feature                   Query
@@ -178,25 +178,46 @@ def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
     if do_sort:
         df = df.sort_index(axis=1)
     if do_sum:
-        df = summarize_query_results(df, data, margin=margin)
+        df = summarize_query_results(df, data)
     return(df)
 
-def summarize_query_results(results, data, margin=True, aggfun=None):
+def summarize_query_results(results, data, aggfun=None, chisq=True):
     results['Dx'] = data['Dx']
     results = results.groupby('Dx')
     if aggfun is not None:
         results = results.apply(lambda x: x.groupby('Individual ID').sum().agg(aggfun)).T
     else:
         results = results.sum().T.astype('int64')
-    if margin:
-        categories = list(results.columns.categories) + ['All']
-        ix = pd.CategoricalIndex(results.columns, categories=categories)
-        results = results.reindex(columns=ix)
-        results['All'] = results.sum(axis=1)
+    categories = list(results.columns.categories) + ['All']
+    ix = pd.CategoricalIndex(results.columns, categories=categories)
+    results = results.reindex(columns=ix)
+    results['All'] = results.sum(axis=1)
+    if chisq:
+        nsamples = individuals.get_nsamples(data, margin=True)
+        results = chisquare_summary(results, nsamples)
     return(results)
 
 def summarize_query_mean_sem(results, data):
     fundict = {'mean': np.mean, 'sem': lambda x: np.std(x) / (len(x) - 1)}
-    df = summarize_query_results(results, data, margin=True, aggfun=fundict.values())
+    df = summarize_query_results(results, data, aggfun=fundict.values())
     df = df.rename(columns={'<lambda>': 'sem'})
     return(df)
+
+def chisquare_summary_row(observed, nsamples, onlyp=True):
+    if 'All' not in observed.index:
+        observed.loc['All'] = observed.sum()
+    nsamples = pd.Series(nsamples) if isinstance(nsamples, dict) else nsamples
+    expected = nsamples.to_numpy() / nsamples.loc['All'] * observed.loc['All']
+    expected = pd.Series(expected, index=nsamples.index)
+    val = stats.chisquare(observed.to_numpy()[:-1], expected.to_numpy()[:-1])
+    if onlyp:
+        val = val[1]
+    return(val)
+
+def chisquare_summary(summary, nsamples):
+    summary = summary.copy()
+    summary.columns = list(summary.columns)
+    s = summary.apply(lambda x: chisquare_summary_row(x, nsamples, onlyp=False), axis=1)
+    summary['Chi^2 pval'] = s.apply(lambda x: x[1])
+    summary['Chi^2 stat'] = s.apply(lambda x: x[0])
+    return(summary)
