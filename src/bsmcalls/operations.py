@@ -181,17 +181,18 @@ def multiquery(querydict, data, do_sum=False, do_sort=False):
         df = summarize_query_results(df, data)
     return(df)
 
-def summarize_query_results(results, data, aggfun=None, chisq=True):
+def summarize_query_results(results, data, aggfun=None, chisq=True, margin=True):
     results['Dx'] = data['Dx']
     results = results.groupby('Dx')
     if aggfun is not None:
         results = results.apply(lambda x: x.groupby('Individual ID').sum().agg(aggfun)).T
     else:
         results = results.sum().T.astype('int64')
-    categories = list(results.columns.categories) + ['All']
-    ix = pd.CategoricalIndex(results.columns, categories=categories)
-    results = results.reindex(columns=ix)
-    results['All'] = results.sum(axis=1)
+    if margin:
+        categories = list(results.columns.categories) + ['All']
+        ix = pd.CategoricalIndex(results.columns, categories=categories)
+        results = results.reindex(columns=ix)
+        results['All'] = results.sum(axis=1)
     if chisq:
         nsamples = individuals.get_nsamples(data, margin=True)
         results = chisquare_summary(results, nsamples)
@@ -199,7 +200,7 @@ def summarize_query_results(results, data, aggfun=None, chisq=True):
 
 def summarize_query_mean_sem(results, data):
     fundict = {'mean': np.mean, 'sem': lambda x: np.std(x) / (len(x) - 1)}
-    df = summarize_query_results(results, data, aggfun=fundict.values())
+    df = summarize_query_results(results, data, aggfun=fundict.values(), chisq=False, margin=False)
     df = df.rename(columns={'<lambda>': 'sem'})
     return(df)
 
@@ -218,6 +219,6 @@ def chisquare_summary(summary, nsamples):
     summary = summary.copy()
     summary.columns = list(summary.columns)
     s = summary.apply(lambda x: chisquare_summary_row(x, nsamples, onlyp=False), axis=1)
-    summary['Chi^2 pval'] = s.apply(lambda x: x[1])
-    summary['Chi^2 stat'] = s.apply(lambda x: x[0])
+    summary['chisq stat'] = s.apply(lambda x: x[0])
+    summary['chisq p'] = s.apply(lambda x: x[1])
     return(summary)
