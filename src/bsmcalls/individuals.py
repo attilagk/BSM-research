@@ -175,3 +175,20 @@ def agg_calls(calls):
     categ = agg_calls_categ(calls)
     val = pd.concat([count, numeric, categ], axis=1)
     return(val)
+
+def get_nsamples(df, margin=False):
+    '''
+    Get number of samples for each Dx
+
+    Arguments
+    df: a calls or annot-like DataFrame
+    margin: whether to sum across all Dx to get all individuals
+
+    Value:
+    A dict with Dx values as keys and the numbers of individuals as values.
+    '''
+    gb_list = ['Tissue', 'Dx'] if 'Tissue' in df.index.names else 'Dx'
+    d = {name: len(group.index.get_level_values('Individual ID').unique()) for name, group in df.groupby('Dx')}
+    if margin:
+        d.update({'All': np.sum(list(d.values()))})
+    return(d)

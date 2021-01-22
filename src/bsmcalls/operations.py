@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import functools
+from bsmcalls import individuals
 
 _level_names = ['Feature', 'Query']
 
@@ -11,8 +12,8 @@ def series_of_sets_intersect(series_of_sets, query):
     if not isinstance(query, set):
         query = {query}
     s = series_of_sets.dropna()
-    s = s.apply(lambda x: len(x.intersection(query))).astype(np.int8)
-    s = s.reindex_like(series_of_sets).fillna(0, downcast=None).astype(np.int8)
+    s = s.apply(lambda x: len(x.intersection(query))).astype(np.int16)
+    s = s.reindex_like(series_of_sets).fillna(0, downcast=None).astype(np.int16)
     return(s)
 
 def dicts2sets(series_of_dicts, listvalued=True):
@@ -180,14 +181,22 @@ def multiquery(querydict, data, do_sum=False, do_sort=False, margin=True):
         df = summarize_query_results(df, data, margin=margin)
     return(df)
 
-def summarize_query_results(results, data, margin=True):
+def summarize_query_results(results, data, margin=True, aggfun=None):
     results['Dx'] = data['Dx']
-    results = results.groupby('Dx').sum().T
+    results = results.groupby('Dx')
+    if aggfun is not None:
+        results = results.apply(lambda x: x.groupby('Individual ID').sum().agg(aggfun)).T
+    else:
+        results = results.sum().T.astype('int64')
     if margin:
         categories = list(results.columns.categories) + ['All']
         ix = pd.CategoricalIndex(results.columns, categories=categories)
         results = results.reindex(columns=ix)
         results['All'] = results.sum(axis=1)
-    results = results.astype('int64')
     return(results)
 
+def summarize_query_mean_sem(results, data):
+    fundict = {'mean': np.mean, 'sem': lambda x: np.std(x) / (len(x) - 1)}
+    df = summarize_query_results(results, data, margin=True, aggfun=fundict.values())
+    df = df.rename(columns={'<lambda>': 'sem'})
+    return(df)
