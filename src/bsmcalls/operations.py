@@ -222,3 +222,40 @@ def chisquare_summary(summary, nsamples):
     summary['chisq stat'] = s.apply(lambda x: x[0])
     summary['chisq p'] = s.apply(lambda x: x[1])
     return(summary)
+
+def is_in_segment(chrom, start, end, annot):
+    POS = annot.index.get_level_values('POS')
+    chromb = annot.index.get_level_values('CHROM') == chrom
+    posb = (start <= POS) &  (POS <= end)
+    val = chromb & posb
+    return(val)
+
+def is_in_segments(segdf, annot):
+    '''
+    Are the positions of annot in the segments of segdf?
+
+    Arguments
+    segdf: a pandas DataFrame, see details
+    annot: the usual DataFrame of annotated calls
+
+    Value
+    an array of bool (one boolean scalar for each call)
+
+    Details:
+
+    segdf looks like this:
+
+    mapped_id  mapped_start  mapped_stop
+            6    24988333.0   33810654.0
+           12     2431034.0    2632938.0
+            7     1917138.0    2229735.0
+            1    98806708.0   99024649.0
+           10   106329876.0  106819654.0
+           ...          ...          ...
+
+    '''
+    segments = segdf.apply(lambda x: (str(x[0]), x[1], x[2]), axis=1)
+    segl = list(segments)
+    booll = [is_in_segment(*x, annot) for x in segl]
+    val = functools.reduce(lambda x, y: (x | y), booll)
+    return(val)
