@@ -259,3 +259,10 @@ def is_in_segments(segdf, annot):
     booll = [is_in_segment(*x, annot) for x in segl]
     val = functools.reduce(lambda x, y: (x | y), booll)
     return(val)
+
+
+def get_geneset(df=pd.read_csv('/home/attila/projects/bsm/resources/CLOZUK/supp-table-4.csv', skiprows=7), col='Gene(s) tagged'):
+    val = df['Gene(s) tagged'].str.split(', ').dropna().sum()
+    geneset = set(val)
+    return(geneset)
+
