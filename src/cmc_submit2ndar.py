@@ -22,6 +22,19 @@ manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': 
 genewiz_serialn_synid = 'syn21982509' # a.k.a samples-from-Chaggai.csv
 chess_s3_bucket = 's3://chesslab-bsmn' 
 
+def edit_gsam(gsam):
+    columns = gsam.columns
+    gsam = gsam.groupby('src_subject_id', as_index=False).first()
+    gsam = gsam.set_index('src_subject_id', drop=False)
+    gsam = gsam.reindex(columns=columns)
+    gsam['data_file2_type'] = np.nan
+    gsam['data_file2'] = np.nan
+    gsam['data_file3_type'] = np.nan
+    gsam['data_file3'] = np.nan
+    gsam['data_file4_type'] = np.nan
+    gsam['data_file4'] = np.nan
+    return(gsam)
+
 def empty_manifest_row(manifest):
     '''
     Returns the NaN-filled last row of a manifest, a pandas DataFrame
