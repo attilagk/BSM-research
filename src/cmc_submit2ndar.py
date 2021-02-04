@@ -42,13 +42,14 @@ def read_dfiles(syn, fpath='/home/attila/projects/bsm/results/2021-02-02-submit-
     return(dfiles)
 
 
-def edit_gsam(gsam, dfiles, dftype='cram'):
+def edit_gsam(gsam, dfiles, gender, dftype='cram'):
     '''
     Edit gsam by replacing data_file1_type with dftyp and data_file1 with synapse S3 path
 
     Parameters
     gsam: template; the same samples but FASTQ file type
     dfiles: list of data files see read_dfiles and 2021-02-02-submit-to-nda
+    gender: a series of gender values (F or M)
     dftype: one of 10 data file types; cram, cram.crai,...
 
     Value: the edited gsam (copy)
@@ -66,6 +67,9 @@ def edit_gsam(gsam, dfiles, dftype='cram'):
     gsam['data_file3'] = np.nan
     gsam['data_file4_type'] = np.nan
     gsam['data_file4'] = np.nan
+    gsam['sex'] = gender
+    gsam['sample_unit'] = gsam['sample_unit'].fillna('NA')
+    gsam['storage_protocol'] = gsam['storage_protocol'].fillna('NA')
     return(gsam)
 
 def empty_manifest_row(manifest):
