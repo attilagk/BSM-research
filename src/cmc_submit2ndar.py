@@ -22,11 +22,44 @@ manifest_template_synids = {'nichd_btb02': "syn12154562", 'genomics_subject02': 
 genewiz_serialn_synid = 'syn21982509' # a.k.a samples-from-Chaggai.csv
 chess_s3_bucket = 's3://chesslab-bsmn' 
 
-def edit_gsam(gsam):
+def read_dfiles(syn, fpath='/home/attila/projects/bsm/results/2021-02-02-submit-to-nda/files_not_uploaded_yet.MSSM.txt'):
+    '''
+    See 2021-02-02-submit-to-nda: Data files to submit
+    '''
+    dfiles = pd.read_csv(fpath, sep='\t', names=['synapseID', 'filename'])
+    s = dfiles['filename']
+    s = s.str.split('_NeuN_pl.').apply(lambda x: ['CMC_' + x[0], x[1]])
+    index = pd.MultiIndex.from_tuples(s, names=['indivID', 'filetype'])
+    dfiles = pd.DataFrame(dfiles.to_numpy(), index=index, columns=dfiles.columns)
+    dfiles = dfiles.sort_index(axis=0, level='filetype')
+    def get_dfile_path(synID):
+        key = syn.get(entity=synID, downloadFile=False)._file_handle['key']
+        l = key.split('/')
+        prefix = l.pop(0)
+        dfpath = '/'.join(l)
+        return(dfpath)
+    dfiles['data_file1'] = dfiles['synapseID'].apply(get_dfile_path)
+    return(dfiles)
+
+
+def edit_gsam(gsam, dfiles, dftype='cram'):
+    '''
+    Edit gsam by replacing data_file1_type with dftyp and data_file1 with synapse S3 path
+
+    Parameters
+    gsam: template; the same samples but FASTQ file type
+    dfiles: list of data files see read_dfiles and 2021-02-02-submit-to-nda
+    dftype: one of 10 data file types; cram, cram.crai,...
+
+    Value: the edited gsam (copy)
+    '''
     columns = gsam.columns
     gsam = gsam.groupby('src_subject_id', as_index=False).first()
     gsam = gsam.set_index('src_subject_id', drop=False)
     gsam = gsam.reindex(columns=columns)
+    dfiles = dfiles.xs(dftype, axis=0, level='filetype')
+    gsam['data_file1_type'] = dftype
+    gsam['data_file1'] = dfiles['data_file1']
     gsam['data_file2_type'] = np.nan
     gsam['data_file2'] = np.nan
     gsam['data_file3_type'] = np.nan
