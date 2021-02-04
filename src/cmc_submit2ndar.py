@@ -61,6 +61,8 @@ def edit_gsam(gsam, dfiles, gender, dftype='cram'):
     dfiles = dfiles.xs(dftype, axis=0, level='filetype')
     gsam['data_file1_type'] = dftype
     gsam['data_file1'] = dfiles['data_file1']
+    # remove samples with missing file; see CMC_PITT_117
+    gsam = gsam.dropna(axis=0, subset=['data_file1'])
     gsam['data_file2_type'] = np.nan
     gsam['data_file2'] = np.nan
     gsam['data_file3_type'] = np.nan
@@ -71,6 +73,7 @@ def edit_gsam(gsam, dfiles, gender, dftype='cram'):
     gsam['sample_unit'] = gsam['sample_unit'].fillna('NA')
     gsam['storage_protocol'] = gsam['storage_protocol'].fillna('NA')
     return(gsam)
+
 
 def empty_manifest_row(manifest):
     '''
