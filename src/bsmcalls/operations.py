@@ -194,8 +194,9 @@ def summarize_query_results(results, data, aggfun=None, chisq=True, margin=True)
         results = results.reindex(columns=ix)
         results['All'] = results.sum(axis=1)
     if chisq:
-        nsamples = individuals.get_nsamples(data, margin=True)
-        results = chisquare_summary(results, nsamples)
+        #nsamples = individuals.get_nsamples(data, margin=True) # obsoleted
+        ncalls = data.groupby('Dx').size()
+        results = chisquare_summary(results, expected_odds=ncalls, append=True)
     return(results)
 
 def summarize_query_mean_sem(results, data):
@@ -204,24 +205,45 @@ def summarize_query_mean_sem(results, data):
     df = df.rename(columns={'<lambda>': 'sem'})
     return(df)
 
-def chisquare_summary_row(observed, nsamples, onlyp=True):
-    if 'All' not in observed.index:
-        observed.loc['All'] = observed.sum()
-    nsamples = pd.Series(nsamples) if isinstance(nsamples, dict) else nsamples
-    expected = nsamples.to_numpy() / nsamples.loc['All'] * observed.loc['All']
-    expected = pd.Series(expected, index=nsamples.index)
-    val = stats.chisquare(observed.to_numpy()[:-1], expected.to_numpy()[:-1])
+def chisquare_summary_row(observed, expected_odds, onlyp=True):
+    '''
+    Chi^2 test for a row in the summary table
+
+    Parameters
+    observed: the observed number of calls in a functional category
+    expected_odds: these are taken as the expected odds
+    onlyp: output only p value or also the Chi^2 statistic?
+
+    Value
+    p value and optionally the Chi^2 statistic
+    '''
+    if 'All' in observed.index:
+        observed = observed.drop('All')
+    observed_tot = observed.sum()
+    expected_odds = pd.Series(expected_odds) if isinstance(expected_odds, dict) else expected_odds
+    if 'All' in expected_odds:
+        expected_odds = expected_odds.drop('All')
+    expected_tot = expected_odds.sum()
+    expected = expected_odds.to_numpy() / expected_tot * observed_tot
+    expected = pd.Series(expected, index=expected_odds.index)
+    val = stats.chisquare(observed.to_numpy(), expected.to_numpy())
     if onlyp:
         val = val[1]
     return(val)
 
-def chisquare_summary(summary, nsamples):
+def chisquare_summary(summary, expected_odds, append=False):
     summary = summary.copy()
     summary.columns = list(summary.columns)
-    s = summary.apply(lambda x: chisquare_summary_row(x, nsamples, onlyp=False), axis=1)
-    summary['chisq stat'] = s.apply(lambda x: x[0])
-    summary['chisq p'] = s.apply(lambda x: x[1])
-    return(summary)
+    s = summary.apply(lambda x: chisquare_summary_row(x, expected_odds, onlyp=False), axis=1)
+    chisq_stat = s.apply(lambda x: x[0])
+    chisq_p = s.apply(lambda x: x[1])
+    if append:
+        summary['chisq stat'] = chisq_stat
+        summary['chisq p'] = chisq_p
+        val = summary
+    else:
+        val = pd.concat([chisq_stat, chisq_p], axis=1).rename({0: 'chisq stat', 1: 'chisq p'}, axis=1)
+    return(val)
 
 def is_in_segment(chrom, start, end, annot):
     POS = annot.index.get_level_values('POS')
@@ -266,3 +288,10 @@ def get_geneset(df=pd.read_csv('/home/attila/projects/bsm/resources/CLOZUK/supp-
     geneset = set(val)
     return(geneset)
 
+
+def filter_aggregate(flt, data, datacols=['DP', 'AF']):
+    data = data[datacols].copy()
+    #data = data.loc[flt.astype('bool')]
+    gb = data.groupby('Individual ID')
+    val = gb.agg(np.mean)
+    return(val)
