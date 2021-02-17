@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from statsmodels.graphics import dotplots
 from matplotlib import pyplot as plt
+import statsmodels.api as sm
+import patsy
 
 def big_plot_matrix(responses, covariates, Dxcol, dropASD=False):
     covariates = covariates.select_dtypes(exclude='category')
@@ -37,3 +39,28 @@ def my_dotplot(feature, mods):
     ax[1].set_xlabel('p-value')
     return((fig, ax))
 
+def endog_binomial(feature, fitdata, proportion=False):
+    success = fitdata[feature]
+    if proportion:
+        prop = success / fitdata['ncalls']
+        return(prop)
+    failure = fitdata['ncalls'] - success
+    complement = 'NOT_' + feature
+    df = pd.DataFrame({feature: success, complement: failure})
+    return(df)
+
+def my_logistic_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Dataset', 'AF', 'DP']):
+    y = endog_binomial(endogname, fitdata, proportion=False)
+    def helper(exogname):
+        formula = ' + '.join(exognames[:exognames.index(exogname) + 1])
+        X = patsy.dmatrix(formula, data=fitdata, return_type='dataframe')
+        mod = sm.GLM(endog=y, exog=X, family=sm.families.Binomial()).fit()
+        return((formula, mod))
+    mods = dict([helper(exogname) for exogname in exognames])
+    return(mods)
+    formulas = [' + '.join(exognames[:exognames.index(x) + 1]) for x in exognames]
+    Xs = [patsy.dmatrix(f, data=fitdata, return_type='dataframe') for f in formulas]
+    mods = [sm.GLM(endog=y, exog=X, family=sm.families.Binomial()).fit() for X in Xs]
+    return(Xs)
+    X = patsy.dmatrix(formula, data=fitdata, return_type='dataframe')
+    mod = sm.GLM(endog=y, exog=X, family=sm.families.Binomial()).fit()
