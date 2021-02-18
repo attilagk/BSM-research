@@ -58,9 +58,9 @@ def my_logistic_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Da
         return((formula, mod))
     mods = dict([helper(exogname) for exogname in exognames])
     return(mods)
-    formulas = [' + '.join(exognames[:exognames.index(x) + 1]) for x in exognames]
-    Xs = [patsy.dmatrix(f, data=fitdata, return_type='dataframe') for f in formulas]
-    mods = [sm.GLM(endog=y, exog=X, family=sm.families.Binomial()).fit() for X in Xs]
-    return(Xs)
-    X = patsy.dmatrix(formula, data=fitdata, return_type='dataframe')
-    mod = sm.GLM(endog=y, exog=X, family=sm.families.Binomial()).fit()
+
+def r_star_residuals(mod):
+    r_D = mod.resid_deviance
+    r_P = mod.resid_pearson
+    r_star = r_D + np.log(r_P / r_D) / r_D
+    return(r_star)
