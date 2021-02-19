@@ -4,6 +4,8 @@ from statsmodels.graphics import dotplots
 from matplotlib import pyplot as plt
 import statsmodels.api as sm
 import patsy
+import scipy.stats as stats
+
 
 def big_plot_matrix(responses, covariates, Dxcol, dropASD=False):
     covariates = covariates.select_dtypes(exclude='category')
@@ -59,8 +61,67 @@ def my_logistic_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Da
     mods = dict([helper(exogname) for exogname in exognames])
     return(mods)
 
+def my_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Dataset', 'AF', 'DP'], family=sm.families.Poisson()):
+    if isinstance(family, sm.families.Binomial):
+        y = endog_binomial(endogname, fitdata, proportion=False)
+    else:
+        y = fitdata[endogname]
+    def helper(exogname):
+        formula = ' + '.join(exognames[:exognames.index(exogname) + 1])
+        X = patsy.dmatrix(formula, data=fitdata, return_type='dataframe')
+        mod = sm.GLM(endog=y, exog=X, family=family).fit()
+        return((formula, mod))
+    mods = dict([helper(exogname) for exogname in exognames])
+    return(mods)
+
 def r_star_residuals(mod):
     r_D = mod.resid_deviance
     r_P = mod.resid_pearson
     r_star = r_D + np.log(r_P / r_D) / r_D
     return(r_star)
+
+def modsel_dotplot(mods):
+    AIC = [mods[f].aic for f in mods.keys()]
+    BIC = [mods[f].bic_llf for f in mods.keys()]
+    def get_pvalues(m, param='Dx[T.SCZ]'):
+        try:
+            return(m.pvalues[param])
+        except KeyError:
+            return(np.nan)
+
+    pvalue_SCZ = [get_pvalues(mods[f], param='Dx[T.SCZ]') for f in mods.keys()]
+    pvalue_ASD = [get_pvalues(mods[f], param='Dx[T.ASD]') for f in mods.keys()]
+    fig, ax = plt.subplots(1, 4, figsize=(12, 4))
+    g = dotplots.dot_plot(AIC, lines=list(mods.keys()), ax=ax[0])
+    g = dotplots.dot_plot(BIC, lines=list(mods.keys()), ax=ax[1], show_names='right')
+    g = dotplots.dot_plot(pvalue_SCZ, lines=list(mods.keys()), ax=ax[2], show_names='right')
+    g = dotplots.dot_plot(pvalue_ASD, lines=list(mods.keys()), ax=ax[3], show_names='right')
+    ax[2].set_xscale('log')
+    ax[3].set_xscale('log')
+    ax[0].set_title('Model fit: AIC')
+    ax[1].set_title('Model fit: BIC')
+    ax[2].set_title('Dx[T.SCZ]: p-value')
+    ax[3].set_title('Dx[T.ASD]: p-value')
+    return((fig, ax))
+
+def QQ_four_residual_types(mod):
+    fig, ax = plt.subplots(2, 2, figsize=(12, 12))
+    g = sm.qqplot(mod.resid_anscombe_scaled, stats.norm, line='45', ax=ax[0, 0])
+    ax[0, 0].set_title('Scaled Anscombe residuals')
+    g = sm.qqplot(mod.resid_deviance, stats.norm, line='45', ax=ax[0, 1])
+    ax[0, 1].set_title('Deviance residuals')
+    g = sm.qqplot(mod.resid_pearson, stats.norm, line='45', ax=ax[1, 0])
+    ax[1, 0].set_title('Pearson residuals')
+    r_star = r_star_residuals(mod)
+    g = sm.qqplot(r_star, stats.norm, line='45', ax=ax[1, 1])
+    ax[1, 1].set_title('$r^\star$ residuals')
+    return((fig, ax))
+
+def QQ_rstar_residual(models):
+    fig, axi = plt.subplots(4, 3, sharex=True, sharey=True, figsize = (12, 16))
+    for f, ax in zip(models.keys(), np.ravel(axi)):
+        m = models[f]
+        r_star = r_star_residuals(m)
+        g = sm.qqplot(r_star, stats.norm, line='45', ax=ax)
+        ax.set_title(f)
+    return((fig, ax))
