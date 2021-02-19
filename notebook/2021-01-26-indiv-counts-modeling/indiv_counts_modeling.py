@@ -51,16 +51,6 @@ def endog_binomial(feature, fitdata, proportion=False):
     df = pd.DataFrame({feature: success, complement: failure})
     return(df)
 
-def my_logistic_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Dataset', 'AF', 'DP']):
-    y = endog_binomial(endogname, fitdata, proportion=False)
-    def helper(exogname):
-        formula = ' + '.join(exognames[:exognames.index(exogname) + 1])
-        X = patsy.dmatrix(formula, data=fitdata, return_type='dataframe')
-        mod = sm.GLM(endog=y, exog=X, family=sm.families.Binomial()).fit()
-        return((formula, mod))
-    mods = dict([helper(exogname) for exogname in exognames])
-    return(mods)
-
 def my_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Dataset', 'AF', 'DP'], family=sm.families.Poisson()):
     if isinstance(family, sm.families.Binomial):
         y = endog_binomial(endogname, fitdata, proportion=False)
@@ -72,6 +62,81 @@ def my_fits(fitdata, endogname, exognames=['1', 'Dx', 'ageOfDeath', 'Dataset', '
         mod = sm.GLM(endog=y, exog=X, family=family).fit()
         return((formula, mod))
     mods = dict([helper(exogname) for exogname in exognames])
+    return(mods)
+
+def fwsel_helper(exog2add, fitdata, endog, exogs, family, return_formula=False):
+    '''
+    Add an exogenous variable to existing ones and fit model
+
+    Parameters
+    exog2add: name of the exogenous variable to add; if None: nothing is added
+    fitdata: dataframe with endog and all exog variables
+    endog: name of the endogenous variable
+    exogs: names of the exogenous variables already selected
+    family: an instance of sm.family.Binomial() or sm.family.Poisson()
+    return_formula: weather the corresponding formula should be returned instead of exog2add
+
+    Value: a tuple of exog2add (or formula) and the corresponding model object
+    '''
+    if isinstance(family, sm.families.Binomial):
+        y = endog_binomial(endog, fitdata, proportion=False)
+    else:
+        y = fitdata[endog]
+    l = list() if exog2add is None else [exog2add]
+    formula = ' + '.join(exogs + l)
+    X = patsy.dmatrix(formula, data=fitdata, return_type='dataframe')
+    mod = sm.GLM(endog=y, exog=X, family=family).fit()
+    name = formula if return_formula else exog2add
+    return((name, mod))
+
+def fwsel(fitdata, endog, exogs0, exogsnew, family):
+    '''
+    Forward variable selection
+
+    Parameters
+    fitdata: dataframe with endog and all exog variables
+    endog: name of the endogenous variable
+    exogs0: names of the exogenous variables already selected
+    exogsnew: names of the exogenous variables not yet selected
+    family: an instance of sm.family.Binomial() or sm.family.Poisson()
+
+    Value: in the base case the list of all exogenous variables in the order in which they were selected
+    '''
+    # recursive algorithm: base case
+    if len(exogsnew) == 0:
+        return(exogs0)
+    # recursive algorithm: general case
+    else:
+        mods = pd.Series(dict([fwsel_helper(e, fitdata, endog, exogs0, family) for e in exogsnew]))
+        ix = mods.apply(lambda m: m.aic).sort_values().index
+        sel_exog = ix[0]
+        bestmod1 = mods.loc[sel_exog]
+        exogs0.append(sel_exog)
+        exogsnew.remove(sel_exog)
+        res = fwsel(fitdata, endog, exogs0, exogsnew, family)
+        return(res)
+
+def multifit(fitdata, endog, exogs, family, do_fwsel=True):
+    '''
+    Create a sequence of increasingly more complex fitted models in an order defined a priori or by forward selection
+
+    Parameters
+    fitdata: dataframe with endog and all exog variables
+    endog: name of the endogenous variable
+    exogs: names of the exogenous variables in a desired order
+    family: an instance of sm.family.Binomial() or sm.family.Poisson()
+    do_fwsel: weather to peform forward selection to change the order of exogs
+
+    Value: a dictionary of models whose keys are corresponding patsy formulas
+    '''
+    exogs = exogs.copy()
+    if do_fwsel:
+        exogs = fwsel(fitdata, endog, ['1'], exogs, family)
+    def helper(exog):
+        exogs_subset = exogs[:exogs.index(exog) + 1]
+        formula, mod = fwsel_helper(None, fitdata, endog, exogs_subset, family, return_formula=True)
+        return((formula, mod))
+    mods = dict([helper(exog) for exog in exogs])
     return(mods)
 
 def r_star_residuals(mod):
