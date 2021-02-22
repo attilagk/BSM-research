@@ -183,10 +183,23 @@ def QQ_four_residual_types(mod):
     return((fig, ax))
 
 def QQ_rstar_residual(models):
-    fig, axi = plt.subplots(4, 3, sharex=True, sharey=True, figsize = (12, 16))
+    models = models.to_dict() if isinstance(models, pd.Series) else models
+    fig, axi = plt.subplots(3, 5, sharex=True, sharey=True, figsize = (15, 9))
     for f, ax in zip(models.keys(), np.ravel(axi)):
-        m = models[f]
-        r_star = r_star_residuals(m)
-        g = sm.qqplot(r_star, stats.norm, line='45', ax=ax)
         ax.set_title(f)
+        m = models[f]
+        if m is not None:
+            r_star = r_star_residuals(m)
+            g = sm.qqplot(r_star, stats.norm, line='45', ax=ax, marker='+')
     return((fig, ax))
+
+def apply2varsel(fun, defaultval, varsel):
+    varsel = varsel.copy().xs(key='model', axis=1, level=1)
+    def helper(m):
+        try:
+            val = fun(m)
+        except (AttributeError, KeyError):
+            val = defaultval
+        return(val)
+    res = varsel.applymap(helper)
+    return(res)
