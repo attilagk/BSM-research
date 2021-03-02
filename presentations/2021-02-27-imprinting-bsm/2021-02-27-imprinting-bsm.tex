@@ -1,0 +1,325 @@
+\documentclass[usenames,dvipsnames]{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, url, hyperref, multirow, colortbl}
+\usepackage[table]{xcolor}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Singapore}
+%\usetheme{Warsaw}
+%\usetheme{Antibes}
+%\usecolortheme{beaver}
+%\usecolortheme{crane}
+%\usecolortheme{seahorse}
+\usecolortheme{default}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Two Genomic Studies on Schizophrenia}
+\subtitle{and Related Psychiatric Disorders}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones}
+\date{Brain Somatic Mosaicism Network}
+
+\begin{document}
+
+\maketitle
+
+\section{Genetics of Schizophrenia}
+
+\begin{frame}{What is schizophrenia (SCZ)?}
+\begin{columns}[t]
+\begin{column}{0.55\textwidth}
+	\begin{itemize}
+		\item \(\approx\)1\% prevalence
+                \item psychosis
+                \item social, cognitive dysfunction
+                \item environmental risk
+		\item associations with MHC and synaptic genes
+                \item a neurodevelopmental disorder?
+	\end{itemize}
+\end{column}
+
+\begin{column}{0.45\textwidth}
+
+\end{column}
+\end{columns}
+%symptoms
+%highly heritable
+%unclear aetiology:
+\end{frame}
+
+\begin{frame}{Heritability in common disorders}
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/sullivan2012-fig1a.png}
+
+{\tiny Sullivan 2012 Nature Reviews Genetics}
+\end{column}
+
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/brainstorm-consortium-science2018-fig2.jpg}
+
+{\tiny Brainstorm Consortium 2018 Science}
+\end{column}
+\end{columns}
+\end{frame}
+
+%\begin{frame}{Some studies of schizophrenia genetics}
+%\footnotesize
+%\begin{tabular}{lll}
+%common variants & GWAS & 145 loci, 500 genes, MHC, ...\\
+%rare \& de novo variants & WES, gene set enrichment & synaptic, LoF intolerant, ...\\
+%somatic variants & WGS, gene set enrichment & \alert{our ongoing work}\\
+%gene expression & allelic bias, imprinted genes & \alert{our 2018 Nat Comm article}\\
+%\end{tabular}
+%\end{frame}
+
+\begin{frame}{Genomic studies on schizophrenia}
+\begin{center}
+\includegraphics[width=1.1\textwidth]{from-others/schizophrenia-Foley2017-Fig1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Our work on schizophrenia genetics}
+\begin{enumerate}
+\item Imprinted genes, allelic expression bias
+\begin{itemize}
+\item Jones et al, Nat Comm 2018
+\end{itemize}	
+\item Somatic variants, brain somatic mosaicism
+\begin{itemize}
+\item McConnell et al, 2017 Science
+\item Wang et al 2021 Genome Biol, in press
+\item Jones et al, unpublished
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\section{Imprinted genes, allelic expression bias}
+
+\begin{frame}<1>[label=imprinting]{Imprinted genes exhibit allelic bias}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/renfree-2012-fig2.jpg}
+
+{\tiny Renfree et al 2012 Philos Trans R Soc Lond B}
+\end{column}
+\begin{column}{0.5\textwidth}
+Biological roles
+\begin{itemize}
+\item mother--child interaction
+\item neurodevelopmental 
+\item psychiatric?
+\begin{itemize}
+\item CNVs of imprinted genes
+\item<2> inprinted brain hypothesis\\
+kinship hypothesis
+\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Rare CNVs with high penetrance for schizophrenia}
+\includegraphics[width=1.0\textwidth]{from-others/sullivan-natrevgenet-2012-fig1b.jpg}
+\end{frame}
+
+\againframe<2>{imprinting}
+
+\begin{frame}{The inprinted brain hypothesis}
+\includegraphics[width=1.0\textwidth]{from-others/crespi-2008-fig3.png}
+
+\tiny Crespi Biol Reviews 2008
+\end{frame}
+
+\begin{frame}{Study design}
+
+\includegraphics[height=0.75\textheight]{by-me/commonmind-rna-seq/commonmind-rna-seq.pdf}
+\end{frame}
+
+\begin{frame}{Allelic bias in imprinted genes of the adult DLPFC}
+\includegraphics[height=0.9\textheight]{figures/S-Dx-strip-1.png}
+\end{frame}
+
+\begin{frame}{The effect of age seemed to depend on the imprinted gene}
+\includegraphics[height=0.9\textheight]{figures/S-Dx-age-1.png}
+\end{frame}
+
+\begin{frame}{Regression model based inference}
+\footnotesize
+\begin{eqnarray*}
+\overbrace{t(S)}^{\text{allelic bias}} &\sim& \overbrace{(1 \,|\, \mathrm{Dx}) + (1 \,|\, \mathrm{Dx}:\mathrm{Gene})}^{\text{random effects of Dx}} + \\
+&+&  \overbrace{(1 + \mathrm{Age} + \mathrm{Ancestry.1} \,|\, \mathrm{Gene})}^{\text{random, gene dependent, effects}} + \\
+&+&  \overbrace{1 + \mathrm{Age} + \mathrm{Ancestry.1}}^{\text{fixed effects}}
+\end{eqnarray*}
+
+\vfill
+
+\begin{tabular}{|l|l|rl|}
+\hline
+Added term & Interpretation                             & \(\Delta\)AIC   & p-value \\
+\hline
+\((1\,|\,\mathrm{Dx})\) & effect of Dx (SCZ and ASD) & \(2.0\)         & \(1.0\) \\
+\((1\,|\,\mathrm{Dx}:\mathrm{Gene})\) & gene dep.~effect of Dx  & \(0.4\)         & \(0.21\) \\
+\hline
+\((1\,|\,\mathrm{Gene})\) & effect of gene & \(-126.8\)      & \(8.5\times 10^{-28}\) \\
+\((\mathrm{Age}\,|\,\mathrm{Gene})\) & gene dep.~effect of Age         & \(-18.9\)       & \(2.5\times 10^{-5}\) \\
+\((\mathrm{Ancestry.1}\,|\,\mathrm{Gene})\) & gene dep.~effect of Ancestry & \(-71.2\) & \(4.6\times 10^{-16}\) \\
+\hline
+\(\mathrm{Age}\) & gene indep.~effect of Dx & \(1.3\) & \(0.39\) \\
+\(\mathrm{Ancestry.1}\) & gene indep.~effect of Ancestry & \(0.6\) & \(0.24\) \\
+\hline
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item we found 30 imprinted genes in the DLPFC
+\item determinants of allelic bias
+	\begin{itemize}
+		\item the gene \(\Rightarrow\) different epigenetic mechanisms
+		\item age \(\Rightarrow\) epigenetic changes.  Causal to aging?
+                \item ancestry \(\Rightarrow\) ``imprinting QTLs''
+		\item \alert{not} schizophrenia \alert{nor} affective spectrum
+			\(\Rightarrow\) no support for imprinted brain
+			hypothesis
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Somatic variants, brain somatic mosaicism}
+
+\begin{frame}{Somatic variants, brain somatic mosaicism}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+\begin{center}
+	\footnotesize no mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1a.png}
+\begin{center}
+\end{center}
+\end{column}
+
+\begin{column}{0.3\columnwidth}
+\begin{center}
+	\footnotesize high freq.~mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1e.png}
+\end{column}
+\begin{column}{0.3\columnwidth}
+\begin{center}
+	\footnotesize low freq.~mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1g.png}
+\end{column}
+\end{columns}
+{\tiny Poduri et al 2013 Science}
+\end{frame}
+
+\begin{frame}{Brain somatic mosaicism in disease}
+\begin{columns}[t]
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/bsmn-visual-summary.jpg}
+
+{\tiny McConnell et al 2017 Science}
+\end{column}
+
+\begin{column}{0.4\textwidth}
+\begin{itemize}
+\item 7 NIH projects
+	\begin{itemize}
+	\item sequence brain cells/samples
+	\item call somatic variants
+	\end{itemize}
+\item collaboration
+	\begin{itemize}
+	\item methods \& tools 
+        \item validation
+        \item functional experiments
+	\end{itemize}
+\item public data
+	\begin{itemize}
+		\item NIMH Data Archive
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Calling somatic variants}
+\includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
+
+{\tiny McConnell et al 2017 Science}
+\end{frame}
+
+\begin{frame}{Traditional variant calling practices failed}
+\includegraphics[height=0.8\textheight]{from-others/bsmn-best-practices-fig2ab.png}
+
+{\tiny Wang et al 2021 Genome Biology}
+\end{frame}
+
+\begin{frame}{Validation results suggested new best practices}
+\begin{center}
+\includegraphics[height=0.7\textheight]{from-others/bsmn-best-practices-fig2c.png}
+\end{center}
+
+{\tiny Wang et al 2021 Genome Biology}
+\end{frame}
+
+\begin{frame}{Best practices variant calling pipeline}
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
+\begin{center}
+\begin{itemize}
+\item software tool
+\begin{itemize}
+        \item cloud computing: compute resotinyurceb auto-scale with data
+	\item  \url{https://github.com/bsmn/bsmn-pipeline}
+\end{itemize}
+\item validation rate (specificity): 85\%
+\item what about sensitivity?
+\end{itemize}
+\end{center}
+
+{\tiny Wang et al 2021 Genome Biology}
+\end{frame}
+
+\end{document}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}

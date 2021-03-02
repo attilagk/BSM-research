@@ -1,0 +1,3 @@
+\beamer@sectionintoc {1}{Genetics of Schizophrenia}{2}{0}{1}
+\beamer@sectionintoc {2}{Imprinted genes, allelic expression bias}{6}{0}{2}
+\beamer@sectionintoc {3}{Somatic variants, brain somatic mosaicism}{15}{0}{3}
