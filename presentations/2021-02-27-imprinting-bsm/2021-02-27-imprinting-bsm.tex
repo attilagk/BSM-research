@@ -176,6 +176,7 @@ kinship hypothesis
 \overbrace{t(S)}^{\text{allelic bias}} &\sim& \overbrace{(1 \,|\, \mathrm{Dx}) + (1 \,|\, \mathrm{Dx}:\mathrm{Gene})}^{\text{random effects of Dx}} + \\
 &+&  \overbrace{(1 + \mathrm{Age} + \mathrm{Ancestry.1} \,|\, \mathrm{Gene})}^{\text{random, gene dependent, effects}} + \\
 &+&  \overbrace{1 + \mathrm{Age} + \mathrm{Ancestry.1}}^{\text{fixed effects}}
++ \overbrace{\dotsb}^{\text{other variables}}
 \end{eqnarray*}
 
 \vfill
@@ -281,7 +282,7 @@ Added term & Interpretation                             & \(\Delta\)AIC   & p-va
 {\tiny McConnell et al 2017 Science}
 \end{frame}
 
-\begin{frame}{Traditional variant calling practices failed}
+\begin{frame}{Somatic SNVs: traditional calling practices failed}
 \includegraphics[height=0.8\textheight]{from-others/bsmn-best-practices-fig2ab.png}
 
 {\tiny Wang et al 2021 Genome Biology}
@@ -310,6 +311,111 @@ Added term & Interpretation                             & \(\Delta\)AIC   & p-va
 \end{center}
 
 {\tiny Wang et al 2021 Genome Biology}
+\end{frame}
+
+\begin{frame}[label=sensitivity]{Allele frequency distribution looks as
+		expected}
+\begin{columns}[t]
+\begin{column}{0.35\textwidth}
+\begin{center}
+Sensitivity
+
+\footnotesize
+toy data, ``labeled'' variants
+\end{center}
+
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-best-practices-fig4b.png}
+
+{\tiny Wang et al 2021 Genome Biology}
+\end{column}
+
+\begin{column}{0.65\textwidth}
+\begin{center}
+Allele frequency distribution
+
+\footnotesize
+real data, ``unlabeled'' variants
+\end{center}
+
+\includegraphics<1>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
+
+\includegraphics<2>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+
+{\tiny A.~Jones, unpublished }
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Genome wide somatic mutation rate unaffected}
+\begin{center}
+\includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Annotation with functional categories}
+\begin{itemize}
+\item coding categories
+\item regulatory
+\item genesets
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Modeling number of calls in a geneset}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit.pdf}
+\end{column}
+\end{columns}
+\begin{center}
+\end{center}
+\end{frame}
+
+\begin{frame}{Finding the best fitting model for SCZ GWAS genes}{Forward variable selection algorithm}
+\includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom.pdf}
+\end{frame}
+
+\begin{frame}{Best models for various categories}
+\begin{center}
+\tiny
+\begin{tabular}{rrl}
+\hline
+category  & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in
+			\mathrm{category}} \ge 1\)} & best fitting model  \\
+\hline
+missense  & 0 & None  \\
+stop\_gain  & 1 & None  \\
+splice\_site  & 1 & None  \\
+deleterious\_low\_confidence  & 4 & 1 \\
+possibly\_damaging  & 4 & 1 + BaseQRankSum  \\
+probably\_damaging  & 9 & 1 + DP  \\
+deleterious  & 19 & 1 + BaseQRankSum + Dataset  \\
+coding\_syn  & 38 & 1 + ageOfDeath + AF  \\
+coding\_nonsyn  & 55 & 1 + Dataset + BaseQRankSum  \\
+cpg\_island  & 57 & 1 + Dx + AF  \\
+scz\_gwas\_genes  & 72 & 1 + Dx + ageOfDeath  \\
+coding  & 80 & 1 + ageOfDeath  \\
+tfbs  & 93 & 1 + Dx + AF  \\
+phast  & 117 & 1 + DP + ageOfDeath + AF  \\
+gerp  & 127 & 1 + Dx + BaseQRankSum + AF + DP  \\
+\hline
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}{Fit improves with with size of category}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
+\end{frame}
+
+\begin{frame}{Enrichment of somatic SNVs in various categories}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz-effect-pois-binom.pdf}
+
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/asd-effect-pois-binom.pdf}
 \end{frame}
 
 \end{document}
