@@ -352,12 +352,8 @@ real data, ``unlabeled'' variants
 \end{center}
 \end{frame}
 
-\begin{frame}{Annotation with functional categories}
-\begin{itemize}
-\item coding categories
-\item regulatory
-\item genesets
-\end{itemize}
+\begin{frame}{Enrichment in functional categories}
+\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq.pdf}
 \end{frame}
 
 \begin{frame}{Modeling number of calls in a geneset}
@@ -414,6 +410,14 @@ gerp  & 127 & 1 + Dx + BaseQRankSum + AF + DP  \\
 
 \begin{frame}{Enrichment of somatic SNVs in various categories}
 \includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/relcallrates-betas-binom-chisq-pvalues.pdf}
+\end{frame}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item we developed a new pipeline for calling somatic SNVs from WGS data
+\item similar genome wide call rate for Control, SCZ and ASD
+\item enrichment of SCZ, ASD somatic SNVs in SCZ GWAS genes
+\end{itemize}
 \end{frame}
 
 \end{document}
