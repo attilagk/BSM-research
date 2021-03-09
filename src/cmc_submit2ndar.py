@@ -32,13 +32,15 @@ def read_dfiles(syn, fpath='/home/attila/projects/bsm/results/2021-02-02-submit-
     index = pd.MultiIndex.from_tuples(s, names=['indivID', 'filetype'])
     dfiles = pd.DataFrame(dfiles.to_numpy(), index=index, columns=dfiles.columns)
     dfiles = dfiles.sort_index(axis=0, level='filetype')
-    def get_dfile_path(synID):
+    def get_dfile_path(synID, which='data_file1'):
         key = syn.get(entity=synID, downloadFile=False)._file_handle['key']
         l = key.split('/')
         prefix = l.pop(0)
         dfpath = '/'.join(l)
-        return(dfpath)
-    dfiles['data_file1'] = dfiles['synapseID'].apply(get_dfile_path)
+        val = {'prefix': prefix, 'data_file1': dfpath}[which]
+        return(val)
+    dfiles['data_file1'] = dfiles['synapseID'].apply(get_dfile_path, which='data_file1')
+    dfiles['prefix'] = dfiles['synapseID'].apply(get_dfile_path, which='prefix')
     return(dfiles)
 
 
@@ -58,7 +60,12 @@ def edit_gsam(gsam, dfiles, gender, dftype='cram'):
     gsam = gsam.groupby('src_subject_id', as_index=False).first()
     gsam = gsam.set_index('src_subject_id', drop=False)
     gsam = gsam.reindex(columns=columns)
-    dfiles = dfiles.xs(dftype, axis=0, level='filetype')
+    try:
+        dfiles = dfiles.xs(dftype, axis=0, level='filetype')
+    except KeyError:
+        return(None)
+    if not len(dfiles):
+        return(None)
     gsam['data_file1_type'] = dftype
     gsam['data_file1'] = dfiles['data_file1']
     # remove samples with missing file; see CMC_PITT_117

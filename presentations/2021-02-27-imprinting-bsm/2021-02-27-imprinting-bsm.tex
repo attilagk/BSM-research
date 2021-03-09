@@ -359,13 +359,17 @@ real data, ``unlabeled'' variants
 \begin{frame}{Modeling number of calls in a geneset}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
+\begin{center}
+Poisson, log-linear
+\end{center}
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
 \end{column}
 
 \begin{column}{0.5\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit.pdf}
+\begin{center}
+binomial, logistic
+\end{center}
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit.pdf}
 \end{column}
 \end{columns}
 \begin{center}
@@ -409,15 +413,37 @@ gerp  & 127 & 1 + Dx + BaseQRankSum + AF + DP  \\
 \end{frame}
 
 \begin{frame}{Enrichment of somatic SNVs in various categories}
-\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/relcallrates-betas-binom-chisq-pvalues.pdf}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-model-chisq.pdf}
 \end{frame}
 
 \begin{frame}{Summary}
 \begin{itemize}
-\item we developed a new pipeline for calling somatic SNVs from WGS data
+\item new pipeline for calling somatic SNVs from WGS data
 \item similar genome wide call rate for Control, SCZ and ASD
 \item enrichment of SCZ, ASD somatic SNVs in SCZ GWAS genes
+\item some somatic SNVs carry risk for psychiatric disorders
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\footnotesize
+\begin{tabular}{cp{3in}}
+\parbox[c]{9em}{\includegraphics[width=0.25\textwidth]{/home/attila/projects/bsm/resources/logos/mount-sinai-logo.png}}
+& Chaggai Rosenbluh, Gabriel Hoffman, Eva Xia, Jessica Johnson, Schahram Akbarian, Andy Chess \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/mayo-clinic-logo.png}} & Taejeong Bae, Alexej Abyzov \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/harvard-logo.png}}
+& Eduardo Maury, Yanmei Dou, Peter Park, Chris Walsh \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/sage-bionetworks-logo.png}} & Kenny Daily, Cindy Molitor, Mette Peters \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/nimh-logo.png}}
+& David Obenshain \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/BSMN-NameAndTagline-Horizontal.png}}
+& \\
+\end{tabular}
 \end{frame}
 
 \end{document}
