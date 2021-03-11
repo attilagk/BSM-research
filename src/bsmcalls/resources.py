@@ -28,3 +28,28 @@ def read_proteinatlas_rna_brain(kind='elevated', index_col='Ensembl', usecols=['
         df['Gene synonym'] = df['Gene synonym'].dropna().str.split(', ').apply(lambda x: set(x))
     return(df)
 
+def gwascat_extract_genes(gwas, genecol='REPORTED GENE(S)', sep=', ', altsep=' - '):
+    trait = gwas['DISEASE/TRAIT'].unique()
+    s = gwas[genecol].dropna().str.replace(altsep, sep)
+    s = set(s.str.split(sep).sum())
+    return(s)
+
+def gwascat_extract_reported_mapped_genes(gwas, trait):
+    genecols = ['REPORTED GENE(S)', 'MAPPED_GENE']
+    reported, mapped = (gwascat_extract_genes(gwas, genecol=genecol) for genecol in genecols)
+    val = (reported, mapped)
+    reported_mapped = reported.union(mapped)
+    val = {trait + ' reported': reported, trait: reported_mapped}
+    return(val)
+
+def gwascat_multi_genesets(gwas, gwasPMID):
+    D = {}
+    def foo(trait='ADHD'):
+            pmid = gwasPMID.loc[trait, 'PMID']
+            d = gwascat_extract_reported_mapped_genes(gwas.loc[gwas['PUBMEDID'] == pmid], trait)
+            D.update(d)
+            return(d)
+    for trait in gwasPMID.index:
+        d = foo(trait)
+    return(D)
+
