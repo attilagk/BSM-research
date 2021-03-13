@@ -128,3 +128,9 @@ def collapse_categories(series, categdict):
         return(series)
     else:
         return(collapse_categories(series, categdict))
+
+def drop_category(data, categories='ASD', col='Dx'):
+    s = data.copy()[col].cat.remove_categories(categories).dropna()
+    data = data.copy().loc[s.index]
+    data[col] = s
+    return(data)

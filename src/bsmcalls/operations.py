@@ -295,3 +295,14 @@ def filter_aggregate(flt, data, datacols=['DP', 'AF']):
     gb = data.groupby('Individual ID')
     val = gb.agg(np.mean)
     return(val)
+
+
+def get_summary(data, querydict):
+    results = multiquery(querydict, data, do_sum=False, do_sort=False)
+    results_vtype = results.xs('near_gens_Annotation', axis=1)[['coding nonsyn', 'coding syn']]
+    results_constr = results.xs('near_gens_Overlapped Gene', axis=1)
+    l = [pd.DataFrame({constr: results_vtype[vtype] & results_constr[constr] for constr in results_constr}) for vtype in results_vtype]
+    results_combi = pd.concat(l, axis=1)
+    results_combi.columns = pd.MultiIndex.from_product([results_vtype.columns, results_constr.columns])
+    summary = summarize_query_results(pd.concat([results, results_combi], axis=1), data)
+    return(summary)
