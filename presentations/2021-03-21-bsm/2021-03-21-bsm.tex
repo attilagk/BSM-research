@@ -1,0 +1,238 @@
+\documentclass[usenames,dvipsnames]{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, url, hyperref, multirow, colortbl}
+\usepackage[table]{xcolor}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Singapore}
+%\usetheme{Warsaw}
+%\usetheme{Antibes}
+%\usecolortheme{beaver}
+%\usecolortheme{crane}
+%\usecolortheme{seahorse}
+\usecolortheme{default}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Enrichment of functional categories in somatic SNVs from schizophrenic
+brains}
+%\subtitle{and Related Psychiatric Disorders}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones, Chess Lab, Mount Sinai}
+\date{Brain Somatic Mosaicism Network}
+
+\begin{document}
+
+\maketitle
+
+\section{Genetics of Schizophrenia}
+
+\begin{frame}{Heritability in common disorders}
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/sullivan2012-fig1a.png}
+
+{\tiny Sullivan 2012 Nature Reviews Genetics}
+\end{column}
+
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/brainstorm-consortium-science2018-fig2.jpg}
+
+{\tiny Brainstorm Consortium 2018 Science}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Genomic studies on schizophrenia}
+\begin{center}
+\includegraphics[width=1.1\textwidth]{from-others/schizophrenia-Foley2017-Fig1.png}
+\end{center}
+\end{frame}
+
+\section{Somatic variants, brain somatic mosaicism}
+
+\begin{frame}{Best practices variant calling pipeline}
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
+\begin{center}
+\begin{itemize}
+\item software tool
+\begin{itemize}
+        \item cloud computing: compute resotinyurceb auto-scale with data
+	\item  \url{https://github.com/bsmn/bsmn-pipeline}
+\end{itemize}
+\item validation rate (specificity): 85\%
+\item what about sensitivity?
+\end{itemize}
+\end{center}
+
+{\tiny Wang et al 2021 Genome Biology}
+\end{frame}
+
+\begin{frame}[label=sensitivity]{Allele frequency distribution looks as
+		expected}
+\begin{columns}[t]
+\begin{column}{0.35\textwidth}
+\begin{center}
+Sensitivity
+
+\footnotesize
+toy data, ``labeled'' variants
+\end{center}
+
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-best-practices-fig4b.png}
+
+{\tiny Wang et al 2021 Genome Biology}
+\end{column}
+
+\begin{column}{0.65\textwidth}
+\begin{center}
+Allele frequency distribution
+
+\footnotesize
+real data, ``unlabeled'' variants
+\end{center}
+
+\includegraphics<1>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
+
+\includegraphics<2>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+
+{\tiny A.~Jones, unpublished }
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Genome wide somatic mutation rate unaffected}
+\begin{center}
+\includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Enrichment in functional categories}
+\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq.pdf}
+\end{frame}
+
+\begin{frame}{Modeling number of calls in a geneset}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{center}
+Poisson, log-linear
+\end{center}
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{center}
+binomial, logistic
+\end{center}
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit.pdf}
+\end{column}
+\end{columns}
+\begin{center}
+\end{center}
+\end{frame}
+
+\begin{frame}{Finding the best fitting model for SCZ GWAS genes}{Forward variable selection algorithm}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC.pdf}
+\end{frame}
+
+\begin{frame}{Best models for various categories}
+\begin{center}
+\tiny
+\begin{tabular}{rrl}
+\hline
+category  & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in
+			\mathrm{category}} \ge 1\)} & best fitting model  \\
+\hline
+missense  & 0 & None  \\
+stop\_gain  & 1 & None  \\
+splice\_site  & 1 & None  \\
+deleterious\_low\_confidence  & 4 & 1 \\
+possibly\_damaging  & 4 & 1 + BaseQRankSum  \\
+probably\_damaging  & 9 & 1 + DP  \\
+deleterious  & 19 & 1 + BaseQRankSum + Dataset  \\
+coding\_syn  & 38 & 1 + ageOfDeath + AF  \\
+coding\_nonsyn  & 55 & 1 + Dataset + BaseQRankSum  \\
+cpg\_island  & 57 & 1 + Dx + AF  \\
+scz\_gwas\_genes  & 72 & 1 + Dx + ageOfDeath  \\
+coding  & 80 & 1 + ageOfDeath  \\
+tfbs  & 93 & 1 + Dx + AF  \\
+phast  & 117 & 1 + DP + ageOfDeath + AF  \\
+gerp  & 127 & 1 + Dx + BaseQRankSum + AF + DP  \\
+\hline
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}{Fit improves with with size of category}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
+\end{frame}
+
+\begin{frame}{Enrichment of somatic SNVs in various categories}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-model-chisq.pdf}
+\end{frame}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item new pipeline for calling somatic SNVs from WGS data
+\item similar genome wide call rate for Control, SCZ and ASD
+\item enrichment of SCZ, ASD somatic SNVs in SCZ GWAS genes
+\item some somatic SNVs carry risk for psychiatric disorders
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\footnotesize
+\begin{tabular}{cp{3in}}
+\parbox[c]{9em}{\includegraphics[width=0.25\textwidth]{/home/attila/projects/bsm/resources/logos/mount-sinai-logo.png}}
+& Chaggai Rosenbluh, Gabriel Hoffman, Eva Xia, Jessica Johnson, Schahram Akbarian, Andy Chess \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/mayo-clinic-logo.png}} & Taejeong Bae, Alexej Abyzov \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/harvard-logo.png}}
+& Eduardo Maury, Yanmei Dou, Peter Park, Chris Walsh \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/sage-bionetworks-logo.png}} & Kenny Daily, Cindy Molitor, Mette Peters \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/nimh-logo.png}}
+& David Obenshain \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/BSMN-NameAndTagline-Horizontal.png}}
+& \\
+\end{tabular}
+\end{frame}
+
+\end{document}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}

@@ -145,7 +145,7 @@ def r_star_residuals(mod):
     r_star = r_D + np.log(r_P / r_D) / r_D
     return(r_star)
 
-def modsel_dotplot(mods, onlyIC=False):
+def modsel_dotplot(mods, onlyIC=False, only_scz=False):
     AIC = [mods[f].aic for f in mods.keys()]
     BIC = [mods[f].bic_llf for f in mods.keys()]
     def get_pvalues(m, param='Dx[T.SCZ]'):
@@ -156,7 +156,8 @@ def modsel_dotplot(mods, onlyIC=False):
 
     pvalue_SCZ = [get_pvalues(mods[f], param='Dx[T.SCZ]') for f in mods.keys()]
     pvalue_ASD = [get_pvalues(mods[f], param='Dx[T.ASD]') for f in mods.keys()]
-    naxes = 2 if onlyIC else 4
+    naxes_max = 3 if only_scz else 4
+    naxes = 2 if onlyIC else naxes_max
     fig, ax = plt.subplots(1, naxes, figsize=(naxes * 3, 4))
     g = dotplots.dot_plot(AIC, lines=list(mods.keys()), ax=ax[0])
     g = dotplots.dot_plot(BIC, lines=list(mods.keys()), ax=ax[1], show_names='right')
@@ -164,11 +165,12 @@ def modsel_dotplot(mods, onlyIC=False):
     ax[1].set_title('Model fit: BIC')
     if not onlyIC:
         g = dotplots.dot_plot(pvalue_SCZ, lines=list(mods.keys()), ax=ax[2], show_names='right')
-        g = dotplots.dot_plot(pvalue_ASD, lines=list(mods.keys()), ax=ax[3], show_names='right')
         ax[2].set_xscale('log')
-        ax[3].set_xscale('log')
         ax[2].set_title('Dx[T.SCZ]: p-value')
-        ax[3].set_title('Dx[T.ASD]: p-value')
+        if not only_scz:
+            g = dotplots.dot_plot(pvalue_ASD, lines=list(mods.keys()), ax=ax[3], show_names='right')
+            ax[3].set_xscale('log')
+            ax[3].set_title('Dx[T.ASD]: p-value')
     return((fig, ax))
 
 def QQ_four_residual_types(mod):
