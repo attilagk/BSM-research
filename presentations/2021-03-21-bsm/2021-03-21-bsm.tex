@@ -92,37 +92,10 @@ brains}
 {\tiny Wang et al 2021 Genome Biology}
 \end{frame}
 
-\begin{frame}[label=sensitivity]{Allele frequency distribution looks as
-		expected}
-\begin{columns}[t]
-\begin{column}{0.35\textwidth}
+\begin{frame}
 \begin{center}
-Sensitivity
-
-\footnotesize
-toy data, ``labeled'' variants
+\includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/nsamples-chess-walsh-barplot.pdf}
 \end{center}
-
-\includegraphics[width=1.0\textwidth]{from-others/bsmn-best-practices-fig4b.png}
-
-{\tiny Wang et al 2021 Genome Biology}
-\end{column}
-
-\begin{column}{0.65\textwidth}
-\begin{center}
-Allele frequency distribution
-
-\footnotesize
-real data, ``unlabeled'' variants
-\end{center}
-
-\includegraphics<1>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
-
-\includegraphics<2>[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
-
-{\tiny A.~Jones, unpublished }
-\end{column}
-\end{columns}
 \end{frame}
 
 \begin{frame}{Genome wide somatic mutation rate unaffected}
@@ -132,7 +105,14 @@ real data, ``unlabeled'' variants
 \end{frame}
 
 \begin{frame}{Enrichment in functional categories}
-\includegraphics[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq.pdf}
+\includegraphics<1>[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq.pdf}
+
+\includegraphics<2>[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq_scz.pdf}
+\end{frame}
+
+\begin{frame}
+
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
 \end{frame}
 
 \begin{frame}{Modeling number of calls in a geneset}
