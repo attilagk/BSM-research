@@ -77,19 +77,9 @@ brains}
 
 \begin{frame}{Best practices variant calling pipeline}
 \includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
-\begin{center}
-\begin{itemize}
-\item software tool
-\begin{itemize}
-        \item cloud computing: compute resotinyurceb auto-scale with data
-	\item  \url{https://github.com/bsmn/bsmn-pipeline}
-\end{itemize}
-\item validation rate (specificity): 85\%
-\item what about sensitivity?
-\end{itemize}
-\end{center}
 
-{\tiny Wang et al 2021 Genome Biology}
+{\tiny https://github.com/bsmn/bsmn-pipeline \\
+	Wang et al 2021 Genome Biology}
 \end{frame}
 
 \begin{frame}
@@ -110,25 +100,30 @@ brains}
 \includegraphics<2>[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq_scz.pdf}
 \end{frame}
 
-\begin{frame}
-
-\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
-\end{frame}
-
-\begin{frame}{Modeling number of calls in a geneset}
+\begin{frame}{Modeling the number of calls in SCZ GWAS genes}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 \begin{center}
 Poisson, log-linear
+\begin{description}
+\tiny
+\item[M0] \(y \sim 1 + \mathrm{Dx}\)
+\item[M1] \(y \sim 1 + \mathrm{Dx} + \log_{10} n_\mathrm{calls}\)
+\end{description}
 \end{center}
-\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit.pdf}
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
 \end{column}
 
 \begin{column}{0.5\textwidth}
 \begin{center}
 binomial, logistic
+\begin{description}
+\tiny
+\item[M0] \(y \sim 1 + \mathrm{Dx}\)
+\item[M1] \(y \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
+\end{description}
 \end{center}
-\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit.pdf}
+\includegraphics[scale=0.4]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
 \end{column}
 \end{columns}
 \begin{center}
@@ -136,7 +131,7 @@ binomial, logistic
 \end{frame}
 
 \begin{frame}{Finding the best fitting model for SCZ GWAS genes}{Forward variable selection algorithm}
-\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC.pdf}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
 \end{frame}
 
 \begin{frame}{Best models for various categories}
@@ -147,21 +142,21 @@ binomial, logistic
 category  & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in
 			\mathrm{category}} \ge 1\)} & best fitting model  \\
 \hline
-missense  & 0 & None  \\
-stop\_gain  & 1 & None  \\
-splice\_site  & 1 & None  \\
-deleterious\_low\_confidence  & 4 & 1 \\
-possibly\_damaging  & 4 & 1 + BaseQRankSum  \\
-probably\_damaging  & 9 & 1 + DP  \\
-deleterious  & 19 & 1 + BaseQRankSum + Dataset  \\
-coding\_syn  & 38 & 1 + ageOfDeath + AF  \\
-coding\_nonsyn  & 55 & 1 + Dataset + BaseQRankSum  \\
-cpg\_island  & 57 & 1 + Dx + AF  \\
-scz\_gwas\_genes  & 72 & 1 + Dx + ageOfDeath  \\
-coding  & 80 & 1 + ageOfDeath  \\
-tfbs  & 93 & 1 + Dx + AF  \\
-phast  & 117 & 1 + DP + ageOfDeath + AF  \\
-gerp  & 127 & 1 + Dx + BaseQRankSum + AF + DP  \\
+missense & 0 & None \\
+stop gain & 1 & None \\
+splice site & 1 & None \\
+deleterious low confidence & 4 & None \\
+possibly damaging & 4 & 1 \\
+probably damaging & 9 & 1 + DP \\
+deleterious & 19 & 1 \\
+coding syn & 38 & 1 + AF + ageOfDeath \\
+coding nonsyn & 55 & 1 + ageOfDeath \\
+cpg island & 57 & 1 + AF + BaseQRankSum \\
+scz gwas genes & 72 & 1 + Dx \\
+coding & 80 & 1 + ageOfDeath \\
+tfbs & 93 & 1 + AF \\
+phast & 117 & 1 + ageOfDeath + AF + DP \\
+gerp & 127 & 1 + Dx \\
 \hline
 \end{tabular}
 \end{center}
@@ -172,7 +167,7 @@ gerp  & 127 & 1 + Dx + BaseQRankSum + AF + DP  \\
 \end{frame}
 
 \begin{frame}{Enrichment of somatic SNVs in various categories}
-\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-model-chisq.pdf}
+\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
 \end{frame}
 
 \begin{frame}{Summary}

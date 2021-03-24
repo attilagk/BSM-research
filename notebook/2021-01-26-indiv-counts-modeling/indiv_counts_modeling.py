@@ -188,7 +188,7 @@ def QQ_four_residual_types(mod):
 
 def QQ_rstar_residual(models):
     models = models.to_dict() if isinstance(models, pd.Series) else models
-    fig, axi = plt.subplots(3, 5, sharex=True, sharey=True, figsize = (15, 9))
+    fig, axi = plt.subplots(4, 6, sharex=True, sharey=True, figsize = (16, 12))
     for f, ax in zip(models.keys(), np.ravel(axi)):
         ax.set_title(f)
         m = models[f]
