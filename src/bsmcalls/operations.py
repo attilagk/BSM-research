@@ -200,7 +200,7 @@ def summarize_query_results(results, data, aggfun=None, chisq=True, margin=True)
     return(results)
 
 def summarize_query_mean_sem(results, data):
-    fundict = {'mean': np.mean, 'sem': lambda x: np.std(x) / (len(x) - 1)}
+    fundict = {'mean': np.mean, 'sem': lambda x: np.std(x) / np.sqrt(len(x))}
     df = summarize_query_results(results, data, aggfun=fundict.values(), chisq=False, margin=False)
     df = df.rename(columns={'<lambda>': 'sem'})
     return(df)
