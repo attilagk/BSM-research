@@ -49,24 +49,6 @@ brains}
 
 \section{Genetics of Schizophrenia}
 
-\begin{frame}{Heritability in common disorders}
-\begin{columns}[t]
-\begin{column}{0.4\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{from-others/sullivan2012-fig1a.png}
-
-{\tiny Sullivan 2012 Nature Reviews Genetics}
-\end{column}
-
-\begin{column}{0.6\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{from-others/brainstorm-consortium-science2018-fig2.jpg}
-
-{\tiny Brainstorm Consortium 2018 Science}
-\end{column}
-\end{columns}
-\end{frame}
-
 \begin{frame}{Genomic studies on schizophrenia}
 \begin{center}
 \includegraphics[width=1.1\textwidth]{from-others/schizophrenia-Foley2017-Fig1.png}
@@ -82,22 +64,37 @@ brains}
 	Wang et al 2021 Genome Biology}
 \end{frame}
 
-\begin{frame}
-\begin{center}
-\includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/nsamples-chess-walsh-barplot.pdf}
-\end{center}
-\end{frame}
-
 \begin{frame}{Genome wide somatic mutation rate unaffected}
 \begin{center}
 \includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
 \end{center}
 \end{frame}
 
-\begin{frame}{Enrichment in functional categories}
-\includegraphics<1>[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq.pdf}
+\begin{frame}{Schizophrenia GWAS genes enriched in SNVs from SCZ}
+\small
+\begin{itemize}
+\item 478 genes in 145 Schizophrenia GWAS loci
+\end{itemize}
+\begin{columns}[t]
+\begin{column}{0.6\textwidth}
 
-\includegraphics<2>[width=1.0\columnwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-chisq_scz.pdf}
+\includegraphics[width=1.0\columnwidth]{../../notebook/2020-11-13-functional-variants/named-figure/genomewide-scz_gwas-rate.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\vfill
+\begin{tabular}{c|c}
+& p-value \(\chi^2\) test \\
+\hline
+with ASD & 4.5 \times 10^{-3} \\
+w/o ASD & 1.9 \times 10^{-3} \\
+\end{tabular}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\includegraphics[height=0.9\textheight]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix.pdf}
 \end{frame}
 
 \begin{frame}{Modeling the number of calls in SCZ GWAS genes}
@@ -131,7 +128,35 @@ binomial, logistic
 \end{frame}
 
 \begin{frame}{Finding the best fitting model for SCZ GWAS genes}{Forward variable selection algorithm}
+\small
 \includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
+\begin{center}
+Best model:
+\(
+	y \sim 1 + \mathrm{Dx} \; \Leftrightarrow \; \mathrm{logit}(y) = \beta_1 +
+	\beta_\mathrm{Dx[T.SCZ]} x_\mathrm{Dx} + \epsilon
+\)
+\end{center}
+
+\begin{center}
+Inference:
+\begin{tabular}{c|ccc}
+& \(\hat{\beta}\) & std.~err. & p-value \(\beta = 0\) \\
+\hline
+Dx[T.SCZ] & 0.34 & 0.20 & 1.9 \times 10^{-3} \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}{Shared heritability of psychiatric disorders}
+\small
+\begin{itemize}
+\item 6 additional disorders/genesets
+\item ``Psychiatric GWAS'' geneset: 1270 genes
+\end{itemize}
+\includegraphics[height=0.65\textheight]{from-others/brainstorm-consortium-science2018-fig2.jpg}
+
+{\tiny Brainstorm Consortium 2018 Science}
 \end{frame}
 
 \begin{frame}{Best models for various categories}
@@ -145,19 +170,29 @@ category  & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in
 missense & 0 & None \\
 stop gain & 1 & None \\
 splice site & 1 & None \\
+Anorexia nervosa GWAS & 4 & None \\
 deleterious low confidence & 4 & None \\
 possibly damaging & 4 & 1 \\
+ADHD GWAS & 6 & 1 + AF + DP \\
 probably damaging & 9 & 1 + DP \\
+Calcium channel & 13 & 1 + Dataset \\
 deleterious & 19 & 1 \\
+ASD GWAS & 27 & 1 + Dx + Dataset \\
 coding syn & 38 & 1 + AF + ageOfDeath \\
+MDD GWAS & 48 & 1 + ageOfDeath + AF \\
 coding nonsyn & 55 & 1 + ageOfDeath \\
 cpg island & 57 & 1 + AF + BaseQRankSum \\
-scz gwas genes & 72 & 1 + Dx \\
+Schizophrenia GWAS & 72 & 1 + Dx \\
+Bipolar disorder GWAS & 77 & 1 + Dataset \\
 coding & 80 & 1 + ageOfDeath \\
 tfbs & 93 & 1 + AF \\
+PSD & 95 & 1 \\
+SCZ de novo & 97 & 1 + AF \\
+Psychiatric GWAS & 105 & 1 + Dataset + Dx \\
 phast & 117 & 1 + ageOfDeath + AF + DP \\
+FMRP-target & 118 & 1 + AF \\
+composite & 126 & 1 + Dx + ageOfDeath \\
 gerp & 127 & 1 + Dx \\
-\hline
 \end{tabular}
 \end{center}
 \end{frame}
@@ -172,10 +207,15 @@ gerp & 127 & 1 + Dx \\
 
 \begin{frame}{Summary}
 \begin{itemize}
-\item new pipeline for calling somatic SNVs from WGS data
-\item similar genome wide call rate for Control, SCZ and ASD
-\item enrichment of SCZ, ASD somatic SNVs in SCZ GWAS genes
-\item some somatic SNVs carry risk for psychiatric disorders
+\item similar genome wide call rate for Control, SCZ (and ASD)
+\item enrichment of Schizophrenia and Psychiatric GWAS genes in SNVs from
+	SCZ brains
+\item limited sample size for other categories \(\Rightarrow\) insufficient power to test
+	hypotheses
+\begin{itemize}
+	\item SNVs in loss of function intolerant genes
+        \item functional genesets implicated in schizophrenia
+\end{itemize}
 \end{itemize}
 \end{frame}
 
