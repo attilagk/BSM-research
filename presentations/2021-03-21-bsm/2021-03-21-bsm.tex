@@ -130,20 +130,24 @@ binomial, logistic
 \begin{frame}{Finding the best fitting model for SCZ GWAS genes}{Forward variable selection algorithm}
 \small
 \includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
-\begin{center}
-Best model:
-\(
-	y \sim 1 + \mathrm{Dx} \; \Leftrightarrow \; \mathrm{logit}(y) = \beta_1 +
-	\beta_\mathrm{Dx[T.SCZ]} x_\mathrm{Dx} + \epsilon
-\)
-\end{center}
+%\begin{center}
+%Best model:
+%\(
+%	y \sim 1 + \mathrm{Dx} \; \Leftrightarrow \; \mathrm{logit}(y) = \beta_1 +
+%	\beta_\mathrm{Dx[T.SCZ]} x_\mathrm{Dx} + \epsilon
+%\)
+%\end{center}
 
 \begin{center}
-Inference:
-\begin{tabular}{c|ccc}
-& \(\hat{\beta}\) & std.~err. & p-value \(\beta = 0\) \\
+\begin{tabular}{l|ccc}
+	\small
+model & \(\hat{\beta}_\mathrm{SCZ} \pm \mathrm{S.E}\) & p-value:
+\(\beta_\mathrm{SCZ} = 0\) &
+\(\mathrm{corr}(\hat{\beta}_\mathrm{SCZ}, \hat{\beta}_\ast)\) \\
 \hline
-Dx[T.SCZ] & 0.34 & 0.20 & 1.9 \times 10^{-3} \\
+1 + Dx & \(0.80 \pm 0.26\) & 0.0019 & n.a \\
+1 + Dx + DP & \(0.80 \pm 0.26\) & 0.0019 & -0.012 \\
+1 + Dx + ageOfDeath & \(0.71 \pm 0.28\) & 0.011 & -0.30 \\
 \end{tabular}
 \end{center}
 \end{frame}
