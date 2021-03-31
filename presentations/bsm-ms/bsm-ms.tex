@@ -1,0 +1,255 @@
+% You can submit either a single PDF file that includes the manuscript text
+% and any display items, or separate files for text, figures and tables.
+%
+% 1500 words, excluding the introductory paragraph, online Methods,
+% references and figure legends
+%
+% TODOs
+% - cover letter
+
+\documentclass[letterpaper]{article}
+%\documentclass[12pt,letterpaper]{article}
+%\setlength{\textwidth}{480pt}
+%\setlength{\textheight}{630pt}
+%\setlength{\voffset}{0pt}
+
+\usepackage{amsmath, geometry, graphicx}
+\usepackage{natbib}
+%\usepackage{float}
+\bibliographystyle{plainnat}
+
+% https://tex.stackexchange.com/questions/6758/how-can-i-create-a-bibliography-like-a-section
+%\usepackage{etoolbox}
+%\patchcmd{\thebibliography}{\section*}{\section}{}{}
+
+\pagestyle{plain}
+
+\title{Involvement of Brain Somatic Mosaicism in Schizophrenia}
+
+\author{Attila Jones\(^{1,2,\ddagger}\), Chaggai Rosenbluh\(^{1}\), ..., Andrew Chess\(^{1,2,3,4,\ast}\)}
+
+\date{Icahn School of Medicine at Mount Sinai (ISMMS)}
+
+\begin{document}
+
+\maketitle
+
+\begin{description}
+\item[1] Department of Cell, Developmental and Regenerative Biology, ISMMS 
+\item[2] Institute for Genomics and Multiscale Biology, Department of Genetics and Genomic Sciences, ISMMS 
+\item[3] Neuroscience Program, The Graduate School of Biomedical Sciences, ISMMS 
+\item[4] Division of Psychiatric Genomics, Department of Psychiatry, ISMMS 
+%\item[\(\S\)] full list of consortium members appears in the Author
+Information section
+\item[\(\ast\)] correspondence: andrew.chess@mssm.edu 
+\end{description}
+
+\clearpage
+
+\section*{Abstract}
+
+The abstract
+
+\section*{Introduction}
+
+Schizophrenia is a psychiatric disorder, which... heritability: 0.8 ...\cite{Kahn2015}.
+
+GWAS (reviewed by \cite{Visscher2017}) has been essential in clarifying the
+genetic of architecture of schizophrenia~\cite{Ripke2014,Pardinas2018} and other psychiatric disorders
+\cite{Sullivan2012}: they are polygenic and much of the heritability is due to
+a large set of common germline variants, typically SNPs, with
+small effect size.  GWAS also revealed that psychiatric disorders
+typically share much heritability with each
+other~\cite{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser extent with
+some neurological disorders~\cite{Consortium2018} indicating shared
+pathological mechanisms and supporting the neurodevelopmental hypothesis of
+schizophrenia~\cite{Nour2015}.
+
+Beyond common SNPs other classes of genetic variation have also been shown to
+carry substantial risk for schizophrenia: rare CNVs~\cite{Rees2014}, rare germline
+SNVs~\cite{Purcell2014,Singh2017} as well as de novo
+SNVs~\cite{Fromer2014,Rees2020}.  These studies confirmed the polygenicity of
+schizophrenia and found excess mutational burden in several functional
+genesets such as synaptic and voltage gated calcium channel and FMRP target
+genes\cite{Fromer2014,Purcell2014} ... and loss of function intolerant
+genes~\cite{Rees2020,Singh2017} but found no evidence for increased genome
+wide germline single nucleotide mutation rate in schizophrenics.
+
+Despite much progress translation of the results from the aforementioned
+genetic studies into effective medical diagnostic and treatment methods for
+schizophrenia is still lacking~\cite{Breen2016,Foley2017}.  Besides limited sample size and underrepresented
+ethnic groups in populations studies~\cite{Visscher2017} and the difficulty of
+interpreting polygenic signals~\cite{Boyle2017},
+of 
+Somatic variants \cite{Insel2014}
+
+%A related question is the number of imprinted genes in the human brain.  Some
+%1,300 genes were estimated to be imprinted in the mouse
+%brain~\cite{Gregg2010a} but followup studies using mouse or human subjects
+%arrived at estimates that are lower with an order of
+%magnitude~\cite{Andergassen2017,Babak2015,Baran2015,DeVeale2012,Perez2015}.
+
+\section*{Results}
+
+\subsection*{Identification of imprinted genes in the adult human brain}
+
+\section*{Discussion}
+
+
+\section*{Methods}
+
+
+\subsection*{Data availability}
+
+Data and analytical results...
+
+\subsection*{Code availability}
+
+All code developed by A.~Jones is available at:\\
+https://github.com/attilagk/BSM-research
+
+\bibliography{bsm}
+%\begin{thebibliography}{10}
+%
+%\bibitem{Noor2015}
+%Abdul Noor, Lucie Dupuis, Kirti Mittal, Anath~C. Lionel, Christian~R. Marshall,
+%  Stephen~W. Scherer, Tracy Stockley, John~B. Vincent, Roberto Mendoza-Londono,
+%  and Dimitri~J. Stavropoulos.
+%\newblock 15q11.2 duplication encompassing only the {UBE}3a gene is associated
+%  with developmental delay and neuropsychiatric phenotypes.
+%\newblock 36(7):689--693.
+%
+%\bibitem{Rees2014}
+%Elliott Rees, James T~R Walters, Lyudmila Georgieva, Anthony~R Isles,
+%  Kimberly~D Chambert, Alexander~L Richards, Gerwyn Mahoney-Davies, Sophie~E
+%  Legge, Jennifer~L Moran, Steven~A McCarroll, Michael~C O'Donovan, Michael~J
+%  Owen, and George Kirov.
+%\newblock {Analysis of copy number variations at 15 schizophrenia-associated
+%  loci.}
+%\newblock {\em The British journal of psychiatry : the journal of mental
+%  science}, 204(2):108--14, feb 2014.
+%
+%\bibitem{Gregg2010a}
+%Christopher Gregg, Jiangwen Zhang, Brandon Weissbourd, Shujun Luo, Gary~P
+%  Schroth, David Haig, and Catherine Dulac.
+%\newblock {High-resolution analysis of parent-of-origin allelic expression in
+%  the mouse brain.}
+%\newblock {\em Science (New York, N.Y.)}, 329(5992):643--8, aug 2010.
+%
+%\bibitem{Andergassen2017}
+%Daniel Andergassen, Christoph~P Dotter, Daniel Wenzel, Verena Sigl, Philipp~C
+%  Bammer, Markus Muckenhuber, Daniela Mayer, Tomasz~M Kulinski, Hans-Christian
+%  Theussl, Josef~M Penninger, Christoph Bock, Denise~P Barlow, Florian~M
+%  Pauler, and Quanah~J Hudson.
+%\newblock Mapping the mouse allelome reveals tissue-specific regulation of
+%  allelic expression.
+%\newblock {\em eLife}, 6, August 2017.
+%
+%\bibitem{Baran2015}
+%Yael Baran, Meena Subramaniam, Anne Biton, Taru Tukiainen, Emily~K. Tsang,
+%  Manuel~A. Rivas, Matti Pirinen, Maria Gutierrez-Arcelus, Kevin~S. Smith,
+%  Kim~R. Kukurba, Rui Zhang, Celeste Eng, Dara~G. Torgerson, Cydney Urbanek,
+%  Jin~Billy Li, Jose~R. Rodriguez-Santana, Esteban~G. Burchard, Max~A. Seibold,
+%  Daniel~G. MacArthur, Stephen~B. Montgomery, Noah~A. Zaitlen, and Tuuli
+%  Lappalainen.
+%\newblock {The landscape of genomic imprinting across diverse adult human
+%  tissues}.
+%\newblock {\em Genome Research}, 25(7), 2015.
+%
+%\bibitem{DeVeale2012}
+%Brian DeVeale, Derek van~der Kooy, and Tomas Babak.
+%\newblock {Critical evaluation of imprinted gene expression by RNA-seq: A new
+%  perspective}.
+%\newblock {\em PLoS Genetics}, 8(3):e1002600, jan 2012.
+%
+%\bibitem{Perez2015}
+%Julio~D Perez, Nimrod~D Rubinstein, Daniel~E Fernandez, Stephen~W Santoro,
+%  Leigh~A Needleman, Olivia Ho-Shing, John~J Choi, Mariela Zirlinger,
+%  Shau-Kwaun Chen, Jun~S Liu, and Catherine Dulac.
+%\newblock {Quantitative and functional interrogation of parent-of-origin
+%  allelic expression biases in the brain.}
+%\newblock {\em eLife}, 4:e07860, jan 2015.
+%
+%\bibitem{Fromer2016a}
+%Fromer, Menachem and Roussos, Panos and Sieberts, Solveig K and Johnson,
+%Jessica S and Kavanagh, David H and Perumal, Thanneer M and Ruderfer, Douglas
+%M and Oh, Edwin C and Topol, Aaron and Shah, Hardik R and others.
+%\newblock {Gene expression elucidates functional impact of polygenic risk for
+%  schizophrenia.}
+%\newblock {\em Nature Neuroscience}, 19(11):1442, Sep 2016.
+%
+%\bibitem{Babak2015}
+%Tomas Babak, Brian DeVeale, Emily~K Tsang, Yiqi Zhou, Xin Li, Kevin~S Smith,
+%  Kim~R Kukurba, Rui Zhang, Jin~Billy Li, Derek van~der Kooy, Stephen~B
+%  Montgomery, and Hunter~B Fraser.
+%\newblock Genetic conflict reflected in tissue-specific maps of genomic
+%  imprinting in human and mouse.
+%\newblock {\em Nature Genetics}, 47:544--549, May 2015.
+%
+%\bibitem{Hoffman2016}
+%Gabriel~E Hoffman and Eric~E Schadt.
+%\newblock {variancePartition: interpreting drivers of variation in complex gene
+%  expression studies.}
+%\newblock {\em BMC Bioinformatics}, 17(1):483, nov 2016.
+%
+%\bibitem{Gregg2010}
+%Christopher Gregg, Jiangwen Zhang, James~E. Butler, David Haig, and Catherine
+%  Dulac.
+%\newblock {Sex-Specific Parent-of-Origin Allelic Expression in the Mouse
+%  Brain}.
+%\newblock {\em Science}, 329(5992):682--685, aug 2010.
+%
+%\bibitem{Crespi2008}
+%Bernard Crespi.
+%\newblock {Genomic imprinting in the development and evolution of psychotic
+%  spectrum conditions.}
+%\newblock {\em Biological reviews of the Cambridge Philosophical Society},
+%  83(4):441--93, nov 2008.
+%
+%\bibitem{Sullivan2012}
+%Patrick~F Sullivan, Mark~J Daly, and Michael O'Donovan.
+%\newblock {Genetic architectures of psychiatric disorders: the emerging picture
+%  and its implications}.
+%\newblock {\em Nature Reviews Genetics}, 13(8):537--551, aug 2012.
+%
+%\bibitem{Horvath2013}
+%Steve Horvath.
+%\newblock {DNA methylation age of human tissues and cell types.}
+%\newblock {\em Genome Biology}, 14(10):R115, oct 2013.
+%
+%\bibitem{Ubeda2012}
+%Francisco Ubeda and Andy Gardner.
+%\newblock {A model for genomic imprinting in the social brain: elders.}
+%\newblock {\em Evolution; international journal of organic evolution},
+%  66(5):1567--81, may 2012.
+%
+%\bibitem{Isles2006}
+%Anthony~R Isles, William Davies, and Lawrence~S Wilkinson.
+%\newblock {Genomic imprinting and the social brain.}
+%\newblock {\em Philosophical transactions of the Royal Society of London.
+%  Series B, Biological sciences}, 361(1476):2229--37, dec 2006.
+%
+%\end{thebibliography}
+
+\section*{Acknowledgements}
+
+We thank...
+
+\section*{Author Information}
+
+\section*{Author Contributions}
+
+A.J...
+
+\section*{Competing Interests}
+
+None
+
+\section*{Figure Legends}
+
+\subsection*{Figure 1}
+%\includegraphics[width=1.0\textwidth]{figures/by-me/commonmind-rna-seq-ms/commonmind-rna-seq-ms.pdf}
+
+\section*{Tables}
+
+\end{document}
