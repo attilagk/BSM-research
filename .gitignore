@@ -67,3 +67,12 @@ ndar/account-info
 *.~lock.*
 
 **/tags
+
+/presentations/bsm-ms/bsm-ms.docx
+*.nav
+*.toc
+*.bbl
+*.blg
+*.bib.bak
+*.bib.sav
+*_aux

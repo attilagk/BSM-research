@@ -1,2 +1,2 @@
 \beamer@sectionintoc {1}{Genetics of Schizophrenia}{2}{0}{1}
-\beamer@sectionintoc {2}{Somatic variants, brain somatic mosaicism}{3}{0}{2}
+\beamer@sectionintoc {2}{Somatic variants, brain somatic mosaicism}{4}{0}{2}

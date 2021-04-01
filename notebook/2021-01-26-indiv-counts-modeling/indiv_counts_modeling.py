@@ -195,6 +195,8 @@ def QQ_rstar_residual(models):
         if m is not None:
             r_star = r_star_residuals(m)
             g = sm.qqplot(r_star, stats.norm, line='45', ax=ax, marker='+')
+            ax.set_xlabel('')
+            ax.set_ylabel('')
     return((fig, ax))
 
 def apply2varsel(fun, defaultval, varsel):

@@ -1,9 +1,28 @@
-\begin{thebibliography}{9}
+\begin{thebibliography}{21}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Boyle et~al.(2017)Boyle, Li, and Pritchard]{Boyle2017}
+Evan~A. Boyle, Yang~I. Li, and Jonathan~K. Pritchard.
+\newblock An expanded view of complex traits: From polygenic to omnigenic.
+\newblock \emph{Cell}, 169:\penalty0 1177--1186, June 2017.
+\newblock ISSN 1097-4172.
+\newblock \doi{10.1016/j.cell.2017.05.038}.
+\newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5536862/}.
+
+\bibitem[Breen et~al.(2016)Breen, Li, Roth, O'Donnell, Didriksen, Dolmetsch,
+  O'Reilly, Gaspar, Manji, Huebel, et~al.]{Breen2016}
+Gerome Breen, Qingqin Li, Bryan~L Roth, Patricio O'Donnell, Michael Didriksen,
+  Ricardo Dolmetsch, Paul~F O'Reilly, H{\'e}l{\'e}na~A Gaspar, Husseini Manji,
+  Christopher Huebel, et~al.
+\newblock Translating genome-wide association findings into new therapeutics
+  for psychiatry.
+\newblock \emph{Nature neuroscience}, 19\penalty0 (11):\penalty0 1392--1396,
+  2016.
+\newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5676453/}.
 
 \bibitem[Consortium et~al.(2018)Consortium, Anttila, Bulik-Sullivan, Finucane,
   Walters, Bras, Duncan, Escott-Price, Falcone, Gormley, Malik, Patsopoulos,
@@ -227,6 +246,39 @@ International~Schizophrenia Consortium, Shaun~M. Purcell, Naomi~R. Wray,
 \newblock ISSN 1476-4687.
 \newblock \doi{10.1038/nature08185}.
 
+\bibitem[Foley et~al.(2017)Foley, Corvin, and Nakagome]{Foley2017}
+Claire Foley, Aiden Corvin, and Shigeki Nakagome.
+\newblock Genetics of schizophrenia: Ready to translate?
+\newblock \emph{Current psychiatry reports}, 19:\penalty0 61, September 2017.
+\newblock ISSN 1535-1645.
+\newblock \doi{10.1007/s11920-017-0807-5}.
+
+\bibitem[Fromer et~al.(2014)Fromer, Pocklington, Kavanagh, Williams, Dwyer,
+  Gormley, Georgieva, Rees, Palta, Ruderfer, Carrera, Humphreys, Johnson,
+  Roussos, Barker, Banks, Milanova, Grant, Hannon, Rose, Chambert, Mahajan,
+  Scolnick, Moran, Kirov, Palotie, McCarroll, Holmans, Sklar, Owen, Purcell,
+  and O'Donovan]{Fromer2014}
+Menachem Fromer, Andrew~J Pocklington, David~H Kavanagh, Hywel~J Williams,
+  Sarah Dwyer, Padhraig Gormley, Lyudmila Georgieva, Elliott Rees, Priit Palta,
+  Douglas~M Ruderfer, Noa Carrera, Isla Humphreys, Jessica~S Johnson, Panos
+  Roussos, Douglas~D Barker, Eric Banks, Vihra Milanova, Seth~G Grant, Eilis
+  Hannon, Samuel~A Rose, Kimberly Chambert, Milind Mahajan, Edward~M Scolnick,
+  Jennifer~L Moran, George Kirov, Aarno Palotie, Steven~A McCarroll, Peter
+  Holmans, Pamela Sklar, Michael~J Owen, Shaun~M Purcell, and Michael~C
+  O'Donovan.
+\newblock {De novo mutations in schizophrenia implicate synaptic networks.}
+\newblock \emph{Nature}, 506\penalty0 (7487):\penalty0 179--84, feb 2014.
+\newblock ISSN 1476-4687.
+\newblock \doi{10.1038/nature12929}.
+\newblock URL
+  \url{http://www.nature.com.myaccess.library.utoronto.ca/nature/journal/v506/n7487/full/nature12929.html}.
+
+\bibitem[Insel(2014)]{Insel2014}
+T.~R. Insel.
+\newblock Brain somatic mutations: the dark matter of psychiatric genetics?
+\newblock \emph{Molecular psychiatry}, 19:\penalty0 156--8, Feb 2014.
+\newblock URL \url{https://www.nature.com/articles/mp2013168.pdf}.
+
 \bibitem[Kahn et~al.(2015)Kahn, Sommer, Murray, Meyer-Lindenberg, Weinberger,
   Cannon, O'Donovan, Correll, Kane, van Os, and Insel]{Kahn2015}
 René~S. Kahn, Iris~E. Sommer, Robin~M. Murray, Andreas Meyer-Lindenberg,
@@ -237,6 +289,31 @@ René~S. Kahn, Iris~E. Sommer, Robin~M. Murray, Andreas Meyer-Lindenberg,
   2015.
 \newblock ISSN 2056-676X.
 \newblock \doi{10.1038/nrdp.2015.67}.
+
+\bibitem[McConnell et~al.(2017)McConnell, Moran, Abyzov, Akbarian, Bae,
+  Cortes-Ciriano, Erwin, Fasching, Flasch, Freed, Ganz, Jaffe, Kwan, Kwon,
+  Lodato, Mills, Paquola, Rodin, Rosenbluh, Sestan, Sherman, Shin, Song,
+  Straub, Thorpe, Weinberger, Urban, Zhou, Gage, Lehner, Senthil, Walsh, Chess,
+  Courchesne, Gleeson, Kidd, Park, Pevsner, Vaccarino, and {Brain Somatic
+  Mosaicism Network}]{McConnell2017}
+Michael~J McConnell, John~V Moran, Alexej Abyzov, Schahram Akbarian, Taejeong
+  Bae, Isidro Cortes-Ciriano, Jennifer~A Erwin, Liana Fasching, Diane~A Flasch,
+  Donald Freed, Javier Ganz, Andrew~E Jaffe, Kenneth~Y Kwan, Minseok Kwon,
+  Michael~A Lodato, Ryan~E Mills, Apua C~M Paquola, Rachel~E Rodin, Chaggai
+  Rosenbluh, Nenad Sestan, Maxwell~A Sherman, Joo~Heon Shin, Saera Song,
+  Richard~E Straub, Jeremy Thorpe, Daniel~R Weinberger, Alexander~E Urban,
+  Bo~Zhou, Fred~H Gage, Thomas Lehner, Geetha Senthil, Christopher~A Walsh,
+  Andrew Chess, Eric Courchesne, Joseph~G Gleeson, Jeffrey~M Kidd, Peter~J
+  Park, Jonathan Pevsner, Flora~M Vaccarino, and {Brain Somatic Mosaicism
+  Network}.
+\newblock {Intersection of diverse neuronal genomes and neuropsychiatric
+  disease: The Brain Somatic Mosaicism Network.}
+\newblock \emph{Science (New York, N.Y.)}, 356\penalty0 (6336):\penalty0
+  eaal1641, apr 2017.
+\newblock ISSN 1095-9203.
+\newblock \doi{10.1126/science.aal1641}.
+\newblock URL \url{http://www.sciencemag.org/lookup/doi/10.1126/science.aal1641
+  http://www.ncbi.nlm.nih.gov/pubmed/28450582}.
 
 \bibitem[Nour and Howes(2015)]{Nour2015}
 Matthew~M. Nour and Oliver~D. Howes.
@@ -427,6 +504,98 @@ Antonio~F. Pardiñas, Peter Holmans, Andrew~J. Pocklington, Valentina
 \newblock ISSN 1546-1718.
 \newblock \doi{10.1038/s41588-018-0059-2}.
 
+\bibitem[{PsychENCODE Consortium} et~al.(2015){PsychENCODE Consortium},
+  Akbarian, Liu, Knowles, Vaccarino, Farnham, Crawford, Jaffe, Pinto, Dracheva,
+  Geschwind, Mill, Nairn, Abyzov, Pochareddy, Prabhakar, Weissman, Sullivan,
+  State, Weng, Peters, White, Gerstein, Amiri, Armoskus, Ashley-Koch, Bae,
+  Beckel-Mitchener, Berman, Coetzee, Coppola, Francoeur, Fromer, Gao, Grennan,
+  Herstein, Kavanagh, Ivanov, Jiang, Kitchen, Kozlenkov, Kundakovic, Li, Li,
+  Liu, Mangravite, Mattei, Markenscoff-Papadimitriou, Navarro, North, Omberg,
+  Panchision, Parikshak, Poschmann, Price, Purcaro, Reddy, Roussos, Schreiner,
+  Scuderi, Sebra, Shibata, Shieh, Skarica, Sun, Swarup, Thomas, Tsuji, van
+  Bakel, Wang, Wang, Wang, Werling, Willsey, Witt, Won, Wong, Wray, Wu, Xu,
+  Yao, Senthil, Lehner, Sklar, and Sestan]{PsychENCODEConsortium2015}
+{PsychENCODE Consortium}, Schahram Akbarian, Chunyu Liu, James~A Knowles,
+  Flora~M Vaccarino, Peggy~J Farnham, Gregory~E Crawford, Andrew~E Jaffe,
+  Dalila Pinto, Stella Dracheva, Daniel~H Geschwind, Jonathan Mill, Angus~C
+  Nairn, Alexej Abyzov, Sirisha Pochareddy, Shyam Prabhakar, Sherman Weissman,
+  Patrick~F Sullivan, Matthew~W State, Zhiping Weng, Mette~A Peters, Kevin~P
+  White, Mark~B Gerstein, Anahita Amiri, Chris Armoskus, Allison~E Ashley-Koch,
+  Taejeong Bae, Andrea Beckel-Mitchener, Benjamin~P Berman, Gerhard~A Coetzee,
+  Gianfilippo Coppola, Nancy Francoeur, Menachem Fromer, Robert Gao, Kay
+  Grennan, Jennifer Herstein, David~H Kavanagh, Nikolay~A Ivanov, Yan Jiang,
+  Robert~R Kitchen, Alexey Kozlenkov, Marija Kundakovic, Mingfeng Li, Zhen Li,
+  Shuang Liu, Lara~M Mangravite, Eugenio Mattei, Eirene
+  Markenscoff-Papadimitriou, F{\'{a}}bio C~P Navarro, Nicole North, Larsson
+  Omberg, David Panchision, Neelroop Parikshak, Jeremie Poschmann, Amanda~J
+  Price, Michael Purcaro, Timothy~E Reddy, Panos Roussos, Shannon Schreiner,
+  Soraya Scuderi, Robert Sebra, Mikihito Shibata, Annie~W Shieh, Mario Skarica,
+  Wenjie Sun, Vivek Swarup, Amber Thomas, Junko Tsuji, Harm van Bakel, Daifeng
+  Wang, Yongjun Wang, Kai Wang, Donna~M Werling, A~Jeremy Willsey, Heather
+  Witt, Hyejung Won, Chloe C~Y Wong, Gregory~A Wray, Emily~Y Wu, Xuming Xu,
+  Lijing Yao, Geetha Senthil, Thomas Lehner, Pamela Sklar, and Nenad Sestan.
+\newblock {The PsychENCODE project.}
+\newblock \emph{Nature neuroscience}, 18\penalty0 (12):\penalty0 1707--12, dec
+  2015.
+\newblock \doi{10.1038/nn.4156}.
+\newblock URL \url{http://www.ncbi.nlm.nih.gov/pubmed/26605881
+  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4675669/
+  http://www.nature.com/neuro/journal/v18/n12/full/nn.4156.html}.
+
+\bibitem[Purcell et~al.(2014)Purcell, Moran, Fromer, Ruderfer, Solovieff,
+  Roussos, O'Dushlaine, Chambert, Bergen, K{\"{a}}hler, Duncan, Stahl,
+  Genovese, Fern{\'{a}}ndez, Collins, Komiyama, Choudhary, Magnusson, Banks,
+  Shakir, Garimella, Fennell, DePristo, Grant, Haggarty, Gabriel, Scolnick,
+  Lander, Hultman, Sullivan, McCarroll, and Sklar]{Purcell2014}
+Shaun~M Purcell, Jennifer~L Moran, Menachem Fromer, Douglas Ruderfer, Nadia
+  Solovieff, Panos Roussos, Colm O'Dushlaine, Kimberly Chambert, Sarah~E
+  Bergen, Anna K{\"{a}}hler, Laramie Duncan, Eli Stahl, Giulio Genovese,
+  Esperanza Fern{\'{a}}ndez, Mark~O Collins, Noboru~H Komiyama, Jyoti~S
+  Choudhary, Patrik K~E Magnusson, Eric Banks, Khalid Shakir, Kiran Garimella,
+  Tim Fennell, Mark DePristo, Seth G~N Grant, Stephen~J Haggarty, Stacey
+  Gabriel, Edward~M Scolnick, Eric~S Lander, Christina~M Hultman, Patrick~F
+  Sullivan, Steven~A McCarroll, and Pamela Sklar.
+\newblock {A polygenic burden of rare disruptive mutations in schizophrenia.}
+\newblock \emph{Nature}, 506\penalty0 (7487):\penalty0 185--90, feb 2014.
+\newblock ISSN 1476-4687.
+\newblock \doi{10.1038/nature12975}.
+\newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4136494/}.
+
+\bibitem[Rees et~al.(2014)Rees, Walters, Georgieva, Isles, Chambert, Richards,
+  Mahoney-Davies, Legge, Moran, McCarroll, O'Donovan, Owen, and
+  Kirov]{Rees2014}
+Elliott Rees, James T~R Walters, Lyudmila Georgieva, Anthony~R Isles,
+  Kimberly~D Chambert, Alexander~L Richards, Gerwyn Mahoney-Davies, Sophie~E
+  Legge, Jennifer~L Moran, Steven~A McCarroll, Michael~C O'Donovan, Michael~J
+  Owen, and George Kirov.
+\newblock {Analysis of copy number variations at 15 schizophrenia-associated
+  loci.}
+\newblock \emph{The British journal of psychiatry : the journal of mental
+  science}, 204\penalty0 (2):\penalty0 108--14, feb 2014.
+\newblock \doi{10.1192/bjp.bp.113.131052}.
+\newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3909838/
+  http://bjp.rcpsych.org/content/204/2/108.long
+  http://www.ncbi.nlm.nih.gov/pubmed/24311552}.
+
+\bibitem[Rees et~al.(2020)Rees, Han, Morgan, Carrera, Escott-Price,
+  Pocklington, Duffield, Hall, Legge, Pardiñas, Richards, Roth, Lezheiko,
+  Kondratyev, Kaleda, Golimbet, Parellada, González-Peñas, Arango,
+  Investigators, Gawlik, Kirov, Walters, Holmans, O'Donovan, and
+  Owen]{Rees2020}
+Elliott Rees, Jun Han, Joanne Morgan, Noa Carrera, Valentina Escott-Price,
+  Andrew~J. Pocklington, Madeleine Duffield, Lynsey~S. Hall, Sophie~E. Legge,
+  Antonio~F. Pardiñas, Alexander~L. Richards, Julian Roth, Tatyana Lezheiko,
+  Nikolay Kondratyev, Vasilii Kaleda, Vera Golimbet, Mara Parellada, Javier
+  González-Peñas, Celso Arango, G.~R. O. U.~P. Investigators, Micha Gawlik,
+  George Kirov, James T.~R. Walters, Peter Holmans, Michael~C. O'Donovan, and
+  Michael~J. Owen.
+\newblock De novo mutations identified by exome sequencing implicate rare
+  missense variants in slc6a1 in schizophrenia.
+\newblock \emph{Nature neuroscience}, 23:\penalty0 179--184, February 2020.
+\newblock ISSN 1546-1726.
+\newblock \doi{10.1038/s41593-019-0565-2}.
+\newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7007300/}.
+
 \bibitem[Ripke et~al.(2014)Ripke, Neale, Corvin, Walters, Farh, Holmans, Lee,
   Bulik-Sullivan, Collier, Huang, Pers, Agartz, Agerbo, Albus, Alexander, Amin,
   Bacanu, Begemann, {Belliveau Jr}, Bene, Bergen, Bevilacqua, Bigdeli, Black,
@@ -547,6 +716,24 @@ Stephan Ripke, Benjamin~M. Neale, Aiden Corvin, James T.~R. Walters, Kai-How
 \newblock \doi{10.1038/nature13595}.
 \newblock URL \url{http://www.nature.com/doifinder/10.1038/nature13595}.
 
+\bibitem[Singh et~al.(2017)Singh, Walters, Johnstone, Curtis, Suvisaari,
+  Torniainen, Rees, Iyegbe, Blackwood, McIntosh, Kirov, Geschwind, Murray,
+  Di~Forti, Bramon, Gandal, Hultman, Sklar, Study, Consortium, Palotie,
+  Sullivan, O'Donovan, Owen, and Barrett]{Singh2017}
+Tarjinder Singh, James T.~R. Walters, Mandy Johnstone, David Curtis, Jaana
+  Suvisaari, Minna Torniainen, Elliott Rees, Conrad Iyegbe, Douglas Blackwood,
+  Andrew~M. McIntosh, Georg Kirov, Daniel Geschwind, Robin~M. Murray, Marta
+  Di~Forti, Elvira Bramon, Michael Gandal, Christina~M. Hultman, Pamela Sklar,
+  I.~N. T. E. R. V. A.~L. Study, UK10K. Consortium, Aarno Palotie, Patrick~F.
+  Sullivan, Michael~C. O'Donovan, Michael~J. Owen, and Jeffrey~C. Barrett.
+\newblock The contribution of rare variants to risk of schizophrenia in
+  individuals with and without intellectual disability.
+\newblock \emph{Nature genetics}, 49\penalty0 (28650482):\penalty0 1167--1173,
+  August 2017.
+\newblock ISSN 1061-4036.
+\newblock \doi{10.1038/ng.3903}.
+\newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5533219/}.
+
 \bibitem[Sullivan et~al.(2012)Sullivan, Daly, and O'Donovan]{Sullivan2012}
 Patrick~F Sullivan, Mark~J Daly, and Michael O'Donovan.
 \newblock {Genetic architectures of psychiatric disorders: the emerging picture
@@ -567,5 +754,31 @@ Peter~M. Visscher, Naomi~R. Wray, Qian Zhang, Pamela Sklar, Mark~I. McCarthy,
 \newblock ISSN 1537-6605.
 \newblock \doi{10.1016/j.ajhg.2017.06.005}.
 \newblock URL \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5501872/}.
+
+\bibitem[Wang et~al.(2021)Wang, Bae, Thorpe, Sherman, Jones, Cho, Daily, Dou,
+  Ganz, Galor, Lobon, Pattni, Rosenbluh, Tomasi, Tomasini, Yang, Zhou,
+  Akbarian, Ball, Bizzotto, Emery, Doan, Fasching, Jang, Juan, Lizano,
+  Luquette, Moldovan, Narurkar, Oetjens, Rodin, Sekar, Shin, Soriano, Straub,
+  Zhou, Chess, Gleeson, Marquès-Bonet, Park, Peters, Pevsner, Walsh,
+  Weinberger, Vaccarino, Moran, Urban, Kidd, Mills, Abyzov, and
+  Network]{Wang2021}
+Yifan Wang, Taejeong Bae, Jeremy Thorpe, Maxwell~A. Sherman, Attila~G. Jones,
+  Sean Cho, Kenneth Daily, Yanmei Dou, Javier Ganz, Alon Galor, Irene Lobon,
+  Reenal Pattni, Chaggai Rosenbluh, Simone Tomasi, Livia Tomasini, Xiaoxu Yang,
+  Bo~Zhou, Schahram Akbarian, Laurel~L. Ball, Sara Bizzotto, Sarah~B. Emery,
+  Ryan Doan, Liana Fasching, Yeongjun Jang, David Juan, Esther Lizano,
+  Lovelace~J. Luquette, John~B. Moldovan, Rujuta Narurkar, Matthew~T. Oetjens,
+  Rachel~E. Rodin, Shobana Sekar, Joo~Heon Shin, Eduardo Soriano, Richard~E.
+  Straub, Weichen Zhou, Andrew Chess, Joseph~G. Gleeson, Tomas Marquès-Bonet,
+  Peter~J. Park, Mette~A. Peters, Jonathan Pevsner, Christopher~A. Walsh,
+  Daniel~R. Weinberger, Flora~M. Vaccarino, John~V. Moran, Alexander~E. Urban,
+  Jeffrey~M. Kidd, Ryan~E. Mills, Alexej Abyzov, and Brain Somatic~Mosaicism
+  Network.
+\newblock Comprehensive identification of somatic nucleotide variants in human
+  brain tissue.
+\newblock \emph{Genome Biology}, 22\penalty0 (1):\penalty0 92, 2021.
+\newblock ISSN 1474-760X.
+\newblock \doi{10.1186/s13059-021-02285-3}.
+\newblock URL \url{https://doi.org/10.1186/s13059-021-02285-3}.
 
 \end{thebibliography}
