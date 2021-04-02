@@ -100,7 +100,7 @@ Shared heritability
 \begin{frame}[label=rare]{Rare and \textit{de novo} variant studies}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
-Genesets enriched in \alert{disruptive} variants
+Genesets enriched in \alert{damaging} variants
 \begin{itemize}
 \item PSD
 \item FMRP-target
@@ -127,11 +127,15 @@ Genesets enriched in \alert{disruptive} variants
 
 \section{Data overview}
 
-\begin{frame}{Best practices variant calling pipeline}
+\begin{frame}{Data and variant calling pipeline}
+\begin{itemize}
+\item DLPFC samples: 60 SCZ, 25 + 15 Control
+\item BSMN pipeline
+\footnote{https://github.com/bsmn/bsmn-pipeline \\
+	Wang et al 2021 Genome Biology}
+\end{itemize}
 \includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
 
-{\tiny https://github.com/bsmn/bsmn-pipeline \\
-	Wang et al 2021 Genome Biology}
 \end{frame}
 
 \begin{frame}{Genome wide somatic mutation rate unaffected}
@@ -256,7 +260,7 @@ Effect of collinear variables
 category & genomic element, geneset & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
 \hline
 \hline
-disruptive & coding nonsyn & 1 & 55 \\
+damaging & coding nonsyn & 1 & 55 \\
 & coding syn & 1 + Gender & 38 \\
 & missense & None & 0 \\
 & stop gain & None & 1 \\
@@ -299,7 +303,7 @@ GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
 \includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
 \end{frame}
 
-\begin{frame}{Enrichment is selective to coding regions}
+\begin{frame}{Enrichment of GWAS loci vs.~GWAS genes}
 \begin{center}
 \includegraphics[height=0.8\textheight]{../../notebook/2020-07-28-CLOZUK/named-figure/calls-in-scz-gwas-loci-coding.pdf}
 \end{center}
@@ -327,7 +331,7 @@ Rodin et al 2021 Nature Neurosci
 	\item GWAS genes: schizophrenia, ASD, psychiatric 
         \item shared heritability of somatic SNVs
 \end{itemize}
-\item insufficient data to study enrichment in disruptive variants
+\item insufficient data to study enrichment in damaging variants
 \begin{itemize}
 	\item LoF intolerant genes?
 	\item PSD, FMRP-target, Ca-channel genes?
