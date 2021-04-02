@@ -36,34 +36,57 @@
 %\useoutertheme[]{tree}
 
 % title, etc
-\title{Enrichment of functional categories in somatic SNVs from schizophrenic
-brains}
+\title{Polygenic Involvement of Somatic SNVs in Schizophrenia}
 %\subtitle{and Related Psychiatric Disorders}
 %\subtitle{A subtitle may be shorter and more technical}
-\author{Attila Jones, Chess Lab, Mount Sinai}
-\date{Brain Somatic Mosaicism Network}
+\author{Attila Jones, Chaggai Rosenbluh, BSMN, Andy Chess}
+\date{Mount Sinai School of Medicine}
 
 \begin{document}
 
 \maketitle
 
-\section{Genetics of Schizophrenia}
+\section{Introduction}
 
-\begin{frame}{GWAS}
+\begin{frame}{Schizophrenia}
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/sullivan2012-fig1a.png}
+\end{column}
+
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item psychosis, dysfunction
+\item symptomatic treatment \& diagnosis
+\item DLPFC
+\item neurodevelopmental hypothesis
+\item heritability \(\approx 0.8\)
+\item polygenic, common SNPs
+\end{itemize}
+\end{column}
+\end{columns}
+
+{\tiny Sullivan 2012 Nature Reviews Genetics}
+\end{frame}
+
+\begin{frame}[label=gwas]{GWAS}
 
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
 \begin{center}
-SCZ GWAS loci
+Schizophrenia GWAS loci
 
 \includegraphics[width=1.0\columnwidth]{from-others/scz-gwas-manhattanplot.png}
 
 \footnotesize
 \(\approx\) 500 ``Schizophrenia GWAS genes''
+{\tiny Ripke et al 2014 Nature}
 \end{center}
 \end{column}
 
 \begin{column}{0.5\textwidth}
+Shared heritability
 
 \includegraphics[width=1.0\columnwidth]{from-others/brainstorm-consortium-science2018-fig2.jpg}
 
@@ -74,10 +97,10 @@ SCZ GWAS loci
 \end{columns}
 \end{frame}
 
-\begin{frame}{Rare and \textit{de novo} variant studies}
+\begin{frame}[label=rare]{Rare and \textit{de novo} variant studies}
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
-Genesets enriched in variants
+Genesets enriched in \alert{disruptive} variants
 \begin{itemize}
 \item PSD
 \item FMRP-target
@@ -102,7 +125,7 @@ Genesets enriched in variants
 %\end{center}
 %\end{frame}
 
-\section{Somatic variants, brain somatic mosaicism}
+\section{Data overview}
 
 \begin{frame}{Best practices variant calling pipeline}
 \includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
@@ -116,6 +139,8 @@ Genesets enriched in variants
 \includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
 \end{center}
 \end{frame}
+
+\section{Modeling enrichment}
 
 \begin{frame}{Schizophrenia GWAS genes enriched in SNVs from SCZ}
 \small
@@ -141,7 +166,7 @@ w/o ASD & 1.9 \times 10^{-3} \\
 \end{frame}
 
 \begin{frame}
-\includegraphics[height=0.9\textheight]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+\includegraphics[height=0.95\textheight]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
 \end{frame}
 
 \begin{frame}{Modeling the number/fraction of calls in SCZ GWAS genes}
@@ -176,7 +201,7 @@ binomial, logistic
 
 \begin{frame}{Model selection for SCZ GWAS genes}
 \small
-\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
+\includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
 %\begin{center}
 %Best model:
 %\(
@@ -222,68 +247,98 @@ Effect of collinear variables
 \end{columns}
 \end{frame}
 
-\begin{frame}{Testing genomic categories for enrichment}
+\section{Results \& discussion}
+
+\begin{frame}{Genomic elements, genesets for testing enrichment}
 \begin{center}
 \tiny
 \begin{tabular}{lrlr}
+category & genomic element, geneset & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
 \hline
-category & genomic element / gene set & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
 \hline
-coding type & coding nonsyn & 1 & 55 \\
- & coding syn & 1 & 38 \\
- & missense & None & 0 \\
- & stop gain & None & 1 \\
- & splice site & None & 1 \\
- & coding & 1 & 80 \\
+disruptive & coding nonsyn & 1 & 55 \\
+& coding syn & 1 + Gender & 38 \\
+& missense & None & 0 \\
+& stop gain & None & 1 \\
+& splice site & None & 1 \\
+& coding & 1 & 80 \\
+& deleterious (sift) & 1 & 19 \\
+& damaging (polyphen) & 1 + DP & 9 \\
 \hline
-protein function & deleterious (sift) & 1 & 19 \\
- & damaging (polyphen) & 1 + DP & 9 \\
+regulartory & TFBS & 1 + AF & 93 \\
+& CpG island & 1 + AF + BaseQRankSum & 57 \\
+& enhancer & 1 & 99 \\
+& genic enhancer & 1 & 22 \\
 \hline
-regulatory & TFBS & 1 + AF & 93 \\
- & CpG island & 1 + AF + BaseQRankSum & 57 \\
- & enhancer & 1 & 99 \\
- & genic enhancer & 1 & 22 \\
-\hline
-constraint & evolutionary cons. (phast) & 1 + DP + AF & 117 \\
- & evolutionary cons. (gerp) & 1 + Dx & 127 \\
- & LoF intolerant genes & 1 + Dx & 143 \\
+constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
+& evolutionary cons. (gerp) & 1 + Dx & 127 \\
+& LoF intolerant genes & 1 + Dx & 143 \\
 \hline
 SCZ genesets & PSD & 1 & 95 \\
- & FMRP-target & 1 + AF & 118 \\
- & SCZ de novo & 1 + AF & 97 \\
- & Calcium channel & 1 + Dx & 13 \\
- & composite & 1 & 126 \\
+& FMRP-target & 1 + AF & 118 \\
+& SCZ de novo & 1 + AF & 97 \\
+& Calcium channel & 1 + Dx & 13 \\
+& composite & 1 & 126 \\
 \hline
-GWAS genesets & ADHD GWAS genes & 1 + AF + DP & 6 \\
- & Anorexia nervosa GWAS & None & 4 \\
- & ASD GWAS & 1 + Dx & 27 \\
- & Bipolar disorder GWAS & 1 + Dx & 77 \\
- & MDD GWAS & 1 & 48 \\
- & Schizophrenia GWAS & 1 + Dx & 72 \\
- & Psychiatric GWAS & 1 + Dx & 105 \\
+GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
+& Anorexia nervosa GWAS & None & 4 \\
+& ASD GWAS & 1 + Dx & 27 \\
+& Bipolar disorder GWAS & 1 + Dx & 77 \\
+& MDD GWAS & 1 & 48 \\
+& Schizophrenia GWAS & 1 + Dx & 72 \\
+& Psychiatric GWAS & 1 + Dx & 105 \\
 \end{tabular}
 \end{center}
 \end{frame}
 
-\begin{frame}{Fit improves with with size of category}
+\begin{frame}{Fit improves with with size of gen.~element/geneset}
 \includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[label=results]
 \includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
+\end{frame}
+
+\begin{frame}{Enrichment is selective to coding regions}
+\begin{center}
+\includegraphics[height=0.8\textheight]{../../notebook/2020-07-28-CLOZUK/named-figure/calls-in-scz-gwas-loci-coding.pdf}
+\end{center}
+\end{frame}
+
+\againframe{gwas}
+
+\againframe{results}
+
+\againframe{rare}
+
+\againframe{results}
+
+\begin{frame}{Enhancers enriched in somatic SNVs in ASD brains}
+\includegraphics[height=0.8\textheight]{from-others/rodin-2021-natneurosci-fig5a.png}
+
+\tiny
+Rodin et al 2021 Nature Neurosci
 \end{frame}
 
 \begin{frame}{Summary}
 \begin{itemize}
-\item similar genome wide call rate for Control, SCZ (and ASD)
-\item enrichment of Schizophrenia and Psychiatric GWAS genes in SNVs from
-	SCZ brains
-\item limited sample size for other categories \(\Rightarrow\) insufficient power to test
-	hypotheses
+\item schizophrenia: some genesets enriched in somatic SNVs
 \begin{itemize}
-	\item SNVs in loss of function intolerant genes
-        \item functional genesets implicated in schizophrenia
+	\item GWAS genes: schizophrenia, ASD, psychiatric 
+        \item shared heritability of somatic SNVs
 \end{itemize}
+\item insufficient data to study enrichment in disruptive variants
+\begin{itemize}
+	\item LoF intolerant genes?
+	\item PSD, FMRP-target, Ca-channel genes?
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Questions}
+\begin{itemize}
+\item noncoding \& regulatory elements?
+\item somatic CNVs (Eduardo Maury)
 \end{itemize}
 \end{frame}
 
