@@ -225,38 +225,42 @@ Effect of collinear variables
 \begin{frame}{Testing genomic categories for enrichment}
 \begin{center}
 \tiny
-\begin{tabular}{rlr}
+\begin{tabular}{lrlr}
 \hline
-genomic category & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
+category & genomic element / gene set & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
 \hline
-coding nonsyn & 1 & 55 \\
-coding syn & 1 & 38 \\
-missense & None & 0 \\
-stop gain & None & 1 \\
-splice site & None & 1 \\
-coding & 1 & 80 \\
-deleterious & 1 & 19 \\
-deleterious low confidence & None & 4 \\
-probably damaging & 1 + DP & 9 \\
-possibly damaging & 1 & 4 \\
-tfbs & 1 + AF & 93 \\
-phast & 1 + DP + AF & 117 \\
-gerp & 1 + Dx & 127 \\
-cpg island & 1 + AF + BaseQRankSum & 57 \\
-Enh & 1 & 99 \\
-EnhG & 1 & 22 \\
-PSD & 1 & 95 \\
-FMRP-target & 1 + AF & 118 \\
-SCZ de novo & 1 + AF & 97 \\
-Calcium channel & 1 + Dx & 13 \\
-composite & 1 & 126 \\
-ADHD GWAS & 1 + AF + DP & 6 \\
-Anorexia nervosa GWAS & None & 4 \\
-ASD GWAS & 1 + Dx & 27 \\
-Bipolar disorder GWAS & 1 + Dx & 77 \\
-MDD GWAS & 1 & 48 \\
-Schizophrenia GWAS & 1 + Dx & 72 \\
-Psychiatric GWAS & 1 + Dx & 105 \\
+coding type & coding nonsyn & 1 & 55 \\
+ & coding syn & 1 & 38 \\
+ & missense & None & 0 \\
+ & stop gain & None & 1 \\
+ & splice site & None & 1 \\
+ & coding & 1 & 80 \\
+\hline
+protein function & deleterious (sift) & 1 & 19 \\
+ & damaging (polyphen) & 1 + DP & 9 \\
+\hline
+regulatory & TFBS & 1 + AF & 93 \\
+ & CpG island & 1 + AF + BaseQRankSum & 57 \\
+ & enhancer & 1 & 99 \\
+ & genic enhancer & 1 & 22 \\
+\hline
+constraint & evolutionary cons. (phast) & 1 + DP + AF & 117 \\
+ & evolutionary cons. (gerp) & 1 + Dx & 127 \\
+ & LoF intolerant genes & 1 + Dx & 143 \\
+\hline
+SCZ genesets & PSD & 1 & 95 \\
+ & FMRP-target & 1 + AF & 118 \\
+ & SCZ de novo & 1 + AF & 97 \\
+ & Calcium channel & 1 + Dx & 13 \\
+ & composite & 1 & 126 \\
+\hline
+GWAS genesets & ADHD GWAS genes & 1 + AF + DP & 6 \\
+ & Anorexia nervosa GWAS & None & 4 \\
+ & ASD GWAS & 1 + Dx & 27 \\
+ & Bipolar disorder GWAS & 1 + Dx & 77 \\
+ & MDD GWAS & 1 & 48 \\
+ & Schizophrenia GWAS & 1 + Dx & 72 \\
+ & Psychiatric GWAS & 1 + Dx & 105 \\
 \end{tabular}
 \end{center}
 \end{frame}
@@ -265,8 +269,8 @@ Psychiatric GWAS & 1 + Dx & 105 \\
 \includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
 \end{frame}
 
-\begin{frame}{Enrichment of categories in SNVs from SCZ}
-\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
+\begin{frame}
+\includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
 \end{frame}
 
 \begin{frame}{Summary}
