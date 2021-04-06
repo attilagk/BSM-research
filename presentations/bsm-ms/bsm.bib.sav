@@ -12393,13 +12393,15 @@ url = {http://cancerres.aacrjournals.org/content/71/13/4443.full},
 volume = {71},
 year = {2011}
 }
-@book{davison2003statistical,
-author = {Davison, A C},
-file = {:home/attila/bibliography/mendeley/Davison/Davison - 2003 - Statistical Models.pdf:pdf},
-publisher = {Cambridge University Press},
-title = {{Statistical Models}},
-url = {http://statwww.epfl.ch/davison/SM/},
-year = {2003}
+
+@Book{davison2003statistical,
+  author    = {Davison, A C},
+  publisher = {Cambridge University Press},
+  title     = {{Statistical Models}},
+  year      = {2003},
+  file      = {:home/attila/bibliography/mendeley/Davison/Davison - 2003 - Statistical Models.pdf:pdf},
+  groups    = {bsm-ms},
+  url       = {http://statwww.epfl.ch/davison/SM/},
 }
 @article{Etesi2014,
 abstract = {In this note a unitary representation of the orientation-preserving diffeomorphism group of an oriented 4-manifold is exhibited. More precisely the resulting representation space is a complete topological vector space equipped with a non-degenerate indefinite Hermitian scalar product and as a vector space admits a family of corresponding direct sum decompositions into orthogonal pairs of maximal definite Hilbert subspaces. It is observed that the associated "net of algebras of local quantum observables" on this representation space in the sense of algebraic quantum field theory contains curvature tensors. Classical vacuum gravitational fields i.e., Einstein manifolds correspond to quantum observables obeying at least one of the above decompositions of the space. General local quantum observables of this theory are also investigated.   In this way classical general relativity exactly in 4 dimensions naturally embeds into an algebraic quantum field theory possessing a diffeomorphism group symmetry and this theory is constructed out of the structures provided by an oriented 4-manifold only.},
