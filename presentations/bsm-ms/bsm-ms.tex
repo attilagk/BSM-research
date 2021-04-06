@@ -103,7 +103,97 @@ individuals.
 
 \section*{Results}
 
-\subsection*{Identification of imprinted genes in the adult human brain}
+\subsection*{Somatic SNV callsets}
+
+\begin{figure}
+\includegraphics[scale=0.6]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
+
+\caption{Genome wide call rate for Control and Schizophrenic samples.  TODO:
+	add Harvard control samples}
+\end{figure}
+
+
+\begin{figure}
+A
+
+\includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
+
+B
+
+\includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+\caption{Distribution of allele frequency and read depth.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.6]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
+
+\caption{Genome wide call rate for Control and Schizophrenic samples.  TODO:
+	add Harvard control samples}
+\end{figure}
+
+\subsection*{Enrichment analysis}
+
+\begin{figure}
+\includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+
+\caption{Pairwise joint distributions of the number and fraction of calls in a
+	gene set with available clinical and technical variables.  TODO: fix
+	legend}
+\end{figure}
+
+\begin{figure}
+A
+
+\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
+
+B
+
+\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-pois-onlyIC_scz.pdf}
+\caption{Variable selection for regression models. A) Binomial--logistic
+	family.  B) Poisson--log-linear family.}
+\end{figure}
+
+\begin{table}
+\begin{tabular}{lrlr}
+category & genomic element, geneset & selected model formula & size \\
+\hline
+\hline
+damaging & coding nonsyn & 1 & 55 \\
+& coding syn & 1 + Gender & 38 \\
+& missense & None & 0 \\
+& stop gain & None & 1 \\
+& splice site & None & 1 \\
+& coding & 1 & 80 \\
+& deleterious (sift) & 1 & 19 \\
+& damaging (polyphen) & 1 + DP & 9 \\
+\hline
+regulartory & TFBS & 1 + AF & 93 \\
+& CpG island & 1 + AF + BaseQRankSum & 57 \\
+& enhancer & 1 & 99 \\
+& genic enhancer & 1 & 22 \\
+\hline
+constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
+& evolutionary cons. (gerp) & 1 + Dx & 127 \\
+& LoF intolerant genes & 1 + Dx & 143 \\
+\hline
+SCZ genesets & PSD & 1 & 95 \\
+& FMRP-target & 1 + AF & 118 \\
+& SCZ de novo & 1 + AF & 97 \\
+& Calcium channel & 1 + Dx & 13 \\
+& composite & 1 & 126 \\
+\hline
+GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
+& Anorexia nervosa GWAS & None & 4 \\
+& ASD GWAS & 1 + Dx & 27 \\
+& Bipolar disorder GWAS & 1 + Dx & 77 \\
+& MDD GWAS & 1 & 48 \\
+& Schizophrenia GWAS & 1 + Dx & 72 \\
+& Psychiatric GWAS & 1 + Dx & 105 \\
+\end{tabular}
+\caption{Genomic elements and genesets.  Size is defined as the number of
+	individuals with at least one somatic SNV call in the genomic element
+	or geneset.}
+\end{table}
 
 \section*{Discussion}
 
