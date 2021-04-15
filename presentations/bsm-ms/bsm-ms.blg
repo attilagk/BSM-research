@@ -3,44 +3,45 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: bsm-ms.aux
 The style file: plainnat.bst
 Database file #1: bsm.bib
-You've used 21 entries,
+Reallocated str_pool (elt_size=1) to 130000 items from 65000.
+You've used 22 entries,
             2773 wiz_defined-function locations,
-            801 strings with 45020 characters,
-and the built_in function-call counts, 91759 in all, are:
-= -- 5920
-> -- 15144
+            808 strings with 45644 characters,
+and the built_in function-call counts, 92866 in all, are:
+= -- 6002
+> -- 15282
 < -- 2
-+ -- 5049
-- -- 5028
-* -- 10746
-:= -- 16277
-add.period$ -- 115
-call.type$ -- 21
-change.case$ -- 1738
-chr.to.int$ -- 21
-cite$ -- 42
-duplicate$ -- 438
-empty$ -- 833
-format.name$ -- 5051
-if$ -- 16800
++ -- 5095
+- -- 5073
+* -- 10866
+:= -- 16464
+add.period$ -- 119
+call.type$ -- 22
+change.case$ -- 1756
+chr.to.int$ -- 22
+cite$ -- 44
+duplicate$ -- 459
+empty$ -- 873
+format.name$ -- 5097
+if$ -- 17014
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 21
-newline$ -- 165
-num.names$ -- 84
-pop$ -- 3383
+missing$ -- 22
+newline$ -- 171
+num.names$ -- 88
+pop$ -- 3416
 preamble$ -- 1
-purify$ -- 1717
+purify$ -- 1734
 quote$ -- 0
-skip$ -- 1914
+skip$ -- 1940
 stack$ -- 0
-substring$ -- 495
-swap$ -- 39
+substring$ -- 518
+swap$ -- 41
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 231
+type$ -- 242
 warning$ -- 0
-while$ -- 98
+while$ -- 102
 width$ -- 0
-write$ -- 384
+write$ -- 399

@@ -1,12 +1,3 @@
-% You can submit either a single PDF file that includes the manuscript text
-% and any display items, or separate files for text, figures and tables.
-%
-% 1500 words, excluding the introductory paragraph, online Methods,
-% references and figure legends
-%
-% TODOs
-% - cover letter
-
 \documentclass[letterpaper]{article}
 %\documentclass[12pt,letterpaper]{article}
 %\setlength{\textwidth}{480pt}
@@ -26,7 +17,7 @@
 
 \title{Involvement of Brain Somatic Mosaicism in Schizophrenia}
 
-\author{Attila Jones\(^{1,2,\ddagger}\), Chaggai Rosenbluh\(^{1}\), ..., Andrew Chess\(^{1,2,3,4,\ast}\)}
+\author{Attila Jones\(^{1,2}\), Chaggai Rosenbluh\(^{1}\), ..., Andrew Chess\(^{1,2,3,4,\ast}\)}
 
 \date{Icahn School of Medicine at Mount Sinai (ISMMS)}
 
@@ -52,68 +43,106 @@ The abstract
 
 \section*{Introduction}
 
-Schizophrenia is a psychiatric disorder, which... heritability: 0.8 ...\cite{Kahn2015}.  
+Schizophrenia is a psychiatric disorder, which... heritability: 0.8 ...\citep{Kahn2015}.  
 GWAS (reviewed by \cite{Visscher2017}) has been essential in clarifying the
-genetic of architecture of schizophrenia~\cite{Ripke2014,Pardinas2018} and other psychiatric disorders
-\cite{Sullivan2012}: they are polygenic and much of the heritability is due to
+genetic of architecture of schizophrenia~\citep{Ripke2014,Pardinas2018} and other psychiatric disorders
+\citep{Sullivan2012}: they are polygenic and much of the heritability is due to
 a large set of common germline variants, typically SNPs, with
 small effect size.  GWAS also revealed that psychiatric disorders
 typically share much heritability with each
-other~\cite{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser extent with
-some neurological disorders~\cite{Consortium2018} indicating shared
+other~\citep{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser extent with
+some neurological disorders~\citep{Consortium2018} indicating shared
 pathological mechanisms and supporting the neurodevelopmental hypothesis of
-schizophrenia~\cite{Nour2015}.
+schizophrenia~\citep{Nour2015}.
 
 Beyond common SNPs other classes of genetic variation have also been shown to
-carry substantial risk for schizophrenia: rare CNVs~\cite{Rees2014}, rare germline
-SNVs~\cite{Purcell2014,Singh2017} as well as de novo
-SNVs~\cite{Fromer2014,Rees2020}.  These studies confirmed the polygenicity of
+carry substantial risk for schizophrenia: rare CNVs~\citep{Rees2014}, rare germline
+SNVs~\citep{Purcell2014,Singh2017} as well as de novo
+SNVs~\citep{Fromer2014,Rees2020}.  These studies confirmed the polygenicity of
 schizophrenia and found excess mutational burden in several functional
-genesets such as synaptic and voltage gated calcium channel and FMRP target
-genes\cite{Fromer2014,Purcell2014} ... and loss of function intolerant
-genes~\cite{Rees2020,Singh2017} but found no evidence for increased genome
+gene sets such as synaptic and voltage gated calcium channel and FMRP target
+genes\citep{Fromer2014,Purcell2014} ... and loss of function intolerant
+genes~\citep{Rees2020,Singh2017} but found no evidence for increased genome
 wide germline single nucleotide mutation rate in schizophrenics.
 
 Despite much progress translation of the results of the aforementioned studies
 into effective medical diagnostic and treatment methods for schizophrenia is
-still lacking~\cite{Breen2016,Foley2017}. Increasing sample sizes, especially
+still lacking~\citep{Breen2016,Foley2017}. Increasing sample sizes, especially
 for currently underrepresented ethnic groups, is expected to uncover new
-potential risk genes and therapeutic targets~\cite{Visscher2017}, but the difficulty of interpreting
-polygenic signals from SNP arrays will persist~\cite{Boyle2017}.  Rare and de
+potential risk genes and therapeutic targets~\citep{Visscher2017}, but the difficulty of interpreting
+polygenic signals from SNP arrays will persist~\citep{Boyle2017}.  Rare and de
 novo variants detected by sequencing afford somewhat easier interpretation.
 However, besides germline variants a number of distinct genetic and epigenetic
 processes are hypothesized to play a role in schizophrenia and psychiatric
-disorders~\cite{PsychENCODEConsortium2015}.
+disorders~\citep{PsychENCODEConsortium2015}.
 
 Somatic variants have been called the dark matter of psychiatric
-genetics~\cite{Insel2014}.  Their systematic, genome-wide study has just begun
+genetics~\citep{Insel2014}.  Their systematic, genome-wide study has just begun
 with the announcement of the Brain Somatic Mosaicism
-project~\cite{McConnell2017}.  Within that project we and others recently
+project~\citep{McConnell2017}.  Within that project we and others recently
 developed new best practices and tools for calling somatic variants from brain
-samples based on bulk tissue sequencing data~\cite{Wang2021}.  In the present
+samples based on bulk tissue sequencing data~\citep{Wang2021}.  In the present
 work, for the first time, we apply these analytical tools to deep, whole
 genome sequencing data from the DLPFC of \(m\) schizophrenic and \(n\) control
 individuals.
-
-%A related question is the number of imprinted genes in the human brain.  Some
-%1,300 genes were estimated to be imprinted in the mouse
-%brain~\cite{Gregg2010a} but followup studies using mouse or human subjects
-%arrived at estimates that are lower with an order of
-%magnitude~\cite{Andergassen2017,Babak2015,Baran2015,DeVeale2012,Perez2015}.
 
 \section*{Results}
 
 \subsection*{Somatic SNV callsets}
 
-\begin{figure}
+\subsubsection*{Genome wide somatic SNV call rate for Control and Schizophrenic samples}
+
+We extracted NeuN+ nuclei from postmortem samples of the DLPFC of 40 control
+and 61 schizophrenic individuals and subjected them to short read DNA
+sequencing at 50--540\(\times\) coverage.  Next we called somatic SNVs using a
+pipeline developed and validated by the BSMN consortium~\citep{Wang2021}.  The
+genome-wide somatic SNV call rate was similar for control and schizophrenic
+samples (median around 40) and showed great variability, ranging 0 to 100 with
+the exception of an outlier schizophrenic sample reaching \(\approx 200\).
+
+
+%\begin{figure}
 \includegraphics[scale=0.6]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
 
-\caption{Genome wide call rate for Control and Schizophrenic samples.  TODO:
-	add Harvard control samples}
-\end{figure}
+%\caption{Genome wide somatic SNV call rate for Control and Schizophrenic samples.  TODO:
+%	add Harvard control samples}
+%\end{figure}
 
+\subsubsection*{Genome wide somatic SNV call rate depends on sequencing read depth}
 
-\begin{figure}
+The finding that somatic SNV call rate is unaltered in schizophrenics was
+expected based on similar results for rare germline and de-novo
+SNVs~\citep{Purcell2014,Singh2017,Fromer2014,Rees2020}.
+As for the high variability of somatic SNV call rate we sought 
+biological or technical variables explaining that variation.  As the figure
+shows sequencing read depth explains much of
+the variability in call rate, which indicates that the variant calling
+pipeline adapts to lower coverage by applying stronger filters in order to 
+maintain high specificity.
+
+%\begin{figure}
+\includegraphics[scale=0.6]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
+
+%\caption{Genome wide somatic SNV call rate depends on sequencing read depth}
+%\end{figure}
+
+\subsubsection*{Distribution of allele frequency and read depth}
+
+The joint distribution of read depth and estimated allele frequency across all
+4141 somatic SNVs in our data set showed that increasing read depth allowed
+calling SNVs at lower frequencies.  (Note that even though allele frequency is
+a continuous variable its estimate is discrete, which is an inherent feature
+of the pipeline.)  As a result the conditional density of allele frequency is
+shifted to the left at higher read depth relative to lower depth.  If we
+assume roughly constant somatic point mutation rate along the cell lineages of
+our samples~\citep{Rodin2021} then the expected distribution of allele
+frequency is quasi exponential.  With decreasing read depth the observed
+conditional allele frequency distribution departed increasingly from an
+exponential distribution, which indicates that the pipeline's sensitivity for
+low allele frequency (below c.a 0.05) somatic SNVs is limited at even high
+(\(\approx\) 400) sequencing coverage.
+
+%\begin{figure}
 A
 
 \includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
@@ -121,41 +150,24 @@ A
 B
 
 \includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
-\caption{Distribution of allele frequency and read depth.}
-\end{figure}
-
-\begin{figure}
-\includegraphics[scale=0.6]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
-
-\caption{Genome wide call rate for Control and Schizophrenic samples.  TODO:
-	add Harvard control samples}
-\end{figure}
+%\caption{Distribution of allele frequency and read depth.  TODO: omit upper
+%left graph (A) and merge (A) and (B)}
+%\end{figure}
 
 \subsection*{Enrichment analysis}
 
-\begin{figure}
-\includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+\subsubsection*{Genomic elements and gene sets}
 
-\caption{Pairwise joint distributions of the number and fraction of calls in a
-	gene set with available clinical and technical variables.  TODO: fix
-	legend}
-\end{figure}
+Studies of rare germline and de-novo SNVs showed that,
+although the genome-wide ``background'' mutation rate is unaltered in
+schizophrenia, specific genomic elements and gene sets are enriched in (in
+other words bear increased burden of) SNVs in schizophrenics relative to
+controls.  We sought to test enrichment in several genomic elements or gene
+sets.
 
-\begin{figure}
-A
-
-\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
-
-B
-
-\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-pois-onlyIC_scz.pdf}
-\caption{Variable selection for regression models. A) Binomial--logistic
-	family.  B) Poisson--log-linear family.}
-\end{figure}
-
-\begin{table}
+%\begin{table}
 \begin{tabular}{lrlr}
-category & genomic element, geneset & selected model formula & size \\
+category & genomic element, gene set & selected model formula & size \\
 \hline
 \hline
 damaging & coding nonsyn & 1 & 55 \\
@@ -176,13 +188,13 @@ constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
 & evolutionary cons. (gerp) & 1 + Dx & 127 \\
 & LoF intolerant genes & 1 + Dx & 143 \\
 \hline
-SCZ genesets & PSD & 1 & 95 \\
+SCZ gene sets & PSD & 1 & 95 \\
 & FMRP-target & 1 + AF & 118 \\
 & SCZ de novo & 1 + AF & 97 \\
 & Calcium channel & 1 + Dx & 13 \\
 & composite & 1 & 126 \\
 \hline
-GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
+GWAS gene sets & ADHD GWAS & 1 + AF + DP & 6 \\
 & Anorexia nervosa GWAS & None & 4 \\
 & ASD GWAS & 1 + Dx & 27 \\
 & Bipolar disorder GWAS & 1 + Dx & 77 \\
@@ -190,10 +202,70 @@ GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
 & Schizophrenia GWAS & 1 + Dx & 72 \\
 & Psychiatric GWAS & 1 + Dx & 105 \\
 \end{tabular}
-\caption{Genomic elements and genesets.  Size is defined as the number of
-	individuals with at least one somatic SNV call in the genomic element
-	or geneset.}
-\end{table}
+%\caption{Genomic elements and gene sets.  Size is defined as the number of
+%	individuals with at least one somatic SNV call in the genomic element
+%	or gene set. TODO: remove ``coding'' since it's redundant give ``coding
+%	nonsyn'' and ``coding syn''}
+%\end{table}
+
+\subsubsection*{Pairwise joint distributions of response and explanatory variables}
+
+%\begin{figure}
+\includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+
+%\caption{Pairwise joint distributions of response and explanatory variables
+%	TODO: fix legend}
+%\end{figure}
+
+\subsubsection*{Modeling the number (A) and fraction (B) of somatic SNV calls in a gene set}
+
+%\begin{figure}
+A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
+B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
+
+%\caption{Modeling the number (A) and fraction (B) of somatic SNV calls in a
+%gene set}
+%\end{figure}
+
+\subsubsection*{Variable selection for regression models}
+
+%\begin{figure}
+A
+
+\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
+
+B
+
+\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-pois-onlyIC_scz.pdf}
+%\caption{Variable selection for regression models. A) Binomial--logistic
+%	family.  B) Poisson--log-linear family.}
+%\end{figure}
+
+\subsubsection*{The effect of ageOfDeath and that of Dataset are mediated by disease status Dx}
+
+Enrichment is independent of ageOfDeath for a given Dataset
+
+%\begin{figure}
+A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/Dx_Dataset_ageOfDeath_scz.pdf}
+B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/collinearity_Dx_Dataset_ageOfDeath_scz.pdf}
+%\caption{The effect of ageOfDeath and that of Dataset are mediated by disease status Dx.  H: Harvard Dataset,
+%S: Mount Sinai Dataset}
+%\end{figure}
+
+\subsubsection*{Residual analysis to assess model fit }
+
+%\begin{figure}
+\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
+%\caption{Residual analysis to assess model fit for genomic elements and gene
+%sets of increasing size (from top left to bottom right)}
+%\end{figure}
+
+\subsubsection*{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
+
+%\begin{figure}
+\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
+%\caption{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
+%\end{figure}
 
 \section*{Discussion}
 
@@ -332,6 +404,7 @@ https://github.com/attilagk/BSM-research
 %  Series B, Biological sciences}, 361(1476):2229--37, dec 2006.
 %
 %\end{thebibliography}
+
 
 \section*{Acknowledgements}
 

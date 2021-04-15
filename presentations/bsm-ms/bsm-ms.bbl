@@ -1,4 +1,4 @@
-\begin{thebibliography}{21}
+\begin{thebibliography}{22}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -715,6 +715,18 @@ Stephan Ripke, Benjamin~M. Neale, Aiden Corvin, James T.~R. Walters, Kai-How
 \newblock ISSN 0028-0836.
 \newblock \doi{10.1038/nature13595}.
 \newblock URL \url{http://www.nature.com/doifinder/10.1038/nature13595}.
+
+\bibitem[Rodin et~al.(2021)Rodin, Dou, Kwon, Sherman, D'Gama, Doan, Rento,
+  Girskis, Bohrson, Kim, Nadig, Luquette, Gulhan, Park, and Walsh]{Rodin2021}
+Rachel~E. Rodin, Yanmei Dou, Minseok Kwon, Maxwell~A. Sherman, Alissa~M.
+  D'Gama, Ryan~N. Doan, Lariza~M. Rento, Kelly~M. Girskis, Craig~L. Bohrson,
+  Sonia~N. Kim, Ajay Nadig, Lovelace~J. Luquette, Doga~C. Gulhan, Peter~J.
+  Park, and Christopher~A. Walsh.
+\newblock The landscape of somatic mutation in cerebral cortex of autistic and
+  neurotypical individuals revealed by ultra-deep whole-genome sequencing.
+\newblock \emph{Nature neuroscience}, 24:\penalty0 176--185, Feb 2021.
+\newblock URL
+  \url{http://www.walshlab.org/uploads/publications/406/2021_natneurosci_thelandscapeofmutationalmosaicisminautisticandnormalhumancerebralcortex_rodinwalsh.pdf}.
 
 \bibitem[Singh et~al.(2017)Singh, Walters, Johnstone, Curtis, Suvisaari,
   Torniainen, Rees, Iyegbe, Blackwood, McIntosh, Kirov, Geschwind, Murray,
