@@ -230,7 +230,7 @@ logistic family, panel (A) shows fitted lines under both \(f_S \sim 1 +
 	\mathrm{Dx}\) and \(f_S \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
 (panel (A)), where \(1\) means intercept.  For the log-linear family panel (B)
 shows fitted lines under both \(n_S \sim 1 + \mathrm{Dx}\) and \(n_S \sim 1 +
-	\mathrm{Dx} + \(n_\mathrm{genome}\)\)
+	\mathrm{Dx} + n_\mathrm{genome}\)
 
 %\begin{figure}
 A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
@@ -299,6 +299,17 @@ B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/na
 \subsubsection*{Residual analysis to assess model fit }
 
 [notebook/2021-01-26-indiv-counts-modeling]
+
+There are several types of residuals in use for generalized linear models.
+The $r^\ast$ residual is approximately normally distributed even if the error
+distribution for the model family is not normal, such as Poisson or
+binomial~\citep{davison2003statistical} (Ch10.2 p477).
+This residual is defined as follows
+
+$$
+r^\ast = r_\mathrm{D} + r_\mathrm{D}^{-1} \log
+\frac{r_\mathrm{P}}{r_\mathrm{D}}
+$$
 
 %\begin{figure}
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
