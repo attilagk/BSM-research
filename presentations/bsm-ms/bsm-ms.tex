@@ -90,55 +90,37 @@ individuals.
 
 \subsection*{Somatic SNV callsets}
 
-\subsubsection*{Genome wide somatic SNV call rate for Control and Schizophrenic samples}
-
-[notebook/2020-06-10-annotate-explore-variants]
-
 We extracted NeuN+ nuclei from postmortem samples of the DLPFC of 40 control
 and 61 schizophrenic individuals and subjected them to short read DNA
 sequencing at 50--540\(\times\) coverage.  Next we called somatic SNVs using a
 pipeline developed and validated by the BSMN consortium~\citep{Wang2021}.  The
 genome-wide somatic SNV call rate was similar for control and schizophrenic
 samples (median around 40) and showed great variability, ranging 0 to 100 with
-the exception of an outlier schizophrenic sample reaching \(\approx 200\).
+the exception of an outlier schizophrenic sample reaching \(\approx 200\)
+(Fig~\ref{fig:genomewide-calls}A).
 
-
-%\begin{figure}
-\includegraphics[scale=0.6]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
-
-%\caption{Genome wide somatic SNV call rate for Control and Schizophrenic samples.  TODO:
-%	add Harvard control samples}
-%\end{figure}
-
-\subsubsection*{Genome wide somatic SNV call rate depends on sequencing read depth}
-
-[notebook/2020-12-09-walsh-data]
+\begin{figure}
+A\includegraphics[scale=0.6]{../../notebook/2020-06-10-annotate-explore-variants/named-figure/numcalls-Dx.pdf}
+B\includegraphics[scale=0.6]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
+\caption{Genome wide somatic SNV call rate for Control and Schizophrenic samples.  TODO:
+	add Harvard control samples, remove ASD}
+\label{fig:genomewide-calls}
+\end{figure}
 
 The finding that somatic SNV call rate is unaltered in schizophrenics was
 expected based on similar results for rare germline and de-novo
 SNVs~\citep{Purcell2014,Singh2017,Fromer2014,Rees2020}.
 As for the high variability of somatic SNV call rate we sought 
-biological or technical variables explaining that variation.  As the figure
+biological or technical variables explaining that variation.  As
+Fig~\ref{fig:genomewide-calls}B
 shows sequencing read depth explains much of
 the variability in call rate, which indicates that the variant calling
 pipeline adapts to lower coverage by applying stronger filters in order to 
 maintain high specificity.
 
-%\begin{figure}
-\includegraphics[scale=0.6]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
-
-%\caption{Genome wide somatic SNV call rate depends on sequencing read depth}
-%\end{figure}
-
-\subsubsection*{Distribution of allele frequency and read depth}
-
-[notebook/2020-08-13-select-vars]
-
 The joint distribution of read depth and estimated allele frequency across all
 4141 somatic SNVs in our data set showed that increasing read depth allowed
-calling SNVs at lower frequencies.  (Note that even though allele frequency is
-a continuous variable its estimate is discrete, which is an inherent feature
-of the pipeline.)  As a result the conditional density of allele frequency is
+calling SNVs at lower frequencies.  As a result the conditional density of allele frequency is
 shifted to the left at higher read depth relative to lower depth.  If we
 assume roughly constant somatic point mutation rate along the cell lineages of
 our samples~\citep{Rodin2021} then the expected distribution of allele
@@ -148,7 +130,7 @@ exponential distribution, which indicates that the pipeline's sensitivity for
 low allele frequency (below c.a 0.05) somatic SNVs is limited at even high
 (\(\approx\) 400) sequencing coverage.
 
-%\begin{figure}
+\begin{figure}
 A
 
 \includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
@@ -156,9 +138,11 @@ A
 B
 
 \includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
-%\caption{Distribution of allele frequency and read depth.  TODO: omit upper
-%left graph (A) and merge (A) and (B)}
-%\end{figure}
+\caption{Distribution of allele frequency and read depth.  Note that even though allele frequency is
+a continuous variable its estimate is discrete, which is an inherent feature
+of the pipeline.   TODO: omit upper
+left graph (A) and merge (A) and (B)}
+\end{figure}
 
 \subsection*{Enrichment analysis}
 
@@ -170,156 +154,11 @@ of---in other words: are enriched in---SNVs in schizophrenic individuals relativ
 controls.  We sought to test enrichment in several genomic elements or gene
 sets (see Table below).  To that end we established statistical procedures.
 
-\subsubsection*{Pairwise joint distributions of response and explanatory variables}
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-For a genomic element or gene set  \(S\) we inspected the joint distribution,
-across all study subjects, of disease status Dx, two enrichment variables
-\(n_S\), \(f_S\), and technical and biological variables that potentially
-carry information on those enrichment variables.  The enrichment variable
-\(n_S\) is the number of somatic SNVs located in \(S\), whereas the \(f_S =
-	n_S/n_\mathrm{genome}\) is the fraction of somatic SNVs in \(S\)
-relative to all somatic SNVs in the genome.  The aim was to formally test
-enrichment in \(S\) in schizophrenia by regressing the response variables
-\(n_S\) or \(f_S\) on the explanatory variable Dx
-and other, ``confounding'', variables.
-
-In case of the plot matrix below \(S\) is the set of schizophrenia GWAS genes
-defined as all genes, including their introns, that are located fully or
-partially in schizophrenia GWAS loci (Table S4 in \cite{Pardinas2018}).
-
-Notable observations:
-\begin{itemize}
-	\item the strongsest dependence was seen between \(n_S\) and \(n_\mathrm{genome}\) as expected
-		when the genome-wide background rate of somatic SNVs is
-		substantial relative to enrichment in \(S\)
-	\item we have already noted the strong dependence between read depth DP and
-		\(n_\mathrm{genome}\)
-        \item other dependencies were relatively weak
-	\item for many control individuals ageOfDeath is below 50 years while for
-		most schizophrenic individuals it is above 50.  This is
-		because the Mount Sinai dataset contained older individuals
-		that were either control or schizophrenic but the Harvard dataset contained
-		only younger control individuals
-\end{itemize}
-
-%\begin{figure}
-\includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
-
-%\caption{Pairwise joint distributions of response and explanatory variables
-%	TODO: fix legend}
-%\end{figure}
-
-\subsubsection*{Modeling the number (A) and fraction (B) of somatic SNV calls in a gene set}
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-We considered two generalized linear model families depending on the response
-variable:
-\begin{description}
-\item[response is \(f_S\):] logistic family: binomial error distribution with
-	logistic link function; see panel (A)
-\item[response is \(n_S\):] log-linear family: Poisson error distribution with exponential link function; see panel (B)
-\end{description}
-
-Within each family we considered relatively simple or complex models depending
-on the set of variables selected as explanatory.  For \(S =\) schizophrenia
-GWAS genes, and within the
-logistic family, panel (A) shows fitted lines under both \(f_S \sim 1 +
-	\mathrm{Dx}\) and \(f_S \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
-(panel (A)), where \(1\) means intercept.  For the log-linear family panel (B)
-shows fitted lines under both \(n_S \sim 1 + \mathrm{Dx}\) and \(n_S \sim 1 +
-	\mathrm{Dx} + n_\mathrm{genome}\)
-
-%\begin{figure}
-A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
-B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
-
-%\caption{Modeling the number (A) and fraction (B) of somatic SNV calls in a
-%gene set}
-%\end{figure}
-
-\subsubsection*{Variable selection for regression models}
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-To select the best fitting model within each family we applied forward
-variable selection algorithm with the Akaike information criterion (AIC) as
-optimality criterion.  (The Bayesian (BIC) information instead of AIC gave the
-same results.)
-
-Still in the case of \(S =\) schizophrenia GWAS genes we see that the first,
-thus most informative, variable selected is Dx under the logistic model (panel A).
-Any additional variables increased the information criteria and thus lead to
-overfitting the data.
-
-Panel (B) shows the same result under the log-linear model except that the
-most informative variable is \(n_\mathrm{genome}\), which was expected by its
-strong correlation with \(n_S\).  Nonetheless, Dx is selected also under this
-model family.
-
-%\begin{figure}
-A
-
-\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
-
-B
-
-\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-pois-onlyIC_scz.pdf}
-%\caption{Variable selection for regression models. A) Binomial--logistic
-%	family.  B) Poisson--log-linear family.}
-%\end{figure}
-
-\subsubsection*{The effect of ageOfDeath and that of Dataset are mediated by disease status Dx}
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-As we noted one of our two datasets contained relatively young individuals who
-were all control.  This leads to the causal-probabilistic graphical model that
-\(\mathrm{ageOfDeath} \leftarrow \mathrm{Dataset} \rightarrow \mathrm{Dx}
-	\rightarrow y\)\), where \(y\) is the response enrichment variable
-\(f_S\) or \(n_S\).  It means that ageOfDeath and
-Dataset have indirect effects on enrichment such that these effects are
-mediated by disease status Dx. If this model is true then \(Dx\) d-separates
-\(y\) from Dataset and ageOfDeath so that \(y\) becomes independent from
-ageOfDeath and Dataset if we condition on Dx = control or Dx =
-schizophrenia.  Panel (A) illustrates that.  The important consequence is
-that we should remove ageOfDeath and Dataset from the set from our models as long
-as we include Dx.  Failing to do so may confound our
-inference on the effect of Dx on enrichment (Panel B).
-
-%\begin{figure}
-A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/Dx_Dataset_ageOfDeath_scz.pdf}
-B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/collinearity_Dx_Dataset_ageOfDeath_scz.pdf}
-%\caption{The effect of ageOfDeath and that of Dataset are mediated by disease status Dx.  H: Harvard Dataset,
-%S: Mount Sinai Dataset}
-%\end{figure}
-
-\subsubsection*{Residual analysis to assess model fit }
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-There are several types of residuals in use for generalized linear models.
-The $r^\ast$ residual is approximately normally distributed even if the error
-distribution for the model family is not normal, such as Poisson or
-binomial~\citep{davison2003statistical} (Ch10.2 p477).
-This residual is defined as follows
-
-$$
-r^\ast = r_\mathrm{D} + r_\mathrm{D}^{-1} \log
-\frac{r_\mathrm{P}}{r_\mathrm{D}}
-$$
-
-%\begin{figure}
-\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
-%\caption{Residual analysis to assess model fit for genomic elements and gene
-%sets of increasing size (from top left to bottom right)}
-%\end{figure}
 
 \subsubsection*{Genomic elements and gene sets}
 
 [notebook/2021-01-26-indiv-counts-modeling]
+
 
 %\begin{table}
 \begin{tabular}{lrlr}
@@ -378,6 +217,115 @@ GWAS gene sets & ADHD GWAS & 1 + AF + DP & 6 \\
 
 \section*{Methods}
 
+For a genomic element or gene set  \(S\) we inspected the joint distribution,
+across all study subjects, of disease status Dx, two enrichment variables
+\(n_S\), \(f_S\), and technical and biological variables that potentially
+carry information on those enrichment variables.  The enrichment variable
+\(n_S\) is the number of somatic SNVs located in \(S\), whereas the \(f_S =
+	n_S/n_\mathrm{genome}\) is the fraction of somatic SNVs in \(S\)
+relative to all somatic SNVs in the genome.  The aim was to formally test
+enrichment in \(S\) in schizophrenia by regressing the response variables
+\(n_S\) or \(f_S\) on the explanatory variable Dx
+and other, ``confounding'', variables.
+
+In case of the plot matrix (Fig~S\ref{fig:scattermatrix}) \(S\) is the set of schizophrenia GWAS genes
+defined as all genes, including their introns, that are located fully or
+partially in schizophrenia GWAS loci (Table S4 in \cite{Pardinas2018}).
+
+Notable observations:
+\begin{itemize}
+	\item the strongsest dependence was seen between \(n_S\) and \(n_\mathrm{genome}\) as expected
+		when the genome-wide background rate of somatic SNVs is
+		substantial relative to enrichment in \(S\)
+	\item we have already noted the strong dependence between read depth DP and
+		\(n_\mathrm{genome}\)
+        \item other dependencies were relatively weak
+	\item for many control individuals ageOfDeath is below 50 years while for
+		most schizophrenic individuals it is above 50.  This is
+		because the Mount Sinai dataset contained older individuals
+		that were either control or schizophrenic but the Harvard dataset contained
+		only younger control individuals
+\end{itemize}
+
+\subsubsection*{Modeling the number and fraction of somatic SNV calls in a gene set}
+
+We considered two generalized linear model families depending on the response
+variable:
+\begin{description}
+\item[response is \(f_S\):] logistic family: binomial error distribution with
+	logistic link function; see panel (A)
+\item[response is \(n_S\):] log-linear family: Poisson error distribution with exponential link function; see panel (B)
+\end{description}
+
+Within each family we considered relatively simple or complex models depending
+on the set of variables selected as explanatory.  For \(S =\) schizophrenia
+GWAS genes, and within the
+logistic family, Fig~S\ref{fig:fitted-lines}A shows fitted lines under both \(f_S \sim 1 +
+	\mathrm{Dx}\) and \(f_S \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
+(panel (A)), where \(1\) means intercept.  For the log-linear family panel
+(Fig~S\ref{fig:fitted-lines}B)
+shows fitted lines under both \(n_S \sim 1 + \mathrm{Dx}\) and \(n_S \sim 1 +
+	\mathrm{Dx} + n_\mathrm{genome}\)
+
+
+\subsubsection*{Variable selection for regression models}
+
+To select the best fitting model within each family we applied forward
+variable selection algorithm with the Akaike information criterion (AIC) as
+optimality criterion.  (The Bayesian (BIC) information instead of AIC gave the
+same results.)
+
+In the case of \(S =\) schizophrenia GWAS genes we see that the first,
+thus most informative, variable selected is Dx under the logistic model
+(Fig~S\ref{fig:varsel}A).
+Any additional variables increased the information criteria and thus lead to
+overfitting the data.
+
+(Fig~S\ref{fig:varsel}B) shows the same result under the log-linear model except that the
+most informative variable is \(n_\mathrm{genome}\), which was expected by its
+strong correlation with \(n_S\).  Nonetheless, Dx is selected also under this
+model family.
+
+\subsubsection*{The effect of ageOfDeath and that of Dataset are mediated by disease status Dx}
+
+As we noted one of our two datasets contained relatively young individuals who
+were all control.  This leads to the causal-probabilistic graphical model that
+\(\mathrm{ageOfDeath} \leftarrow \mathrm{Dataset} \rightarrow \mathrm{Dx}
+	\rightarrow y\)\), where \(y\) is the response enrichment variable
+\(f_S\) or \(n_S\).  It means that ageOfDeath and
+Dataset have indirect effects on enrichment such that these effects are
+mediated by disease status Dx. If this model is true then \(Dx\) d-separates
+\(y\) from Dataset and ageOfDeath so that \(y\) becomes independent from
+ageOfDeath and Dataset if we condition on Dx = control or Dx =
+schizophrenia.  Fig~S\ref{fig:d-separation}A illustrates that.  The important consequence is
+that we should remove ageOfDeath and Dataset from the set from our models as long
+as we include Dx.  Failing to do so may confound our
+inference on the effect of Dx on enrichment (Fig~S\ref{fig:d-separation}B).
+
+\subsubsection*{Residual analysis to assess model fit }
+
+We assessed model fit by residual analysis.  There are several types of residuals in use for generalized linear models.
+The $r^\ast$ residual is approximately normally distributed even if the error
+distribution for the model family is not normal, such as Poisson or
+binomial~\citep{davison2003statistical} (Ch10.2 p477).
+
+This residual is defined as follows
+
+$$
+r^\ast = r_\mathrm{D} + r_\mathrm{D}^{-1} \log
+\frac{r_\mathrm{P}}{r_\mathrm{D}},
+$$
+
+where \(r_\mathrm{D}\) is the standardized deviance residual and
+\(r_\mathrm{P}\) is the standardized Pearson residual.
+
+We expressed the size of genomic element or gene set as the number of
+individuals with at least one somatic SNV in that genomic element or gene set.
+We sorted genomic elements and gene sets according to their size and produced
+normal Q-Q plots of \(r^\ast\) from top left of Fig~S\ref{fig:residual-QQ} (smallest) to
+bottom right (largest).  This indicated poor fit for the smallest genomic
+elements and gene sets (top row of plots) but good fit for medium sized and
+large ones.
 
 \subsection*{Data availability}
 
@@ -389,127 +337,6 @@ All code developed by A.~Jones is available at:\\
 https://github.com/attilagk/BSM-research
 
 \bibliography{bsm}
-%\begin{thebibliography}{10}
-%
-%\bibitem{Noor2015}
-%Abdul Noor, Lucie Dupuis, Kirti Mittal, Anath~C. Lionel, Christian~R. Marshall,
-%  Stephen~W. Scherer, Tracy Stockley, John~B. Vincent, Roberto Mendoza-Londono,
-%  and Dimitri~J. Stavropoulos.
-%\newblock 15q11.2 duplication encompassing only the {UBE}3a gene is associated
-%  with developmental delay and neuropsychiatric phenotypes.
-%\newblock 36(7):689--693.
-%
-%\bibitem{Rees2014}
-%Elliott Rees, James T~R Walters, Lyudmila Georgieva, Anthony~R Isles,
-%  Kimberly~D Chambert, Alexander~L Richards, Gerwyn Mahoney-Davies, Sophie~E
-%  Legge, Jennifer~L Moran, Steven~A McCarroll, Michael~C O'Donovan, Michael~J
-%  Owen, and George Kirov.
-%\newblock {Analysis of copy number variations at 15 schizophrenia-associated
-%  loci.}
-%\newblock {\em The British journal of psychiatry : the journal of mental
-%  science}, 204(2):108--14, feb 2014.
-%
-%\bibitem{Gregg2010a}
-%Christopher Gregg, Jiangwen Zhang, Brandon Weissbourd, Shujun Luo, Gary~P
-%  Schroth, David Haig, and Catherine Dulac.
-%\newblock {High-resolution analysis of parent-of-origin allelic expression in
-%  the mouse brain.}
-%\newblock {\em Science (New York, N.Y.)}, 329(5992):643--8, aug 2010.
-%
-%\bibitem{Andergassen2017}
-%Daniel Andergassen, Christoph~P Dotter, Daniel Wenzel, Verena Sigl, Philipp~C
-%  Bammer, Markus Muckenhuber, Daniela Mayer, Tomasz~M Kulinski, Hans-Christian
-%  Theussl, Josef~M Penninger, Christoph Bock, Denise~P Barlow, Florian~M
-%  Pauler, and Quanah~J Hudson.
-%\newblock Mapping the mouse allelome reveals tissue-specific regulation of
-%  allelic expression.
-%\newblock {\em eLife}, 6, August 2017.
-%
-%\bibitem{Baran2015}
-%Yael Baran, Meena Subramaniam, Anne Biton, Taru Tukiainen, Emily~K. Tsang,
-%  Manuel~A. Rivas, Matti Pirinen, Maria Gutierrez-Arcelus, Kevin~S. Smith,
-%  Kim~R. Kukurba, Rui Zhang, Celeste Eng, Dara~G. Torgerson, Cydney Urbanek,
-%  Jin~Billy Li, Jose~R. Rodriguez-Santana, Esteban~G. Burchard, Max~A. Seibold,
-%  Daniel~G. MacArthur, Stephen~B. Montgomery, Noah~A. Zaitlen, and Tuuli
-%  Lappalainen.
-%\newblock {The landscape of genomic imprinting across diverse adult human
-%  tissues}.
-%\newblock {\em Genome Research}, 25(7), 2015.
-%
-%\bibitem{DeVeale2012}
-%Brian DeVeale, Derek van~der Kooy, and Tomas Babak.
-%\newblock {Critical evaluation of imprinted gene expression by RNA-seq: A new
-%  perspective}.
-%\newblock {\em PLoS Genetics}, 8(3):e1002600, jan 2012.
-%
-%\bibitem{Perez2015}
-%Julio~D Perez, Nimrod~D Rubinstein, Daniel~E Fernandez, Stephen~W Santoro,
-%  Leigh~A Needleman, Olivia Ho-Shing, John~J Choi, Mariela Zirlinger,
-%  Shau-Kwaun Chen, Jun~S Liu, and Catherine Dulac.
-%\newblock {Quantitative and functional interrogation of parent-of-origin
-%  allelic expression biases in the brain.}
-%\newblock {\em eLife}, 4:e07860, jan 2015.
-%
-%\bibitem{Fromer2016a}
-%Fromer, Menachem and Roussos, Panos and Sieberts, Solveig K and Johnson,
-%Jessica S and Kavanagh, David H and Perumal, Thanneer M and Ruderfer, Douglas
-%M and Oh, Edwin C and Topol, Aaron and Shah, Hardik R and others.
-%\newblock {Gene expression elucidates functional impact of polygenic risk for
-%  schizophrenia.}
-%\newblock {\em Nature Neuroscience}, 19(11):1442, Sep 2016.
-%
-%\bibitem{Babak2015}
-%Tomas Babak, Brian DeVeale, Emily~K Tsang, Yiqi Zhou, Xin Li, Kevin~S Smith,
-%  Kim~R Kukurba, Rui Zhang, Jin~Billy Li, Derek van~der Kooy, Stephen~B
-%  Montgomery, and Hunter~B Fraser.
-%\newblock Genetic conflict reflected in tissue-specific maps of genomic
-%  imprinting in human and mouse.
-%\newblock {\em Nature Genetics}, 47:544--549, May 2015.
-%
-%\bibitem{Hoffman2016}
-%Gabriel~E Hoffman and Eric~E Schadt.
-%\newblock {variancePartition: interpreting drivers of variation in complex gene
-%  expression studies.}
-%\newblock {\em BMC Bioinformatics}, 17(1):483, nov 2016.
-%
-%\bibitem{Gregg2010}
-%Christopher Gregg, Jiangwen Zhang, James~E. Butler, David Haig, and Catherine
-%  Dulac.
-%\newblock {Sex-Specific Parent-of-Origin Allelic Expression in the Mouse
-%  Brain}.
-%\newblock {\em Science}, 329(5992):682--685, aug 2010.
-%
-%\bibitem{Crespi2008}
-%Bernard Crespi.
-%\newblock {Genomic imprinting in the development and evolution of psychotic
-%  spectrum conditions.}
-%\newblock {\em Biological reviews of the Cambridge Philosophical Society},
-%  83(4):441--93, nov 2008.
-%
-%\bibitem{Sullivan2012}
-%Patrick~F Sullivan, Mark~J Daly, and Michael O'Donovan.
-%\newblock {Genetic architectures of psychiatric disorders: the emerging picture
-%  and its implications}.
-%\newblock {\em Nature Reviews Genetics}, 13(8):537--551, aug 2012.
-%
-%\bibitem{Horvath2013}
-%Steve Horvath.
-%\newblock {DNA methylation age of human tissues and cell types.}
-%\newblock {\em Genome Biology}, 14(10):R115, oct 2013.
-%
-%\bibitem{Ubeda2012}
-%Francisco Ubeda and Andy Gardner.
-%\newblock {A model for genomic imprinting in the social brain: elders.}
-%\newblock {\em Evolution; international journal of organic evolution},
-%  66(5):1567--81, may 2012.
-%
-%\bibitem{Isles2006}
-%Anthony~R Isles, William Davies, and Lawrence~S Wilkinson.
-%\newblock {Genomic imprinting and the social brain.}
-%\newblock {\em Philosophical transactions of the Royal Society of London.
-%  Series B, Biological sciences}, 361(1476):2229--37, dec 2006.
-%
-%\end{thebibliography}
 
 
 \section*{Acknowledgements}
@@ -532,5 +359,70 @@ None
 %\includegraphics[width=1.0\textwidth]{figures/by-me/commonmind-rna-seq-ms/commonmind-rna-seq-ms.pdf}
 
 \section*{Tables}
+
+\section*{Supplementary Figures}
+
+\setcounter{figure}{0}
+\makeatletter 
+\renewcommand{\figurename}{Supplementary Figure} % nice
+\makeatother
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+\end{center}
+\caption{
+Pairwise joint distributions of response and explanatory variables TODO: fix legend
+}
+\label{fig:scattermatrix}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
+B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
+\end{center}
+\caption{
+Modeling the number (A) and fraction (B) of somatic SNV calls in a gene set
+}
+\label{fig:fitted-lines}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+A
+
+\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
+
+B
+
+\includegraphics[scale=0.5]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-pois-onlyIC_scz.pdf}
+\end{center}
+\caption{
+Variable selection for regression models. A) Binomial--logistic
+family.  B) Poisson--log-linear family.
+}
+\label{fig:varsel}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/Dx_Dataset_ageOfDeath_scz.pdf}
+B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/collinearity_Dx_Dataset_ageOfDeath_scz.pdf}
+\end{center}
+\caption{
+The effect of ageOfDeath and that of Dataset are mediated by disease status Dx
+}
+\label{fig:d-separation}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
+\caption{
+Residual analysis to assess model fit for genomic elements and gene
+sets of increasing size (from top left to bottom right)
+}
+\label{fig:residual-QQ}
+\end{figure}
 
 \end{document}
