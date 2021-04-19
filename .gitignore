@@ -76,3 +76,9 @@ ndar/account-info
 *.bib.bak
 *.bib.sav
 *_aux
+*.db
+*.db.lock
+*.fdb_latexmk
+*.fls
+presentations/bsm-ms/library.bib
+presentations/bsm-ms/bsm.bib*

@@ -131,13 +131,7 @@ low allele frequency (below c.a 0.05) somatic SNVs is limited at even high
 (\(\approx\) 400) sequencing coverage.
 
 \begin{figure}
-A
-
-\includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-calls.pdf}
-
-B
-
-\includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/DP-AF-jointdensity-conddensity.pdf}
+\includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/calls-DP-AF-jointdensity-conddensity.pdf}
 \caption{Distribution of allele frequency and read depth.  Note that even though allele frequency is
 a continuous variable its estimate is discrete, which is an inherent feature
 of the pipeline.   TODO: omit upper
@@ -291,16 +285,16 @@ model family.
 As we noted one of our two datasets contained relatively young individuals who
 were all control.  This leads to the causal-probabilistic graphical model that
 \(\mathrm{ageOfDeath} \leftarrow \mathrm{Dataset} \rightarrow \mathrm{Dx}
-	\rightarrow y\)\), where \(y\) is the response enrichment variable
-\(f_S\) or \(n_S\).  It means that ageOfDeath and
-Dataset have indirect effects on enrichment such that these effects are
-mediated by disease status Dx. If this model is true then \(Dx\) d-separates
-\(y\) from Dataset and ageOfDeath so that \(y\) becomes independent from
-ageOfDeath and Dataset if we condition on Dx = control or Dx =
-schizophrenia.  Fig~S\ref{fig:d-separation}A illustrates that.  The important consequence is
-that we should remove ageOfDeath and Dataset from the set from our models as long
-as we include Dx.  Failing to do so may confound our
-inference on the effect of Dx on enrichment (Fig~S\ref{fig:d-separation}B).
+\rightarrow y\), where \(y\) is the response enrichment variable \(f_S\) or
+\(n_S\).  It means that ageOfDeath and Dataset have indirect effects on
+enrichment such that these effects are mediated by disease status Dx. If this
+model is true then \(Dx\) d-separates \(y\) from Dataset and ageOfDeath so
+that \(y\) becomes independent from ageOfDeath and Dataset if we condition on
+Dx = control or Dx = schizophrenia.  Fig~S\ref{fig:d-separation}A illustrates
+that.  The important consequence is that we should remove ageOfDeath and
+Dataset from the set from our models as long as we include Dx.  Failing to do
+so may confound our inference on the effect of Dx on enrichment
+(Fig~S\ref{fig:d-separation}B).
 
 \subsubsection*{Residual analysis to assess model fit }
 
@@ -336,7 +330,8 @@ Data and analytical results...
 All code developed by A.~Jones is available at:\\
 https://github.com/attilagk/BSM-research
 
-\bibliography{bsm}
+\bibliography{library}
+%\bibliography{bsm}
 
 
 \section*{Acknowledgements}
@@ -367,7 +362,7 @@ None
 \renewcommand{\figurename}{Supplementary Figure} % nice
 \makeatother
 
-\begin{figure}[H]
+\begin{figure}[p]
 \begin{center}
 \includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
 \end{center}
@@ -377,7 +372,7 @@ Pairwise joint distributions of response and explanatory variables TODO: fix leg
 \label{fig:scattermatrix}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[p]
 \begin{center}
 A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
 B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
@@ -388,7 +383,7 @@ Modeling the number (A) and fraction (B) of somatic SNV calls in a gene set
 \label{fig:fitted-lines}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[p]
 \begin{center}
 A
 
@@ -405,7 +400,7 @@ family.  B) Poisson--log-linear family.
 \label{fig:varsel}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[p]
 \begin{center}
 A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/Dx_Dataset_ageOfDeath_scz.pdf}
 B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/collinearity_Dx_Dataset_ageOfDeath_scz.pdf}
@@ -416,7 +411,7 @@ The effect of ageOfDeath and that of Dataset are mediated by disease status Dx
 \label{fig:d-separation}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[p]
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
 \caption{
 Residual analysis to assess model fit for genomic elements and gene
