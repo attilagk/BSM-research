@@ -2,11 +2,12 @@ import pandas as pd
 import subprocess
 import io
 from bsmcalls import operations
+import bsmutils
 
 hs37d5_bed = '/big/data/refgenome/GRCh37/dna/hs37d5.bed'
 
 def read_scz_gwas():
-    fpath = '/home/attila/projects/bsm/resources/CLOZUK/supp-table-4.csv'
+    fpath = bsmutils.get_bsmdir() + '/resources/CLOZUK/supp-table-4.csv' #'/home/attila/projects/bsm/resources/CLOZUK/supp-table-4.csv'
     gwas = pd.read_csv(fpath, skiprows=7)
     gwas['Chromosome'] = pd.Categorical(gwas['Chromosome'], ordered=True, categories=[str(y) for y in range(1, 23)] + list('XY'))
     gwas.sort_values(['Chromosome', 'Start (BP)'], inplace=True)
