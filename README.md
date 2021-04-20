@@ -31,7 +31,8 @@ Of course, the data---Terabytes of DNA sequences---are not contained in this rep
 
 ## Reproduce
 
-* clone this git project
+* clone this git project `https://github.com/attilagk/BSM-research`
+* clone `https://github.com/attilagk/src`
 * modules needed
     * argparse
     * copy
