@@ -31,9 +31,9 @@ Of course, the data---Terabytes of DNA sequences---are not contained in this rep
 
 ## Reproduce
 
-* clone this git project `https://github.com/attilagk/BSM-research`
-* clone `https://github.com/attilagk/src`
-* modules needed
+* Clone this git project `git clone https://github.com/attilagk/BSM-research bsm`.  (Note: Some functions expect the cloned directory to have the name `bsm`.)
+* Get `attila_utils.py` from [here](https://github.com/attilagk/src/blob/main/attila_utils.py) and place it on your `PYTHONPATH`
+* Modules needed
     * argparse
     * copy
     * ensembl_rest
@@ -50,7 +50,5 @@ Of course, the data---Terabytes of DNA sequences---are not contained in this rep
     * statsmodels
     * subprocess
     * synapseclient
-* set `$PYTHONPATH` in your `.profile` or `.bashrc` as follows
-```
-export PYTHONPATH="/path/to/bsm/src:$PYTHONPATH"
-```
+* Set `PYTHONPATH` in your `.profile` or `.bashrc` as follows: `export PYTHONPATH="/path/to/bsm/src:$PYTHONPATH"`
+* Contact me for data files
