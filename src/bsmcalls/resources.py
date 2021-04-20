@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
+import bsmutils
 
-roadmap_rna_bname = '/home/attila/projects/bsm/resources/roadmap-epigenomics/rna/expression/57epigenomes.'
-proteinatlas_rna_bname = '/home/attila/projects/bsm/resources/proteinatlas/expression/tissue_category_rna_brain_'
+roadmap_rna_bname = bsmutils.get_bsmdir() + '/resources/roadmap-epigenomics/rna/expression/57epigenomes.'
+proteinatlas_rna_bname = bsmutils.get_bsmdir() + '/resources/proteinatlas/expression/tissue_category_rna_brain_'
 
 def read_roadmap_rna(kind='RPKM', sampledict={'E071': 'BRN.HIPP.MID', 'E082': 'BRN.FET.F'}, suffix=False):
     if suffix:

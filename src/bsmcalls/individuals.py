@@ -4,13 +4,14 @@ import pandas as pd
 import os.path
 from bsmcalls import readVCF
 from bsmcalls import preprocessing
+import bsmutils
 
 cmc_clinical_synid = 'syn2279441'
-cmc_clinical_path = '/home/attila/projects/bsm/resources/CMC_Human_clinical_metadata.csv'
-cmc_ancestry_path = '/home/attila/projects/bsm/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
-walsh_gsub_path = '/home/attila/projects/bsm/resources/walsh-manifests/genomics_subject02_template_WalshParkASD-corr.csv'
-walsh_vcfs_path = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Walsh.tsv'
-chess_vcfs_path = '/home/attila/projects/bsm/results/calls/filtered-vcfs.tsv'
+cmc_clinical_path = bsmutils.get_bsmdir() + '/resources/CMC_Human_clinical_metadata.csv'
+cmc_ancestry_path = bsmutils.get_bsmdir() + '/resources/cmc-ancestry/CMC_MSSM-Penn-Pitt_DNA_GENOTYPE_ANCESTRY_GemTools.tsv'
+walsh_gsub_path = bsmutils.get_bsmdir() + '/resources/walsh-manifests/genomics_subject02_template_WalshParkASD-corr.csv'
+walsh_vcfs_path = bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs-Walsh.tsv'
+chess_vcfs_path = bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs.tsv'
 
 v1 = ['AF', 'ALT', 'BaseQRankSum', 'DP', 'FILTER/PASS', 'FS', 'GWASpval', 'REF', 'ReadPosRankSum', 'SOR', 'VQSLOD', 'chromatinState_DLPFC', 'culprit', 'szdbCNVcount']
 v2 = ['Dx', 'AntipsychAtyp', 'AntipsychTyp', 'Institution', 'EV.3']
@@ -20,7 +21,7 @@ def read_clinical(ancestry=True):
     if not os.path.exists(cmc_clinical_path):
         import synapseclient
         syn = synapseclient.login()
-        wdir = '/home/attila/projects/bsm/resources/'
+        wdir = bsmutils.get_bsmdir() + '/resources/'
         clinical_syn = syn.get('syn2279441', downloadLocation=wdir, ifcollision='overwrite.local')
         fpath = clinical_syn.path
     else:

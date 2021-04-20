@@ -3,6 +3,7 @@ import numpy as np
 import functools
 from bsmcalls import individuals
 from scipy import stats
+import bsmutils
 
 _level_names = ['Feature', 'Query']
 
@@ -283,7 +284,7 @@ def is_in_segments(segdf, annot):
     return(val)
 
 
-def get_geneset(df=pd.read_csv('/home/attila/projects/bsm/resources/CLOZUK/supp-table-4.csv', skiprows=7), col='Gene(s) tagged'):
+def get_geneset(df=pd.read_csv(bsmutils.get_bsmdir() + '/resources/CLOZUK/supp-table-4.csv', skiprows=7), col='Gene(s) tagged'):
     val = df['Gene(s) tagged'].str.split(', ').dropna().sum()
     geneset = set(val)
     return(geneset)

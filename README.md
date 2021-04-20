@@ -28,3 +28,28 @@ As noted above the main matter of this repository is the lab notebook, a chronol
 ## The data
 
 Of course, the data---Terabytes of DNA sequences---are not contained in this repository but they do exist on our computational server and at the [NIMH Data Archive](https://ndar.nih.gov/) (NDA), which will release them for public use.
+
+## Reproduce
+
+* clone this git project
+* modules needed
+    * argparse
+    * copy
+    * ensembl_rest
+    * functools
+    * io
+    * itertools
+    * numpy
+    * operator
+    * os.path
+    * pandas
+    * pickle
+    * re
+    * scipy.stats
+    * statsmodels
+    * subprocess
+    * synapseclient
+* set `$PYTHONPATH` in your `.profile` or `.bashrc` as follows
+```
+export PYTHONPATH="/path/to/bsm/src:$PYTHONPATH"
+```

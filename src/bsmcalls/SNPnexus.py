@@ -9,6 +9,7 @@ import itertools
 import ensembl_rest
 import pickle
 from bsmcalls import individuals
+import bsmutils
 
 # TODO: GTEx
 
@@ -208,8 +209,8 @@ def annotation_duplicates(annot, sep=':'):
     return(val)
 
 def get_multi_annotations(annotlist,
-                          vcflistpath='/big/results/bsm/calls/filtered-vcfs-Chess-Walsh.tsv',
-                          annotdirpath='/home/attila/projects/bsm/results/2020-09-07-annotations',
+                          vcflistpath=bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs-Chess-Walsh.tsv',
+                          annotdirpath=bsmutils.get_bsmdir() + '/results/2020-09-07-annotations',
                           na_values={}, simplecolumns=True):
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
     samplestr = '((MSSM|PITT)_[0-9]+)_(NeuN_pl|NeuN_mn|muscle)'
@@ -292,7 +293,7 @@ def create_colsdict():
             val = f.readlines()
             val = [x.strip() for x in val]
             return(val)
-    regbuild_epigenomes = read_categories('/big/results/bsm/2020-09-07-annotations/regbuild-epigenomes')
+    regbuild_epigenomes = read_categories(bsmutils.get_bsmdir() + '/results/2020-09-07-annotations/regbuild-epigenomes')
     colsdict.update({'regbuild_Epigenome': regbuild_epigenomes})
     colsdict.update({'structvar_Type': ['complex', 'loss', 'gain']})
     return(colsdict)
@@ -337,7 +338,7 @@ def regularize_categ_cols(colsdict, annot, calls, nafillval='other'):
     return(val)
 
 
-def load_data(picklepath='/home/attila/projects/bsm/results/2020-09-07-annotations/annotated-calls.p'):
+def load_data(picklepath=bsmutils.get_bsmdir() + '/results/2020-09-07-annotations/annotated-calls.p'):
     '''
     Load annotated calls from pickle file
     '''
@@ -577,7 +578,7 @@ def merge_clean(calls, annot, dofilter=True):
 
 
 def do_annot(annotlist=annotlist, na_values=na_values, colsdict=create_colsdict(),
-             fpath='/home/attila/projects/bsm/results/2020-09-07-annotations/annot.p',
+             fpath=bsmutils.get_bsmdir() + '/results/2020-09-07-annotations/annot.p',
              calls=individuals.get_datasets()):
     '''
     Main function: read SNPnexus annotations for the full Chess and Walsh datasets
@@ -587,8 +588,8 @@ def do_annot(annotlist=annotlist, na_values=na_values, colsdict=create_colsdict(
         with open(fpath, 'rb') as f:
             annot = pickle.load(f)
     else:
-        vcflistpath = '/home/attila/projects/bsm/results/calls/filtered-vcfs-Chess-Walsh.tsv'
-        annotdirpath = '/home/attila/projects/bsm/results/2020-09-07-annotations'
+        vcflistpath = bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs-Chess-Walsh.tsv'
+        annotdirpath = bsmutils.get_bsmdir() + '/results/2020-09-07-annotations'
         annot = get_multi_annotations(annotlist, vcflistpath, annotdirpath, na_values)
         pickle.dump(annot, open(fpath, 'wb'))
     return(annot)

@@ -6,6 +6,7 @@ import subprocess
 import io
 import re
 import os.path
+import bsmutils
 
 # Source:
 # https://egg2.wustl.edu/roadmap/data/byFileType/chromhmmSegmentations/ChmmModels/coreMarks/jointModel/final/browserlabelmap_15_coreMarks.tab
@@ -31,7 +32,7 @@ Reading VCFs
 ========================================================================
 '''
 
-def read_annotlist(annotpath='/home/attila/projects/bsm/tables/VCF-HC.annotations', withFORMAT=False):
+def read_annotlist(annotpath=bsmutils.get_bsmdir() + '/tables/VCF-HC.annotations', withFORMAT=False):
     '''
     Reads a file containing list of annotations in VCFs into a list.
 
@@ -107,8 +108,8 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     #calls.columns = pd.MultiIndex.from_product([['VCF'], calls.columns], names=['Source', 'Annotation'])
     return(calls)
 
-def readVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
-        vcfdir='/home/attila/projects/bsm/results/calls/', clean=True):
+def readVCFs(vcflistpath=bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs.tsv',
+        vcfdir=bsmutils.get_bsmdir() + '/results/calls/', clean=True):
     '''
     Reads the calls/records of several VCFs into rows of a single DataFrame
 
@@ -153,19 +154,19 @@ def clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True):
     return(calls)
 
 
-def annotateVCF(invcf='/home/attila/projects/bsm/results/calls/filtered/MSSM_106_brain.ploidy_50.filtered.vcf',
+def annotateVCF(invcf=bsmutils.get_bsmdir() + '/results/calls/filtered/MSSM_106_brain.ploidy_50.filtered.vcf',
         sample='MSSM_106_NeuN_pl',
-        targetdir='/home/attila/projects/bsm/results/calls/annotated/'):
+        targetdir=bsmutils.get_bsmdir() + '/results/calls/annotated/'):
     '''
     Some help would be nice
     '''
-    script = '/home/attila/projects/bsm/src/annotate-vcf-bsm'
+    script = bsmutils.get_bsmdir() + '/src/annotate-vcf-bsm'
     cmd = [script, '-t', targetdir, invcf, sample]
     p =  subprocess.run(cmd, capture_output=True)
     return(p)
 
-def annotateVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
-        vcfdir='/home/attila/projects/bsm/results/calls/'):
+def annotateVCFs(vcflistpath=bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs.tsv',
+        vcfdir=bsmutils.get_bsmdir() + '/results/calls/'):
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
     def helper(sample):
         invcf = vcfdir + os.path.sep + 'filtered' + os.path.sep + vcflist.loc[sample, 'file']
@@ -178,10 +179,10 @@ def annotateVCFs(vcflistpath='/big/results/bsm/calls/filtered-vcfs.tsv',
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dir', help='main VCF directory (/home/attila/projects/bsm/results/calls/)',
-            default='/home/attila/projects/bsm/results/calls/')
-    parser.add_argument('-l', '--vcflist', help='list of samples and VCF files (/big/results/bsm/calls/filtered-vcfs.tsv)',
-            default='/big/results/bsm/calls/filtered-vcfs.tsv')
+    parser.add_argument('-d', '--dir', help='main VCF directory (bsm/results/calls/)',
+            default=bsmutils.get_bsmdir() + '/results/calls/')
+    parser.add_argument('-l', '--vcflist', help='list of samples and VCF files (bsm/results/calls/filtered-vcfs.tsv)',
+            default=bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs.tsv')
     args = parser.parse_args()
     annotateVCFs(vcflistpath=args.vcflist, vcfdir=args.dir)
     readVCFs(vcflistpath=args.vcflist, vcfdir=args.dir)
