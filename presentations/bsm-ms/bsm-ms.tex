@@ -17,7 +17,7 @@
 
 \title{Involvement of Brain Somatic Mosaicism in Schizophrenia}
 
-\author{Attila Jones\(^{1,2}\), Chaggai Rosenbluh\(^{1}\), ..., Andrew Chess\(^{1,2,3,4,\ast}\)}
+\author{Attila Jones\(^{1,2}\), Eduardo Maury\(^{3}\), Chaggai Rosenbluh\(^{1,4}\), ..., Andrew Chess\(^{1,2,5,6,\ast}\)}
 
 \date{Icahn School of Medicine at Mount Sinai (ISMMS)}
 
@@ -28,8 +28,10 @@
 \begin{description}
 \item[1] Department of Cell, Developmental and Regenerative Biology, ISMMS 
 \item[2] Institute for Genomics and Multiscale Biology, Department of Genetics and Genomic Sciences, ISMMS 
-\item[3] Neuroscience Program, The Graduate School of Biomedical Sciences, ISMMS 
-\item[4] Division of Psychiatric Genomics, Department of Psychiatry, ISMMS 
+\item[3] Harvard Medical School
+\item[4] Department of Genetics, Hadassah Medical Center, Jerusalem, Israel
+\item[5] Neuroscience Program, The Graduate School of Biomedical Sciences, ISMMS 
+\item[6] Division of Psychiatric Genomics, Department of Psychiatry, ISMMS 
 %\item[\(\S\)] full list of consortium members appears in the Author
 Information section
 \item[\(\ast\)] correspondence: andrew.chess@mssm.edu 
@@ -118,43 +120,38 @@ the variability in call rate, which indicates that the variant calling
 pipeline adapts to lower coverage by applying stronger filters in order to 
 maintain high specificity.
 
-The joint distribution of read depth and estimated allele frequency across all
-4141 somatic SNVs in our data set showed that increasing read depth allowed
-calling SNVs at lower frequencies.  As a result the conditional density of allele frequency is
-shifted to the left at higher read depth relative to lower depth.  If we
-assume roughly constant somatic point mutation rate along the cell lineages of
-our samples~\citep{Rodin2021} then the expected distribution of allele
-frequency is quasi exponential.  With decreasing read depth the observed
-conditional allele frequency distribution departed increasingly from an
-exponential distribution, which indicates that the pipeline's sensitivity for
-low allele frequency (below c.a 0.05) somatic SNVs is limited at even high
-(\(\approx\) 400) sequencing coverage.
+Our pipeline provided us with an estimate of allele frequency for
+each somatic SNV.  This enabled us to test, at least qualitatively, the
+simple model that somatic point mutation rate roughly constant along the cell lineages of
+our samples~\citep{Rodin2021} since under this model the density of allele
+frequency is quasi exponential.  We found this to be the case at high
+(\(\approx 400\) read depth (blue allele frequency density in Fig~\ref{fig:AF}
+right panel).  With decreasing read depth,
+however, the density of allele frequency is increasingly shifted towards
+higher frequencies (orange and green densities, Fig~\ref{fig:AF})
+right).  These results indicate that the somatic SNVs we called
+follow the expected allele frequency distribution but our pipeline's sensitivity for
+low allele frequency (below c.a 0.05) is low at low-medium sequencing
+coverage.
 
 \begin{figure}
 \includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/calls-DP-AF-jointdensity-conddensity.pdf}
-\caption{Distribution of allele frequency and read depth.  Note that even though allele frequency is
+\caption{
+Distribution of allele frequency and read depth.  Note that even though allele frequency is
 a continuous variable its estimate is discrete, which is an inherent feature
-of the pipeline.   TODO: omit upper
-left graph (A) and merge (A) and (B)}
+of the pipeline.
+}
+\label{fig:AF}
 \end{figure}
 
 \subsection*{Enrichment analysis}
 
+In the preceding section we showed that the genome-wide rate of somatic SNVs
+in the DLPFC is unaltered in schizophrenia.   We sought to test enrichment
+in several genomic elements or gene sets (see Table below).  To that end we
+established statistical procedures.
 
-Studies of rare germline and de-novo SNVs showed that,
-although the genome-wide ``background'' mutation rate is unaltered in
-schizophrenia, specific genomic elements and gene sets bear increased burden
-of---in other words: are enriched in---SNVs in schizophrenic individuals relative to
-controls.  We sought to test enrichment in several genomic elements or gene
-sets (see Table below).  To that end we established statistical procedures.
-
-
-\subsubsection*{Genomic elements and gene sets}
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-
-%\begin{table}
+\begin{table}
 \begin{tabular}{lrlr}
 category & genomic element, gene set & selected model formula & size \\
 \hline
@@ -191,11 +188,14 @@ GWAS gene sets & ADHD GWAS & 1 + AF + DP & 6 \\
 & Schizophrenia GWAS & 1 + Dx & 72 \\
 & Psychiatric GWAS & 1 + Dx & 105 \\
 \end{tabular}
-%\caption{Genomic elements and gene sets.  Size is defined as the number of
-%	individuals with at least one somatic SNV call in the genomic element
-%	or gene set. TODO: remove ``coding'' since it's redundant give ``coding
-%	nonsyn'' and ``coding syn''}
-%\end{table}
+\caption{
+Genomic elements and gene sets.  Size is defined as the number of
+individuals with at least one somatic SNV call in the genomic element
+or gene set. TODO: remove ``coding'' since it's redundant give ``coding
+nonsyn'' and ``coding syn''
+}
+\label{tab:modsel}
+\end{table}
 
 \subsubsection*{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
 
@@ -208,6 +208,16 @@ GWAS gene sets & ADHD GWAS & 1 + AF + DP & 6 \\
 
 \section*{Discussion}
 
+Studies of rare germline and
+de-novo SNVs showed that, although the genome-wide ``background'' mutation
+rate is unaltered in schizophrenia, specific genomic elements and gene sets
+bear increased burden of---in other words: are enriched in---SNVs in
+schizophrenic individuals relative to controls.  Our present study extends
+this basic result to somatic SNVs in the human brain.  In particular, we
+present evidence that genes implicated in schizophrenia by schizophrenia GWAS and other psychiatric
+GWAS suffer increased rate of somatic point mutations in schizophrenia.
+
+Questions we cannot answer:
 
 \section*{Methods}
 
@@ -418,6 +428,14 @@ Residual analysis to assess model fit for genomic elements and gene
 sets of increasing size (from top left to bottom right)
 }
 \label{fig:residual-QQ}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[scale=0.6]{../../notebook/2020-07-28-CLOZUK/named-figure/calls-in-individual-scz-gwas-loci-coding.pdf}
+\caption{
+Somatic SNVs at individual loci of schizophrenia GWAS
+}
+\label{fig:indiv-scz-gwas-loci}
 \end{figure}
 
 \end{document}
