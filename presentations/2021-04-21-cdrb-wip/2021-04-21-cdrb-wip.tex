@@ -1,0 +1,460 @@
+\documentclass[usenames,dvipsnames]{beamer}
+%\documentclass[handout]{beamer}
+
+% language settings
+%\usepackage{fontspec, polyglossia}
+%\setdefaultlanguage{magyar}
+
+% common packages
+\usepackage{amsmath, multimedia, url, hyperref, multirow, colortbl}
+\usepackage[table]{xcolor}
+%\usepackage{graphicx}
+
+% TikZ
+\usepackage{tikz}
+%\usetikzlibrary{arrows.meta, decorations.pathmorphing, decorations.pathreplacing, shapes.geometric,mindmap}
+%\usetikzlibrary{shapes.geometric,fadings,bayesnet}
+
+% beamer styles
+\mode<presentation>{
+\usetheme{Singapore}
+%\usetheme{Warsaw}
+%\usetheme{Antibes}
+%\usecolortheme{beaver}
+%\usecolortheme{crane}
+%\usecolortheme{seahorse}
+\usecolortheme{default}
+%\usefonttheme{structureitalicserif}
+\setbeamercovered{transparent}
+}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\AtBeginSubsection[]{
+  \begin{frame}<beamer>{Contents}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+%\useoutertheme[]{tree}
+
+% title, etc
+\title{Polygenic Involvement of Somatic SNVs in Schizophrenia}
+%\subtitle{and Related Psychiatric Disorders}
+%\subtitle{A subtitle may be shorter and more technical}
+\author{Attila Jones, Chaggai Rosenbluh, BSMN, Andy Chess}
+\date{Mount Sinai School of Medicine}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\begin{frame}{Schizophrenia}
+\begin{columns}[t]
+\begin{column}{0.4\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/sullivan2012-fig1a.png}
+\end{column}
+
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item psychosis, dysfunction
+\item symptomatic treatment \& diagnosis
+\item DLPFC
+\item neurodevelopmental hypothesis
+\item heritability \(\approx 0.8\)
+\item polygenic, common SNPs
+\end{itemize}
+\end{column}
+\end{columns}
+
+{\tiny Sullivan 2012 Nature Reviews Genetics}
+\end{frame}
+
+\begin{frame}{Genetic architecture}
+\begin{center}
+\includegraphics[height=0.8\textheight]{from-others/schizophrenia-kahn-2015-fig3.png}
+\end{center}
+\end{frame}
+
+\begin{frame}[label=gwas]{GWAS}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{center}
+Schizophrenia GWAS loci
+
+\includegraphics[width=1.0\columnwidth]{from-others/scz-gwas-manhattanplot.png}
+
+\footnotesize
+\(\approx\) 500 ``Schizophrenia GWAS genes''
+{\tiny Ripke et al 2014 Nature}
+\end{center}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+Shared heritability
+
+\includegraphics[width=1.0\columnwidth]{from-others/brainstorm-consortium-science2018-fig2.jpg}
+
+\footnotesize
+\(\approx\) 1300 ``Psychiatric GWAS genes''
+{\tiny Brainstorm Consortium 2018 Science}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=rare]{Rare germline and \textit{de novo} variant studies}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+Genesets enriched in \alert{damaging} variants
+\begin{itemize}
+\item PSD
+\item FMRP-target
+\item Calcium channel
+\item SCZ \textit{de novo}
+\item composite (union of all above)
+\end{itemize}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{from-others/singh-2017-fig2a.png}
+
+\tiny Singh et al 2017 Nature Genetics
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+\begin{center}
+Germline variant
+\end{center}
+\end{column}
+
+\begin{column}{0.7\textwidth}
+\begin{center}
+Somatic variant
+\end{center}
+\end{column}
+\end{columns}
+\begin{columns}[t]
+\begin{column}{0.3\textwidth}
+\begin{center}
+	\footnotesize no mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1a.png}
+\begin{center}
+\end{center}
+\end{column}
+
+\begin{column}{0.3\columnwidth}
+\begin{center}
+	\footnotesize high freq.~mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1e.png}
+\end{column}
+\begin{column}{0.3\columnwidth}
+\begin{center}
+	\footnotesize low freq.~mosaicism
+\end{center}
+
+\includegraphics[width=1.0\columnwidth]{from-others/poduri-2013-fig1g.png}
+\end{column}
+\end{columns}
+{\tiny Poduri et al 2013 Science}
+\end{frame}
+
+%\begin{frame}{Genomic studies on schizophrenia}
+%\begin{center}
+%\includegraphics[width=1.1\textwidth]{from-others/schizophrenia-Foley2017-Fig1.png}
+%\end{center}
+%\end{frame}
+
+\section{Data overview}
+
+\begin{frame}
+\begin{center}
+\includegraphics[height=0.45\columnwidth]{from-others/bsmn-visual-summary.jpg}
+
+{\tiny Brain Somatic Mosaicism Network 2017 Science}
+\end{center}
+\begin{description}
+\item[$\checkmark$] sequencing data production
+\item[$\checkmark$] pipeline development
+\item[$\checkmark$] data processing and sharing
+\item[$\cdots$] biomedical research
+\end{description}
+\end{frame}
+
+\begin{frame}{Sequencing data production}
+\includegraphics[width=1.0\textwidth]{from-others/bsm-marker-fig1.jpg}
+
+{\tiny Brain Somatic Mosaicism Network 2017 Science}
+\end{frame}
+
+\begin{frame}{Pipeline development}
+\begin{itemize}
+\item call somatic single nucleotide variants (SNVs) with low error
+\item BSMN pipeline
+\footnote{https://github.com/bsmn/bsmn-pipeline \\
+	Wang,..., Jones et al 2021 Genome Biology}
+\end{itemize}
+\includegraphics[width=1.0\textwidth]{from-others/bsmn-pipeline-calling.png}
+\end{frame}
+
+\begin{frame}{Data processing and sharing}
+\begin{center}
+\href{https://nda.nih.gov/data_structure.html?short_name=genomics_sample03}{\includegraphics[width=0.25\textwidth]{/home/attila/projects/bsm/resources/logos/nda.png}}
+
+National Institute of Mental Health Data Archive
+\end{center}
+\end{frame}
+
+\begin{frame}{4141 somatic single nucleotide variants (SNVs) called}{61 schizophrenic, 40 control brains}
+\includegraphics[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/calls-DP-AF-jointdensity-conddensity.pdf}
+\begin{itemize}
+\item consistent with roughly constant somatic SNV rate
+\item low sensitivity to call low freq.~SNVs at low seq.~depth
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Genome wide somatic mutation rate unaffected}
+\begin{center}
+\includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
+\end{center}
+\end{frame}
+
+\section{Statistical analysis}
+
+\begin{frame}{Schizophrenia GWAS genes enriched in SNVs from SCZ}
+\small
+\begin{itemize}
+\item 478 genes in 145 Schizophrenia GWAS loci
+\end{itemize}
+\begin{columns}[t]
+\begin{column}{0.6\textwidth}
+
+\includegraphics[width=1.0\columnwidth]{../../notebook/2020-11-13-functional-variants/named-figure/genomewide-scz_gwas-rate.pdf}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\vfill
+\begin{tabular}{c|c}
+& p-value \(\chi^2\) test \\
+\hline
+with ASD & 4.5 \times 10^{-3} \\
+w/o ASD & 1.9 \times 10^{-3} \\
+\end{tabular}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\includegraphics[height=0.95\textheight]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+\end{frame}
+
+%\begin{frame}{Modeling the number/fraction of calls in SCZ GWAS genes}
+%\begin{columns}[t]
+%\begin{column}{0.5\textwidth}
+%\begin{center}
+%Poisson, log-linear
+%\begin{description}
+%\tiny
+%\item[M0] \(y \sim 1 + \mathrm{Dx}\)
+%\item[M1] \(y \sim 1 + \mathrm{Dx} + \log_{10} n_\mathrm{calls}\)
+%\end{description}
+%\end{center}
+%\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
+%\end{column}
+%
+%\begin{column}{0.5\textwidth}
+%\begin{center}
+%binomial, logistic
+%\begin{description}
+%\tiny
+%\item[M0] \(y \sim 1 + \mathrm{Dx}\)
+%\item[M1] \(y \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
+%\end{description}
+%\end{center}
+%\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
+%\end{column}
+%\end{columns}
+%\begin{center}
+%\end{center}
+%\end{frame}
+
+\begin{frame}{Model selection for SCZ GWAS genes}
+\small
+\includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
+%\begin{center}
+%Best model:
+%\(
+%	y \sim 1 + \mathrm{Dx} \; \Leftrightarrow \; \mathrm{logit}(y) = \beta_1 +
+%	\beta_\mathrm{Dx[T.SCZ]} x_\mathrm{Dx} + \epsilon
+%\)
+%\end{center}
+
+\begin{center}
+\tiny
+\begin{tabular}{l|cc}
+model formula & \(\hat{\beta}_\mathrm{SCZ} \pm \mathrm{S.E}\) & p-value: \(\beta_\mathrm{SCZ} = 0\) \\
+\hline
+1 + Dx & \(0.80 \pm 0.26\) & 0.0019 \\
+1 + Dx + DP & \(0.80 \pm 0.26\) & 0.0019 \\
+%1 + Dx + ageOfDeath & \(0.71 \pm 0.28\) & 0.011 \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+%\begin{frame}{Addressing multicollinearity}{Exclude ``Dataset'' and
+%		``ageOfDeath'' from variable selection}
+%\begin{columns}[t]
+%\begin{column}{0.5\textwidth}
+%\begin{center}
+%\small
+%Harvard (H) and Sinai (S) dataset
+%
+%\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/Dx_Dataset_ageOfDeath_scz.pdf}
+%%\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/Dx_Dataset_ageOfDeath_scz.pdf}
+%
+%\end{center}
+%\end{column}
+%
+%\begin{column}{0.5\textwidth}
+%\begin{center}
+%\small
+%Effect of collinear variables
+%
+%\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/collinearity_Dx_Dataset_ageOfDeath_scz.pdf}
+%\end{center}
+%\end{column}
+%\end{columns}
+%\end{frame}
+
+\section{Results}
+
+\begin{frame}{Genomic elements, genesets for testing enrichment}
+\begin{center}
+\tiny
+\begin{tabular}{lrlr}
+category & genomic element, geneset & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
+\hline
+\hline
+damaging & coding nonsyn & 1 & 55 \\
+& coding syn & 1 + Gender & 38 \\
+& missense & None & 0 \\
+& stop gain & None & 1 \\
+& splice site & None & 1 \\
+& coding & 1 & 80 \\
+& deleterious (sift) & 1 & 19 \\
+& damaging (polyphen) & 1 + DP & 9 \\
+\hline
+regulartory & TFBS & 1 + AF & 93 \\
+& CpG island & 1 + AF + BaseQRankSum & 57 \\
+& enhancer & 1 & 99 \\
+& genic enhancer & 1 & 22 \\
+\hline
+constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
+& evolutionary cons. (gerp) & 1 + Dx & 127 \\
+& LoF intolerant genes & 1 + Dx & 143 \\
+\hline
+SCZ genesets & PSD & 1 & 95 \\
+& FMRP-target & 1 + AF & 118 \\
+& SCZ de novo & 1 + AF & 97 \\
+& Calcium channel & 1 + Dx & 13 \\
+& composite & 1 & 126 \\
+\hline
+GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
+& Anorexia nervosa GWAS & None & 4 \\
+& ASD GWAS & 1 + Dx & 27 \\
+& Bipolar disorder GWAS & 1 + Dx & 77 \\
+& MDD GWAS & 1 & 48 \\
+& Schizophrenia GWAS & 1 + Dx & 72 \\
+& Psychiatric GWAS & 1 + Dx & 105 \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+%\begin{frame}{Fit improves with with size of gen.~element/geneset}
+%\includegraphics[width=1.0\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
+%\end{frame}
+
+\begin{frame}[label=results]
+\includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
+\end{frame}
+
+\begin{frame}{Enrichment of GWAS loci vs.~GWAS genes}
+\begin{center}
+\includegraphics[height=0.8\textheight]{../../notebook/2020-07-28-CLOZUK/named-figure/calls-in-scz-gwas-loci-coding.pdf}
+\end{center}
+\end{frame}
+
+\section{Discussion}
+
+\againframe{gwas}
+
+%\begin{frame}{Individual GWAS loci}
+%\includegraphics[scale=0.45]{../../notebook/2020-07-28-CLOZUK/named-figure/calls-in-individual-scz-gwas-loci-coding.pdf}
+%\end{frame}
+
+\againframe{rare}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item schizophrenia: some genesets enriched in somatic SNVs
+\begin{itemize}
+	\item GWAS genes: schizophrenia, ASD, psychiatric 
+        \item shared heritability of somatic SNVs
+\end{itemize}
+\item insufficient data to study enrichment in damaging variants
+\begin{itemize}
+	\item LoF intolerant genes?
+	\item PSD, FMRP-target, Ca-channel genes?
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Questions}
+\begin{itemize}
+\item noncoding \& regulatory elements?
+\item somatic CNVs (Eduardo Maury)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\footnotesize
+\begin{tabular}{cp{3in}}
+\parbox[c]{9em}{\includegraphics[width=0.25\textwidth]{/home/attila/projects/bsm/resources/logos/mount-sinai-logo.png}}
+& Chaggai Rosenbluh, Gabriel Hoffman, Eva Xia, Jessica Johnson, Schahram Akbarian, Andy Chess \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/mayo-clinic-logo.png}} & Taejeong Bae, Alexej Abyzov \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/harvard-logo.png}}
+& Eduardo Maury, Yanmei Dou, Peter Park, Chris Walsh \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/sage-bionetworks-logo.png}} & Kenny Daily, Cindy Molitor, Mette Peters \\
+\noalign{\medskip}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/nimh-logo.png}}
+& David Obenshain, ... \\
+\noalign{\medskip}
+%\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/nda.png}}
+\parbox[c]{9em}{\includegraphics[width=0.3\textwidth]{/home/attila/projects/bsm/resources/logos/BSMN-NameAndTagline-Horizontal.png}}
+& \\
+\end{tabular}
+\end{frame}
+
+\end{document}
+
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\end{column}
+\end{columns}
