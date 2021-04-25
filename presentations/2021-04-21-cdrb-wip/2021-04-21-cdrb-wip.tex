@@ -214,43 +214,28 @@ National Institute of Mental Health Data Archive
 \end{center}
 \end{frame}
 
-\begin{frame}{4141 somatic single nucleotide variants (SNVs) called}{61 schizophrenic, 40 control brains}
-\includegraphics[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/calls-DP-AF-jointdensity-conddensity.pdf}
-\begin{itemize}
-\item consistent with roughly constant somatic SNV rate
-\item low sensitivity to call low freq.~SNVs at low seq.~depth
-\end{itemize}
-\end{frame}
+%\begin{frame}{4141 somatic single nucleotide variants (SNVs) called}{61 schizophrenic, 40 control brains}
+%\includegraphics[width=1.0\textwidth]{../../notebook/2020-08-13-select-vars/named-figure/calls-DP-AF-jointdensity-conddensity.pdf}
+%\begin{itemize}
+%\item consistent with roughly constant somatic SNV rate
+%\item low sensitivity to call low freq.~SNVs at low seq.~depth
+%\end{itemize}
+%\end{frame}
 
-\begin{frame}{Genome wide somatic mutation rate unaffected}
+\begin{frame}{Genome-wide somatic mutation rate unaffected}
 \begin{center}
-\includegraphics[height=0.8\textheight]{../../notebook/2020-12-09-walsh-data/named-figure/ncalls-depth-chess-walsh.pdf}
+\includegraphics[scale=0.55]{../../notebook/2020-12-09-walsh-data/named-figure/genome-wide-callrate.pdf}
 \end{center}
 \end{frame}
 
 \section{Statistical analysis}
 
 \begin{frame}{Schizophrenia GWAS genes enriched in SNVs from SCZ}
-\small
+\includegraphics[scale=0.55]{../../notebook/2020-11-13-functional-variants/named-figure/genomewide-scz_gwas-rate_scz.pdf}
 \begin{itemize}
 \item 478 genes in 145 Schizophrenia GWAS loci
+\item \(\chi^2\) test p-value 0.0019
 \end{itemize}
-\begin{columns}[t]
-\begin{column}{0.6\textwidth}
-
-\includegraphics[width=1.0\columnwidth]{../../notebook/2020-11-13-functional-variants/named-figure/genomewide-scz_gwas-rate.pdf}
-\end{column}
-
-\begin{column}{0.5\textwidth}
-\vfill
-\begin{tabular}{c|c}
-& p-value \(\chi^2\) test \\
-\hline
-with ASD & 4.5 \times 10^{-3} \\
-w/o ASD & 1.9 \times 10^{-3} \\
-\end{tabular}
-\end{column}
-\end{columns}
 \end{frame}
 
 \begin{frame}
