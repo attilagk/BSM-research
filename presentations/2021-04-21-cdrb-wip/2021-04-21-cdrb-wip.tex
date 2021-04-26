@@ -39,7 +39,7 @@
 \title{Polygenic Involvement of Somatic SNVs in Schizophrenia}
 %\subtitle{and Related Psychiatric Disorders}
 %\subtitle{A subtitle may be shorter and more technical}
-\author{Attila Jones, Chaggai Rosenbluh, BSMN, Andy Chess}
+\author{Attila Jones, Chaggai Rosenbluh,\\Brain Somatic Mosaicism Network, Andy Chess}
 \date{Mount Sinai School of Medicine}
 
 \begin{document}
@@ -76,7 +76,7 @@
 \end{center}
 \end{frame}
 
-\begin{frame}[label=gwas]{GWAS}
+\begin{frame}[label=gwas]{GWAS on psychiatric disorders}
 
 \begin{columns}[t]
 \begin{column}{0.5\textwidth}
@@ -222,7 +222,7 @@ National Institute of Mental Health Data Archive
 %\end{itemize}
 %\end{frame}
 
-\begin{frame}{Genome-wide somatic mutation rate unaffected}
+\begin{frame}{Genome-wide somatic SNV rate unaffected}
 \begin{center}
 \includegraphics[scale=0.55]{../../notebook/2020-12-09-walsh-data/named-figure/genome-wide-callrate.pdf}
 \end{center}
@@ -230,7 +230,7 @@ National Institute of Mental Health Data Archive
 
 \section{Statistical analysis}
 
-\begin{frame}{Schizophrenia GWAS genes enriched in SNVs from SCZ}
+\begin{frame}{Schizophrenia GWAS genes: increased somatic SNVs rate}
 \includegraphics[scale=0.55]{../../notebook/2020-11-13-functional-variants/named-figure/genomewide-scz_gwas-rate_scz.pdf}
 \begin{itemize}
 \item 478 genes in 145 Schizophrenia GWAS loci
@@ -238,41 +238,38 @@ National Institute of Mental Health Data Archive
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\includegraphics[height=0.95\textheight]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+\begin{frame}{GWAS genes vs.~GWAS loci}
+\begin{center}
+\includegraphics[scale=0.6]{../../notebook/2020-07-28-CLOZUK/named-figure/rel-callrate-sczgwas2_scz.pdf}
+\end{center}
 \end{frame}
 
-%\begin{frame}{Modeling the number/fraction of calls in SCZ GWAS genes}
-%\begin{columns}[t]
-%\begin{column}{0.5\textwidth}
-%\begin{center}
-%Poisson, log-linear
-%\begin{description}
-%\tiny
-%\item[M0] \(y \sim 1 + \mathrm{Dx}\)
-%\item[M1] \(y \sim 1 + \mathrm{Dx} + \log_{10} n_\mathrm{calls}\)
-%\end{description}
-%\end{center}
-%\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
-%\end{column}
-%
-%\begin{column}{0.5\textwidth}
-%\begin{center}
-%binomial, logistic
-%\begin{description}
-%\tiny
-%\item[M0] \(y \sim 1 + \mathrm{Dx}\)
-%\item[M1] \(y \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
-%\end{description}
-%\end{center}
-%\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
-%\end{column}
-%\end{columns}
-%\begin{center}
-%\end{center}
-%\end{frame}
+\begin{frame}{Local som.~SNV call rates $n_S$, $f_S$ and other variables}
+\includegraphics[height=0.9\textheight]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
+\end{frame}
 
-\begin{frame}{Model selection for SCZ GWAS genes}
+\begin{frame}{Modeling local somatic SNV call rate $f_S$}
+	{Example: $S =$ Schizophrenia GWAS genes}
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\begin{center}
+logistic regression
+\begin{description}
+\tiny
+\item[M0] \(f_S \sim 1 + \mathrm{Dx}\)
+\item[M1] \(f_S \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
+\end{description}
+\end{center}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-ageOfDeath-binom-fit_scz.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Model selection}
 \small
 \includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
 %\begin{center}
@@ -322,7 +319,8 @@ model formula & \(\hat{\beta}_\mathrm{SCZ} \pm \mathrm{S.E}\) & p-value: \(\beta
 
 \section{Results}
 
-\begin{frame}{Genomic elements, genesets for testing enrichment}
+\begin{frame}{Genomic elements, genesets}
+	{Determinants of local rate of somatic SNVs}
 \begin{center}
 \tiny
 \begin{tabular}{lrlr}
@@ -334,7 +332,6 @@ damaging & coding nonsyn & 1 & 55 \\
 & missense & None & 0 \\
 & stop gain & None & 1 \\
 & splice site & None & 1 \\
-& coding & 1 & 80 \\
 & deleterious (sift) & 1 & 19 \\
 & damaging (polyphen) & 1 + DP & 9 \\
 \hline
@@ -372,12 +369,6 @@ GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
 \includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
 \end{frame}
 
-\begin{frame}{Enrichment of GWAS genes vs.~GWAS loci}
-\begin{center}
-\includegraphics[scale=0.6]{../../notebook/2020-07-28-CLOZUK/named-figure/rel-callrate-sczgwas2_scz.pdf}
-\end{center}
-\end{frame}
-
 \section{Discussion}
 
 \againframe{gwas}
@@ -390,15 +381,17 @@ GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
 
 \begin{frame}{Summary}
 \begin{itemize}
-\item schizophrenia: some genesets enriched in somatic SNVs
+\item unchanged genome-wide rate of somatic SNVs in schizophrenia
+\item altered local rate
 \begin{itemize}
-	\item GWAS genes: schizophrenia, ASD, psychiatric 
+	\item genes of schizophrenia, ASD, psychiatric GWAS
         \item shared heritability of somatic SNVs
 \end{itemize}
-\item insufficient data to study enrichment in damaging variants
+\item limited sample size
 \begin{itemize}
 	\item LoF intolerant genes?
 	\item PSD, FMRP-target, Ca-channel genes?
+	\item ...
 \end{itemize}
 \end{itemize}
 \end{frame}
