@@ -59,7 +59,6 @@
 \begin{itemize}
 \item psychosis, dysfunction
 \item symptomatic treatment \& diagnosis
-\item DLPFC
 \item neurodevelopmental hypothesis
 \item heritability \(\approx 0.8\)
 \item polygenic, common SNPs
@@ -270,6 +269,7 @@ logistic regression
 \end{frame}
 
 \begin{frame}{Model selection}
+	{Example: $S =$ Schizophrenia GWAS genes}
 \small
 \includegraphics[width=1.1\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-fw-varsel-binom-onlyIC_scz.pdf}
 %\begin{center}
@@ -319,12 +319,12 @@ model formula & \(\hat{\beta}_\mathrm{SCZ} \pm \mathrm{S.E}\) & p-value: \(\beta
 
 \section{Results}
 
-\begin{frame}{Genomic elements, genesets}
+\begin{frame}{Gene sets and genomic elements}
 	{Determinants of local rate of somatic SNVs}
 \begin{center}
 \tiny
 \begin{tabular}{lrlr}
-category & genomic element, geneset & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
+category & gene set, genomic element & selected model formula & size\footnote{\(n_\mathrm{indiv} \,|\, n_{\mathrm{calls} \in \mathrm{category}} \ge 1\)} \\
 \hline
 \hline
 damaging & coding nonsyn & 1 & 55 \\
@@ -335,28 +335,28 @@ damaging & coding nonsyn & 1 & 55 \\
 & deleterious (sift) & 1 & 19 \\
 & damaging (polyphen) & 1 + DP & 9 \\
 \hline
-regulartory & TFBS & 1 + AF & 93 \\
+regulatory & TFBS & 1 + AF & 93 \\
 & CpG island & 1 + AF + BaseQRankSum & 57 \\
 & enhancer & 1 & 99 \\
 & genic enhancer & 1 & 22 \\
 \hline
 constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
-& evolutionary cons. (gerp) & 1 + Dx & 127 \\
-& LoF intolerant genes & 1 + Dx & 143 \\
+& evolutionary cons. (gerp) & 1 + \alert{Dx} & 127 \\
+& LoF intolerant genes & 1 + \alert{Dx} & 143 \\
 \hline
 SCZ genesets & PSD & 1 & 95 \\
 & FMRP-target & 1 + AF & 118 \\
 & SCZ de novo & 1 + AF & 97 \\
-& Calcium channel & 1 + Dx & 13 \\
+& Calcium channel & 1 + \alert{Dx} & 13 \\
 & composite & 1 & 126 \\
 \hline
 GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
 & Anorexia nervosa GWAS & None & 4 \\
-& ASD GWAS & 1 + Dx & 27 \\
-& Bipolar disorder GWAS & 1 + Dx & 77 \\
+& ASD GWAS & 1 + \alert{Dx} & 27 \\
+& Bipolar disorder GWAS & 1 + \alert{Dx} & 77 \\
 & MDD GWAS & 1 & 48 \\
-& Schizophrenia GWAS & 1 + Dx & 72 \\
-& Psychiatric GWAS & 1 + Dx & 105 \\
+& Schizophrenia GWAS & 1 + \alert{Dx} & 72 \\
+& Psychiatric GWAS & 1 + \alert{Dx} & 105 \\
 \end{tabular}
 \end{center}
 \end{frame}
@@ -384,8 +384,8 @@ GWAS genesets & ADHD GWAS & 1 + AF + DP & 6 \\
 \item unchanged genome-wide rate of somatic SNVs in schizophrenia
 \item altered local rate
 \begin{itemize}
-	\item genes of schizophrenia, ASD, psychiatric GWAS
-        \item shared heritability of somatic SNVs
+	\item genes of schizophrenia, ASD, psychiatric GWAS\\
+		$\Rightarrow$ shared polygenic pathomechanism
 \end{itemize}
 \item limited sample size
 \begin{itemize}

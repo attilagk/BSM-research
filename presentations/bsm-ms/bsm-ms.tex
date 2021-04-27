@@ -45,17 +45,22 @@ The abstract
 
 \section*{Introduction}
 
-Schizophrenia is a psychiatric disorder, which... heritability: 0.8 ...\citep{Kahn2015}.  
-GWAS (reviewed by \cite{Visscher2017}) has been essential in clarifying the
-genetic of architecture of schizophrenia~\citep{Ripke2014,Pardinas2018} and other psychiatric disorders
-\citep{Sullivan2012}: they are polygenic and much of the heritability is due to
-a large set of common germline variants, typically SNPs, with
-small effect size.  GWAS also revealed that psychiatric disorders
-typically share much heritability with each
-other~\citep{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser extent with
-some neurological disorders~\citep{Consortium2018} indicating shared
-pathological mechanisms and supporting the neurodevelopmental hypothesis of
-schizophrenia~\citep{Nour2015}.
+Schizophrenia is a psychiatric disorder, which... heritability: 0.8
+...\citep{Kahn2015}.  GWAS (reviewed by \cite{Visscher2017}) has been
+essential in clarifying the genetic of architecture of
+schizophrenia~\citep{Ripke2014,Pardinas2018} and other psychiatric disorders
+\citep{Sullivan2012}: they are polygenic and much of the heritability is due
+to a large set of common germline variants, typically SNPs, with small effect
+size.  GWASs of schizophrenia have so far yielded 145 genome-wide significant
+loci distributed roughly uniformly along the genome involving about 700 genes,
+c.a 200 of which are located at the most significant locus in the MHC region,
+suggesting that an impaired immune function is responsible for the increased
+synaptic pruning seen in schizophrenic brains.  GWAS also revealed that
+psychiatric disorders typically share much heritability with each
+other~\citep{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser
+extent with some neurological disorders~\citep{Consortium2018} indicating
+shared pathological mechanisms and supporting the neurodevelopmental
+hypothesis of schizophrenia~\citep{Nour2015}.
 
 Beyond common SNPs other classes of genetic variation have also been shown to
 carry substantial risk for schizophrenia: rare CNVs~\citep{Rees2014}, rare germline
@@ -97,9 +102,10 @@ and 61 schizophrenic individuals and subjected them to short read DNA
 sequencing at 50--540\(\times\) coverage.  Next we called somatic SNVs using a
 pipeline developed and validated by the BSMN consortium~\citep{Wang2021}.  The
 genome-wide somatic SNV call rate was similar for control and schizophrenic
-samples (median around 40) and showed great variability, ranging 0 to 100 with
-the exception of an outlier schizophrenic sample reaching \(\approx 200\)
-(Fig~\ref{fig:genomewide-calls}A).
+samples (median around 40) and showed great variability, ranging 0 to 100
+(Fig~\ref{fig:genomewide-calls}A) with the exception of an outlier
+schizophrenic sample reaching \(\approx 189\).  (TODO: investigate the outlier
+CMC_MSSM_224 further.)
 
 \begin{figure}
 \includegraphics[scale=0.6]{../../notebook/2020-12-09-walsh-data/named-figure/genome-wide-callrate.pdf}
@@ -108,30 +114,24 @@ the exception of an outlier schizophrenic sample reaching \(\approx 200\)
 \label{fig:genomewide-calls}
 \end{figure}
 
-The finding that somatic SNV call rate is unaltered in schizophrenics was
-expected based on similar results for rare germline and de-novo
-SNVs~\citep{Purcell2014,Singh2017,Fromer2014,Rees2020}.
-As for the high variability of somatic SNV call rate we sought 
-biological or technical variables explaining that variation.  As
-Fig~\ref{fig:genomewide-calls}B
-shows sequencing read depth explains much of
-the variability in call rate, which indicates that the variant calling
-pipeline adapts to lower coverage by applying stronger filters in order to 
-maintain high specificity.
+We sought biological or technical variables that explain that high variance of
+genome-wide.  As the bottom panel of Fig~\ref{fig:genomewide-calls} shows,
+sequencing read depth explains much of the variability in call rate, which
+indicates that the variant calling pipeline adapts to lower coverage by
+applying stronger filters in order to maintain high specificity.
 
-Our pipeline provided us with an estimate of allele frequency for
-each somatic SNV.  This enabled us to test, at least qualitatively, the
-simple model that somatic point mutation rate roughly constant along the cell lineages of
-our samples~\citep{Rodin2021} since under this model the density of allele
+Our pipeline provided us with an estimate of allele frequency for each somatic
+SNV.  This enabled us to qualitatively assess the simple model that somatic
+point mutation rate roughly constant along the cell lineages of our
+samples~\citep{Rodin2021} since under this model the density of allele
 frequency is quasi exponential.  We found this to be the case at high
 (\(\approx 400\) read depth (blue allele frequency density in Fig~\ref{fig:AF}
-right panel).  With decreasing read depth,
-however, the density of allele frequency is increasingly shifted towards
-higher frequencies (orange and green densities, Fig~\ref{fig:AF})
-right).  These results indicate that the somatic SNVs we called
-follow the expected allele frequency distribution but our pipeline's sensitivity for
-low allele frequency (below c.a 0.05) is low at low-medium sequencing
-coverage.
+right panel).  With decreasing read depth, however, the density of allele
+frequency is increasingly shifted towards higher frequencies (orange and green
+densities, Fig~\ref{fig:AF}) right).  These results indicate that the somatic
+SNVs we called follow the expected allele frequency distribution but our
+pipeline's sensitivity for low allele frequency (below c.a 0.05) is low at
+low-medium sequencing coverage.
 
 \begin{figure}
 \includegraphics[scale=0.6]{../../notebook/2020-08-13-select-vars/named-figure/calls-DP-AF-jointdensity-conddensity.pdf}
@@ -143,29 +143,51 @@ of the pipeline.
 \label{fig:AF}
 \end{figure}
 
-\subsection*{Enrichment analysis}
+\subsection*{Increased local rates of somatic SNVs in schizophrenia}
 
-In the preceding section we showed that the genome-wide rate of somatic SNVs
-in the DLPFC is unaltered in schizophrenia.  It is, however, possible 
-that the rate is significantly altered at certain genomic regions.
-We selected genomic elements and gene sets for testing altered somatic SNV
-rate (Table~\ref{tab:modsel}).
+Next we investigated weather the local rate of somatic SNVs falling into
+specific functional categories is altered in schizophrenia.  We
+tested genic categories such as nonsynonymous and deleterious SNVs;
+regulatory categories such as enhancers; constraint
+categories such as loss of function intolerant genes; and gene sets affected
+by rare and common variants in schizophrenia and related psychiatric
+disorders (Table~\ref{tab:modsel}).
+
+For each SNV category we formally tested weather the local rate of somatic SNVs is
+affected by disease status.  For that purpose we employed one univariate test
+($\chi^2$) and two multivariate regression models---logistic and log-linear
+regression, Fig.~S\ref{fig:fitted-lines} ---, which we combined with a forward
+variable selection algorithm (Fig.~S\ref{fig:varsel}) on a set of biological
+and technical explanatory variables.  These three techniques
+lead to highly concordant inferences (compare p-values between the two
+rightmost panels in Fig.~\ref{fig:testresults} and compare
+Fig.~S\ref{fig:varsel}A vs.~B) suggesting that confounding variables or false
+modeling assumptions did not undermine our analyses.
+
+Three categories of somatic SNVs displayed significantly increased local rate
+in schizophrenia samples after multipe test correction: Schizophrenia GWAS,
+Psychiatric GWAS (both at false discovery rate, FDR, below $\alpha=0.025$) and
+ASD GWAS (FDR below $\alpha=0.05$).  For four additional categories the
+forward algorithm selected the disease status, Dx, variable
+(Table~\ref{tab:modsel}) and the local rate was nonsignificantly increased
+(Fig.~\ref{fig:testresults}) in schizophrenic samples; these are: Bipolar
+disorder GWAS, Calcium channel genes, loss of function (LoF) intolerant genes
+and evolutionary conserved regions detected by GERP++.
 
 \begin{table}
 \begin{tabular}{lrlr}
-category & genomic element, gene set & selected model formula & size \\
+group & SNV category & selected model formula & size \\
 \hline
 \hline
-damaging & coding nonsyn & 1 & 55 \\
+genic & coding nonsyn & 1 & 55 \\
 & coding syn & 1 + Gender & 38 \\
 & missense & None & 0 \\
 & stop gain & None & 1 \\
 & splice site & None & 1 \\
-& coding & 1 & 80 \\
 & deleterious (sift) & 1 & 19 \\
 & damaging (polyphen) & 1 + DP & 9 \\
 \hline
-regulartory & TFBS & 1 + AF & 93 \\
+regulatory & TFBS & 1 + AF & 93 \\
 & CpG island & 1 + AF + BaseQRankSum & 57 \\
 & enhancer & 1 & 99 \\
 & genic enhancer & 1 & 22 \\
@@ -174,7 +196,7 @@ constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
 & evolutionary cons. (gerp) & 1 + Dx & 127 \\
 & LoF intolerant genes & 1 + Dx & 143 \\
 \hline
-SCZ gene sets & PSD & 1 & 95 \\
+rare var.~gene sets & PSD & 1 & 95 \\
 & FMRP-target & 1 + AF & 118 \\
 & SCZ de novo & 1 + AF & 97 \\
 & Calcium channel & 1 + Dx & 13 \\
@@ -197,25 +219,22 @@ nonsyn'' and ``coding syn''
 \label{tab:modsel}
 \end{table}
 
-\subsubsection*{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
-
-[notebook/2021-01-26-indiv-counts-modeling]
-
-%\begin{figure}
+\begin{figure}
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
-%\caption{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
-%\end{figure}
+\caption{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
+\label{fig:testresults}
+\end{figure}
 
 \section*{Discussion}
 
-Studies of rare germline and
-de-novo SNVs showed that, although the genome-wide ``background'' mutation
-rate is unaltered in schizophrenia, specific genomic elements and gene sets
-bear increased burden of---in other words: are enriched in---SNVs in
-schizophrenic individuals relative to controls.  Our present study extends
-this basic result to somatic SNVs in the human brain.  In particular, we
-present evidence that genes implicated in schizophrenia by schizophrenia GWAS and other psychiatric
-GWAS suffer increased rate of somatic point mutations in schizophrenia.
+Studies of rare germline and de-novo SNVs showed that, although the
+genome-wide ``background'' mutation rate is unaltered in schizophrenia,
+specific genomic elements and gene sets bear increased burden of---in other
+words: are enriched in---SNVs in schizophrenic individuals relative to
+controls.  Our present study extends this basic result to somatic SNVs in the
+human brain.  In particular, we present evidence that genes implicated in
+schizophrenia by schizophrenia GWAS and other psychiatric GWAS suffer
+increased rate of somatic point mutations in schizophrenia.
 
 Increased rate suggests that these somatic SNVs are damaging to normal brain
 function.  On the other hand we did not observe decreased rate at other
@@ -228,6 +247,20 @@ schizophrenia so long they are outnumbered by damaging mutations.
 Questions we cannot answer:
 
 \section*{Methods}
+
+\subsection{Study subjects and clinical data}
+
+\subsection{Sample preparation and sequencing}
+
+\subsection{Somatic SNV calling}
+
+\subsection{Variant annotation}
+
+SNPnexus (https://www.snp-nexus.org/v4/)
+
+RoadMap,... TODO: list all sources of annotation
+
+\subsection{Statistical analysis}
 
 For a genomic element or gene set  \(S\) we inspected the joint distribution,
 across all study subjects, of disease status Dx, two enrichment variables
@@ -339,17 +372,20 @@ bottom right (largest).  This indicated poor fit for the smallest genomic
 elements and gene sets (top row of plots) but good fit for medium sized and
 large ones.
 
+\subsubsection*{Multiple test correction}
+
 \subsection*{Data availability}
 
-Data and analytical results...
+All FASTQ, CRAM and VCF files generated for this work have been submitted to
+collection #2965 of the National Institute of Mental Health Data Archive
+(https://nda.nih.gov/) and will be released for the public.
 
 \subsection*{Code availability}
 
-All code developed by A.~Jones is available at:\\
+All code developed by A.~Jones and E.~Maury is available at:\\
 https://github.com/attilagk/BSM-research
 
 \bibliography{library}
-%\bibliography{bsm}
 
 
 \section*{Acknowledgements}
