@@ -167,23 +167,45 @@ modeling assumptions did not undermine our analyses.
 Three categories of somatic SNVs displayed significantly increased local rate
 in schizophrenia samples after multipe test correction: Schizophrenia GWAS,
 Psychiatric GWAS (both at false discovery rate, FDR, below $\alpha=0.025$) and
-ASD GWAS (FDR below $\alpha=0.05$).  For four additional categories the
-forward algorithm selected the disease status, Dx, variable
-(Table~\ref{tab:modsel}) and the local rate was nonsignificantly increased
-(Fig.~\ref{fig:testresults}) in schizophrenic samples; these are: Bipolar
-disorder GWAS, Calcium channel genes, loss of function (LoF) intolerant genes
-and evolutionary conserved regions detected by GERP++.
+ASD GWAS (FDR below $\alpha=0.05$), see Fig.~\ref{fig:testresults} and
+supporting-data-file1.csv.  For four additional categories the forward algorithm selected the
+disease status, Dx, variable (Table~\ref{tab:modsel}) and the local rate was
+nonsignificantly increased (Fig.~\ref{fig:testresults}) in schizophrenic
+samples; these are: Bipolar disorder GWAS, Calcium channel genes, loss of
+function (LoF) intolerant genes and evolutionary conserved regions detected by
+GERP++.
+
+For the remaining categories in Table~\ref{tab:modsel} no change in local rate
+was detected in schizophrenic samples relative to controls.  The
+interpretation of such negative result depended on the the category size,
+which we defined as the number of somatic SNV in the given category.  For
+larger categories (relative to, say, Schizophrenia GWAS at size 72), such as
+enhancers (size 99) or FMRP-target genes (size 118), this means no or small
+(relative to Schizophrenia GWAS) change in local somatic SNV rate.  For
+smaller categories, such as ADHD GWAS or deleterious SNVs inferred by SIFT the
+interpretation is open since there was not enough data to fit well
+sufficiently complex models or, for very small categories such as ADHD GWAS,
+the iterative algorithm of the fit failed to converge.  This is seen in
+Fig.~S\ref{fig:residual-QQ} from the progressive improvement in the
+goodness of fit with increasing category size.
+
+The increased local rate of somatic SNVs in some of the
+gene set categories was expected to be a mixed effect of increased rate of
+damaging variants and unaltered rate of neutral variants. We attempted at
+testing this expectation by narrowing down the gene set categories to likely
+damaging SNVs.  We defined likely damaging SNVs as those in either the coding nonsynonymous,
+stop-gain or splice site category.
 
 \begin{table}
 \begin{tabular}{lrlr}
-group & SNV category & selected model formula & size \\
+group & SNV category & selected model formula & category size \\
 \hline
 \hline
 genic & coding nonsyn & 1 & 55 \\
 & coding syn & 1 + Gender & 38 \\
-& missense & None & 0 \\
-& stop gain & None & 1 \\
-& splice site & None & 1 \\
+& missense & failed to converge & 0 \\
+& stop gain & failed to converge & 1 \\
+& splice site & failed to converge & 1 \\
 & deleterious (sift) & 1 & 19 \\
 & damaging (polyphen) & 1 + DP & 9 \\
 \hline
@@ -203,7 +225,7 @@ rare var.~gene sets & PSD & 1 & 95 \\
 & composite & 1 & 126 \\
 \hline
 GWAS gene sets & ADHD GWAS & 1 + AF + DP & 6 \\
-& Anorexia nervosa GWAS & None & 4 \\
+& Anorexia nervosa GWAS & failed to converge & 4 \\
 & ASD GWAS & 1 + Dx & 27 \\
 & Bipolar disorder GWAS & 1 + Dx & 77 \\
 & MDD GWAS & 1 & 48 \\
