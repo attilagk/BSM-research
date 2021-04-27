@@ -167,8 +167,8 @@ modeling assumptions did not undermine our analyses.
 Three categories of somatic SNVs displayed significantly increased local rate
 in schizophrenia samples after multipe test correction: Schizophrenia GWAS,
 Psychiatric GWAS (both at false discovery rate, FDR, below $\alpha=0.025$) and
-ASD GWAS (FDR below $\alpha=0.05$), see Fig.~\ref{fig:testresults} and
-supporting-data-file1.csv.  For four additional categories the forward algorithm selected the
+ASD GWAS (FDR below $\alpha=0.05$), see Fig.~\ref{fig:testresults}, 
+supporting-data-file1.csv and supporting-data-file2.csv.  For four additional categories the forward algorithm selected the
 disease status, Dx, variable (Table~\ref{tab:modsel}) and the local rate was
 nonsignificantly increased (Fig.~\ref{fig:testresults}) in schizophrenic
 samples; these are: Bipolar disorder GWAS, Calcium channel genes, loss of
@@ -186,15 +186,21 @@ smaller categories, such as ADHD GWAS or deleterious SNVs inferred by SIFT the
 interpretation is open since there was not enough data to fit well
 sufficiently complex models or, for very small categories such as ADHD GWAS,
 the iterative algorithm of the fit failed to converge.  This is seen in
-Fig.~S\ref{fig:residual-QQ} from the progressive improvement in the
-goodness of fit with increasing category size.
+Fig.~S\ref{fig:binomial-QQ},~S\ref{fig:poisson-QQ} from the progressive improvement in the
+goodness of fit with increasing category size.  This analysis also showed that
+for the smaller sized ASD GWAS (size 22) the fit is already adequate and for
+the relatively large Schizophrenia GWAS (size 86) and Psychiatric GWAS (size
+176) the fit is excellent, which gives further support to our model based
+inference regarding these categories.
 
-The increased local rate of somatic SNVs in some of the
-gene set categories was expected to be a mixed effect of increased rate of
-damaging variants and unaltered rate of neutral variants. We attempted at
-testing this expectation by narrowing down the gene set categories to likely
-damaging SNVs.  We defined likely damaging SNVs as those in either the coding nonsynonymous,
-stop-gain or splice site category.
+The increased local rate of somatic SNVs in some of the gene set categories
+was expected to be a mixed effect of increased rate of damaging variants and
+unaltered rate of neutral variants. We attempted at testing this expectation
+by narrowing down the gene set categories to likely damaging SNVs.  (We defined
+likely damaging SNVs as those in either the coding nonsynonymous, stop-gain or
+splice site category.  A complementary test for neutral SNVs was not
+performed due to the difficulty of defining likely neutral mutations.)
+However, our attempt fa
 
 \begin{table}
 \begin{tabular}{lrlr}
@@ -389,7 +395,7 @@ where \(r_\mathrm{D}\) is the standardized deviance residual and
 We expressed the size of genomic element or gene set as the number of
 individuals with at least one somatic SNV in that genomic element or gene set.
 We sorted genomic elements and gene sets according to their size and produced
-normal Q-Q plots of \(r^\ast\) from top left of Fig~S\ref{fig:residual-QQ} (smallest) to
+normal Q-Q plots of \(r^\ast\) from top left of Fig~S\ref{fig:binomial-QQ} (smallest) to
 bottom right (largest).  This indicated poor fit for the smallest genomic
 elements and gene sets (top row of plots) but good fit for medium sized and
 large ones.
@@ -431,7 +437,12 @@ None
 
 \section*{Tables}
 
-\section*{Supplementary Figures}
+\section*{Supplementary Material}
+
+\setcounter{table}{0}
+\makeatletter 
+\renewcommand{\figurename}{Supplementary Table} % nice
+\makeatother
 
 \setcounter{figure}{0}
 \makeatletter 
@@ -488,12 +499,21 @@ The effect of ageOfDeath and that of Dataset are mediated by disease status Dx
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom.pdf}
+\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom_scz.pdf}
 \caption{
 Residual analysis to assess model fit for genomic elements and gene
 sets of increasing size (from top left to bottom right)
 }
-\label{fig:residual-QQ}
+\label{fig:binomial-QQ}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-pois_scz.pdf}
+\caption{
+Residual analysis to assess model fit for genomic elements and gene
+sets of increasing size (from top left to bottom right)
+}
+\label{fig:poisson-QQ}
 \end{figure}
 
 \begin{figure}[p]

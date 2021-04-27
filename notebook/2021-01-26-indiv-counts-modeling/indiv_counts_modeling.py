@@ -186,11 +186,13 @@ def QQ_four_residual_types(mod):
     ax[1, 1].set_title('$r^\star$ residuals')
     return((fig, ax))
 
-def QQ_rstar_residual(models):
+def QQ_rstar_residual(varsel, family='binomial_scz', size='size_scz'):
+    varsel = varsel.sort_values(size)
+    models = varsel.loc[:, (family, 'model')]
     models = models.to_dict() if isinstance(models, pd.Series) else models
-    fig, axi = plt.subplots(4, 6, sharex=True, sharey=True, figsize = (16, 12))
-    for f, ax in zip(models.keys(), np.ravel(axi)):
-        ax.set_title(f)
+    fig, axi = plt.subplots(5, 5, sharex=True, sharey=True, figsize = (15, 15))
+    for f, ax, sz in zip(models.keys(), np.ravel(axi), varsel[size]):
+        ax.set_title(f + ', ' + str(sz))
         m = models[f]
         if m is not None:
             r_star = r_star_residuals(m)
@@ -199,12 +201,25 @@ def QQ_rstar_residual(models):
             ax.set_ylabel('')
     return((fig, ax))
 
-def apply2varsel(fun, defaultval, varsel):
+def apply2varsel(fun, noconvergenceval, defaultval, varsel):
+    '''
+    Apply a function to varsel dataframe
+
+    Parameters
+    fun: the function
+    noconvergenceval: default value if fit did not converge
+    defaultval: default value if Dx was not selected
+    varsel: the varsel dataframe
+
+    Value: depends on fun
+    '''
     varsel = varsel.copy().xs(key='model', axis=1, level=1)
     def helper(m):
         try:
             val = fun(m)
-        except (AttributeError, KeyError):
+        except AttributeError:
+            val = noconvergenceval
+        except KeyError:
             val = defaultval
         return(val)
     res = varsel.applymap(helper)
