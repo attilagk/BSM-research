@@ -177,72 +177,80 @@ GERP++.
 
 For the remaining categories in Table~\ref{tab:modsel} no change in local rate
 was detected in schizophrenic samples relative to controls.  The
-interpretation of such negative result depended on the the category size,
-which we defined as the number of somatic SNV in the given category.  For
-larger categories (relative to, say, Schizophrenia GWAS at size 72), such as
-enhancers (size 99) or FMRP-target genes (size 118), this means no or small
-(relative to Schizophrenia GWAS) change in local somatic SNV rate.  For
-smaller categories, such as ADHD GWAS or deleterious SNVs inferred by SIFT the
-interpretation is open since there was not enough data to fit well
-sufficiently complex models or, for very small categories such as ADHD GWAS,
-the iterative algorithm of the fit failed to converge.  This is seen in
-Fig.~S\ref{fig:binomial-QQ},~S\ref{fig:poisson-QQ} from the progressive improvement in the
-goodness of fit with increasing category size.  This analysis also showed that
-for the smaller sized ASD GWAS (size 22) the fit is already adequate and for
-the relatively large Schizophrenia GWAS (size 86) and Psychiatric GWAS (size
-176) the fit is excellent, which gives further support to our model based
-inference regarding these categories.
+interpretation of such negative result depended on the the somatic SNVs called
+in the given category size.  For larger categories (relative to, say,
+Schizophrenia GWAS with 72 SNVs called), such as enhancers (99 SNVs) or
+FMRP-target genes (118 SNVs), this means no or small (relative to
+Schizophrenia GWAS) change in local somatic SNV rate.  For smaller categories,
+such as ADHD GWAS (5 SNVs) or the 17 deleterious SNVs inferred by SIFT the
+interpretation is open since there were not enough SNVs called to fit
+sufficiently complex models well.  Moreover, for very small categories such as
+Anorexia GWAS (2 SNVs), the iterative algorithm of the fit failed to converge.
+This is seen in Fig.~S\ref{fig:binomial-QQ},~S\ref{fig:poisson-QQ} from the
+progressive improvement in the goodness of fit with increasing number of
+somatic SNVs called.  This analysis also showed that for the smaller sized ASD
+GWAS (22 SNVs) the fit is already adequate and for the relatively large
+Schizophrenia GWAS (86 SNVs) and Psychiatric GWAS (176 SNVs) the fit is
+excellent, which gives further support to our model based inference regarding
+these categories.
 
 The increased local rate of somatic SNVs in some of the gene set categories
 was expected to be a mixed effect of increased rate of damaging variants and
 unaltered rate of neutral variants. We attempted at testing this expectation
-by narrowing down the gene set categories to likely damaging SNVs.  (We defined
-likely damaging SNVs as those in either the coding nonsynonymous, stop-gain or
-splice site category.  A complementary test for neutral SNVs was not
-performed due to the difficulty of defining likely neutral mutations.)
-However, our attempt fa
+by narrowing down the gene set categories to nonsynonymous SNVs.  However, our
+attempt was undermined by too few nonsynonymous SNVs in even the largest
+geneset, the LoF intolerant genes, which contained only 30 nonsynonymous SNVs
+out of 1077 SNVs and for which the $\chi^2$ test yielded no significant
+change in the local somatic SNV rate ($p = 0.7$).  TODO: supplementary table
+with nonsyn SNVs for gene sets.
+
+We performed a complementary test of the above question to evade the limited
+number somatic SNV calls.  Instead of narrowing down our Schizophrenia GWAS
+category we extended it by including SNVs not only in genic but also
+intergenic regions of all 145 schizophrenia GWAS loci.  The local somatic SNV
+rate was no more significantly increased in schizophrenic samples relative to
+controls (Fig~\ref{fig:scz-gwas-genes-vs-loci}).  Of note is that the most
+strongly associated locus to schizophrenia is at the MHC region, which is only
+represented in the extended Schizophrenia GWAS loci category but in the
+Schizophrenia GWAS gene set due to its structural variability.  To address
+this discrepancy we narrowed down again the GWAS loci to genic regions but
+this time also including the MHC locus.  We found, again, a significantly
+increased local rate of somatic SNVs despite the likely inclusion of some
+intergenic regions at the MHC locus (Fig.~\ref{fig:scz-gwas-genes-vs-loci}).
 
 \begin{table}
 \begin{tabular}{lrlr}
-group & SNV category & selected model formula & category size \\
+group & SNV category & selected model formula & SNVs called \\
 \hline
 \hline
-genic & coding nonsyn & 1 & 55 \\
-& coding syn & 1 + Gender & 38 \\
-& missense & failed to converge & 0 \\
-& stop gain & failed to converge & 1 \\
-& splice site & failed to converge & 1 \\
-& deleterious (sift) & 1 & 19 \\
-& damaging (polyphen) & 1 + DP & 9 \\
-\hline
-regulatory & TFBS & 1 + AF & 93 \\
-& CpG island & 1 + AF + BaseQRankSum & 57 \\
-& enhancer & 1 & 99 \\
-& genic enhancer & 1 & 22 \\
-\hline
-constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 117 \\
-& evolutionary cons. (gerp) & 1 + Dx & 127 \\
-& LoF intolerant genes & 1 + Dx & 143 \\
-\hline
-rare var.~gene sets & PSD & 1 & 95 \\
-& FMRP-target & 1 + AF & 118 \\
-& SCZ de novo & 1 + AF & 97 \\
-& Calcium channel & 1 + Dx & 13 \\
-& composite & 1 & 126 \\
-\hline
-GWAS gene sets & ADHD GWAS & 1 + AF + DP & 6 \\
-& Anorexia nervosa GWAS & failed to converge & 4 \\
-& ASD GWAS & 1 + Dx & 27 \\
-& Bipolar disorder GWAS & 1 + Dx & 77 \\
-& MDD GWAS & 1 & 48 \\
-& Schizophrenia GWAS & 1 + Dx & 72 \\
-& Psychiatric GWAS & 1 + Dx & 105 \\
+genic & coding nonsyn & 1 & 66\\
+ & coding syn & 1 + Gender & 36\\
+ & stop gain &  & 1\\
+ & splice site &  & 1\\
+ & deleterious (sift) & 1 & 17\\
+ & damaging (polyphen) & 1 + DP & 8\\
+regulatory & TFBS & 1 + AF & 126\\
+ & CpG island & 1 + AF + BaseQRankSum & 73\\
+ & enhancer & 1 & 130\\
+ & genic enhancer & 1 & 12\\
+constraint & evolutionary cons. (phast) & 1 + DP + AF + Gender & 276\\
+ & evolutionary cons. (gerp) & 1 + Dx & 402\\
+ & LoF intolerant genes & 1 + Dx & 1077\\
+rare var.~gene sets  & PSD & 1 & 112\\
+ & FMRP-target & 1 + AF & 227\\
+ & SCZ de novo & 1 + AF & 112\\
+ & Calcium channel & 1 + Dx & 11\\
+ & composite & 1 & 377\\
+GWAS gene set & ADHD GWAS & 1 + AF + DP & 5\\
+ & Anorexia nervosa GWAS &  & 2\\
+ & ASD GWAS & 1 + Dx & 22\\
+ & Bipolar disorder GWAS & 1 + Dx & 91\\
+ & MDD GWAS & 1 & 40\\
+ & Schizophrenia GWAS & 1 + Dx & 86\\
+ & Psychiatric GWAS & 1 + Dx & 176\\
 \end{tabular}
 \caption{
-Genomic elements and gene sets.  Size is defined as the number of
-individuals with at least one somatic SNV call in the genomic element
-or gene set. TODO: remove ``coding'' since it's redundant give ``coding
-nonsyn'' and ``coding syn''
+TODO
 }
 \label{tab:modsel}
 \end{table}
@@ -272,23 +280,27 @@ de-novo single nucleotide mutations.  Even so, we cannot rule out that
 protective somatic SNVs exist in genomic regions mechanistically involved in
 schizophrenia so long they are outnumbered by damaging mutations.
 
+The comparison of GWAS genes to GWAS loci suggests that not only 
+exonic but also intronic somatic SNVs can contribute to the risk of
+schizophrenia.
+
 Questions we cannot answer:
 
 \section*{Methods}
 
-\subsection{Study subjects and clinical data}
+\subsection*{Study subjects and clinical data}
 
-\subsection{Sample preparation and sequencing}
+\subsection*{Sample preparation and sequencing}
 
-\subsection{Somatic SNV calling}
+\subsection*{Somatic SNV calling}
 
-\subsection{Variant annotation}
+\subsection*{Variant annotation}
 
 SNPnexus (https://www.snp-nexus.org/v4/)
 
 RoadMap,... TODO: list all sources of annotation
 
-\subsection{Statistical analysis}
+\subsection*{Statistical analysis}
 
 For a genomic element or gene set  \(S\) we inspected the joint distribution,
 across all study subjects, of disease status Dx, two enrichment variables
@@ -501,8 +513,7 @@ The effect of ageOfDeath and that of Dataset are mediated by disease status Dx
 \begin{figure}[p]
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-binom_scz.pdf}
 \caption{
-Residual analysis to assess model fit for genomic elements and gene
-sets of increasing size (from top left to bottom right)
+Residual analysis of goodness of fit for the logistic family.
 }
 \label{fig:binomial-QQ}
 \end{figure}
@@ -510,10 +521,18 @@ sets of increasing size (from top left to bottom right)
 \begin{figure}[p]
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-pois_scz.pdf}
 \caption{
-Residual analysis to assess model fit for genomic elements and gene
-sets of increasing size (from top left to bottom right)
+Residual analysis of goodness of fit for the log-linear family.
+}
 }
 \label{fig:poisson-QQ}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[scale=0.6]{../../notebook/2020-07-28-CLOZUK/named-figure/rel-callrate-sczgwas_scz.pdf}
+\caption{
+TODO
+}
+\label{fig:scz-gwas-genes-vs-loci}
 \end{figure}
 
 \begin{figure}[p]
