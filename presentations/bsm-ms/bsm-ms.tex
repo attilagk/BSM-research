@@ -41,56 +41,53 @@ Information section
 
 \section*{Abstract}
 
-The abstract
+TODO
 
 \section*{Introduction}
 
-Schizophrenia is a psychiatric disorder, which... heritability: 0.8
-...\citep{Kahn2015}.  GWAS (reviewed by \cite{Visscher2017}) has been
-essential in clarifying the genetic of architecture of
+Schizophrenia is a common psychiatric disorder whose onset in early adulthood
+manifests in psychotic episodes and social dysfunction \citep{Kahn2015}.
+Early diagnosis as well as effective prevention and treatment are unavailable
+but the high (80\%) heritability of the disease provides hope that genetic
+research will help clarify pathomechanisms and provide biomarkers and drug
+targets \citep{Breen2016,Foley2017}.  GWAS (reviewed by \cite{Visscher2017})
+have been essential in clarifying the genetic of architecture of
 schizophrenia~\citep{Ripke2014,Pardinas2018} and other psychiatric disorders
-\citep{Sullivan2012}: they are polygenic and much of the heritability is due
-to a large set of common germline variants, typically SNPs, with small effect
-size.  GWASs of schizophrenia have so far yielded 145 genome-wide significant
-loci distributed roughly uniformly along the genome involving about 700 genes,
-c.a 200 of which are located at the most significant locus in the MHC region,
-suggesting that an impaired immune function is responsible for the increased
-synaptic pruning seen in schizophrenic brains.  GWAS also revealed that
-psychiatric disorders typically share much heritability with each
+\citep{Sullivan2012}: they are polygenic and especially in schizophrenia much
+of the heritability is due to a large set of common germline variants, mostly
+SNPs, with small effect size.  GWAS of schizophrenia have so far yielded 145
+genome-wide significant loci distributed roughly uniformly along the genome
+involving about 700 genes, c.a 200 of which are located at the most
+significant locus in the MHC region, suggesting that an impaired immune
+function is responsible for the increased synaptic pruning seen in
+schizophrenic brains~\citep{Sekar2016a}\footnote{TODO: fix citations}.  GWAS
+also revealed that psychiatric disorders share much heritability with each
 other~\citep{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser
 extent with some neurological disorders~\citep{Consortium2018} indicating
-shared pathological mechanisms and supporting the neurodevelopmental
-hypothesis of schizophrenia~\citep{Nour2015}.
+shared pathomechanisms and supporting the neurodevelopmental hypothesis of
+schizophrenia~\citep{Nour2015}.
 
 Beyond common SNPs other classes of genetic variation have also been shown to
-carry substantial risk for schizophrenia: rare CNVs~\citep{Rees2014}, rare germline
-SNVs~\citep{Purcell2014,Singh2017} as well as de novo
+carry substantial risk for schizophrenia: rare CNVs~\citep{Rees2014}, rare
+germline SNVs~\citep{Purcell2014,Singh2017} as well as de novo
 SNVs~\citep{Fromer2014,Rees2020}.  These studies confirmed the polygenicity of
-schizophrenia and found excess mutational burden in several functional
-gene sets such as synaptic and voltage gated calcium channel and FMRP target
-genes\citep{Fromer2014,Purcell2014} ... and loss of function intolerant
-genes~\citep{Rees2020,Singh2017} but found no evidence for increased genome
-wide germline single nucleotide mutation rate in schizophrenics.
+schizophrenia and found increased rate of damaging or loss of function
+mutations in several functional gene sets such as synaptic and voltage gated
+calcium channel and FMRP target genes~\citep{Fromer2014,Purcell2014} and loss
+of function intolerant genes~\citep{Rees2020,Singh2017} but found unaltered
+genome-wide germline single nucleotide mutation rate in schizophrenics.
 
-Despite much progress translation of the results of the aforementioned studies
-into effective medical diagnostic and treatment methods for schizophrenia is
-still lacking~\citep{Breen2016,Foley2017}. Increasing sample sizes, especially
-for currently underrepresented ethnic groups, is expected to uncover new
-potential risk genes and therapeutic targets~\citep{Visscher2017}, but the difficulty of interpreting
-polygenic signals from SNP arrays will persist~\citep{Boyle2017}.  Rare and de
-novo variants detected by sequencing afford somewhat easier interpretation.
-However, besides germline variants a number of distinct genetic and epigenetic
-processes are hypothesized to play a role in schizophrenia and psychiatric
-disorders~\citep{PsychENCODEConsortium2015}.
-
-Somatic variants have been called the dark matter of psychiatric
-genetics~\citep{Insel2014}.  Their systematic, genome-wide study has just begun
-with the announcement of the Brain Somatic Mosaicism
-project~\citep{McConnell2017}.  Within that project we and others recently
-developed new best practices and tools for calling somatic variants from brain
-samples based on bulk tissue sequencing data~\citep{Wang2021}.  In the present
-work, for the first time, we apply these analytical tools to deep, whole
-genome sequencing data from the DLPFC of \(m\) schizophrenic and \(n\) control
+Besides germline variants a number of distinct genetic and epigenetic
+mechanisms are hypothesized to play a role in schizophrenia and psychiatric
+disorders~\citep{PsychENCODEConsortium2015}.  Somatic variants have been
+called the dark matter of psychiatric genetics~\citep{Insel2014}.  Their
+systematic, genome-wide study in brain disorders has just begun with the
+announcement of the Brain Somatic Mosaicism project~\citep{McConnell2017}.
+Within that project we and others recently developed new best practices and
+tools for calling somatic variants from brain samples based on bulk tissue
+sequencing data~\citep{Wang2021}.  In the present work, for the first time, we
+apply these analytical tools to deep, whole genome sequencing data from the
+dorsolateral prefrontal cortex (DLPFC) of schizophrenic and control
 individuals.
 
 \section*{Results}
@@ -102,38 +99,42 @@ and 61 schizophrenic individuals and subjected them to short read DNA
 sequencing at 50--540\(\times\) coverage.  Next we called somatic SNVs using a
 pipeline developed and validated by the BSMN consortium~\citep{Wang2021}.  The
 genome-wide somatic SNV call rate was similar for control and schizophrenic
-samples (median around 40) and showed great variability, ranging typically
-from 0 to 100
-(Fig~\ref{fig:genomewide-calls}A).
+samples (median around 40) and showed great variability, ranging 
+0---100 except for an outlier sample at 189
+(Fig.~\ref{fig:genomewide-calls} top and middle).
 
 \begin{figure}
 \includegraphics[scale=0.6]{../../notebook/2020-12-09-walsh-data/named-figure/genome-wide-callrate.pdf}
-\caption{Genome wide somatic SNV call rate for Control and Schizophrenic samples.  TODO:
-	add Harvard control samples, remove ASD}
+\caption{
+Genome-wide somatic SNV call rate for control and schizophrenic
+samples and its dependence on sequencing depth.
+}
 \label{fig:genomewide-calls}
 \end{figure}
 
-We sought biological and technical variables that explain that high variance of
-genome-wide.  As the bottom panel of Fig~\ref{fig:genomewide-calls} shows,
-sequencing read depth explains much of the variability in call rate, which
-indicates that the variant calling pipeline adapts to lower coverage by
-applying stronger filters in order to maintain high specificity.
+We sought biological and technical variables that explain that high variance
+of genome-wide.  Sequencing depth stood out among the observed variables
+(Fig.~S\ref{fig:scattermatrix}) explaining much of the variability in call
+rate (Fig.~\ref{fig:genomewide-calls} bottom). This means that the variant
+calling pipeline adapts to lower coverage by applying stronger filters in
+order to maintain high specificity.
 
 The highest genome-wide rate (189 somatic SNVs) was observed in a sample from
 a schizophrenic woman.  Considering that its sequencing depth is only moderate
-this sample is clearly an outlier and the reason is likely biological. TODO:
-case study of CMC\_MSSM\_224 using
-results/2020-09-07-annotations/annotated-calls.csv.
+this sample is clearly an outlier and the reason is possibly
+biological.\footnote{TODO: case study of CMC\_MSSM\_224, perhaps a
+supplementary table of its variants with some annotations (gene, predicted
+functional consequence)?  Or a mutation spectrum analysis suggested by Andy?}
 
 Our pipeline provided us with an estimate of allele frequency for each somatic
-SNV.  This enabled us to qualitatively assess the simple model that somatic
-point mutation rate roughly constant along the cell lineages of our
+SNV.  This enabled us to assess, at least qualitatively, the simple model that somatic
+point mutation rate is roughly constant along the cell lineages of our
 samples~\citep{Rodin2021} since under this model the density of allele
 frequency is quasi exponential.  We found this to be the case at high
-(\(\approx 400\)) read depth (blue allele frequency density in Fig~\ref{fig:AF}
+(\(\approx 400\)) read depth (blue allele frequency density in Fig.~\ref{fig:AF}
 right panel).  With decreasing read depth, however, the density of allele
 frequency is increasingly shifted towards higher frequencies (orange and green
-densities, Fig~\ref{fig:AF} right panel).  These results indicate that the somatic
+densities, Fig.~\ref{fig:AF} right panel).  These results indicate that the somatic
 SNVs we called follow the expected allele frequency distribution but our
 pipeline's sensitivity for low allele frequency (below c.a 0.05) is low at
 low-medium sequencing coverage.
@@ -150,79 +151,13 @@ of the pipeline.
 
 \subsection*{Local rates of somatic SNVs in schizophrenia}
 
-Next we investigated weather the local rate of somatic SNVs falling into
-specific functional categories is altered in schizophrenia.  We
-tested genic categories such as nonsynonymous and deleterious SNVs;
-regulatory categories such as enhancers; constraint
-categories such as loss of function intolerant genes; and gene sets affected
-by rare and common variants in schizophrenia and related psychiatric
-disorders (Table~\ref{tab:modsel}).
-
-For each SNV category we tested weather the local rate of somatic SNVs is
-affected by disease status.  For that purpose we employed one univariate test
-($\chi^2$) and two multivariate regression models---logistic and log-linear
-regression, Fig.~S\ref{fig:fitted-lines} ---, which we combined with a forward
-variable selection algorithm (Fig.~S\ref{fig:varsel}) on a set of biological
-and technical explanatory variables (Fig.~S\ref{fig:scattermatrix}).  These three techniques
-lead to highly concordant inferences (compare p-values between the two
-rightmost panels in Fig.~\ref{fig:testresults} and compare
-Fig.~S\ref{fig:varsel}A to~S\ref{fig:varsel}B) suggesting that confounding variables or false
-modeling assumptions did not undermine our analyses.
-
-Three categories of somatic SNVs displayed significantly increased local rate
-in schizophrenia samples after multiple test correction: Schizophrenia GWAS,
-Psychiatric GWAS (both at false discovery rate, FDR, below $\alpha=0.025$ for
-the $\chi^2$ and the logistic model based test) and ASD GWAS (FDR below
-$\alpha=0.025$ for the $\chi^2$ test), see Fig.~\ref{fig:testresults},
-supporting-data-file1.csv and supporting-data-file2.csv.  For four additional
-categories the forward algorithm selected the disease status, Dx, variable
-(Table~\ref{tab:modsel}) but the local rate was only nonsignificantly increased
-(Fig.~\ref{fig:testresults}) in schizophrenic samples. These categories are: Bipolar
-disorder GWAS, Calcium channel genes, loss of function (LoF) intolerant genes
-and evolutionary conserved regions detected by GERP++.
-
-For the remaining categories in Table~\ref{tab:modsel} no change in local rate
-was detected in schizophrenic samples relative to controls.  The
-interpretation of such negative result depended on the the somatic SNVs called
-in the given category size.  For larger categories (relative to, say,
-Schizophrenia GWAS with 72 SNVs called), such as enhancers (99 SNVs) or
-FMRP-target genes (118 SNVs), this means no or small (relative to
-Schizophrenia GWAS) change in local somatic SNV rate.  For smaller categories,
-such as ADHD GWAS (5 SNVs) or the 17 deleterious SNVs inferred by SIFT the
-interpretation is open since there were not enough SNVs called to fit
-sufficiently complex models well.  Moreover, for very small categories such as
-Anorexia GWAS (2 SNVs), the iterative algorithm of the fit failed to converge.
-This is seen in Fig.~S\ref{fig:binomial-QQ},~S\ref{fig:poisson-QQ} from the
-progressive improvement in the goodness of fit with increasing number of
-somatic SNVs called.  This analysis also showed that for the smaller sized ASD
-GWAS (22 SNVs) the fit is already adequate and for the relatively large
-Schizophrenia GWAS (86 SNVs) and Psychiatric GWAS (176 SNVs) the fit is
-excellent, which gives further support to our model based inference regarding
-these categories.
-
-The increased local rate of somatic SNVs in some of the gene set categories
-was expected to be a mixed effect of increased rate of damaging variants and
-unaltered rate of neutral variants. We attempted at testing this expectation
-by narrowing down the gene set categories to nonsynonymous SNVs.  However, our
-attempt was undermined by too few nonsynonymous SNVs in even the largest
-geneset, the LoF intolerant genes, which contained only 30 nonsynonymous SNVs
-out of 1077 SNVs and for which the $\chi^2$ test yielded no significant
-change in the local somatic SNV rate ($p = 0.7$).  TODO: supplementary table
-with nonsyn SNVs for gene sets.
-
-We performed a complementary test of the above question to evade the limited
-number somatic SNV calls.  Instead of narrowing down our Schizophrenia GWAS
-category we extended it by including SNVs not only in genic but also
-intergenic regions of all 145 schizophrenia GWAS loci.  The local somatic SNV
-rate was no more significantly increased in schizophrenic samples relative to
-controls (Fig~\ref{fig:scz-gwas-genes-vs-loci}).  Of note is that the most
-strongly associated locus to schizophrenia is at the MHC region, which is only
-represented in the extended Schizophrenia GWAS loci category but in the
-Schizophrenia GWAS gene set due to its structural variability.  To address
-this discrepancy we narrowed down again the GWAS loci to genic regions but
-this time also including the MHC locus.  We found, again, a significantly
-increased local rate of somatic SNVs despite the likely inclusion of some
-intergenic regions at the MHC locus (Fig.~\ref{fig:scz-gwas-genes-vs-loci}).
+Next we investigated weather the rate of somatic SNVs falling into specific
+functional categories is altered in schizophrenia.  We refer to this as local
+rate to distinguish from the genome-wide (global) rate discussed above.  We
+tested genic categories such as nonsynonymous and deleterious SNVs; regulatory
+categories such as enhancers; constraint categories such as loss of function
+intolerant genes; and gene sets affected by rare and common variants in
+schizophrenia and related psychiatric disorders (Table~\ref{tab:modsel}).
 
 \begin{table}
 \begin{tabular}{lrlr}
@@ -263,13 +198,108 @@ GWAS gene set & ADHD GWAS & 1 + AF + DP & 5\\
 \label{tab:modsel}
 \end{table}
 
+For each SNV category we tested weather the local rate of somatic SNVs is
+affected by disease status, Dx.  For that purpose we employed one univariate test
+($\chi^2$) and two multivariate regression models---logistic and log-linear
+regression (Fig.~S\ref{fig:fitted-lines}) ---, which we combined with a forward
+variable selection algorithm (Fig.~S\ref{fig:varsel}) on a set of biological
+and technical explanatory variables (Fig.~S\ref{fig:scattermatrix}).  These three techniques
+lead to highly concordant inferences (compare p-values between the two
+rightmost panels in Fig.~\ref{fig:testresults} and compare
+Fig.~S\ref{fig:varsel}A to~S\ref{fig:varsel}B) suggesting that confounding variables or false
+modeling assumptions did not undermine our analyses.
+
+Three categories of somatic SNVs displayed significantly increased local rate
+in schizophrenia samples after multiple test correction: Schizophrenia GWAS,
+Psychiatric GWAS (both at false discovery rate, FDR, below $\alpha=0.025$ for
+both the $\chi^2$ and the logistic model based test) and ASD GWAS (FDR below
+$\alpha=0.025$ for only the $\chi^2$ test), see Fig.~\ref{fig:testresults},
+supporting-data-file1.csv and supporting-data-file2.csv\footnote{TODO: turn
+supporting-data-file2.csv into a supplementary table}.  For four
+additional categories the forward algorithm selected the disease
+status variable Dx (Table~\ref{tab:modsel}) but the local rate was
+only nonsignificantly increased (Fig.~\ref{fig:testresults}) in
+schizophrenic samples. These categories are: Bipolar disorder GWAS,
+Calcium channel genes, loss of function (LoF) intolerant genes and
+evolutionary conserved regions detected by GERP++.
+
 \begin{figure}
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/enrichment-5-plots_scz.pdf}
 \caption{Enrichment of genomic elements and gene sets in somatic SNVs in schizophrenia}
 \label{fig:testresults}
 \end{figure}
 
-\section*{Discussion}
+For the remaining categories in Table~\ref{tab:modsel} no change in local rate
+was detected in schizophrenic samples relative to controls.  The
+interpretation of such negative result depends on the size of the given
+category, which we define as the somatic SNVs called
+(Fig.~\ref{fig:testresults} left, Table~\ref{tab:modsel}).  For larger
+categories (relative to, say, Schizophrenia GWAS with 72 SNVs called), such as
+enhancers (99 SNVs) or FMRP-target genes (118 SNVs), this means no or small
+(relative to Schizophrenia GWAS) change in local somatic SNV rate.  For
+smaller categories, such as ADHD GWAS (5 SNVs) or the 17 deleterious SNVs
+inferred by SIFT the interpretation is open since not enough SNVs were
+called to fit sufficiently complex models well.  Moreover, for very small
+categories such as Anorexia GWAS (2 SNVs), the iterative algorithm of the fit
+failed to converge.  This is seen in
+Fig.~S\ref{fig:binomial-QQ}-S\ref{fig:poisson-QQ} from the progressive
+improvement in the goodness of fit with increasing number of somatic SNVs
+called.  This analysis also showed that for the smaller sized ASD GWAS (22
+SNVs) the fit is already adequate and for the relatively large Schizophrenia
+GWAS (86 SNVs) and Psychiatric GWAS (176 SNVs) the fit is excellent, which
+gives further support to our model based inference regarding these categories.
+
+The moderately increased (2-5 fold, Fig.~\ref{fig:testresults}) local rate of
+somatic SNVs in some of the gene set categories was expected to be a mixed
+effect of a much increased rate of damaging variants and unaltered rate of
+neutral variants. We attempted at testing this expectation by narrowing down
+the gene set categories to nonsynonymous SNVs, since those tend to be
+damaging mutations.  However, our attempt was undermined by too few
+nonsynonymous SNVs even in the largest geneset, the LoF intolerant genes,
+which contained only 30 nonsynonymous SNVs out of 1077 SNVs and for which the
+$\chi^2$ test yielded no significant change in the local somatic SNV rate ($p
+= 0.7$).\footnote{TODO: supplementary table with nonsyn SNVs for gene sets.}
+
+Next we performed a complementary test to evade the limited number somatic SNV
+calls.  Instead of narrowing down our Schizophrenia GWAS category we extended
+it by including SNVs not only in genic but also in intergenic regions, in
+which SNVs tend to be more neutral than those in genes.  In agreement with
+that, the local somatic SNV rate was no longer significantly increased in
+schizophrenic samples relative to controls
+(Fig~S\ref{fig:scz-gwas-genes-vs-loci}).  Of note is that the most strongly
+associated locus to schizophrenia is at the MHC region, which is only
+represented in the extended Schizophrenia GWAS loci category but not in the
+Schizophrenia GWAS gene set due to its structural variability.  To address
+this discrepancy we narrowed down again the GWAS loci to genic regions but
+this time also including the MHC locus.  We found, again, a significantly
+increased local rate of somatic SNVs despite the likely inclusion of some
+intergenic regions at the MHC locus (Fig.~S\ref{fig:scz-gwas-genes-vs-loci}).
+
+Also, we ranked schizophrenia GWAS loci according to their p-values for
+genome-wide association to see if the somatic SNV rate in schizophrenic
+samples is associated with rank.  However, the small number of somatic SNVs
+($\approx 0.6$ SNV per locus on average) only allowed us to conclude that
+somatic SNVs---whether from control or schizophrenic samples---are roughly
+evenly distributed across GWAS loci excluding locus 1 (the most significant
+locus i.e the MHC region), which harbored 4 somatic SNVs reflecting its larger
+size compared to other loci (Fig.~\ref{fig:indiv-scz-gwas-loci}).
+
+Finally, we wondered how the observed local rates (Fig.~\ref{fig:testresults})
+change when we narrow the definition of SNV categories to include only genes
+highly expressed in the brain.  This analysis yielded similar relative local
+rates to the ones already observed.\footnote{TODO: create supplementary figure
+	or table
+from 2020-11-13-functional-variants}
+
+\section*{Discussion\footnote{TODO: In progress...}}
+
+In this work\footnote{this paragraph might be a good basis for the abstract
+and a cover letter for manuscript submission} we show, for the first time,
+that somatic SNVs in certain gene sets contribute to the risk of a psychiatric
+disorder, namely schizophrenia.  This finding is not only statistically sound
+(false discovery rate below 0.025) but also biologically plausible
+because the affected gene sets are those identified by GWAS on schizophrenia
+and genetically related psychiatric disorders.
 
 Studies of rare germline and de-novo SNVs showed that, although the
 genome-wide ``background'' mutation rate is unaltered in schizophrenia,
@@ -278,7 +308,11 @@ words: are enriched in---SNVs in schizophrenic individuals relative to
 controls.  Our present study extends this basic result to somatic SNVs in the
 human brain.  In particular, we present evidence that genes implicated in
 schizophrenia by schizophrenia GWAS and other psychiatric GWAS suffer
-increased rate of somatic point mutations in schizophrenia.
+increased rate of somatic point mutations in schizophrenia...\footnote{I would
+	continue this by talking about two main obstacles specific to somatic
+	variants---compared to rare germline and de-novo variants---A) difficult
+	variant calling and B) the related need for deeper sequencing and
+computationally heavy data processing.}
 
 Increased rate suggests that these somatic SNVs are damaging to normal brain
 function.  On the other hand we did not observe decreased rate at other
@@ -302,7 +336,7 @@ Questions
 		sequencing, increased sample size,...
 \end{itemize}
 
-\section*{Methods}
+\section*{Methods\footnote{TODO: In progress... I need to revisit this section}}
 
 \subsection*{Study subjects and clinical data}
 
@@ -538,7 +572,6 @@ Residual analysis of goodness of fit for the logistic family.
 \includegraphics[width=0.9\textwidth]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/resid-pois_scz.pdf}
 \caption{
 Residual analysis of goodness of fit for the log-linear family.
-}
 }
 \label{fig:poisson-QQ}
 \end{figure}
