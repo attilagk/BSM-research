@@ -2,4 +2,4 @@
 # https://medium.com/@zhelinchen91/how-to-convert-from-latex-to-ms-word-with-pandoc-f2045a762293
 TEX=${1:-/home/attila/projects/bsm/presentations/bsm-ms/bsm-ms.tex}
 DOCX=$(dirname $TEX)/$(basename $TEX .tex).docx
-pandoc $TEX --bibliography=bsm.bib -o $DOCX
+pandoc $TEX --bibliography=library.bib -o $DOCX
