@@ -82,7 +82,9 @@ mechanisms are hypothesized to play a role in schizophrenia and psychiatric
 disorders~\citep{PsychENCODEConsortium2015}.  Somatic variants have been
 called the dark matter of psychiatric genetics~\citep{Insel2014}.  Their
 systematic, genome-wide study in brain disorders has just begun with the
-announcement of the Brain Somatic Mosaicism project~\citep{McConnell2017}.
+announcement of the Brain Somatic Mosaicism
+project~\citep{McConnell2017}.\footnote{TODO: cite recent work on BSM and mention
+some key findings}
 Within that project we and others recently developed new best practices and
 tools for calling somatic variants from brain samples based on bulk tissue
 sequencing data~\citep{Wang2021}.  In the present work, for the first time, we
@@ -301,40 +303,45 @@ disorder, namely schizophrenia.  This finding is not only statistically sound
 because the affected gene sets are those identified by GWAS on schizophrenia
 and genetically related psychiatric disorders.
 
+Although this general finding is confirmatory as somatic variants were
+expected to play a role in psychiatric disorders~\citep{McConnell2017} it is
+still remarkable if we consider the challenges of studying somatic variants in
+the brain.  These include at least an order of magnitude fewer somatic
+variants than germline variants; the need for very deep whole-genome sequencing
+(Fig.~\ref{fig:genomewide-calls},~\ref{fig:AF}), the associated increased
+cost of data processing and a customized variant calling pipeline, which has
+been validated~\citep{Wang2021} in our laboratory using the same sequencing
+and variant calling protocols as those used in our present work.
+
 Studies of rare germline and de-novo SNVs showed that, although the
 genome-wide ``background'' mutation rate is unaltered in schizophrenia,
-specific genomic elements and gene sets bear increased burden of---in other
-words: are enriched in---SNVs in schizophrenic individuals relative to
-controls.  Our present study extends this basic result to somatic SNVs in the
-human brain.  In particular, we present evidence that genes implicated in
-schizophrenia by schizophrenia GWAS and other psychiatric GWAS suffer
-increased rate of somatic point mutations in schizophrenia...\footnote{I would
-	continue this by talking about two main obstacles specific to somatic
-	variants---compared to rare germline and de-novo variants---A) difficult
-	variant calling and B) the related need for deeper sequencing and
-computationally heavy data processing.}
+specific gene sets like PSD, FMRP-target or LoF intolerant genes bear
+increased burden of likely damaging~\citep{Purcell2014} or
+LoF~\citep{Singh2017} SNVs in schizophrenic individuals.  Our present study
+might be regarded as an extension that line of research to somatic SNVs in the
+human brain since it seems plausible that a large class of somatic mutations
+in the brain mimic the genetic pathomechanism of rare and de-novo variabts.
+However, the above mentioned challenges prevented us to study damaging and let
+alone LoF SNVs.  Despite that we found a nonsignificant but suggestive
+increase in local somatic SNV rate at Calcium channel and LoF intolerant genes
+as well as in evolutionary constrained regions without restricting our SNVs to
+nonsynonymous or likely damaging ones.  Moreover, our more detailed analysis
+of schizophrenia GWAS genes and loci suggests that not only exonic but also
+many intronic somatic SNVs play a role in schizophrenia.
 
-Increased rate suggests that these somatic SNVs are damaging to normal brain
-function.  On the other hand we did not observe decreased rate at other
-genomic regions, which would allude to compensatory, protective mutations in
-schizophrenia.  This observation parallels those regarding rare germline and
-de-novo single nucleotide mutations.  Even so, we cannot rule out that
-protective somatic SNVs exist in genomic regions mechanistically involved in
-schizophrenia so long they are outnumbered by damaging mutations.
-
-The comparison of GWAS genes to GWAS loci suggests that not only 
-exonic but also intronic somatic SNVs can contribute to the risk of
-schizophrenia.
-
-Questions
+TODO: more questions to discuss:
 \begin{itemize}
-	\item Inverse relationship of somatic and germline variants?  Our data
-		are probably insufficient
-	\item somatic CNVs
-	\item how much more insights to schizophrenia pathomechanism can we
-		gain from further study of somatic variants?  Single cell
-		sequencing, increased sample size,...
+\item What insights might study of brain somatic mosaicism provide on schizophrenia
+pathomechanism that go beyond the findings obtained from rare germline and
+de-novo variant studies?  
+\item At what cost with our current techniques~\citep{Wang2021} and how can the cost be minimized?  
+\item How much do somatic SNVs contribute to schizophrenia risk relative to other
+classes of variants?  Inverse relationship of different classes of risk
+carrying variants~\citep{Bergen2019}\footnote{TODO: fix citation}
+\item Clinical utility of further studies on somatic SNVs in
+schizophrenia and psychiatric disorders?
 \end{itemize}
+
 
 \section*{Methods\footnote{TODO: In progress... I need to revisit this section}}
 
