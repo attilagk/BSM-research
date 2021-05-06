@@ -60,7 +60,7 @@ genome-wide significant loci distributed roughly uniformly along the genome
 involving about 700 genes, c.a 200 of which are located at the most
 significant locus in the MHC region, suggesting that an impaired immune
 function is responsible for the increased synaptic pruning seen in
-schizophrenic brains~\citep{Sekar2016a}\footnote{TODO: fix citations}.  GWAS
+schizophrenic brains~\citep{Sekar2016a}.  GWAS
 also revealed that psychiatric disorders share much heritability with each
 other~\citep{Consortium2009,PsychiatricGenomicsConsortium2013} and to a lesser
 extent with some neurological disorders~\citep{Consortium2018} indicating
@@ -337,23 +337,63 @@ de-novo variant studies?
 \item At what cost with our current techniques~\citep{Wang2021} and how can the cost be minimized?  
 \item How much do somatic SNVs contribute to schizophrenia risk relative to other
 classes of variants?  Inverse relationship of different classes of risk
-carrying variants~\citep{Bergen2019}\footnote{TODO: fix citation}
+carrying variants~\citep{Bergen2019}
 \item Clinical utility of further studies on somatic SNVs in
 schizophrenia and psychiatric disorders?
 \end{itemize}
 
 
-\section*{Methods\footnote{TODO: In progress... I need to revisit this section}}
+\section*{Methods}
 
-\subsection*{Study subjects and clinical data}
+\subsection*{Study subjects, sample preparation, sequencing}
 
-\subsection*{Sample preparation and sequencing}
+Post-mortem DLPFC samples of predominantly Caucasian subjects (61
+schizophrenic and 25 control) were obtained from the Mount Sinai NIH Brain
+Bank and Tissue Repository~\citep{Hoffman2019}.  In addition we included DLPFC
+samples of 15 control subjects from~\citep{Rodin2021}, which did not
+qualitatively change the results.
 
-\subsection*{Somatic SNV calling}
+NeuN+ nuclei isolation was performed on DLPFC tissue samples using
+fluorescence-activated nuclei sorting. The Illumina PCR-free TruSeq DNA
+Library Prep kit was used according to the manufacturer's protocol to produce
+the DNA libraries of the sorted samples. Constructed libraries were quantified
+using the KAPA Library Quantification Kit with real-time PCR and were then
+sequenced on the Illumina HiSeq X Ten platform to yield 150bp paired-end reads
+for all samples. Sequencing was designed aiming for 200X coverage per sample.
+
+\subsection*{Somatic SNV calling and validation}
+
+Sequencing reads were processed by a computational pipeline described in
+detail by our recent methodological study~\citep{Wang2021}.  Briefly, for each
+sample, the reads were aligned to the reference sequence GRCh37d5 using bwa
+v3.7.16a~\citep{Li2009b}. Duplicate reads were marked with Picard v2.12.1
+(https://broadinstitute.github.io/picard/). Indel realignment and base quality
+score recalibration using GATK v3.7-0~\citep{McKenna2010} gave rise to the
+final BAM file for each sample.
+
+From the final BAM files, single nucleotide variants and small indels were
+called using GATK (v3.7-0) HaplotypeCaller with \texttt{--ploidy} option 2, 12, or 50
+resulting in three raw call sets per sample. The raw call
+sets were filtered in the following sequential steps: (1) Only PASS calls were
+retained; (2) known germline variants were excluded based on the 1000 Genomes,
+ExAC, GnomAD, and Kaviar databases
+\citep{Auton2015,Karczewski2020,Glusman2011}, as well as ESP5600
+(https://evs.gs.washington.edu/EVS/); (3) calls located in problematic
+genomic regions defined as non-P bases of the 1000 Genomes were removed; (4) a
+binomial test was used to remove likely heterozygous variants: for each
+variant the $p$ and $N$ parameter of the binomial null distribution was set to 0.5
+and the total read count (read depth) at the variant position, respectively,
+and we removed the variant supporting the null hypothesis at $\alpha = 0.00001$; (5)
+a similar binomial hypothesis test was used to filter variant calls at sites
+with strand bias; (6) similarly, Fisher's exact test was used to filter out
+calls with imbalance of strand ratios between reference (REF) and alternative
+(ALT) bases; (7) multi-allelic calls were removed; (8) calls at sites with $>
+2.5$ copy number, estimated using CNVnator~\citep{Abyzov2011}, were also
+removed.
 
 \subsection*{Variant annotation}
 
-SNPnexus (https://www.snp-nexus.org/v4/)
+SNPnexus~\citep{Oscanoa2020}
 
 RoadMap,... TODO: list all sources of annotation
 
