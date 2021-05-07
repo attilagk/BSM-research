@@ -411,22 +411,46 @@ selected (see \url{https://www.snp-nexus.org/v4/guide/}).
 These were further filtered based on relevance to our
 hypotheses (Table~\ref{tab:modsel}).
 
-Additionally we annotated SNVs with chromatin state based on the 
-Core 15-state model of the RoadMap consortium
-(\url{https://egg2.wustl.edu/roadmap/web\_portal/chr\_state\_learning.html}).
+Additionally we annotated SNVs with chromatin state in the adult DLPFC
+epigenome of the RoadMap consortium~\citep{Kundaje2015} based on their
+Core 15-state model:\\
+\url{https://egg2.wustl.edu/roadmap/web\_portal/chr\_state\_learning.html}
 
 \subsection*{Statistical analysis}
 
-For a genomic element or gene set  \(S\) we inspected the joint distribution,
-across all study subjects, of disease status Dx, two enrichment variables
-\(n_S\), \(f_S\), and technical and biological variables that potentially
-carry information on those enrichment variables.  The enrichment variable
-\(n_S\) is the number of somatic SNVs located in \(S\), whereas the \(f_S =
-	n_S/n_\mathrm{genome}\) is the fraction of somatic SNVs in \(S\)
-relative to all somatic SNVs in the genome.  The aim was to formally test
-enrichment in \(S\) in schizophrenia by regressing the response variables
-\(n_S\) or \(f_S\) on the explanatory variable Dx
-and other, ``confounding'', variables.
+\subsubsection*{Overview}
+
+Our goal is to see if and how the local rate of somatic SNVs in a category $S$
+depends on schizophrenia disease status Dx.  $S$ may be a gene set
+(e.g.~Schizophrenia GWAS genes) or genic category (e.g.~coding nonsyn), see
+Table~\ref{tab:modsel}.  We expressed the local rate of somatic SNVs in $S$ as
+either number $n_S$ or the fraction $f_S = n_S / n$ of somatic SNVs in $S$,
+where $n$ is the genome-wide number of somatic SNVs.
+
+We did so by three ways:
+\begin{enumerate}
+\item Perform $\chi^2$ test, where we use $N_D = \sum_{i\in D} n_{i,S}$ as the observed number
+	of somatic SNV calls such that $D \in \{\mathrm{Control},
+	\mathrm{SCZ}\}$.  The expected numbers are based on the ratio of
+	Control and SCZ samples: $40:61$.
+\item Regress the local rate i.e.~the response $y$ on a set of explanatory variables
+	using a generalized linear model with link function $\eta$ and random error
+	$\epsilon$; here we denote as $\mu$
+	the expected value given the design matrix $X$ based on the
+	explanatory variables including schizophrenia status Dx.
+\begin{enumerate}
+\item The response is the number of somatic SNVs in $S$ and the model is
+	log-linear with its canonical Poisson error distribution
+	(Fig~S\ref{fig:fitted-lines}A).  Formally $y
+	= n_S$, $\eta = \log$, $\epsilon \sim \mathrm{Pois}(\mu)$
+\item The response is the fraction of somatic SNVs in $S$ relative to the
+	genome-wide number number $n$ and the model is
+	logistic with its canonical Binomial error distribution (Fig~S\ref{fig:fitted-lines}B).  Formally $y
+	= f_S$, $\eta = \mathrm{logit}$, $\epsilon \sim \mathrm{Binom}(\mu, n)$
+\end{enumerate}
+\end{enumerate}
+
+\subsubsection*{Initial variable selection and exploration}
 
 In case of the plot matrix (Fig~S\ref{fig:scattermatrix}) \(S\) is the set of schizophrenia GWAS genes
 defined as all genes, including their introns, that are located fully or
@@ -446,27 +470,6 @@ Notable observations:
 		that were either control or schizophrenic but the Harvard dataset contained
 		only younger control individuals
 \end{itemize}
-
-\subsubsection*{Modeling the number and fraction of somatic SNV calls in a gene set}
-
-We considered two generalized linear model families depending on the response
-variable:
-\begin{description}
-\item[response is \(f_S\):] logistic family: binomial error distribution with
-	logistic link function; see panel (A)
-\item[response is \(n_S\):] log-linear family: Poisson error distribution with exponential link function; see panel (B)
-\end{description}
-
-Within each family we considered relatively simple or complex models depending
-on the set of variables selected as explanatory.  For \(S =\) schizophrenia
-GWAS genes, and within the
-logistic family, Fig~S\ref{fig:fitted-lines}A shows fitted lines under both \(f_S \sim 1 +
-	\mathrm{Dx}\) and \(f_S \sim 1 + \mathrm{Dx} + \mathrm{ageOfDeath}\)
-(panel (A)), where \(1\) means intercept.  For the log-linear family panel
-(Fig~S\ref{fig:fitted-lines}B)
-shows fitted lines under both \(n_S \sim 1 + \mathrm{Dx}\) and \(n_S \sim 1 +
-	\mathrm{Dx} + n_\mathrm{genome}\)
-
 
 \subsubsection*{Variable selection for regression models}
 
@@ -592,7 +595,15 @@ A\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/na
 B\includegraphics[scale=0.45]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/scz_gwas_genes-log10_ncalls-poisson-fit_scz.pdf}
 \end{center}
 \caption{
-Modeling the number (A) and fraction (B) of somatic SNV calls in a gene set
+Modeling the number $n_S$ (A) and fraction $f_S$ (B) of somatic SNV calls in a
+gene set $S$ with the log-linear (A) and logistic (B) model family.  Within
+each family we considered relatively simple or complex models depending on the
+set of variables selected as explanatory.  For \(S =\) schizophrenia GWAS
+genes, and within the logistic family, panel A shows
+fitted lines under both \(f_S \sim 1 + \mathrm{Dx}\) and \(f_S \sim 1 +
+\mathrm{Dx} + \mathrm{ageOfDeath}\), where \(1\) means intercept.
+For the log-linear family panel B shows fitted lines under both \(n_S \sim 1 +
+\mathrm{Dx}\) and \(n_S \sim 1 + \mathrm{Dx} + n\).
 }
 \label{fig:fitted-lines}
 \end{figure}
