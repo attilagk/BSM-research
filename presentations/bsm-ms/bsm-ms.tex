@@ -393,9 +393,27 @@ removed.
 
 \subsection*{Variant annotation}
 
-SNPnexus~\citep{Oscanoa2020}
+We annotated each called SNV using SNPnexus~\citep{Oscanoa2020}.  After
+removing redundancies the following annotation~\texttt{.txt} files were
+selected (see \url{https://www.snp-nexus.org/v4/guide/}).
 
-RoadMap,... TODO: list all sources of annotation
+\begin{description}
+\item[Gene Annotation:] gen\_coords, ensembl, near\_gens
+\item[Protein Effect:] sift, polyphen
+\item[Population Data:] 1KGen, gnomad
+\item[Regulatory Elements:] tfbs, vista, cpg, targetscan, tarbase, encode, roadmap, regbuild
+\item[Phenotype/Disease Association:] clinvar
+\item[Conserved Elements:] phast, gerp
+\item[Structural Variations:] structvar
+\item[Non-coding Variation Scoring:] cadd, fitcons, eigen, fathmm, gwava, deepsea, funseq2, remm
+\end{description}
+
+These were further filtered based on relevance to our
+hypotheses (Table~\ref{tab:modsel}).
+
+Additionally we annotated SNVs with chromatin state based on the 
+Core 15-state model of the RoadMap consortium
+(\url{https://egg2.wustl.edu/roadmap/web\_portal/chr\_state\_learning.html}).
 
 \subsection*{Statistical analysis}
 
