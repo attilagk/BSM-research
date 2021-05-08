@@ -42,8 +42,6 @@ Information section
 
 \section*{Abstract}
 
-TODO
-
 \section*{Introduction}
 
 Schizophrenia is a common psychiatric disorder whose onset in early adulthood
@@ -217,8 +215,7 @@ in schizophrenia samples after multiple test correction: Schizophrenia GWAS,
 Psychiatric GWAS (both at false discovery rate, FDR, below $\alpha=0.025$ for
 both the $\chi^2$ and the logistic model based test) and ASD GWAS (FDR below
 $\alpha=0.025$ for only the $\chi^2$ test), see Fig.~\ref{fig:testresults},
-supporting-data-file1.csv and supporting-data-file2.csv\footnote{TODO: turn
-supporting-data-file2.csv into a supplementary table}.  For four
+supporting-data-file1.csv and supporting-data-file2.csv.  For four
 additional categories the forward algorithm selected the disease
 status variable Dx (Table~\ref{tab:modsel}) but the local rate was
 only nonsignificantly increased (Fig.~\ref{fig:testresults}) in
@@ -511,7 +508,7 @@ variable selection algorithm with the Akaike information criterion (AIC) as
 optimality criterion.  (The Bayesian (BIC) information instead of AIC gave the
 same results.)
 
-In the case of \(S =\) schizophrenia GWAS genes we see that the first,
+In the case of \(S =\) Schizophrenia GWAS genes we see that the first,
 thus most informative, variable selected is Dx under the logistic model
 (Fig~S\ref{fig:varsel}A).
 Any additional variables increased the information criteria and thus lead to
@@ -606,7 +603,8 @@ None
 \includegraphics[scale=0.6]{../../notebook/2021-01-26-indiv-counts-modeling/named-figure/symmetric-scatter-matrix_scz.pdf}
 \end{center}
 \caption{
-Pairwise joint distributions of response and explanatory variables TODO: fix legend
+Pairwise joint distributions of response and explanatory variables for Control
+and SCZ individuals.
 }
 \label{fig:scattermatrix}
 \end{figure}
@@ -677,7 +675,12 @@ Residual analysis of goodness of fit for the log-linear family.
 \begin{figure}[p]
 \includegraphics[scale=0.6]{../../notebook/2020-07-28-CLOZUK/named-figure/rel-callrate-sczgwas_scz.pdf}
 \caption{
-TODO
+Local rate of somatic SNVs in three distinct categories all related to
+Schizophrenia GWAS loci.  SCZ GWAS genes and SCZ GWAS loci genic contain no
+SNVs in intergenic regions whereas SCZ GWAS loci does.  This difference
+translates to the different effect of schizophrenia on the local somatic SNV
+rate suggesting that genic regions (including introns) tend to be linked to
+the pathomechanism of schizophrenia.
 }
 \label{fig:scz-gwas-genes-vs-loci}
 \end{figure}
