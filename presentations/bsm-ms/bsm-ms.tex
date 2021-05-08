@@ -7,6 +7,7 @@
 \usepackage{amsmath, geometry, graphicx}
 \usepackage{natbib}
 %\usepackage{float}
+\usepackage{url}
 \bibliographystyle{plainnat}
 
 % https://tex.stackexchange.com/questions/6758/how-can-i-create-a-bibliography-like-a-section
@@ -414,26 +415,38 @@ hypotheses (Table~\ref{tab:modsel}).
 Additionally we annotated SNVs with chromatin state in the adult DLPFC
 epigenome of the RoadMap consortium~\citep{Kundaje2015} based on their
 Core 15-state model:\\
-\url{https://egg2.wustl.edu/roadmap/web\_portal/chr\_state\_learning.html}
+\url{https:g/egg2.wustl.edu/roadmap/web_portal/chr_state_learning.html}
+
+
+\subsection*{GWAS gene sets}
+
+We downloaded the GWAS Catalog (\url{https://www.ebi.ac.uk/gwas/home}) and
+selected all associations (loci), for the following psychiatric disorders and
+studies, respectively: ADHD~\citep{Demontis2019}, Anorexia
+nervosa~\citep{Watson2019}, ASD~\citep{Grove2019}, Bipolar
+disorder~\citep{Stahl2019}, MDD~\citep{Howard2019}, OCD~\citep{Smit2020}.  For
+these associated loci we used all reported or mapped genes.
+For Schizophrenia we used Table S4 of \cite{Pardinas2018} as this gave
+a more complete gene set than the GWAS catalog although using the latter did
+not qualitatively change the results.
 
 \subsection*{Statistical analysis}
 
-\subsubsection*{Overview}
+\subsubsection*{Modeling the effect of schizophrenia on local rates of SNVs}
 
-Our goal is to see if and how the local rate of somatic SNVs in a category $S$
+Our goal is to see if and how the local rate of somatic SNVs in some category $S$
 depends on schizophrenia disease status Dx.  $S$ may be a gene set
 (e.g.~Schizophrenia GWAS genes) or genic category (e.g.~coding nonsyn), see
 Table~\ref{tab:modsel}.  We expressed the local rate of somatic SNVs in $S$ as
 either number $n_S$ or the fraction $f_S = n_S / n$ of somatic SNVs in $S$,
-where $n$ is the genome-wide number of somatic SNVs.
-
+where $n$ is the genome-wide number of somatic SNVs.  
 We did so by three ways:
 \begin{enumerate}
 \item Perform $\chi^2$ test, where we use $N_D = \sum_{i\in D} n_{i,S}$ as the observed number
 	of somatic SNV calls such that $D \in \{\mathrm{Control},
 	\mathrm{SCZ}\}$.  The expected numbers are based on the ratio of
 	Control and SCZ samples: $40:61$.
-\item Regress the local rate i.e.~the response $y$ on a set of explanatory variables
+\item Regress the local rate i.e.~response $y$ on a set of explanatory variables
 	using a generalized linear model with link function $\eta$ and random error
 	$\epsilon$; here we denote as $\mu$
 	the expected value given the design matrix $X$ based on the
@@ -452,24 +465,44 @@ We did so by three ways:
 
 \subsubsection*{Initial variable selection and exploration}
 
-In case of the plot matrix (Fig~S\ref{fig:scattermatrix}) \(S\) is the set of schizophrenia GWAS genes
-defined as all genes, including their introns, that are located fully or
-partially in schizophrenia GWAS loci (Table S4 in \cite{Pardinas2018}).
+We inspected the pairwise joint distributions including $n_S$, $f_S$ (where
+$S=$ Schizophrenia GWAS genes) and the following explanatory variables:
+log10\_ncalls (logarithm of the genome-wide rate $n$), Dx, ageOfDeath,
+BaseQRankSum, Dataset, AF, DP, Gender.
 
-Notable observations:
+From Fig~S\ref{fig:scattermatrix} we can make some observations that explain
+the variable selection results in Fig.~S\ref{fig:varsel}:
 \begin{itemize}
-	\item the strongsest dependence was seen between \(n_S\) and \(n_\mathrm{genome}\) as expected
-		when the genome-wide background rate of somatic SNVs is
-		substantial relative to enrichment in \(S\)
-	\item we have already noted the strong dependence between read depth DP and
-		\(n_\mathrm{genome}\)
-        \item other dependencies were relatively weak
-	\item for many control individuals ageOfDeath is below 50 years while for
-		most schizophrenic individuals it is above 50.  This is
-		because the Mount Sinai dataset contained older individuals
-		that were either control or schizophrenic but the Harvard dataset contained
-		only younger control individuals
+\item The strongest dependence is seen between the local rate
+	\(n_S\) and global rate log10\_ncalls as expected
+	when the background rate of somatic SNVs is
+	substantial relative to the additional component that carries the
+	effect of schizophrenia.
+\item Another strong dependence is between read depth DP and
+	the global rate log10\_ncalls.
+\item The distributions of $n_S$, $f_S$ and ageOfDeath is different in SCZ
+	relative to Control individuals.
+\item For many control individuals ageOfDeath is below 50 years while for
+	most schizophrenic individuals it is above 50.  This is
+	because the Mount Sinai dataset contained older individuals
+	that were either control or schizophrenic but the Harvard dataset contained
+	only younger control individuals.
+\item The remaining dependencies are relatively weak.
 \end{itemize}
+
+As we noted one of our two datasets contained relatively young individuals who
+were all control.  This leads to the causal-probabilistic graphical model that
+\(\mathrm{ageOfDeath} \leftarrow \mathrm{Dataset} \rightarrow \mathrm{Dx}
+\rightarrow y\), where \(y\) is the response enrichment variable \(f_S\) or
+\(n_S\).  It means that ageOfDeath and Dataset have indirect effects on
+enrichment such that these effects are mediated by disease status Dx. If this
+model is true then \(Dx\) d-separates \(y\) from Dataset and ageOfDeath so
+that \(y\) becomes independent from ageOfDeath and Dataset if we condition on
+Dx = Control or Dx = SCZ.  Fig~S\ref{fig:d-separation}A illustrates
+that.  The important consequence is that we should remove ageOfDeath and
+Dataset from the set from our models as long as we include Dx.  Failing to do
+so may confound our inference on the effect of Dx on enrichment
+(Fig~S\ref{fig:d-separation}B).
 
 \subsubsection*{Variable selection for regression models}
 
@@ -485,25 +518,9 @@ Any additional variables increased the information criteria and thus lead to
 overfitting the data.
 
 (Fig~S\ref{fig:varsel}B) shows the same result under the log-linear model except that the
-most informative variable is \(n_\mathrm{genome}\), which was expected by its
+most informative variable is \(n\), which was expected by its
 strong correlation with \(n_S\).  Nonetheless, Dx is selected also under this
 model family.
-
-\subsubsection*{The effect of ageOfDeath and that of Dataset are mediated by disease status Dx}
-
-As we noted one of our two datasets contained relatively young individuals who
-were all control.  This leads to the causal-probabilistic graphical model that
-\(\mathrm{ageOfDeath} \leftarrow \mathrm{Dataset} \rightarrow \mathrm{Dx}
-\rightarrow y\), where \(y\) is the response enrichment variable \(f_S\) or
-\(n_S\).  It means that ageOfDeath and Dataset have indirect effects on
-enrichment such that these effects are mediated by disease status Dx. If this
-model is true then \(Dx\) d-separates \(y\) from Dataset and ageOfDeath so
-that \(y\) becomes independent from ageOfDeath and Dataset if we condition on
-Dx = control or Dx = schizophrenia.  Fig~S\ref{fig:d-separation}A illustrates
-that.  The important consequence is that we should remove ageOfDeath and
-Dataset from the set from our models as long as we include Dx.  Failing to do
-so may confound our inference on the effect of Dx on enrichment
-(Fig~S\ref{fig:d-separation}B).
 
 \subsubsection*{Residual analysis to assess model fit }
 
@@ -531,6 +548,11 @@ elements and gene sets (top row of plots) but good fit for medium sized and
 large ones.
 
 \subsubsection*{Multiple test correction}
+
+We employed three related methods of FDR
+control~\citep{Benjamini:1995ml,Benjamini2006} implemented in the
+stats.multipletests function of statsmodels v0.12.2:
+fdr\_bh, fdr\_tsbh, fdr\_tsbky
 
 \subsection*{Data availability}
 
