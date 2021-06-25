@@ -25,6 +25,7 @@ resources
 *.s.Rmd
 *.tar
 *.tar.gz
+*.docx
 
 # ignore knitr's cache
 **/cache/
