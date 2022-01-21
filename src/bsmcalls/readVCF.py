@@ -109,7 +109,7 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     return(calls)
 
 def readVCFs(vcflistpath=bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs.tsv',
-        vcfdir=bsmutils.get_bsmdir() + '/results/calls/', clean=True):
+        vcfdir=bsmutils.get_bsmdir() + '/results/calls/', clean=True, annotlist=read_annotlist()):
     '''
     Reads the calls/records of several VCFs into rows of a single DataFrame
 
@@ -123,7 +123,7 @@ def readVCFs(vcflistpath=bsmutils.get_bsmdir() + '/results/calls/filtered-vcfs.t
     '''
     vcflist = pd.read_csv(vcflistpath, sep='\t', names=['sample', 'file'], index_col='sample')
     vcflist['filepath'] = [vcfdir + os.sep + 'annotated' + os.sep + f for f in vcflist['file']]
-    l = [readVCF(y) for y in vcflist['filepath']]
+    l = [readVCF(y, annotlist=annotlist) for y in vcflist['filepath']]
     calls = pd.concat(l, axis=0)
     if clean:
         calls = clean_calls(calls, dropna=True, dropdegenerate=True, dropredundant=True)
