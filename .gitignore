@@ -3,6 +3,7 @@ results
 test
 calls
 resources
+manuscript
 
 .tmp
 *.log
@@ -83,3 +84,5 @@ ndar/account-info
 *.fls
 presentations/bsm-ms/library.bib
 presentations/bsm-ms/bsm.bib*
+
+**/harvard/

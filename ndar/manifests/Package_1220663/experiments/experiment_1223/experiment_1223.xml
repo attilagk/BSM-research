@@ -1,0 +1,58 @@
+<Experiment xmlns:ns2="NDA.experiment" experiment_id="1223" experiment_name="Bulk sequencing of NeuN+ and NeuN- brain cells and of muscle in Schizophrenic and Control individuals">
+  <Omics>
+    <SECTIONS>
+      <EXPERIMENT_PARAMETERS>
+        <molecule>
+          <moleculeName>DNA</moleculeName>
+          <moleculeSubType>gDNA</moleculeSubType>
+        </molecule>
+        <technology moleculeName="DNA">
+          <applicationName>Next Generation Sequencing</applicationName>
+          <applicationSubType>Whole genome sequencing</applicationSubType>
+          <technologyName>sequencing</technologyName>
+          <technologySubType>sequencing</technologySubType>
+        </technology>
+        <platform>
+          <vendorName>Illumina</vendorName>
+          <platformName>Illumina Sequencing</platformName>
+          <platformSubType>Illumina Sequencing</platformSubType>
+        </platform>
+      </EXPERIMENT_PARAMETERS>
+      <EXTRACTION>
+        <extractionProtocols moleculeName="DNA">
+          <protocolName>Genomic DNA purification</protocolName>
+        </extractionProtocols>
+        <extractionKits moleculeName="DNA">
+          <extractionKit vendorName="Not Applicable">Not Applicable</extractionKit>
+        </extractionKits>
+      </EXTRACTION>
+      <PROCESSING>
+        <processingProtocols moleculeName="DNA">
+          <processingProtocol technologyName="sequencing">library preparation</processingProtocol>
+        </processingProtocols>
+        <processingKits moleculeName="DNA">
+          <processingKit technologyName="sequencing" vendorName="Illumina">Illumina Sequencing Kit</processingKit>
+        </processingKits>
+      </PROCESSING>
+      <ADDITIONAL_INFORMATION>
+        <analysisSoftware>
+          <software vendorName="Illumina">Genome Analyzer Pipeline</software>
+        </analysisSoftware>
+        <equipment>
+          <equipmentName vendorName="Illumina">HiSeq 2000</equipmentName>
+          <equipmentName vendorName="Illumina">HiSeq X Ten</equipmentName>
+        </equipment>
+      </ADDITIONAL_INFORMATION>
+    </SECTIONS>
+  </Omics>
+  <collections>
+    <collection>
+      <id>2458</id>
+      <link href="https://nda.nih.gov/edit_collection.html?id=2458"/>
+      <owner>Mette Peters</owner>
+      <title>Brain Somatic Mosaicism Network Reference Tissue Project</title>
+    </collection>
+  </collections>
+  <link href="https://nda.nih.gov/experimentView.html?experimentId=1223"/>
+</Experiment>
+
