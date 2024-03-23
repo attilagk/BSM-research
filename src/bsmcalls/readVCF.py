@@ -50,7 +50,10 @@ def read_annotlist(annotpath=bsmutils.get_bsmdir() + '/tables/VCF-HC.annotations
     return(l)
 
 def make_formatstr(annotlist):
-    formatstr = '%' + '\t%'.join(annotlist) + '\n'
+    format_annotlist = [x.replace('FORMAT/', '\t%') for x in annotlist if re.match('^FORMAT.*', x)]
+    format_annotlist = '[' + ''.join(format_annotlist) + ']'
+    nonformat_annotlist = [x for x in annotlist if not re.match('^FORMAT.*', x)]
+    formatstr = '%' + '\t%'.join(nonformat_annotlist) + format_annotlist + '\n'
     return(formatstr)
 
 def sample_fromVCF(vcfpath):
@@ -87,7 +90,10 @@ def readVCF(vcfpath, annotlist=read_annotlist()):
     calls: a pandas DataFrame
     '''
     formatstr = make_formatstr(annotlist)
-    colnames = [y.replace('INFO/', '') for y in annotlist]
+    format_annotlist = [x for x in annotlist if re.match('^FORMAT.*', x)]
+    nonformat_annotlist = [x for x in annotlist if not re.match('^FORMAT.*', x)]
+    colnames = nonformat_annotlist + format_annotlist
+    colnames = [y.replace('INFO/', '') for y in colnames]
     cmd = ['bcftools', 'query', '-f', formatstr, vcfpath]
     p =  subprocess.run(cmd, capture_output=True)
     calls = pd.read_csv(io.BytesIO(p.stdout), sep='\t', names=colnames,
